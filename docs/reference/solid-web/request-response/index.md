@@ -1,19 +1,19 @@
 ---
-title: "Request and response"
+title: "リクエストとレスポンス"
 titleTemplate: ":title"
 category: "@solidjs/web"
 version: "2.0"
-description: "Reference for request context, response metadata, cookies, redirects, and errors."
+description: "リクエストコンテキスト、レスポンスメタデータ、Cookie、リダイレクト、エラーのリファレンス。"
 ---
 
-`@solidjs/web` owns the web-standard request and response values used by server rendering, middleware, actions, and server functions.
+`@solidjs/web` は、サーバーレンダリング、ミドルウェア、アクション、サーバー関数で使われる Web 標準のリクエスト値とレスポンス値を提供します。
 
-- [`getRequestEvent()`](/reference/solid-web/request-response/get-request-event) reads the current request, local values, and response stub.
-- [`provideRequestEvent()`](/reference/solid-web/request-response/provide-request-event) establishes request context in a Node server or test.
-- [`respond()`](/reference/solid-web/request-response/respond) pairs a value with status, headers, or revalidation metadata.
-- [`redirect()`](/reference/solid-web/request-response/redirect) creates redirect control flow.
-- [`reload()`](/reference/solid-web/request-response/reload) requests data revalidation.
-- [Safe errors](/reference/solid-web/request-response/safe-errors) mark intentional client-facing `Error` values.
-- [Cookie codecs](/reference/solid-web/request-response/cookies) parse and serialize cookie header values.
+- [`getRequestEvent()`](/reference/solid-web/request-response/get-request-event) は現在のリクエスト、ローカル値、レスポンススタブを読み取ります。
+- [`provideRequestEvent()`](/reference/solid-web/request-response/provide-request-event) は Node サーバーやテストでリクエストコンテキストを確立します。
+- [`respond()`](/reference/solid-web/request-response/respond) は値にステータス、ヘッダー、再検証メタデータを付けて返します。
+- [`redirect()`](/reference/solid-web/request-response/redirect) はリダイレクトの制御フローを作成します。
+- [`reload()`](/reference/solid-web/request-response/reload) はデータの再検証を要求します。
+- [安全なエラー](/reference/solid-web/request-response/safe-errors)は、クライアント向けに意図した `Error` 値をマークします。
+- [Cookie コーデック](/reference/solid-web/request-response/cookies)は Cookie ヘッダー値をパース・シリアライズします。
 
-See [Middleware and API routes](/building-apps/middleware-and-api-routes) for request handling and [server functions](/building-apps/server-functions) for RPC patterns.
+リクエスト処理については[ミドルウェアと API ルート](/building-apps/middleware-and-api-routes)、RPC パターンについては[サーバー関数](/building-apps/server-functions)を参照してください。
