@@ -1,16 +1,16 @@
-The Solid Core Team, Solid DX Team as well as our generous corporate sponsors
-[Netlify](https://www.netlify.com) and [Sentry](https://sentry.io/) are proud to
-announce SolidHack 2024. This years prize totals US$15,000 and is graciously contributed
-evenly by both sponsors.
+Solid コアチーム、Solid DX チーム、そして寛大な協賛企業である
+[Netlify](https://www.netlify.com) と [Sentry](https://sentry.io/) は、SolidHack 2024 の
+開催を誇りをもって発表します。今年の賞金総額は 15,000 米ドルで、両スポンサーが
+均等に拠出しています。
 
-The inaugural SolidHack event was so successful that we decided to bring it back this
-year. A lot has changed since the previous event though. Solid and the ecosystem have matured
-considerably and SolidStart is now 1.0. It's an ideal time to be working with Solid!
-We're giving the talented developers in our community an incredible opportunity to
-show what they got and win prize money.
+初回の SolidHack イベントが大きな成功を収めたため、今年も開催することにしました。
+ただし前回から多くのことが変わっています。Solid とそのエコシステムは大きく成熟し、
+SolidStart は 1.0 を迎えました。Solid に取り組むには絶好のタイミングです！
+コミュニティの優れた開発者の皆さんに、実力を披露して賞金を獲得する
+素晴らしい機会を提供します。
 
-Additional contest details regarding the event including rules and categories will be announced
-on October 1st. Visit the [SolidHack website](https://hack.solidjs.com/) to learn more!
+ルールやカテゴリーを含むコンテストの詳細は 10 月 1 日に発表されます。
+詳しくは [SolidHack のウェブサイト](https://hack.solidjs.com/) をご覧ください！
 
-If your team is interested in becoming a SolidHack sponsor please email
-[hack@solidjs.com](mailto:hack@solidjs.com).
+SolidHack のスポンサーにご関心のあるチームは、
+[hack@solidjs.com](mailto:hack@solidjs.com) までメールでお問い合わせください。

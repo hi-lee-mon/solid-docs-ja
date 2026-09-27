@@ -1,40 +1,37 @@
-The SolidJS Core and Ecosystem Teams are excited to announce the launch of a new program to support SolidJS development. 2022 has been an exceptional year for the project's growth. As adoption continues to increase, Core's direct focus is to ensure projects of all sizes and enterprise teams can depend on Solid in production.
+SolidJS コアチームとエコシステムチームは、SolidJS の開発を支援する新しいプログラムの開始を発表できることを嬉しく思います。2022 年はプロジェクトの成長にとって格別な一年でした。採用が増え続ける中、あらゆる規模のプロジェクトやエンタープライズチームが本番環境で Solid に依存できるようにすることが、コアチームが直接注力する課題です。
 
-With Solid now a year into its v1.0 release and with the coming release of SolidStart, the Core Team is busier than ever laying the foundations for further radical growth. Core Team will leverage funds entrusted to us by our broader community via [OpenCollective](https://opencollective.com/solid) and deploy it to efforts that support better and faster Solid and SolidStart releases.
+Solid は v1.0 のリリースから 1 年が経ち、SolidStart のリリースも間近に控え、コアチームはさらなる飛躍的成長の基盤を築くため、かつてないほど忙しくしています。コアチームは [OpenCollective](https://opencollective.com/solid) を通じて広いコミュニティから託された資金を活用し、より良く、より速い Solid と SolidStart のリリースを支える取り組みへと投入します。
 
-For this reason we are happy to announce Solid Fellowships, an initiative that non-core community members will be given fixed-term opportunities to work on Core supervised projects. Projects will range from research, bug triage & fixing, writing documentation and general community support tasks.
+このため、私たちは Solid Fellowships を発表できることを嬉しく思います。これは、コアメンバー以外のコミュニティメンバーに、コアチーム監督のプロジェクトに取り組む期間限定の機会を提供する取り組みです。プロジェクトは調査研究、バグのトリアージと修正、ドキュメントの執筆、一般的なコミュニティ支援タスクなど多岐にわたります。
 
-# Introducing the Inaugural Cohort
+# 初代コーホートの紹介
 
-We are also pleased to announce that the first Fellowship cohort will be a 5 month engagement with 3 Fellows. Each fellow will receive compensation of US$1000/month. Core has selected the first two Fellows and will open the third to public applications.
+初の Fellowship コーホートは 3 名のフェローによる 5 か月間の契約となることもあわせてお知らせします。各フェローには月額 1,000 米ドルの報酬が支払われます。コアチームは最初の 2 名のフェローを選定済みで、3 人目は公募します。
 
-Introducing our first two Solid Fellows:
+最初の 2 名の Solid フェローを紹介します。
 
-## Alexis H. Munsayac ([lxsmnsyc](https://www.github.com/lxsmnsyc))
+## Alexis H. Munsayac（[lxsmnsyc](https://www.github.com/lxsmnsyc)）
 
-Alexis is a software engineer based in the Philippines who has been a long-time member of the Solid community. His work has helped improve the future of reactivity and web development in general. His contributions have included supporting Solid Refresh and DOM Expressions, as well as building libraries to help expand the SolidJS ecosystem. During the tenure of his fellowship, Alexis will support SolidStart release efforts. Having developed Rigidity, Waystone and similar meta-framework tooling he is an ideal candidate to support Core in bringing Start to production readiness.
+Alexis はフィリピンを拠点とするソフトウェアエンジニアで、Solid コミュニティの長年のメンバーです。彼の仕事は、リアクティビティとウェブ開発全般の未来をより良いものにしてきました。これまでの貢献には、Solid Refresh や DOM Expressions の支援に加え、SolidJS エコシステムの拡大を助けるライブラリの構築が含まれます。フェローシップの期間中、Alexis は SolidStart のリリースに向けた取り組みを支援します。Rigidity や Waystone といったメタフレームワークツールを開発してきた彼は、Start を本番運用可能な状態にするという点で、コアチームを支援するのに理想的な人材です。
 
-## Damian Tarnawski ([thetarnav](https://www.github.com/thetarnav))
+## Damian Tarnawski（[thetarnav](https://www.github.com/thetarnav)）
 
-Damian is a web developer who was born and lives in Poland. Technology, reactivity and architecting original ideas as open-source projects have always been amongst his great passions. He has been an active contributor to Solid Primitives and is currently focused on Solid Developer Tools, a suite of utilities designed for making working with Solid easier. During the tenure of his fellowship, Damian will focus on Developer Tools and supporting integration with SolidStart to ensure that the DX story between tooling is of the highest quality possible.
+Damian はポーランドで生まれ、現在も在住しているウェブ開発者です。テクノロジー、リアクティビティ、そして独自のアイデアをオープンソースプロジェクトとして形にすることは、常に彼の大きな情熱の一つでした。彼は Solid Primitives への活発なコントリビューターであり、現在は Solid での作業をより容易にするために設計されたユーティリティ群である Solid Developer Tools に注力しています。フェローシップの期間中、Damian は Developer Tools と SolidStart との統合支援に取り組み、ツール間の DX が可能な限り高品質になることを目指します。
 
-# Call for Submissions
+# 応募の募集
 
-Our third Fellowship position will be focused specifically on documentation writing and is open to a public call for applications. With Solid API and SolidStart API documentation rewrites in the works our team would like to supercharge the effort with a dedicated individual.
+3 人目の Fellowship ポジションはドキュメント執筆に特化したもので、公募で広く応募を受け付けます。Solid API と SolidStart API のドキュメント改訂が進行中のため、私たちのチームは専任の人材でこの取り組みを加速させたいと考えています。
 
-We're seeking a Fellow member excited about educating users and writing fun, clear and concise documentation. Applicants should have writing experience and at least beginner Solid experience (or advanced React knowledge). Solid is also committed to providing equal opportunities for all. We welcome individuals from all walks of life.
+私たちは、ユーザーの教育に情熱を持ち、楽しく明快で簡潔なドキュメントを書けるフェローを求めています。応募者にはライティング経験と、少なくとも初級レベルの Solid 経験（または高度な React の知識）が求められます。また、Solid はすべての人に平等な機会を提供することにコミットしています。あらゆるバックグラウンドを持つ方々からの応募を歓迎します。
 
-The position will provide US$1000/month and be awarded to an individual selected by Core and Ecosystem members. The final decision will be based on a number of factors including but not limited to: experience, availability, technical writing abilities etc.
+このポジションには月額 1,000 米ドルが支払われ、コアチームとエコシステムチームのメンバーによって選ばれた個人に授与されます。最終決定は、経験、稼働可能時間、テクニカルライティング能力などを含むがこれらに限定されない、複数の要素に基づきます。
 
-<center>
-  [Submit your application here](https://form.typeform.com/to/Vb0QSoMb) before October 30th 23:50
-  EST.
-</center>
+[こちらから応募をご提出ください](https://form.typeform.com/to/Vb0QSoMb)。締め切りは 10 月 30 日 23:50（EST）です。
 
-# Budget and Awarding Fellowships
+# 予算とフェローシップの授与
 
-The Fellowship program will launch with a meager budget with the intention of growing it through further sponsorship fundraising. If your organization is interested in using Solid, now's your moment to support Solid’s adoption story and help it produce a highly durable and performant library. Kindly donate directly to our OpenCollective or email [community@solidjs.com](mailto:community@solidjs.com) for more information.
+Fellowship プログラムは限られた予算で開始し、今後のスポンサーシップによる資金調達を通じて拡大していく予定です。Solid の導入にご関心のある組織の皆さまにとって、Solid の普及を後押しし、高い耐久性とパフォーマンスを備えたライブラリの開発を支援する絶好の機会です。OpenCollective への直接のご寄付、または詳細については [community@solidjs.com](mailto:community@solidjs.com) までメールでお問い合わせください。
 
-Solid Fellows will be granted to members that are actively involved in furthering Solid’s goals. The Core team will continue selecting future cohort members based on general interest and availability of talented contributors willing to focus on Solid efforts. If you have an idea or interest in being involved, reach out to our team members to start the conversation!
+Solid フェローは、Solid の目標推進に積極的に関わっているメンバーに授与されます。コアチームは今後も、Solid の取り組みに集中して取り組もうとする優れたコントリビューターの関心と稼働状況に基づき、将来のコーホートメンバーを選定していきます。アイデアや参加への関心をお持ちの方は、ぜひチームメンバーに声をかけて会話を始めてください！
 
-Thank you to everyone, especially our OpenColletive sponsors for making this possible. Solid remains committed to being progressive and pushing the boundaries. We hope that Fellowships become a successful program that fosters strong community bonds, friendships and rock-solid careers.
+これを実現してくださった皆さん、特に OpenCollective のスポンサーの皆さんに感謝します。Solid は革新的であり続け、限界を押し広げていくことにコミットしています。Fellowships が、強いコミュニティの絆、友情、そして盤石なキャリアを育む成功したプログラムとなることを願っています。
