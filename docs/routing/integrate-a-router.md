@@ -1,26 +1,26 @@
 ---
-title: "Integrate a router"
+title: "ルーターを統合する"
 version: "2.0"
-description: "Wire a router that Solid does not ship into start mode: give it the request URL and a per-request instance, and connect it to the single-flight mutation transport."
+description: "Solid が同梱していないルーターを start モードに組み込みます: リクエスト URL とリクエストごとのインスタンスを渡し、シングルフライトミューテーションのトランスポートへ接続します。"
 ---
 
-This page is for someone bringing a router other than Solid Router or TanStack Router into start mode, or writing a Solid adapter for one.
-An application developer using either supported router does not need it; the [Routing overview](/routing/overview) and the router's own pages cover everything they touch.
+このページは、Solid Router や TanStack Router 以外のルーターを start モードに組み込む人、あるいはそうしたルーターの Solid アダプターを書く人向けです。
+サポート対象のルーターのどちらかを使うアプリケーション開発者には不要です。[ルーティング概要](/routing/overview)と各ルーター自身のページが、それらが関わるすべてをカバーしています。
 
-The situation it addresses: the router renders fine in the browser, and the first server-rendered request either matches the wrong URL, has no request-scoped instance to load its routes into, or leaves a mutation making two round trips where Solid Router makes one.
-Two parts of the platform are involved, the request pipeline and the server-function transport, and each exposes a small, router-neutral surface.
+このページが扱う状況: ルーターはブラウザーでは問題なくレンダーされるのに、最初のサーバーレンダーされるリクエストで、間違った URL にマッチしてしまう、ルートを読み込むためのリクエストスコープのインスタンスがない、あるいは Solid Router なら1回で済む往復をミューテーションが2回行ってしまう、というものです。
+関係するのはプラットフォームの2つの部分、リクエストパイプラインとサーバー関数トランスポートで、それぞれがルーター中立の小さな接地面を公開しています。
 
-## Connect routing to requests
+## ルーティングをリクエストに接続する
 
-During server-side rendering (SSR), a router needs the request URL and any request-scoped data its loaders read.
-The start mode request handler creates a `RequestEvent` for each web `Request` and runs the render inside that event's scope, so `getRequestEvent()` answers anywhere in the render.
+サーバーサイドレンダリング（SSR）では、ルーターはリクエスト URL と、そのローダーが読むリクエストスコープのデータを必要とします。
+start モードのリクエストハンドラーは、Web の `Request` ごとに `RequestEvent` を作成し、そのイベントのスコープ内でレンダーを実行するため、`getRequestEvent()` はレンダー内のどこでも値を返します。
 
-Solid Router reads the request URL from that event when it creates its server integration, and falls back to its `url` prop when there is no event.
-A router that does the same needs nothing else from the platform for a synchronous route tree.
+Solid Router は、サーバー統合を作成する際にそのイベントからリクエスト URL を読み取り、イベントがない場合は `url` prop にフォールバックします。
+同じことを行うルーターであれば、同期的なルートツリーに関してプラットフォームから必要なものは他にありません。
 
-### Prepare an instance per request
+### リクエストごとにインスタンスを準備する
 
-A router that must do asynchronous work before rendering, such as creating a request-bound instance and awaiting its route loaders, uses the `start.setup` option:
+レンダーの前に非同期処理（リクエストに紐づくインスタンスの作成やルートローダーの待機など）が必要なルーターは、`start.setup` オプションを使います:
 
 ```ts
 // vite.config.ts
@@ -32,8 +32,8 @@ solid({
 });
 ```
 
-The configured module is server-only.
-Its default export runs once per SSR request, after the middleware chain has dispatched to the page render and immediately before `renderToStream`:
+設定したモジュールはサーバー専用です。
+そのデフォルトエクスポートは SSR リクエストごとに1回、ミドルウェアチェーンがページレンダーへディスパッチした後、`renderToStream` の直前に実行されます:
 
 ```tsx
 // src/setup.tsx
@@ -47,34 +47,34 @@ export default async function setup(event: RequestEvent) {
 }
 ```
 
-Return a component and the generated entry renders it in `App`'s place inside `Document`; return nothing and `<App />` renders unchanged.
-The browser-side `App` must produce the matching router tree so hydration lines up.
-The [TanStack Router](/routing/tanstack#what-the-server-does-per-request) page shows a complete `setup.tsx`, including how it copies a redirect or a `404` from the router onto the response.
+コンポーネントを返すと、生成されるエントリーは `Document` 内で `App` の代わりにそれをレンダーします。何も返さなければ `<App />` がそのままレンダーされます。
+ハイドレーションが一致するよう、ブラウザー側の `App` は対応するルーターツリーを生成しなければなりません。
+[TanStack Router](/routing/tanstack#what-the-server-does-per-request) のページには、ルーターからのリダイレクトや `404` をレスポンスへコピーする方法を含む、完全な `setup.tsx` が示されています。
 
-:::caution[Where the hook runs and where it does not]
-`start.setup` runs only when a generated server entry renders an SSR request.
-It is ignored when `ssr` is off, and configuring it together with an authored `entry-server` is a build error, because an authored entry already owns its render function and must perform the same preparation itself.
+:::caution[このフックが実行される場所とされない場所]
+`start.setup` は、生成されたサーバーエントリーが SSR リクエストをレンダーするときだけ実行されます。
+`ssr` がオフの場合は無視され、自作の `entry-server` と併せて設定するとビルドエラーになります。自作のエントリーはレンダー関数をすでに所有しており、同じ準備を自身で行わなければならないからです。
 :::
 
-### Middleware shares the event
+### ミドルウェアはイベントを共有する
 
-The separate `start.middleware` option installs a fetch-style chain in front of page renders, server-function calls, API routes, and no-JavaScript form posts.
-The chain and `start.setup` receive the same request event, so a value a middleware stores in `event.locals`, such as a session, is visible to the router instance the setup hook builds.
-[Middleware and API routes](/building-apps/middleware-and-api-routes) covers the chain itself.
+独立した `start.middleware` オプションは、ページレンダー、サーバー関数呼び出し、APIルート、JavaScript なしのフォーム送信の前段に、fetch スタイルのチェーンを組み込みます。
+チェーンと `start.setup` は同じリクエストイベントを受け取るため、ミドルウェアが `event.locals` に格納した値（セッションなど）は、setup フックが構築するルーターインスタンスから見えます。
+チェーン自体は[ミドルウェアと APIルート](/building-apps/middleware-and-api-routes)で説明しています。
 
-## Integrate single-flight mutations
+## シングルフライトミューテーションを統合する
 
-Single-flight combines a mutation result and refreshed page data in one server-function response.
-The platform transport supplies two router-neutral extension points, one on each side of the wire:
+シングルフライトは、ミューテーションの結果と再取得されたページデータを1つのサーバー関数レスポンスにまとめます。
+プラットフォームのトランスポートは、ワイヤーの両側に1つずつ、ルーター中立の拡張ポイントを2つ提供します:
 
-- On the client, registering a consumer with `subscribeFlightData` from `@solidjs/web/server-functions` is the opt-in.
-  While any consumer is registered, the transport adds the single-flight request header to non-`GET` server-function calls; `GET` reads stay plain and cacheable.
-- On the server, a `collectFlightData` hook receives the target URL the client will show next, the revalidation keys the mutation declared, and request headers with the mutation's cookie changes already folded in.
+- クライアント側では、`@solidjs/web/server-functions` の `subscribeFlightData` でコンシューマーを登録することがオプトインです。
+  いずれかのコンシューマーが登録されている間、トランスポートは非 `GET` のサーバー関数呼び出しにシングルフライトのリクエストヘッダーを追加します。`GET` の読み取りはプレーンなままでキャッシュ可能です。
+- サーバー側では、`collectFlightData` フックが、クライアントが次に表示するターゲット URL、ミューテーションが宣言した再検証キー、ミューテーションの Cookie 変更がすでに折り込まれたリクエストヘッダーを受け取ります。
 
-The server-function runtime awaits the consumer before resolving the call with the mutation value, so by the time the caller's `await` returns, the consumer has already seeded whatever cache it owns.
-The integration decides everything in between: how to match the target URL, which loaders or preloads to rerun, what serializable payload to produce, and how to apply it on the client.
+サーバー関数ランタイムは、ミューテーションの値で呼び出しを解決する前にコンシューマーを待機するため、呼び出し元の `await` が返る頃には、コンシューマーは自身が所有するキャッシュへすでにデータを投入済みです。
+その間のすべては統合側が決めます: ターゲット URL のマッチ方法、再実行するローダーやプリロード、生成するシリアライズ可能なペイロード、そしてクライアントでの適用方法です。
 
-Register the server hook once, at startup, from a module the generated handler imports before it dispatches any server function:
+サーバーフックは起動時に1回だけ登録します。生成されるハンドラーがサーバー関数をディスパッチする前にインポートするモジュールから登録します:
 
 ```ts
 // src/server-config.ts
@@ -98,61 +98,61 @@ solid({
 });
 ```
 
-The `configure` module is pinned into the handler graph, so it loads before the first dispatch on the development middleware and in the production handler alike.
-An application with its own server-function handler passes `collectFlightData` to `handleServerFunctionRequest` per request instead.
+`configure` モジュールはハンドラーグラフに固定されるため、開発用ミドルウェアでも本番ハンドラーでも、最初のディスパッチより前にロードされます。
+独自のサーバー関数ハンドラーを持つアプリケーションは、代わりにリクエストごとに `collectFlightData` を `handleServerFunctionRequest` へ渡します。
 
-The unnamed `collectFlightData` slot belongs to the integration that owns data production, a router.
-A second cache, such as a query library refreshing its own entries, registers additively with `registerFlightDataSource(id, hook)` on the server and `subscribeFlightData(id, consumer)` on the client.
-Each named source receives only its own slice of the payload, so the two do not compete for the slot or overwrite each other.
+名前なしの `collectFlightData` スロットは、データ生成を担う統合、つまりルーターのものです。
+クエリライブラリが自身のエントリーを再取得するような2つ目のキャッシュは、サーバーでは `registerFlightDataSource(id, hook)`、クライアントでは `subscribeFlightData(id, consumer)` で追加的に登録します。
+名前付きの各ソースはペイロードの自分の部分だけを受け取るため、両者がスロットを取り合ったり互いを上書きしたりすることはありません。
 
-:::deep-dive[How the two supported routers use these hooks]
-Solid Router supplies `createFlightDataCollector` from `@solidjs/router/server`.
-It consumes the router's route tree, base, and root preload, then collects matched `query` results for the target URL.
-On the client, it registers the mounted router when `singleFlight` is on, which is the default, and installs its flight consumer when the first router action is created.
-The two sides use a rendezvous so either can load first: an action module in a lazily loaded route still attaches to the already mounted router, and a router-only app that never creates an action never subscribes, so the server is never asked to collect.
-The consumer applies the response's redirect and revalidation metadata and seeds Solid Router's `query` cache from the payload.
+:::deep-dive[サポート対象の2つのルーターがこれらのフックを使う方法]
+Solid Router は `@solidjs/router/server` から `createFlightDataCollector` を提供します。
+これはルーターのルートツリー、base、ルートプリロードを消費し、ターゲット URL にマッチした `query` の結果を収集します。
+クライアント側では、デフォルトで有効な `singleFlight` がオンのときにマウント済みのルーターを登録し、最初のルーターアクションが作成されたときにフライトコンシューマーをインストールします。
+両側はランデブーを使うため、どちらが先にロードされても構いません: 遅延ロードされたルート内のアクションモジュールも、すでにマウントされたルーターにアタッチされ、アクションを一度も作成しないルーターのみのアプリは購読しないため、サーバーが収集を求められることもありません。
+コンシューマーはレスポンスのリダイレクトと再検証メタデータを適用し、ペイロードから Solid Router の `query` キャッシュへデータを投入します。
 
-TanStack Router's integration registers a named source instead.
-Its `QueryClientProvider` subscribes as `"sq"` while mounted, the server hook builds a router for the target URL and runs its loaders into a fresh `QueryClient`, and the payload is a dehydrated TanStack Query cache that the client hydrates with TanStack's own `hydrate`.
-[Single-flight on a router Solid does not own](/routing/tanstack#single-flight-on-a-router-solid-does-not-own) walks through that code.
+TanStack Router の統合は、代わりに名前付きソースを登録します。
+その `QueryClientProvider` はマウントされている間 `"sq"` として購読し、サーバーフックはターゲット URL 用のルーターを構築してそのローダーを新しい `QueryClient` へ実行し、ペイロードはクライアントが TanStack 自身の `hydrate` でハイドレートする、デハイドレートされた TanStack Query キャッシュです。
+[Solid が所有しないルーターでのシングルフライト](/routing/tanstack#single-flight-on-a-router-solid-does-not-own)でそのコードを順にたどれます。
 :::
 
-## Common problems
+## よくある問題
 
-### The build fails with `start.setup only applies to generated entries`
+### `start.setup only applies to generated entries` でビルドが失敗する
 
-The project has an authored `entry-server` and a `start.setup` option at the same time.
-Remove one: either delete the authored entry so the generated one runs the hook, or move the preparation into the authored entry's own render function and drop `start.setup`.
+プロジェクトに自作の `entry-server` と `start.setup` オプションが同時に存在しています。
+どちらかを取り除きます: 自作のエントリーを削除して生成されるエントリーにフックを実行させるか、準備処理を自作エントリー自身のレンダー関数へ移して `start.setup` を外します。
 
-### The setup module never runs
+### setup モジュールが一度も実行されない
 
-`start.setup` is server-mode only.
-With `ssr: false` there is no per-request app render to prepare, so the option is accepted and ignored.
-Check the `ssr` flag in `vite.config.ts` before looking at the module.
+`start.setup` はサーバーモード専用です。
+`ssr: false` では準備すべきリクエストごとのアプリレンダーが存在しないため、このオプションは受け入れられますが無視されます。
+モジュールを調べる前に `vite.config.ts` の `ssr` フラグを確認してください。
 
-### Mutation responses carry no flight data
+### ミューテーションのレスポンスにフライトデータが乗らない
 
-No consumer is subscribed on the client, so the transport does not send the single-flight header and the server skips collection; responses are byte-identical to a plain call.
-Subscribe the consumer before the mutation is called, and check that the mutation is not declared `GET`, since `GET` calls never carry the header.
+クライアントでコンシューマーが購読されていないため、トランスポートはシングルフライトヘッダーを送らず、サーバーは収集をスキップします。レスポンスはプレーンな呼び出しとバイト単位で同一です。
+ミューテーションが呼ばれる前にコンシューマーを購読してください。また `GET` 呼び出しはヘッダーを乗せないため、そのミューテーションが `GET` 宣言されていないか確認してください。
 
-### The server hook runs but the payload is not applied
+### サーバーフックは動くがペイロードが適用されない
 
-The hook returned a payload under a source id the client did not subscribe to, or the client subscribed under a different id.
-The unnamed server hook pairs with the one-argument `subscribeFlightData(consumer)`; a named `registerFlightDataSource(id, hook)` pairs with `subscribeFlightData(id, consumer)`, and the ids must match exactly.
+フックが、クライアントが購読していないソース id でペイロードを返したか、クライアントが別の id で購読しています。
+名前なしのサーバーフックは1引数の `subscribeFlightData(consumer)` と対になります。名前付きの `registerFlightDataSource(id, hook)` は `subscribeFlightData(id, consumer)` と対になり、id は完全に一致しなければなりません。
 
-## Recap
+## まとめ
 
-- Read the request URL from the request event during SSR; the handler runs the render inside that event's scope.
-- Use `start.setup` for a router that needs a per-request instance or asynchronous loading before render, and return the component to render in `App`'s place.
-- `start.setup` applies only to generated server entries with `ssr` on; an authored entry does the same work itself.
-- Values a middleware stores in `event.locals` are visible in the setup hook, because both receive the same request event.
-- Opt in to single-flight on the client with `subscribeFlightData`; the header is sent on non-`GET` calls while a consumer is registered.
-- Register the server-side `collectFlightData` hook from the `serverFunctions.configure` module so it loads before the first dispatch.
-- Use `registerFlightDataSource` and the two-argument `subscribeFlightData` when a second cache shares the round trip.
+- SSR 中はリクエストイベントからリクエスト URL を読み取ります。ハンドラーはそのイベントのスコープ内でレンダーを実行します。
+- リクエストごとのインスタンスやレンダー前の非同期ロードが必要なルーターには `start.setup` を使い、`App` の代わりにレンダーするコンポーネントを返します。
+- `start.setup` は `ssr` がオンの生成されたサーバーエントリーにのみ適用されます。自作のエントリーは同じ処理を自身で行います。
+- ミドルウェアが `event.locals` に格納した値は、両者が同じリクエストイベントを受け取るため、setup フックから見えます。
+- クライアントでは `subscribeFlightData` でシングルフライトにオプトインします。コンシューマーが登録されている間、非 `GET` 呼び出しにヘッダーが送信されます。
+- サーバー側の `collectFlightData` フックは `serverFunctions.configure` モジュールから登録し、最初のディスパッチより前にロードされるようにします。
+- 2つ目のキャッシュが往復を共有する場合は、`registerFlightDataSource` と2引数の `subscribeFlightData` を使います。
 
-## Next steps
+## 次のステップ
 
-- [TanStack Router](/routing/tanstack): a complete integration built on these hooks, with the setup module and the flight-data source in full.
-- [Metadata and transport](/building-apps/server-functions/metadata-and-transport): what a server-function request and response look like on the wire, including the single-flight envelope.
-- [App structure](/building-apps/app-structure): the generated entries, `Document`, and when to author an entry instead.
-- [Middleware and API routes](/building-apps/middleware-and-api-routes): the `start.middleware` chain that runs before the setup hook.
+- [TanStack Router](/routing/tanstack): これらのフックの上に構築された完全な統合。setup モジュールとフライトデータソースの全体が載っています。
+- [メタデータとトランスポート](/building-apps/server-functions/metadata-and-transport): シングルフライトのエンベロープを含め、サーバー関数のリクエストとレスポンスがワイヤー上でどう見えるか。
+- [アプリ構造](/building-apps/app-structure): 生成されるエントリーと `Document`、および代わりにエントリーを自作するべき場合。
+- [ミドルウェアと APIルート](/building-apps/middleware-and-api-routes): setup フックの前に実行される `start.middleware` チェーン。

@@ -1,39 +1,39 @@
 ---
-title: "Routing overview"
+title: "ルーティング概要"
 version: "2.0"
-description: "Choose between Solid Router and TanStack Router for a Solid app, mount the router in App, and decide whether routes come from an array or from files under src/routes."
+description: "Solid アプリで Solid Router と TanStack Router のどちらかを選び、App にルーターをマウントし、ルートを配列で与えるか src/routes 配下のファイルから与えるかを決めます。"
 ---
 
-The store from the [Quick start](/getting-started/quick-start) has one page.
-It needs a product page whose URL carries the product id, a cart at `/cart`, and a header that stays on screen while the page under it changes, and clicking between those pages must not reload the document.
+[クイックスタート](/getting-started/quick-start)のストアにはページが1つしかありません。
+商品 id を URL に持つ商品ページ、`/cart` のカート、その下のページが切り替わっても画面上に残るヘッダーが必要です。そして、それらのページ間のクリックでドキュメントが再読み込みされてはいけません。
 
-Solid does not ship a router.
-Routing is an integration: a router owns URL matching, navigation, and rendering the matched page, and the application renders it as part of the component tree like any other component.
-Two routers are supported, and both are mounted the same way.
-This page helps you pick one and shows the smallest routed app; the router-specific pages take over from there.
+Solid はルーターを同梱しません。
+ルーティングは統合です: ルーターが URL マッチング、ナビゲーション、マッチしたページのレンダーを担い、アプリケーションは他のコンポーネントと同じように、コンポーネントツリーの一部としてそれをレンダーします。
+サポート対象のルーターは2つで、どちらも同じ方法でマウントします。
+このページではどちらを選ぶかを決め、最小のルーティング済みアプリを示します。そこから先は各ルーターのページが引き継ぎます。
 
-:::note[Wiring a router that is not one of these two]
-If you are integrating a different router into start mode, [Integrate a router](/routing/integrate-a-router) covers the request pipeline and the single-flight extension points.
-Nothing on this page is required reading for that.
+:::note[この2つ以外のルーターを組み込む場合]
+別のルーターを start モードに統合する場合は、[ルーターを統合する](/routing/integrate-a-router)がリクエストパイプラインとシングルフライトの拡張ポイントを説明しています。
+このページの内容はそのために必読ではありません。
 :::
 
-## Pick a router
+## ルーターを選ぶ
 
-Use Solid Router when you do not have a reason to use something else.
-It is built for Solid's reactivity model: route params and location are reactive values, `query()` and `action()` are thin wrappers around server functions, forms submit before JavaScript loads, and single-flight mutations work by default.
-It also ships the file-system adapter that the CLI templates use, so routes are files under `src/routes`.
-The `basic` and `fullstack` project shapes install it.
+他のものを使う理由がなければ、Solid Router を使います。
+Solid のリアクティビティモデルのために作られています: ルートパラメータとロケーションはリアクティブな値で、`query()` と `action()` はサーバー関数の薄いラッパーで、フォームは JavaScript がロードされる前に送信でき、シングルフライトミューテーションはデフォルトで動きます。
+CLI テンプレートが使うファイルシステムアダプターも同梱しているため、ルートは `src/routes` 配下のファイルになります。
+`basic` と `fullstack` のプロジェクト形状がこれをインストールします。
 
-Use TanStack Router when you already build on TanStack Query, need its typed search-parameter schemas and loader model, or share routing conventions with a TanStack app in another framework.
-You give up the file-system convention shared with the rest of the Solid templates, and you own the data cache handoff between server and client, which the [TanStack Router](/routing/tanstack) page documents.
-The `fullstack-tanstack` project shape installs it.
+すでに TanStack Query の上に構築している場合、その型付き検索パラメータスキーマとローダーモデルが必要な場合、あるいは別フレームワークの TanStack アプリとルーティング規約を共有する場合は、TanStack Router を使います。
+その代わり、他の Solid テンプレートと共有されるファイルシステム規約は捨てることになり、サーバーとクライアント間のデータキャッシュの受け渡しは自分で管理します。これは [TanStack Router](/routing/tanstack) のページで説明しています。
+`fullstack-tanstack` のプロジェクト形状がこれをインストールします。
 
-The `bare` shape has no router, for a single-page tool or a project that adds one later.
+`bare` の形状にはルーターがありません。単一ページのツールや、後からルーターを追加するプロジェクト向けです。
 
-## The smallest routed app
+## 最小のルーティング済みアプリ
 
-This is the `basic` template with the comments removed.
-The router is created once at module scope:
+これはコメントを取り除いた `basic` テンプレートです。
+ルーターはモジュールスコープで1回だけ作成されます:
 
 ```ts
 // src/router.ts
@@ -46,7 +46,7 @@ export const Router = createRouter({ routes: fileRoutes(pageRoutes) });
 export const { paths } = Router;
 ```
 
-And mounted in `App`, where the matched page renders through `props.children`:
+そして `App` にマウントされ、マッチしたページは `props.children` を通してレンダーされます:
 
 ```tsx
 // src/App.tsx
@@ -70,22 +70,22 @@ export default function App() {
 }
 ```
 
-Run it and click **Users**.
-The URL changes to `/users/1`, the page under the `<nav>` changes, and the `<nav>` itself is not touched: the document did not reload.
+実行して **Users** をクリックしてください。
+URL が `/users/1` に変わり、`<nav>` の下のページが切り替わりますが、`<nav>` 自体はそのままです。ドキュメントは再読み込みされていません。
 
-Each file under `src/routes` with a default export is a page.
-`paths` builds URLs from the route tree, so `paths.users(1)` is checked by the type checker and a link to a route that does not exist fails to compile.
-The `Loading` boundary around `props.children` gives the first load a fallback; later navigations keep the current page on screen without it, because the update is held until the next page's data arrives.
-The [Solid Router setup page](/routing/solid-router/setup) shows the same app with an in-memory route tree instead of the file-system adapter.
+`src/routes` 配下でデフォルトエクスポートを持つ各ファイルが1つのページです。
+`paths` はルートツリーから URL を構築するため、`paths.users(1)` は型チェッカーで検査され、存在しないルートへのリンクはコンパイルに失敗します。
+`props.children` を囲む `Loading` バウンダリは初回ロードにフォールバックを与えます。次のページのデータが届くまで更新が保留されるため、以降のナビゲーションではフォールバックなしに現在のページが画面に残ります。
+[Solid Router のセットアップページ](/routing/solid-router/setup)では、ファイルシステムアダプターの代わりにインメモリのルートツリーを使う同じアプリを示しています。
 
-## Mount the router in `App`
+## `App` にルーターをマウントする
 
-The `@solidjs/vite-plugin` start mode uses `src/App.tsx` as the root component for its generated entries.
-With server-side rendering (SSR) enabled, the generated server and client entries both render `App` inside `src/Document.tsx`.
-Mount the router or its provider in `App` so both entries use the same router root.
+`@solidjs/vite-plugin` の start モードは、生成されるエントリーのルートコンポーネントとして `src/App.tsx` を使います。
+サーバーサイドレンダリング（SSR）が有効な場合、生成されるサーバーエントリーとクライアントエントリーの両方が `src/Document.tsx` 内で `App` をレンダーします。
+両方のエントリーが同じルータールートを使うよう、ルーターまたはそのプロバイダーを `App` にマウントします。
 
-Site-wide providers can wrap the router.
-Shared layouts belong inside it, in the router's function child or a layout route, so they can read the location:
+サイト全体のプロバイダーはルーターを包めます。
+共有レイアウトはルーターの内側、ルーターの関数としての children かレイアウトルートに置きます。そうするとロケーションを読めます:
 
 ```tsx
 // Avoid: the header is outside the router, so it cannot read the location or mark the active link
@@ -105,43 +105,43 @@ Shared layouts belong inside it, in the router's function child or a layout rout
 </Router>
 ```
 
-Run the `Avoid` version with a `useLocation()` call inside `Header` and it throws `<A> and 'use' router primitives can be only used inside a Route.`
-The `Prefer` version keeps `Header` mounted for the life of the app and gives it access to every router primitive.
+`Avoid` 版を `Header` 内で `useLocation()` を呼ぶ状態で実行すると、`<A> and 'use' router primitives can be only used inside a Route.` とスローされます。
+`Prefer` 版はアプリの存続期間中 `Header` をマウントしたままにし、すべてのルータープリミティブへのアクセスを与えます。
 
-:::caution[One router per app]
-Solid Router does not support a `<Router>` inside another `<Router>`; development warns `Mounting a router inside another router is not supported.`
-Compose one route tree instead, splitting large sections into [lazy subtrees](/routing/solid-router/route-definitions#load-a-route-subtree-lazily) when they should load on demand.
+:::caution[アプリにつきルーターは1つ]
+Solid Router は `<Router>` の内側に別の `<Router>` を置くことをサポートしていません。開発時には `Mounting a router inside another router is not supported.` と警告されます。
+代わりに1つのルートツリーを構成し、必要に応じてロードすべき大きなセクションは[遅延サブツリー](/routing/solid-router/route-definitions#load-a-route-subtree-lazily)に分割します。
 :::
 
-## Choose how routes are defined
+## ルートの定義方法を選ぶ
 
-The platform does not prescribe route definitions or file naming.
-A router can consume a hand-written route array, its own generated route tree, or a manifest from a file-system routing plugin.
+プラットフォームはルート定義やファイル命名を規定しません。
+ルーターは、手書きのルート配列、自身が生成したルートツリー、あるいはファイルシステムルーティングプラグインのマニフェストを消費できます。
 
-With Solid Router, both forms produce the same route objects, so the decision is about where you want to read the route tree:
+Solid Router では、どちらの形式も同じルートオブジェクトを生成するため、判断基準はルートツリーをどこで読みたいかです:
 
-- A hand-written array in `src/router.ts` keeps every path in one file and needs no plugin.
-  [Route definitions](/routing/solid-router/route-definitions) covers its fields.
-- The `filesystem-routing` Vite plugin exposes a manifest through `virtual:file-routes`, and `fileRoutes` from `@solidjs/router/fs` converts its `pageRoutes` export into route definitions.
-  The path lives in the filename, so adding a page is adding a file.
-  This is what the templates do.
+- `src/router.ts` の手書き配列はすべてのパスを1つのファイルに収め、プラグインも不要です。
+  フィールドは[ルート定義](/routing/solid-router/route-definitions)で説明しています。
+- `filesystem-routing` Vite プラグインは `virtual:file-routes` を通じてマニフェストを公開し、`@solidjs/router/fs` の `fileRoutes` がその `pageRoutes` エクスポートをルート定義へ変換します。
+  パスはファイル名に表れるため、ページの追加はファイルの追加です。
+  テンプレートはこの方法を使っています。
 
-TanStack Router uses `@tanstack/router-plugin` to generate its own typed route tree from `src/routes`.
-An application can still use `virtual:file-routes` for HTTP handlers in another directory, as the `fullstack-tanstack` template does for `src/api`.
+TanStack Router は `@tanstack/router-plugin` を使って `src/routes` から独自の型付きルートツリーを生成します。
+`fullstack-tanstack` テンプレートが `src/api` に対して行うように、アプリケーションは別ディレクトリの HTTP ハンドラーに `virtual:file-routes` を使うこともできます。
 
-## Recap
+## まとめ
 
-- Use Solid Router unless you already build on TanStack Query or share routing with a TanStack app.
-- Create the router once at module scope and export `Router` and `paths` from `src/router.ts`.
-- Mount the router in `src/App.tsx` so the generated client and server entries render the same tree.
-- Put shared layout inside the router's function child, not around the router, so it can use router primitives.
-- Wrap `props.children` in a `Loading` boundary so the first load has a fallback and later navigations keep the current page.
-- Build URLs with `paths` instead of string literals so the type checker catches a route that moved.
-- Choose the file-system adapter or a hand-written array in `src/router.ts`; everything else is unchanged either way.
+- TanStack Query の上に構築しているか、TanStack アプリとルーティングを共有するのでなければ、Solid Router を使います。
+- ルーターはモジュールスコープで1回だけ作成し、`Router` と `paths` を `src/router.ts` からエクスポートします。
+- 生成されるクライアントエントリーとサーバーエントリーが同じツリーをレンダーするよう、`src/App.tsx` にルーターをマウントします。
+- 共有レイアウトはルーターを囲むのではなく、ルーターの関数としての children の内側に置き、ルータープリミティブを使えるようにします。
+- `props.children` を `Loading` バウンダリで囲み、初回ロードにフォールバックを持たせ、以降のナビゲーションで現在のページを維持します。
+- URL は文字列リテラルではなく `paths` で構築し、移動したルートを型チェッカーが検出できるようにします。
+- ファイルシステムアダプターか `src/router.ts` の手書き配列かを選びます。それ以外はどちらでも変わりません。
 
-## Next steps
+## 次のステップ
 
-- [Solid Router](/routing/solid-router): one small store built up page by page, then routes, layouts, navigation, and data loading in depth.
-- [TanStack Router](/routing/tanstack): how the `fullstack-tanstack` template hands the TanStack Query cache between server and client.
-- [App structure](/building-apps/app-structure): what the generated entries do with `App` and `Document`, and when to change them.
-- [Integrate a router](/routing/integrate-a-router): the request pipeline and single-flight hooks for a router Solid does not ship.
+- [Solid Router](/routing/solid-router): 小さなストアをページごとに作り上げた後、ルート、レイアウト、ナビゲーション、データロードを掘り下げます。
+- [TanStack Router](/routing/tanstack): `fullstack-tanstack` テンプレートがサーバーとクライアント間で TanStack Query キャッシュを受け渡す方法。
+- [アプリ構造](/building-apps/app-structure): 生成されるエントリーが `App` と `Document` に何をするか、いつそれらを変更するか。
+- [ルーターを統合する](/routing/integrate-a-router): Solid が同梱しないルーターのための、リクエストパイプラインとシングルフライトフック。
