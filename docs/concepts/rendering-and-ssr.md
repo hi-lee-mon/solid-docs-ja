@@ -1,29 +1,29 @@
 ---
-title: "Rendering and SSR"
+title: "レンダリングと SSR"
 version: "2.0"
-description: "Run the same components in the browser and on the server: keep browser-only code off the server, get matching HTML for hydration, and choose between string and streaming rendering."
+description: "同じコンポーネントをブラウザーとサーバーで実行します。ブラウザー専用コードをサーバーから隔離し、ハイドレーション用に一致する HTML を得て、文字列レンダリングとストリーミングレンダリングを使い分けます。"
 ---
 
-You add `ssr: true` to `vite.config.ts`, reload, and the terminal prints:
+`vite.config.ts` に `ssr: true` を追加してリロードすると、ターミナルにこう出力されます:
 
 ```text
 ReferenceError: window is not defined
 ```
 
-The stack points at a module that read `localStorage` when it was imported.
-Nothing about the component was wrong in the browser; it is now also running in Node, where there is no `window`, and the same source has to be correct in both places.
+スタックは、インポート時に `localStorage` を読んだモジュールを指しています。
+ブラウザーではコンポーネントに何の問題もなかったのですが、今それは `window` のない Node でも実行されており、同じソースが両方の場所で正しくある必要があります。
 
-Solid uses one component source for client rendering and server-side rendering (SSR).
-The JSX build target selects DOM operations for the browser or HTML-producing operations for the server.
-This page covers what that asks of your code and which rendering function fits which situation.
+Solid はクライアントレンダリングとサーバーサイドレンダリング（SSR）に1つのコンポーネントソースを使います。
+JSX のビルドターゲットが、ブラウザー向けの DOM 操作かサーバー向けの HTML 生成操作かを選択します。
+このページでは、それがコードに何を求めるのか、そしてどのレンダリング関数がどの状況に合うのかを説明します。
 
-Most applications need two things from this page: the [server and client boundaries](#server-and-client-boundaries) rules for browser-only code, and the rule in [streaming rendering](#streaming-rendering) about where `Loading` boundaries go.
-In a project made by the CLI, the generated entries already call `render`, `hydrate`, and `renderToStream`; the sections on those functions are for code that calls the renderer directly.
+ほとんどのアプリケーションがこのページから必要とするのは2つです。ブラウザー専用コードのための[サーバーとクライアントのバウンダリ](#server-and-client-boundaries)のルール、そして `Loading` バウンダリをどこに置くかという[ストリーミングレンダリング](#streaming-rendering)のルールです。
+CLI で作ったプロジェクトでは、生成されたエントリーがすでに `render`・`hydrate`・`renderToStream` を呼んでいます。それらの関数の節は、レンダラーを直接呼ぶコード向けです。
 
-## Server and client boundaries
+## サーバーとクライアントのバウンダリ
 
-Code that touches `window`, `document`, `localStorage`, or a browser-only library must not run while the server renders.
-Three places are safe: an effect function, an `onSettled` callback, or a subtree that only renders in the browser.
+`window`・`document`・`localStorage`・ブラウザー専用ライブラリーに触れるコードは、サーバーがレンダリングしている間に実行してはいけません。
+安全な場所は3つあります。エフェクト関数、`onSettled` コールバック、またはブラウザーでのみレンダリングされるサブツリーです。
 
 ```tsx
 // Avoid: runs on import, on the server too
@@ -42,11 +42,11 @@ onSettled(() => {
 });
 ```
 
-The `Avoid` version crashes the server render with `ReferenceError: localStorage is not defined`.
-In the `Prefer` version the server renders an empty cart, the browser hydrates it, and the `onSettled` callback fills it in from storage.
-The effect function of `createEffect` and the callback of `onSettled` do not run during server rendering; their compute functions may.
+`Avoid` 版は `ReferenceError: localStorage is not defined` でサーバーレンダリングをクラッシュさせます。
+`Prefer` 版ではサーバーが空のカートをレンダリングし、ブラウザーがそれをハイドレートし、`onSettled` コールバックがストレージから内容を埋めます。
+`createEffect` のエフェクト関数と `onSettled` のコールバックはサーバーレンダリング中には実行されません。それらの計算関数は実行されることがあります。
 
-For a check inside shared code, [`isServer`](/reference/solid-web/rendering-ssr/is-server) is a build-time constant: the browser build exports `false` and the server build exports `true`, so a bundler can remove the unreachable side.
+共有コード内でのチェックには、[`isServer`](/reference/solid-web/rendering-ssr/is-server) がビルド時定数です。ブラウザービルドでは `false`、サーバービルドでは `true` をエクスポートするため、バンドラーが到達不能な側を除去できます。
 
 ```tsx
 import { isServer } from "@solidjs/web";
@@ -56,8 +56,8 @@ if (!isServer) {
 }
 ```
 
-For a whole component that cannot run on the server, such as a map or a rich text editor, use [`clientOnly`](/reference/solid-web/rendering-ssr/client-only).
-The server renders its fallback and does not start the import; the browser hydrates the fallback, waits for the module and for hydration to settle, and then swaps in the component:
+マップやリッチテキストエディターのようにサーバーで実行できないコンポーネント全体には、[`clientOnly`](/reference/solid-web/rendering-ssr/client-only) を使います。
+サーバーはそのフォールバックをレンダリングし、インポートを開始しません。ブラウザーはフォールバックをハイドレートし、モジュールとハイドレーションの確定を待ってから、コンポーネントに入れ替えます:
 
 ```tsx
 import { clientOnly } from "@solidjs/web";
@@ -69,18 +69,18 @@ export function StoreLocator() {
 }
 ```
 
-By default `clientOnly` starts loading when its declaration runs.
-Pass `{ lazy: true }` to defer the import until the component's first render.
+デフォルトでは `clientOnly` は宣言が実行されたときに読み込みを開始します。
+`{ lazy: true }` を渡すと、コンポーネントの初回レンダリングまでインポートを遅延します。
 
-:::caution[Module-scope state is shared by every request]
-On the server one module instance serves every request, so a signal or store at module scope leaks one user's state into another user's response.
-Create state inside a component or a context provider, which runs once per app in the browser and once per request on the server.
-[State management](/guides/state-management#module-level-state-and-the-server) shows the pattern and what the server does with the module-scope version.
+:::caution[モジュールスコープの状態はすべてのリクエストで共有される]
+サーバーでは1つのモジュールインスタンスがすべてのリクエストに応答するため、モジュールスコープのシグナルやストアはあるユーザーの状態を別のユーザーのレスポンスへ漏らします。
+状態はコンポーネントかコンテキストプロバイダーの内側で作ってください。これらはブラウザーではアプリごとに1回、サーバーではリクエストごとに1回実行されます。
+[状態管理](/guides/state-management#module-level-state-and-the-server) でこのパターンと、サーバーがモジュールスコープ版をどう扱うかを示しています。
 :::
 
-## Client rendering
+## クライアントレンダリング
 
-[`render`](/reference/solid-web/rendering-ssr/render) mounts a tree into a DOM container and returns a disposer that tears down the tree and its reactive scopes:
+[`render`](/reference/solid-web/rendering-ssr/render) はツリーを DOM コンテナにマウントし、そのツリーとリアクティブスコープを解体する破棄関数を返します:
 
 ```tsx
 import { render } from "@solidjs/web";
@@ -97,14 +97,14 @@ const dispose = render(() => <App />, root);
 // Call dispose() when this root must be unmounted.
 ```
 
-Pass a function so Solid creates the root before it evaluates the component tree.
-The root owns the delegated event listeners for its container, and disposal removes them.
-When the initial render has no unresolved async read, `render` flushes that work before returning; if an async read is pending, the mount attaches after it settles.
+関数を渡すと、Solid はコンポーネントツリーを評価する前にルートを作ります。
+ルートはそのコンテナのデリゲートされたイベントリスナーを所有し、破棄はそれらを取り除きます。
+最初のレンダリングに未解決の非同期読み取りがなければ、`render` は戻る前にその処理をフラッシュします。非同期読み取りが保留中なら、確定後にマウントが取り付けられます。
 
-## Hydrating server HTML
+## サーバー HTML のハイドレーション
 
-[`hydrate`](/reference/solid-web/rendering-ssr/hydrate) is `render` for a container that already holds HTML from `renderToString` or `renderToStream`.
-It claims the existing nodes and attaches event handlers and reactive bindings without recreating them:
+[`hydrate`](/reference/solid-web/rendering-ssr/hydrate) は、`renderToString` または `renderToStream` からの HTML をすでに保持しているコンテナに対する `render` です。
+既存のノードを引き継ぎ、それらを作り直さずにイベントハンドラーとリアクティブバインディングを取り付けます:
 
 ```tsx
 import { hydrate } from "@solidjs/web";
@@ -119,8 +119,8 @@ if (!root) {
 hydrate(() => <App />, root);
 ```
 
-The server and client must render the same initial structure in each hydrated region.
-Solid assigns hydration keys during SSR so the client build can claim the matching nodes; when the structures differ, the client cannot find the node it expects.
+サーバーとクライアントは、ハイドレートされる各領域で同じ初期構造をレンダリングしなければなりません。
+Solid は SSR 中にハイドレーションキーを割り当てるため、クライアントビルドは一致するノードを引き継げます。構造が異なると、クライアントは期待するノードを見つけられません。
 
 ```tsx
 // Avoid: a different element on each side
@@ -141,14 +141,14 @@ onSettled(() => setRenderedAt(Date.now()));
 </p>;
 ```
 
-The `Avoid` version logs, in development, a warning such as `Hydration tag mismatch for key "...": expected <time> but found` followed by the `<p>` it found instead, and the client's bindings for that region attach to the wrong node.
-The `Prefer` version hydrates cleanly and updates the text once the browser has taken over.
-A value that differs only in its text, such as `<p>{Date.now()}</p>`, produces no warning: hydration adopts the server's text node as it is, so the page keeps showing the server's value until a reactive update replaces it.
-[SSR-safe code](/guides/ssr-safe-code#values-that-differ-on-every-run) goes through these cases and how to read each warning.
+`Avoid` 版は開発環境で `Hydration tag mismatch for key "...": expected <time> but found` のような警告を記録し、その後に代わりに見つかった `<p>` が続きます。そしてその領域のクライアントのバインディングは間違ったノードに取り付けられます。
+`Prefer` 版はクリーンにハイドレートし、ブラウザーが引き継いだ後にテキストを更新します。
+テキストだけが異なる値（`<p>{Date.now()}</p>` など）は警告を出しません。ハイドレーションはサーバーのテキストノードをそのまま採用するため、リアクティブな更新が置き換えるまでページはサーバーの値を表示し続けます。
+[SSR セーフなコード](/guides/ssr-safe-code#values-that-differ-on-every-run) でこれらのケースと各警告の読み方を解説しています。
 
-When the application owns the full document, include `HydrationScript` once before the application markup.
-It initializes hydration support and records delegated events that fire before the client bundle has hydrated, so a click during the load is not lost.
-For several roots on one page, give each server render a distinct `renderId` and pass the same value to its `hydrate` call:
+アプリケーションがドキュメント全体を所有している場合は、アプリケーションマークアップの前に `HydrationScript` を1回含めます。
+これはハイドレーションサポートを初期化し、クライアントバンドルがハイドレートする前に発火したデリゲートされたイベントを記録するため、読み込み中のクリックが失われません。
+1ページに複数のルートがある場合は、各サーバーレンダリングに別々の `renderId` を与え、同じ値をその `hydrate` 呼び出しに渡してください:
 
 ```tsx
 // Server
@@ -158,10 +158,10 @@ const accountHtml = renderToString(() => <Account />, { renderId: "account" });
 hydrate(() => <Account />, accountRoot, { renderId: "account" });
 ```
 
-## Synchronous string rendering
+## 同期的な文字列レンダリング
 
-[`renderToString`](/reference/solid-web/rendering-ssr/render-to-string) runs a component tree synchronously and returns an HTML string.
-Use it when the tree can complete synchronously, or when the pending parts are inside a `Loading` boundary whose fallback is acceptable in the response:
+[`renderToString`](/reference/solid-web/rendering-ssr/render-to-string) はコンポーネントツリーを同期的に実行し、HTML 文字列を返します。
+ツリーが同期的に完了できる場合、または保留中の部分がフォールバックをレスポンスに含めてよい `Loading` バウンダリの内側にある場合に使います:
 
 ```tsx
 import { Loading } from "solid-js";
@@ -175,12 +175,12 @@ const html = renderToString(() => (
 ));
 ```
 
-When a read is pending inside `Loading`, the string contains that boundary's fallback and nothing arrives later.
-Use streaming when the client should receive the real content once the async work settles.
+`Loading` の内側で読み取りが保留中のとき、文字列にはそのバウンダリのフォールバックが含まれ、後から届くものはありません。
+非同期処理が確定したらクライアントに本物のコンテンツを届けたい場合は、ストリーミングを使ってください。
 
-## Streaming rendering
+## ストリーミングレンダリング
 
-[`renderToStream`](/reference/solid-web/rendering-ssr/render-to-stream) emits the synchronous shell first, then a fragment for each `Loading` boundary as its content settles:
+[`renderToStream`](/reference/solid-web/rendering-ssr/render-to-stream) はまず同期のシェルを出力し、次に各 `Loading` バウンダリのコンテンツが確定するたびにフラグメントを出力します:
 
 ```tsx
 import { renderToStream } from "@solidjs/web";
@@ -194,20 +194,20 @@ export function handleRequest(): Response {
 }
 ```
 
-The returned object can pipe to a Node writable, pipe to a Web `WritableStream`, expose a `ReadableStream<Uint8Array>`, or be awaited for the fully settled HTML.
-Choose one output form per render.
+返されたオブジェクトは、Node の writable へパイプする、Web の `WritableStream` へパイプする、`ReadableStream<Uint8Array>` を公開する、あるいは完全に確定した HTML として await することができます。
+レンダリングごとに出力形式を1つ選んでください。
 
-An async read with no `Loading` boundary above it blocks the shell until it settles.
-Inside a boundary, the shell carries the fallback and a later fragment replaces it.
-That makes `Loading` placement a server decision as well as a client one: a boundary around the product detail lets the header, navigation, and footer reach the browser while the product query is still running.
-[Boundaries](/concepts/boundaries) covers placement and how `Reveal` orders the fragments.
+上に `Loading` バウンダリのない非同期読み取りは、確定するまでシェルをブロックします。
+バウンダリの内側では、シェルはフォールバックを載せ、後のフラグメントがそれを置き換えます。
+つまり `Loading` の配置はクライアントだけでなくサーバーの決定でもあります。商品詳細の周りのバウンダリは、商品クエリがまだ実行中の間に、ヘッダー・ナビゲーション・フッターをブラウザーへ届けます。
+[バウンダリ](/concepts/boundaries) で配置と、`Reveal` がフラグメントをどう並べるかを解説しています。
 
-## Who owns the document
+## ドキュメントを所有するのは誰か
 
-A server render can produce a complete document or a fragment embedded in a document another host owns.
-The choice decides how head content and render assets reach the page.
+サーバーレンダリングは完全なドキュメントを生成することも、別のホストが所有するドキュメントに埋め込まれるフラグメントを生成することもできます。
+その選択が、head コンテンツとレンダリングアセットがどうページに届くかを決めます。
 
-When the rendered output includes a closing `</head>`, the renderer inserts registered head content and assets into that document:
+レンダリング出力に閉じる `</head>` が含まれる場合、レンダラーは登録された head コンテンツとアセットをそのドキュメントに挿入します:
 
 ```tsx
 import { HydrationScript, renderToString } from "@solidjs/web";
@@ -228,8 +228,8 @@ const html = renderToString(() => (
 ));
 ```
 
-When another host owns the document, render the application fragment and use `onHead` to receive the head HTML.
-For `renderToString`, `onHead` runs synchronously before the function returns; for `renderToStream`, it runs before the shell is emitted:
+別のホストがドキュメントを所有する場合は、アプリケーションフラグメントをレンダリングし、`onHead` で head の HTML を受け取ります。
+`renderToString` では `onHead` は関数が戻る前に同期的に実行され、`renderToStream` ではシェルが出力される前に実行されます:
 
 ```tsx
 let head = "";
@@ -247,16 +247,16 @@ const documentHtml = `<!doctype html>
 </html>`;
 ```
 
-The renderer handles HTML generation and head delivery.
-Server adapters, routing, response creation, and deployment belong to the application layer; [App structure](/building-apps/app-structure) shows how the CLI templates wire them.
+レンダラーは HTML 生成と head の受け渡しを処理します。
+サーバーアダプター、ルーティング、レスポンス生成、デプロイはアプリケーション層の仕事です。[アプリの構造](/building-apps/app-structure) で CLI テンプレートがそれらをどう配線するかを示しています。
 
-## Controlling hydration
+## ハイドレーションの制御
 
-These controls divide hydration ownership between the server and the client.
-Use them only when the two intentionally manage different parts of the document, such as a server-rendered marketing page with one interactive island.
+これらの制御は、ハイドレーションの所有権をサーバーとクライアントで分けます。
+サーバーレンダリングされたマーケティングページにインタラクティブな島が1つあるなど、両者が意図的にドキュメントの異なる部分を管理する場合にのみ使ってください。
 
-[`NoHydration`](/reference/solid-js/advanced/manual-hydration/no-hydration) renders its children on the server without hydration keys or serialized state.
-During client hydration, Solid skips that subtree and leaves its DOM untouched:
+[`NoHydration`](/reference/solid-js/advanced/manual-hydration/no-hydration) は、ハイドレーションキーやシリアライズされた状態なしで、その子をサーバー上にレンダリングします。
+クライアントのハイドレーション中、Solid はそのサブツリーをスキップし、その DOM を触れないままにします:
 
 ```tsx
 import { NoHydration } from "solid-js";
@@ -266,8 +266,8 @@ import { NoHydration } from "solid-js";
 </NoHydration>;
 ```
 
-[`Hydration`](/reference/solid-js/advanced/manual-hydration/hydration) re-enables hydration inside a `NoHydration` region and starts a new hydration id namespace on the server.
-Pass the same id as the `renderId` of the client root that hydrates it:
+[`Hydration`](/reference/solid-js/advanced/manual-hydration/hydration) は `NoHydration` 領域の内側でハイドレーションを再有効化し、サーバー上で新しいハイドレーション id 名前空間を開始します。
+それをハイドレートするクライアントルートの `renderId` と同じ id を渡してください:
 
 ```tsx
 import { Hydration, NoHydration } from "solid-js";
@@ -289,44 +289,44 @@ const accountRoot = document.getElementById("account")!;
 hydrate(() => <Account />, accountRoot, { renderId: "account" });
 ```
 
-## Common problems
+## よくある問題
 
-### `window is not defined` or `document is not defined`
+### `window is not defined` または `document is not defined`
 
-A module or component body reads a browser API while the server renders.
-Move the read into an effect function or an `onSettled` callback, guard it with `isServer`, or wrap the component in `clientOnly`.
-See [Server and client boundaries](#server-and-client-boundaries).
+サーバーがレンダリングしている間に、モジュールやコンポーネント本体がブラウザー API を読んでいます。
+読み取りをエフェクト関数や `onSettled` コールバックへ移すか、`isServer` でガードするか、コンポーネントを `clientOnly` で包んでください。
+[サーバーとクライアントのバウンダリ](#server-and-client-boundaries)を参照してください。
 
-### `Hydration tag mismatch`, `Hydration structure mismatch`, or `Hydration key miss` in the console
+### コンソールに `Hydration tag mismatch`・`Hydration structure mismatch`・`Hydration key miss`
 
-The server and the client rendered different elements for the same region: a conditional on `isServer` that picks a different tag reports a tag mismatch; a `Show` whose condition depends on `Math.random()`, or data that differs between the request and the browser, reports a structure mismatch inside the template.
-Render the same structure on both sides and fill in browser-only values after hydration; [Reading the hydration warnings](/guides/ssr-safe-code#reading-the-hydration-warnings) explains what each message checks.
-A key miss whose message mentions namespaces means a subtree was hydrated with a different `renderId` than the server used; see [Controlling hydration](#controlling-hydration).
+サーバーとクライアントが同じ領域に異なる要素をレンダリングしました。別のタグを選ぶ `isServer` の条件分岐はタグ不一致を報告し、`Math.random()` に依存する条件の `Show` や、リクエストとブラウザーで異なるデータはテンプレート内の構造不一致を報告します。
+両側で同じ構造をレンダリングし、ブラウザー専用の値はハイドレーション後に埋めてください。[ハイドレーション警告の読み方](/guides/ssr-safe-code#reading-the-hydration-warnings)で各メッセージが何をチェックするかを説明しています。
+メッセージが名前空間に言及するキーミスは、サブツリーがサーバーが使ったのとは異なる `renderId` でハイドレートされたことを意味します。[ハイドレーションの制御](#controlling-hydration)を参照してください。
 
-### The page renders but the first clicks do nothing
+### ページはレンダリングされるが最初のクリックが何もしない
 
-Clicks that fire before the client bundle has hydrated are lost unless `HydrationScript` is in the document head.
-Include it once, before the application markup.
+クライアントバンドルがハイドレートする前に発火したクリックは、`HydrationScript` がドキュメントの head にない限り失われます。
+アプリケーションマークアップの前に、1回だけ含めてください。
 
-### The shell waits for every request before anything is sent
+### 何かが送られる前にシェルがすべてのリクエストを待つ
 
-An async read outside any `Loading` boundary blocks the stream's shell.
-Put a boundary around the region that depends on the read, so the shell carries a fallback and the content streams later.
+どの `Loading` バウンダリの外側にもある非同期読み取りが、ストリームのシェルをブロックしています。
+その読み取りに依存する領域の周りにバウンダリを置けば、シェルはフォールバックを載せ、コンテンツは後でストリーミングされます。
 
-## Recap
+## まとめ
 
-- One component source runs in the browser and on the server; code that needs `window` runs in an effect, an `onSettled` callback, behind `isServer`, or inside `clientOnly`.
-- Create state inside components or providers, never at module scope, so requests do not share it.
-- Render the same initial structure on both sides; fill in browser-only values after hydration.
-- Include `HydrationScript` once when the application owns the document.
-- `renderToString` returns the shell with fallbacks; `renderToStream` sends the shell and streams each boundary's content as it settles.
-- A `Loading` boundary decides what is in the shell and what streams later, so its placement is a server decision too.
-- Reach for `NoHydration`, `Hydration`, and `renderId` only when the server and client intentionally own different parts of the page.
+- 1つのコンポーネントソースがブラウザーとサーバーで実行されます。`window` を必要とするコードは、エフェクト、`onSettled` コールバック、`isServer` の内側、または `clientOnly` の内側で実行します。
+- 状態はコンポーネントやプロバイダーの内側で作り、モジュールスコープには作らないでください。リクエスト間で共有されないようにするためです。
+- 両側で同じ初期構造をレンダリングし、ブラウザー専用の値はハイドレーション後に埋めます。
+- アプリケーションがドキュメントを所有する場合は `HydrationScript` を1回含めます。
+- `renderToString` はフォールバック入りのシェルを返し、`renderToStream` はシェルを送り、各バウンダリのコンテンツを確定するたびにストリーミングします。
+- `Loading` バウンダリはシェルに含まれるものと後でストリーミングされるものを決めるため、その配置もサーバーの決定です。
+- `NoHydration`・`Hydration`・`renderId` は、サーバーとクライアントが意図的にページの異なる部分を所有する場合にのみ使います。
 
-## Next steps
+## 次のステップ
 
-- [Choose a rendering mode](/guides/choose-a-rendering-mode): which of these APIs a start-mode project uses, and how to pick between a static shell, streaming SSR, and prerendering.
-- [App structure](/building-apps/app-structure): the generated entries that call `render`, `hydrate`, and `renderToStream` for you.
-- [Boundaries](/concepts/boundaries): how `Loading` placement decides what streams in the shell and what arrives later.
-- [Head and metadata](/building-apps/head-and-metadata): how titles and meta tags declared in components reach the document head on both sides.
-- [SSR-safe code](/guides/ssr-safe-code): the checklist for code that runs in both places, and how to read each hydration warning.
+- [レンダリングモードを選ぶ](/guides/choose-a-rendering-mode): start-mode のプロジェクトがこれらの API のどれを使うか、そして静的シェル・ストリーミング SSR・プリレンダリングの選び方。
+- [アプリの構造](/building-apps/app-structure): `render`・`hydrate`・`renderToStream` を代わりに呼ぶ生成済みエントリー。
+- [バウンダリ](/concepts/boundaries): `Loading` の配置が、シェルにストリーミングされるものと後で届くものをどう決めるか。
+- [head とメタデータ](/building-apps/head-and-metadata): コンポーネントで宣言されたタイトルとメタタグが、両側でドキュメントの head に届く仕組み。
+- [SSR セーフなコード](/guides/ssr-safe-code): 両方の場所で実行されるコードのチェックリストと、各ハイドレーション警告の読み方。
