@@ -1,65 +1,65 @@
 ---
-title: Overview
+title: 概要
 version: "2.0"
-description: "What Solid is, what these docs cover, and where to start reading."
+description: "Solid とは何か、このドキュメントが扱う内容、そしてどこから読み始めるか。"
 ---
 
-:::note[These docs cover the release candidate]
-Solid 2.0 is in its release candidate (RC) phase.
-APIs may change before the stable release, and packages from the coordinated RC must use compatible versions.
-For Solid 1.x, SolidStart, and the current stable ecosystem, see the [current Solid documentation](https://docs.solidjs.com/).
+:::note[このドキュメントはリリース候補版を対象にしています]
+Solid 2.0 は現在、リリース候補（RC）フェーズです。
+安定版リリースまでに API が変更される可能性があり、協調リリースされる RC の各パッケージは互換性のあるバージョンを使う必要があります。
+Solid 1.x、SolidStart、現在の安定版エコシステムについては、[現在の Solid ドキュメント](https://docs.solidjs.com/)を参照してください。
 :::
 
-Solid is a framework for building user interfaces on the web.
-You write components in JSX, hold state in signals and stores, and Solid updates the exact parts of the page that read the values you changed.
-There is no virtual DOM and no component re-render: a component function runs once, and the reactive expressions inside it keep running as their inputs change.
+Solid は Web 上でユーザーインターフェースを構築するためのフレームワークです。
+コンポーネントを JSX で記述し、状態をシグナルとストアで保持すると、Solid は変更した値を読み取っているページの部分だけを正確に更新します。
+仮想 DOM はなく、コンポーネントの再レンダーもありません。コンポーネント関数は一度だけ実行され、その内部のリアクティブな式は入力が変わるたびに実行され続けます。
 
-Solid 2.0 is a coordinated release of the whole platform.
-The core library, the DOM renderer, the router, head management, and the Vite plugin are designed to work together, and these docs describe them as one system.
+Solid 2.0 はプラットフォーム全体を束ねた協調リリースです。
+コアライブラリ、DOM レンダラー、ルーター、head 管理、Vite プラグインは一体として動作するよう設計されており、このドキュメントもそれらを一つのシステムとして説明します。
 
-## Where to start
+## どこから始めるか
 
-If you have not written Solid before, start with the [Quick start](/getting-started/quick-start).
-It creates an app with the CLI, walks through the files it generates, and has you make your first change.
-Then read [Reactivity](/concepts/reactivity) and [Components and JSX](/concepts/components-and-jsx) in that order; they teach signals, derived values, effects, and the run-once component model, starting from the counter the Quick start left you with.
+Solid を書いたことがなければ、[クイックスタート](/getting-started/quick-start)から始めてください。
+CLI でアプリを作成し、生成されるファイルを順に見ながら、最初の変更を加えるところまで案内します。
+その後、[リアクティビティ](/concepts/reactivity)と[コンポーネントと JSX](/concepts/components-and-jsx)をこの順で読んでください。クイックスタートで作ったカウンターを起点に、シグナル、派生値、エフェクト、そして一度だけ実行されるコンポーネントモデルを学びます。
 
-If you are starting a project and already know Solid, the [Quick start](/getting-started/quick-start) is still the shortest path to a running app, and [Project shapes](/getting-started/project-shapes) explains which template to pick.
+プロジェクトを始める場合で Solid をすでに知っているなら、[クイックスタート](/getting-started/quick-start)が動くアプリへの最短経路であることに変わりはなく、[プロジェクトの形](/getting-started/project-shapes)でどのテンプレートを選ぶべきかを説明しています。
 
-If you already know React or Vue, read [Thinking in Solid](/guides/thinking-in-solid) after the Quick start.
-It builds one feature end to end and points out where Solid differs from what you would write in either framework.
-[From React](/migration/from-react) maps React concepts to Solid concepts one by one and explains the places where the same code means something different.
-Developers moving from Solid 1 or SolidStart have their own guides under [Migration](/migration/from-solid-1).
+React や Vue の経験があるなら、クイックスタートの後に [Thinking in Solid](/guides/thinking-in-solid)を読んでください。
+一つの機能を端から端まで実装しながら、どちらのフレームワークで書く場合とも Solid がどこで異なるのかを指摘します。
+[React からの移行](/migration/from-react)では React の概念を Solid の概念に一つずつ対応付け、同じコードが異なる意味を持つ箇所を説明します。
+Solid 1 や SolidStart から移行する開発者向けには、[Migration](/migration/from-solid-1)配下に専用のガイドがあります。
 
-If you know what you need and want the signature, go to the [Reference](/reference).
-It is organized by import specifier, so `solid-js`, `@solidjs/web`, and `@solidjs/router` each have their own section.
+必要なものが分かっていてシグネチャだけを確認したい場合は、[リファレンス](/reference)へ進んでください。
+インポート指定子ごとに整理されているので、`solid-js`、`@solidjs/web`、`@solidjs/router` にそれぞれのセクションがあります。
 
-## A reading order
+## 推奨の読み順
 
-The Learn pages build on each other.
-Read them in this order the first time through:
+Learn ページは互いに積み重なっています。
+最初の通読ではこの順番で読んでください。
 
-1. [Quick start](/getting-started/quick-start): create a project and see how the pieces fit.
-2. [Thinking in Solid](/guides/thinking-in-solid): one feature built end to end, with the places where Solid differs from React and Vue pointed out as they come up.
-3. [Reactivity](/concepts/reactivity): what a signal is, why reads have to happen in the right place, and when updates land.
-4. [Components and JSX](/concepts/components-and-jsx): props, events, refs, lists, and conditional content.
-5. [Stores](/concepts/stores): objects and arrays whose properties update independently, and how to update them through a draft.
-6. [Avoid unnecessary effects](/guides/avoid-unnecessary-effects): the habit that separates working Solid code from fragile Solid code.
-7. [Async reactivity](/concepts/async-reactivity) and [Boundaries](/concepts/boundaries): loading data, showing fallbacks, and keeping the current screen visible while new data arrives.
-8. [Mutations](/concepts/mutations): writing to a server with actions and optimistic stores, without changing the components that render the data.
-9. [State management](/guides/state-management): where each piece of state lives, from a modal flag to the signed-in user.
-10. [Rendering and SSR](/concepts/rendering-and-ssr): what changes when the same components also run on a server.
-11. [App structure](/building-apps/app-structure) and the rest of Building apps: the Vite plugin, server functions, sessions, and deployment.
-12. [Routing](/routing/overview): how a router plugs in, then the guide for the router you chose.
+1. [クイックスタート](/getting-started/quick-start): プロジェクトを作成し、各部分がどう組み合わさるかを見ます。
+2. [Thinking in Solid](/guides/thinking-in-solid): 一つの機能を端から端まで実装し、React や Vue との相違点を随所で指摘します。
+3. [リアクティビティ](/concepts/reactivity): シグナルとは何か、なぜ読み取りを正しい場所で行う必要があるのか、更新がいつ反映されるのか。
+4. [コンポーネントと JSX](/concepts/components-and-jsx): props、イベント、ref、リスト、条件付きコンテンツ。
+5. [ストア](/concepts/stores): プロパティが独立して更新されるオブジェクトと配列、およびドラフトを通じた更新方法。
+6. [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects): 動く Solid コードと壊れやすい Solid コードを分ける習慣。
+7. [非同期リアクティビティ](/concepts/async-reactivity)と[バウンダリ](/concepts/boundaries): データの読み込み、フォールバックの表示、新しいデータが届くまで現在の画面を維持する方法。
+8. [ミューテーション](/concepts/mutations): データをレンダーするコンポーネントを変えずに、アクションと楽観的ストアでサーバーへ書き込みます。
+9. [状態管理](/guides/state-management): モーダルの開閉フラグからログイン中のユーザーまで、各状態をどこに置くか。
+10. [レンダリングと SSR](/concepts/rendering-and-ssr): 同じコンポーネントがサーバーでも動くとき、何が変わるのか。
+11. [アプリの構造](/building-apps/app-structure)と Building apps の残りのページ: Vite プラグイン、サーバー関数、セッション、デプロイ。
+12. [ルーティング](/routing/overview): ルーターの組み込み方と、選んだルーターのガイド。
 
-Each page ends with where to go next, so you can also follow the links instead of this list.
+各ページの末尾には次に読むべき場所が書かれているので、このリストではなくリンクをたどって進むこともできます。
 
-## How these docs are organized
+## このドキュメントの構成
 
-The **Learn** tab holds the pages above: getting started, concepts, building apps, routing, guides, and migration.
-They explain how Solid works and how to accomplish tasks, with examples you can copy.
-The [Glossary](/glossary) at the end of the tab defines Solid's own words, such as held update, owner, and projection, and links each to the page that teaches it.
+**Learn** タブには上記のページ群があります。入門、概念、アプリの構築、ルーティング、ガイド、マイグレーションです。
+Solid の仕組みとタスクの実現方法を、コピーできる例とともに説明しています。
+タブの末尾にある[用語集](/glossary)では、held update、オーナー、プロジェクションといった Solid 固有の用語を定義し、それぞれを学べるページへリンクしています。
 
-The **Reference** tab documents each exported API: its import, signature, parameters, and return value.
-Reference pages stay short on purpose and link back to the Learn page that explains the idea.
+**Reference** タブにはエクスポートされている各 API のドキュメントがあります。インポート、シグネチャ、パラメータ、戻り値です。
+リファレンスページは意図的に短く保たれ、概念を説明する Learn ページへリンクしています。
 
-If a page is missing something you needed, [open an issue](https://github.com/solidjs/solid-docs/issues) or ask in the [Discord chatroom](https://discord.com/invite/solidjs).
+必要な内容がページに見つからない場合は、[Issue を作成](https://github.com/solidjs/solid-docs/issues)するか、[Discord チャットルーム](https://discord.com/invite/solidjs)で質問してください。
