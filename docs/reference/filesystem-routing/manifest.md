@@ -1,30 +1,30 @@
 ---
-title: "Manifest module"
-category: "filesystem-routing"
+title: "マニフェストモジュール"
+category: "ファイルシステムルーティング"
 order: 6
 version: "2.0"
-description: "Reference for virtual:file-routes runtime output and TypeScript declarations."
+description: "virtual:file-routes のランタイム出力と TypeScript 宣言に関するリファレンス。"
 source_repo: "solidjs/filesystem-routing"
 source_ref: "v0.2.1"
 source_path: "types.d.ts"
 ---
 
-The Vite adapter serves the neutral route manifest from `virtual:file-routes` by default.
+Vite アダプターはデフォルトで `virtual:file-routes` から中立なルートマニフェストを提供します。
 
-## Imports
+## インポート
 
 ```ts
 import routes, { pageRoutes } from "virtual:file-routes";
 ```
 
-`routes` is the flat manifest in scan order.
-The `routes` paths retain route groups.
+`routes` はスキャン順のフラットなマニフェストです。
+`routes` のパスはルートグループを保持します。
 
-`pageRoutes` contains only entries with `page: true`.
-`pageRoutes` nests entries by manifest path, removes groups from URL paths, and changes child paths to be relative to their parent.
-Both exports reuse the same serialized entry objects.
+`pageRoutes` は `page: true` のエントリーだけを含みます。
+`pageRoutes` はエントリーをマニフェストパスでネストし、URL パスからグループを取り除き、子パスを親に対する相対パスに変えます。
+両方のエクスポートは同じシリアライズされたエントリーオブジェクトを再利用します。
 
-## Delivered refs
+## 配信される ref
 
 ```ts
 interface FileRouteLazyRef<M = Record<string, unknown>> {
@@ -51,49 +51,49 @@ interface FileRouteTreeEntry extends FileRouteEntry {
 }
 ```
 
-With default code splitting, `$` keys contain `{ src, import }` and `$$` keys contain `{ require }`.
-With `codeSplitting: false`, both forms contain `require`, while delivered component and handler refs also retain `src`.
+デフォルトのコード分割では、`$` キーは `{ src, import }` を、`$$` キーは `{ require }` を含みます。
+`codeSplitting: false` の場合、両形式とも `require` を含み、配信されるコンポーネントとハンドラーの ref は `src` も保持します。
 
-`$component` selects the route component exports and CSS.
-`$$route` selects the eager `route` export.
-With HTTP methods enabled, `$GET`, `$POST`, and equivalent keys select handler exports.
+`$component` はルートコンポーネントのエクスポートと CSS を選択します。
+`$$route` は即時の `route` エクスポートを選択します。
+HTTP メソッドが有効な場合、`$GET`・`$POST` および同等のキーがハンドラーのエクスポートを選択します。
 
-## Environment output
+## 環境ごとの出力
 
-When one shared router enables HTTP methods:
+1 つの共有ルーターで HTTP メソッドを有効にしている場合：
 
-- Server-consumer environments receive page, route config, and handler refs.
-- Client-consumer environments remove handler refs.
-- Handler-only entries are absent from client-consumer output.
-- Page entries that also have handlers remain, without their handler refs.
+- サーバー側コンシューマーの環境は、ページ、ルート設定、ハンドラーの ref を受け取ります。
+- クライアント側コンシューマーの環境では、ハンドラーの ref は除去されます。
+- ハンドラーのみのエントリーはクライアント側コンシューマーの出力に含まれません。
+- ハンドラーも持つページエントリーは、ハンドラーの ref を除いた状態で残ります。
 
-The plugin serializes a router assigned through `fileRoutes({ routers })` unchanged for that environment.
+プラグインは `fileRoutes({ routers })` で割り当てられたルーターを、その環境向けに変更せずシリアライズします。
 
 ## `filesystem-routing/types`
 
-Add the packaged general declaration when generated tuple types are disabled:
+生成されるタプル型が無効な場合は、パッケージ同梱の汎用宣言を追加します：
 
 ```ts
 /// <reference types="filesystem-routing/types" />
 ```
 
-The packaged declaration types `routes` as `FileRouteEntry[]` and `pageRoutes` as `FileRouteTreeEntry[]`.
-The declaration applies only to the default module ID.
+同梱の宣言は `routes` を `FileRouteEntry[]` として、`pageRoutes` を `FileRouteTreeEntry[]` として型付けします。
+この宣言はデフォルトのモジュール ID にのみ適用されます。
 
-## Generated literal-tuple declaration
+## 生成されるリテラルタプル宣言
 
-Enable type generation to preserve literal paths and module export types:
+リテラルパスとモジュールエクスポートの型を保持するには、型生成を有効にします：
 
 ```ts
 fileRoutes({ types: true });
 ```
 
-The default output is `file-routes.d.ts` in the Vite root.
-The generated declaration declares the configured module ID, types JavaScript and TypeScript refs with `typeof import(...)`, and reproduces the nested page tuple.
-Modules whose extensions TypeScript cannot resolve use generic ref types.
+デフォルトの出力は Vite ルートの `file-routes.d.ts` です。
+生成される宣言は設定されたモジュール ID を宣言し、JavaScript と TypeScript の ref を `typeof import(...)` で型付けし、ネストされたページタプルを再現します。
+TypeScript が解決できない拡張子のモジュールには、汎用の ref 型が使われます。
 
-The generated declaration is self-contained.
-Do not reference `filesystem-routing/types` at the same time because both declare the default virtual module.
+生成される宣言は自己完結しています。
+両方ともデフォルトの仮想モジュールを宣言するため、`filesystem-routing/types` を同時に参照しないでください。
 
-The plugin regenerates the file at build start and after route changes.
-The plugin writes the file only when the content changes.
+プラグインはビルド開始時とルート変更後にファイルを再生成します。
+プラグインは内容に変更がある場合にのみファイルを書き込みます。
