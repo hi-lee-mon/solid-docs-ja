@@ -1,17 +1,17 @@
 ---
-title: "Route conventions"
-category: "filesystem-routing"
+title: "ルートの規約"
+category: "ファイルシステムルーティング"
 order: 2
 version: "2.0"
-description: "Reference for nested and flat route filename conventions."
+description: "ネスト規約とフラット規約のルートファイル名に関するリファレンスです。"
 source_repo: "solidjs/filesystem-routing"
 source_ref: "v0.2.1"
 source_path: "src/convention.ts"
 ---
 
-The root `filesystem-routing` import exports two scanners with different filename conventions and the same module convention.
+ルートの `filesystem-routing` インポートは、ファイル名規約が異なりモジュール規約が共通の 2 つのスキャナーをエクスポートします。
 
-## Nested convention
+## ネスト規約
 
 ### `routePathFromFile`
 
@@ -21,20 +21,20 @@ import { routePathFromFile } from "filesystem-routing";
 function routePathFromFile(routeFile: string): string;
 ```
 
-Converts a root-relative filename without its extension:
+拡張子を除いたルート相対のファイル名を変換します:
 
-- `/index` becomes `/`.
-- `/blog/index` becomes `/blog/`.
-- `/blog/[id]` becomes `/blog/:id`.
-- `/blog/[[page]]` becomes `/blog/:page?`.
-- `/docs/[...path]` becomes `/docs/*path`.
-- `/(marketing)/about` remains `/(marketing)/about` in the flat manifest.
+- `/index` は `/` になります。
+- `/blog/index` は `/blog/` になります。
+- `/blog/[id]` は `/blog/:id` になります。
+- `/blog/[[page]]` は `/blog/:page?` になります。
+- `/docs/[...path]` は `/docs/*path` になります。
+- `/(marketing)/about` はフラットマニフェスト内で `/(marketing)/about` のままです。
 
-Route groups remain in manifest paths so tree construction can nest them.
-The generated `pageRoutes` view removes groups from URL paths.
+ルートグループはツリー構築でネストできるよう、マニフェストのパス内に残ります。
+生成される `pageRoutes` ビューでは URL パスからグループが取り除かれます。
 
-Pair a route file with a directory to create nesting.
-For example, `blog.tsx` is a layout for routes under `blog/`.
+ルートファイルとディレクトリを組み合わせるとネストが作られます。
+たとえば `blog.tsx` は `blog/` 配下のルートのレイアウトになります。
 
 ### `PageFileSystemRouter`
 
@@ -49,10 +49,10 @@ class PageFileSystemRouter extends BaseFileSystemRouter {
 }
 ```
 
-`PageFileSystemRouter` uses `config.toPath` when provided and otherwise uses `routePathFromFile`.
-See [Module convention](#module-convention) for its manifest entries.
+`PageFileSystemRouter` は `config.toPath` が指定されていればそれを使い、なければ `routePathFromFile` を使います。
+そのマニフェストエントリについては[モジュール規約](#module-convention)を参照してください。
 
-## Flat convention
+## フラット規約
 
 ### `flatRoutePathFromFile`
 
@@ -62,22 +62,22 @@ import { flatRoutePathFromFile } from "filesystem-routing";
 function flatRoutePathFromFile(routeFile: string): string | undefined;
 ```
 
-Converts flat route names:
+フラットルート名を変換します:
 
-- `/_index` becomes `/`.
-- `/concerts.trending` becomes `/concerts/trending`.
-- `/concerts.$city` becomes `/concerts/:city`.
-- `/concerts.($page)` becomes `/concerts/:page?`.
-- `/files.$` becomes `/files/*splat`.
-- `/_auth.login` becomes `/(_auth)/login`, a pathless layout group.
-- `/concerts_.mine` becomes `/(concerts_)/concerts/mine`, outside the `concerts` layout.
-- `/[sitemap.xml]` becomes `/sitemap.xml`.
+- `/_index` は `/` になります。
+- `/concerts.trending` は `/concerts/trending` になります。
+- `/concerts.$city` は `/concerts/:city` になります。
+- `/concerts.($page)` は `/concerts/:page?` になります。
+- `/files.$` は `/files/*splat` になります。
+- `/_auth.login` は `/(_auth)/login` になります。これはパスを持たないレイアウトグループです。
+- `/concerts_.mine` は `/(concerts_)/concerts/mine` になり、`concerts` レイアウトの外側に置かれます。
+- `/[sitemap.xml]` は `/sitemap.xml` になります。
 
-Square brackets escape flat-convention characters.
-The convention rejects an optional static segment such as `(en)` because the neutral path syntax represents optional parameters only.
+角括弧はフラット規約の特殊文字をエスケープします。
+この規約は `(en)` のようなオプションの静的セグメントを拒否します。ニュートラルなパス構文がオプションのパラメーターしか表現できないためです。
 
-A top-level directory contributes only its `route` module.
-Other files in that directory and deeper nested directories return `undefined`.
+トップレベルのディレクトリはその `route` モジュールのみを提供します。
+そのディレクトリ内の他のファイルと、より深くネストされたディレクトリは `undefined` を返します。
 
 ### `FlatFileSystemRouter`
 
@@ -87,7 +87,7 @@ import { FlatFileSystemRouter } from "filesystem-routing";
 class FlatFileSystemRouter extends PageFileSystemRouter;
 ```
 
-Uses `flatRoutePathFromFile` and inherits the page module convention.
+`flatRoutePathFromFile` を使い、ページモジュール規約を継承します。
 
 ```ts
 import { resolve } from "node:path";
@@ -102,21 +102,21 @@ fileRoutes({
 });
 ```
 
-## Module convention
+## モジュール規約
 
-A JavaScript or TypeScript route module participates when it has a default export or a recognized HTTP method export.
+JavaScript または TypeScript のルートモジュールは、デフォルトエクスポートまたは認識される HTTP メソッドのエクスポートを持つ場合に対象となります。
 
-- A default export sets `page: true`.
-- `$component` lazily selects same-named local runtime exports, `default`, and `$css`.
-  It excludes the `route` export and recognized HTTP handlers.
-- An exported `route` value creates the eager `$$route` ref.
-- Recognized uppercase handler exports create `$GET`, `$POST`, and equivalent refs.
-- A recognized `GET` also creates `$HEAD` selecting `GET` unless the module exports `HEAD`.
-- A handler-only module sets `page: false` and has no component ref.
-- The scanner treats `.md` and `.mdx` files as pages when the configuration includes those extensions.
+- デフォルトエクスポートは `page: true` を設定します。
+- `$component` は同名のローカルランタイムエクスポート、`default`、`$css` を遅延選択します。
+  `route` エクスポートと認識される HTTP ハンドラーは除外します。
+- エクスポートされた `route` 値は eager の `$$route` ref を作成します。
+- 認識される大文字のハンドラーエクスポートは `$GET`、`$POST` などの同等の ref を作成します。
+- 認識される `GET` は、モジュールが `HEAD` をエクスポートしていない限り、`GET` を選択する `$HEAD` も作成します。
+- ハンドラーのみのモジュールは `page: false` となり、コンポーネント ref を持ちません。
+- 設定にそれらの拡張子が含まれる場合、スキャナーは `.md` と `.mdx` ファイルをページとして扱います。
 
-Set `components: false` to omit component refs while retaining page status and route configuration.
-Set `httpMethods: true` to recognize the standard method set.
+`components: false` を設定すると、ページの状態とルート設定を維持したままコンポーネント ref を省略します。
+`httpMethods: true` を設定すると、標準のメソッドセットを認識します。
 
 ### `HTTP_METHODS`
 
@@ -143,5 +143,5 @@ interface PageFileSystemRouterConfig extends FileSystemRouterConfig {
 }
 ```
 
-`components` defaults to `true`.
-`httpMethods` defaults to `false`; `true` selects `HTTP_METHODS`, and an array selects only the listed export names.
+`components` のデフォルトは `true` です。
+`httpMethods` のデフォルトは `false` です。`true` は `HTTP_METHODS` を選択し、配列は列挙されたエクスポート名のみを選択します。

@@ -1,141 +1,141 @@
 ---
-title: "From SolidStart"
+title: "SolidStart からの移行"
 version: "2.0"
-description: "Move a SolidStart 1 or released SolidStart 2 application to Solid 2 through @solidjs/vite-plugin start mode."
+description: "SolidStart 1 またはリリース済み SolidStart 2 のアプリケーションを、@solidjs/vite-plugin の start モードを通じて Solid 2 へ移します。"
 source_repo: "solidjs/solid-vite-plugin"
 source_ref: "next"
 source_path: "src/ssr/index.ts"
 ---
 
-:::caution[This is not a SolidStart upgrade]
-Released SolidStart 2 runs on Solid 1 and does not support Solid 2.
-Do not install Solid 2 into an existing SolidStart application.
+:::caution[これは SolidStart のアップグレードではありません]
+リリース済みの SolidStart 2 は Solid 1 上で動作しており、Solid 2 をサポートしていません。
+既存の SolidStart アプリケーションに Solid 2 をインストールしないでください。
 
-Create a separate Solid 2 application that uses `@solidjs/vite-plugin` 3 start mode, then move application code into that target.
-Start mode is a serving mode of the Vite plugin.
-It is not SolidStart and does not provide the SolidStart runtime.
+`@solidjs/vite-plugin` 3 の start モードを使う独立した Solid 2 アプリケーションを作成し、そのターゲットへアプリケーションコードを移してください。
+start モードは Vite プラグインのサーブモードです。
+SolidStart ではなく、SolidStart のランタイムも提供しません。
 :::
 
-This guide has separate extraction steps for [SolidStart 1](#start-from-solidstart-1) and [released SolidStart 2](#start-from-released-solidstart-2).
-Both paths then use the same [Solid 2 target model](#build-the-solid-2-target).
+このガイドでは、[SolidStart 1](#start-from-solidstart-1) と[リリース済み SolidStart 2](#start-from-released-solidstart-2) で別々の抽出手順を説明します。
+どちらの経路も、その後は同じ [Solid 2 ターゲットモデル](#build-the-solid-2-target)を使います。
 
-## Migrate platform dependencies first
+## プラットフォーム依存関係を先に移行する
 
-Apply the platform migrations as code moves into the separate Solid 2 target:
+コードを独立した Solid 2 ターゲットへ移す際に、プラットフォームの移行を適用します:
 
-1. Migrate core reactivity, lifecycle, boundaries, and rendering with [From Solid 1](/migration/from-solid-1).
-2. Migrate route definitions and router APIs with [From Solid Router](/migration/from-solid-router) when the source uses Solid Router.
-3. Migrate head management with [From Solid Meta 0.x](/migration/from-solid-meta) when the source uses Solid Meta.
-4. Apply the SolidStart extraction steps on this page for entries, server functions, middleware, sessions, and deployment.
+1. [Solid 1 からの移行](/migration/from-solid-1)で、コアのリアクティビティ、ライフサイクル、バウンダリ、レンダリングを移行します。
+2. ソースが Solid Router を使っている場合は、[Solid Router からの移行](/migration/from-solid-router)でルート定義とルーター API を移行します。
+3. ソースが Solid Meta を使っている場合は、[Solid Meta 0.x からの移行](/migration/from-solid-meta)で head 管理を移行します。
+4. このページの SolidStart 抽出手順を、エントリ、サーバー関数、ミドルウェア、セッション、デプロイに適用します。
 
-Do not copy Solid 1 component code into the target before checking its changed runtime APIs.
+変更されたランタイム API を確認するまでは、Solid 1 のコンポーネントコードをターゲットへコピーしないでください。
 
-Keep the old application runnable during the migration.
-Move one route or server feature at a time, and compare its behavior in both applications before continuing.
+移行中は旧アプリケーションを実行可能な状態に保ちます。
+一度に 1 つのルートまたはサーバー機能を移し、両方のアプリケーションで動作を比較してから次へ進みます。
 
-## Choose what to copy
+## コピーする対象を選ぶ
 
-Copy these files after checking their imports:
+インポートを確認したうえで、次のファイルをコピーします:
 
-- Static files from `public/`.
-- CSS, images, fonts, and other browser assets.
-- Components whose imports are compatible with Solid 2.
-- Domain code that does not import SolidStart, Vinxi, Nitro, or H3.
-- Route component bodies after selecting a router and adapting their route exports.
-- Server-function bodies after restoring authorization and validation at the new server boundary.
-- Environment variable names and `.env.example` values that are not secrets.
+- `public/` 内の静的ファイル。
+- CSS、画像、フォント、その他のブラウザーアセット。
+- インポートが Solid 2 と互換性のあるコンポーネント。
+- SolidStart、Vinxi、Nitro、H3 をインポートしないドメインコード。
+- ルーターを選択しルートのエクスポートを適合させた後の、ルートコンポーネントの本体。
+- 新しいサーバーバウンダリで認可とバリデーションを復元した後の、サーバー関数の本体。
+- シークレットではない環境変数名と `.env.example` の値。
 
-Rewrite these integration files:
+次の統合ファイルは書き直します:
 
-- `app.config.ts` or a SolidStart `vite.config.ts`.
-- `src/entry-client.*` and `src/entry-server.*`.
-- The document shell and application root.
-- The router bootstrap and the SolidStart `FileRoutes` usage.
-- Imports from `@solidjs/start/*`, `vinxi/*`, `nitropack/*`, or Nitro and H3 runtime modules.
-- Middleware, session helpers, API handler types, deployment adapters, and provider configuration.
+- `app.config.ts` または SolidStart の `vite.config.ts`。
+- `src/entry-client.*` と `src/entry-server.*`。
+- ドキュメントシェルとアプリケーションルート。
+- ルーターのブートストラップと SolidStart の `FileRoutes` の使用箇所。
+- `@solidjs/start/*`、`vinxi/*`、`nitropack/*`、Nitro や H3 のランタイムモジュールからのインポート。
+- ミドルウェア、セッションヘルパー、API ハンドラーの型、デプロイアダプター、プロバイダー設定。
 
-Do not copy a build output directory or a lockfile into the target.
-Install the target dependencies first, then add application dependencies as their callers move.
+ビルド出力ディレクトリやロックファイルはターゲットへコピーしないでください。
+先にターゲットの依存関係をインストールし、呼び出し元の移動に合わせてアプリケーションの依存関係を追加します。
 
-## Start from SolidStart 1
+## SolidStart 1 から始める
 
-[SolidStart 1](https://docs.solidjs.com/solid-start) uses Vinxi, Nitro, `app.config.ts`, and framework-owned entries.
-Record the source behavior before changing files:
+[SolidStart 1](https://docs.solidjs.com/solid-start) は Vinxi、Nitro、`app.config.ts`、フレームワークが所有するエントリを使います。
+ファイルを変更する前に、ソースの動作を記録します:
 
-1. Record the value of `ssr`, the `appRoot`, the route directory, middleware paths, route prerendering, and every option under `server` in `app.config.ts`.
-2. Record aliases supplied by the framework, including imports that start with `~/`.
-3. List custom code in `entry-client.*`, `entry-server.*`, and `app.*`.
-4. List all imports from `@solidjs/start`, `vinxi`, `nitropack`, and direct Nitro or H3 entrypoints.
-5. List API routes, server functions, session operations, middleware hooks, and deployment presets.
-6. Run the old development server and production deployment tests as a behavioral baseline.
+1. `app.config.ts` の `ssr` の値、`appRoot`、ルートディレクトリ、ミドルウェアパス、ルートのプリレンダリング、`server` 配下のすべてのオプションを記録します。
+2. `~/` で始まるインポートを含む、フレームワークが提供するエイリアスを記録します。
+3. `entry-client.*`、`entry-server.*`、`app.*` のカスタムコードを一覧化します。
+4. `@solidjs/start`、`vinxi`、`nitropack`、および Nitro や H3 の直接のエントリポイントからのインポートをすべて一覧化します。
+5. API ルート、サーバー関数、セッション操作、ミドルウェアフック、デプロイプリセットを一覧化します。
+6. 旧開発サーバーと本番デプロイのテストを実行し、動作のベースラインとします。
 
-Do not migrate the application to released SolidStart 2 as an intermediate step.
-Move from the SolidStart 1 source directly into the separate Solid 2 target.
+中間段階としてアプリケーションをリリース済み SolidStart 2 へ移行しないでください。
+SolidStart 1 のソースから独立した Solid 2 ターゲットへ直接移します。
 
-Apply these source-specific rules:
+次のソース固有のルールを適用します:
 
-- Treat `app.config.ts` as a checklist only.
-  Do not copy its configuration object.
-- Split the SolidStart `app.*` file into the target `src/App.tsx` application tree and `src/Document.tsx` HTML shell.
-- Remove the old `StartClient`, `StartServer`, `mount`, and `createHandler` entry code.
-  Generated start-mode entries replace it.
-- Preserve route filenames only when the selected file-system convention produces the same paths.
-  Rewrite the `FileRoutes` integration and route-level types.
-- Preserve the code inside a `"use server"` function only after removing SolidStart runtime imports and checking its request, response, redirect, and serialization behavior.
-- Rewrite `onRequest` and `onBeforeResponse` middleware as fetch-style middleware.
-- Replace `vinxi/http` session and cookie calls with a session library over the Solid request event.
-- Replace Nitro presets, storage, tasks, WebSockets, and prerender options with host or Vite integrations selected for the new deployment.
+- `app.config.ts` はチェックリストとしてのみ扱います。
+  その設定オブジェクトはコピーしません。
+- SolidStart の `app.*` ファイルを、ターゲットの `src/App.tsx` アプリケーションツリーと `src/Document.tsx` HTML シェルに分割します。
+- 旧 `StartClient`、`StartServer`、`mount`、`createHandler` のエントリコードを削除します。
+  生成される start モードのエントリがこれを置き換えます。
+- 選択したファイルシステム規約が同じパスを生成する場合にのみ、ルートのファイル名を維持します。
+  `FileRoutes` 統合とルートレベルの型は書き直します。
+- `"use server"` 関数内のコードは、SolidStart のランタイムインポートを取り除き、リクエスト、レスポンス、リダイレクト、シリアライズの動作を確認した後にのみ維持します。
+- `onRequest` と `onBeforeResponse` のミドルウェアを fetch スタイルのミドルウェアとして書き直します。
+- `vinxi/http` のセッションと cookie の呼び出しを、Solid のリクエストイベント上のセッションライブラリに置き換えます。
+- Nitro のプリセット、ストレージ、タスク、WebSocket、プリレンダリングオプションを、新しいデプロイ向けに選択したホストまたは Vite の統合に置き換えます。
 
-## Start from released SolidStart 2
+## リリース済み SolidStart 2 から始める
 
-[Released SolidStart 2](https://docs.solidjs.com/solid-start/v2) uses Solid 1, `solidStart()`, Vite environment builds, and a deployment plugin such as Nitro.
-Its Vite configuration resembles the target, but the application and server contracts are different.
+[リリース済み SolidStart 2](https://docs.solidjs.com/solid-start/v2) は Solid 1、`solidStart()`、Vite 環境ビルド、Nitro のようなデプロイプラグインを使います。
+その Vite 設定はターゲットに似ていますが、アプリケーションとサーバーの契約は異なります。
 
-Record the source behavior before changing files:
+ファイルを変更する前に、ソースの動作を記録します:
 
-1. Record every `solidStart()` option, including `middleware`, `serialization`, `devOverlay`, route locations, and rendering mode.
-2. Record the Nitro, Netlify, Cloudflare, or other deployment plugin configuration.
-3. List custom behavior in `src/app.*`, `src/entry-client.*`, and `src/entry-server.*`.
-4. List imports from `@solidjs/start/config`, `@solidjs/start/client`, `@solidjs/start/server`, `@solidjs/start/http`, and `@solidjs/start/middleware`.
-5. List API routes, H3 middleware, session helpers, request-event locals, and server functions.
-6. Run development, build, preview, and deployment tests as a behavioral baseline.
+1. `middleware`、`serialization`、`devOverlay`、ルートの場所、レンダリングモードを含む、すべての `solidStart()` オプションを記録します。
+2. Nitro、Netlify、Cloudflare、その他のデプロイプラグインの設定を記録します。
+3. `src/app.*`、`src/entry-client.*`、`src/entry-server.*` のカスタム動作を一覧化します。
+4. `@solidjs/start/config`、`@solidjs/start/client`、`@solidjs/start/server`、`@solidjs/start/http`、`@solidjs/start/middleware` からのインポートを一覧化します。
+5. API ルート、H3 ミドルウェア、セッションヘルパー、リクエストイベントの locals、サーバー関数を一覧化します。
+6. 開発、ビルド、プレビュー、デプロイのテストを実行し、動作のベースラインとします。
 
-Do not replace `solidStart()` with `solid()` in the existing application and assume that the result has the same runtime.
-Create the separate target, then apply these source-specific rules:
+既存アプリケーションで `solidStart()` を `solid()` に置き換えて、結果が同じランタイムになると想定しないでください。
+独立したターゲットを作成し、次のソース固有のルールを適用します:
 
-- Remove `@solidjs/start`, `solidStart()`, and the SolidStart environment type reference.
-- Remove the deployment plugin until the start-mode build works through `vite preview`.
-  Add a host integration only after the web-standard handler works.
-- Rewrite H3 middleware and `@solidjs/start/http` calls against `Request`, `Response`, and the Solid request event.
-- Replace `StartClient`, `StartServer`, `createHandler`, and `FileRoutes`.
-- Treat `serialization`, `devOverlay`, islands, route prerendering, and Nitro configuration as features to redesign.
-  Start mode has no matching application options for them.
-- Recheck all router code.
-  Released SolidStart router versions and Solid 2 router versions do not have the same contracts.
+- `@solidjs/start`、`solidStart()`、SolidStart 環境の型参照を取り除きます。
+- start モードのビルドが `vite preview` で動作するまで、デプロイプラグインを取り除きます。
+  Web 標準のハンドラーが動作してから、ホスト統合を追加します。
+- H3 ミドルウェアと `@solidjs/start/http` の呼び出しを、`Request`、`Response`、Solid のリクエストイベントに対して書き直します。
+- `StartClient`、`StartServer`、`createHandler`、`FileRoutes` を置き換えます。
+- `serialization`、`devOverlay`、アイランド、ルートプリレンダリング、Nitro 設定は再設計が必要な機能として扱います。
+  start モードにはこれらに対応するアプリケーションオプションがありません。
+- ルーターコードをすべて再確認します。
+  リリース済み SolidStart のルーターバージョンと Solid 2 のルーターバージョンは同じ契約ではありません。
 
-## Build the Solid 2 target
+## Solid 2 ターゲットを構築する
 
-The current source baselines are [`@solidjs/vite-plugin` at `519da14d`](https://github.com/solidjs/solid-vite-plugin/tree/519da14d20a51dd0a856eb9acfdae784a567bf10) and the [`solid-v2` templates at `cbbd8ba2`](https://github.com/solidjs/templates/tree/cbbd8ba26ed7f909455abe142de74e204b039974/solid-v2).
-Use the closest template as the target, or create an empty Vite project with the same dependency and script shape.
+現在のソースのベースラインは [`519da14d` の `@solidjs/vite-plugin`](https://github.com/solidjs/solid-vite-plugin/tree/519da14d20a51dd0a856eb9acfdae784a567bf10) と [`cbbd8ba2` の `solid-v2` テンプレート](https://github.com/solidjs/templates/tree/cbbd8ba26ed7f909455abe142de74e204b039974/solid-v2)です。
+最も近いテンプレートをターゲットとして使うか、同じ依存関係とスクリプト構成を持つ空の Vite プロジェクトを作成します。
 
-Select a target before moving application files:
+アプリケーションファイルを移す前にターゲットを選択します:
 
-- Use [`solid-v2/bare`](https://github.com/solidjs/templates/tree/cbbd8ba26ed7f909455abe142de74e204b039974/solid-v2/bare) for a client-rendered application without server functions.
-- Use [`solid-v2/basic`](https://github.com/solidjs/templates/tree/cbbd8ba26ed7f909455abe142de74e204b039974/solid-v2/basic) for Solid Router and file-system pages.
-- Use [`solid-v2/fullstack`](https://github.com/solidjs/templates/tree/cbbd8ba26ed7f909455abe142de74e204b039974/solid-v2/fullstack) for streaming server-side rendering (SSR), server functions, sessions, middleware, and API routes.
-- Use [`solid-v2/fullstack-tanstack`](https://github.com/solidjs/templates/tree/cbbd8ba26ed7f909455abe142de74e204b039974/solid-v2/fullstack-tanstack) when TanStack Router owns routing and TanStack Query owns the data cache.
+- サーバー関数のないクライアントレンダーアプリケーションには [`solid-v2/bare`](https://github.com/solidjs/templates/tree/cbbd8ba26ed7f909455abe142de74e204b039974/solid-v2/bare) を使います。
+- Solid Router とファイルシステムページには [`solid-v2/basic`](https://github.com/solidjs/templates/tree/cbbd8ba26ed7f909455abe142de74e204b039974/solid-v2/basic) を使います。
+- ストリーミングサーバーサイドレンダリング（SSR）、サーバー関数、セッション、ミドルウェア、API ルートには [`solid-v2/fullstack`](https://github.com/solidjs/templates/tree/cbbd8ba26ed7f909455abe142de74e204b039974/solid-v2/fullstack) を使います。
+- TanStack Router がルーティングを、TanStack Query がデータキャッシュを担当する場合は [`solid-v2/fullstack-tanstack`](https://github.com/solidjs/templates/tree/cbbd8ba26ed7f909455abe142de74e204b039974/solid-v2/fullstack-tanstack) を使います。
 
-The following checklist uses an SSR application with Solid Router.
-Omit `ssr: true` only when the source application is client-rendered.
-Omit `serverFunctions` and middleware when the application has no server behavior.
+以下のチェックリストは Solid Router を使う SSR アプリケーションを想定しています。
+ソースアプリケーションがクライアントレンダーの場合のみ `ssr: true` を省略します。
+アプリケーションにサーバー動作がない場合は `serverFunctions` とミドルウェアを省略します。
 
-### Create the package boundary
+### パッケージ境界を作る
 
-Start from the selected Solid 2 template's `package.json`.
-Keep the template's compatible versions of Solid 2, `@solidjs/web`, Vite, and `@solidjs/vite-plugin`.
-Do not carry `@solidjs/start`, Vinxi, Nitro, or an old Solid Router release into the target.
+選択した Solid 2 テンプレートの `package.json` から始めます。
+テンプレートが持つ Solid 2、`@solidjs/web`、Vite、`@solidjs/vite-plugin` の互換バージョンを維持します。
+`@solidjs/start`、Vinxi、Nitro、古い Solid Router リリースをターゲットへ持ち込まないでください。
 
-Use Vite scripts:
+Vite スクリプトを使います:
 
 ```json title="package.json"
 {
@@ -147,14 +147,14 @@ Use Vite scripts:
 }
 ```
 
-Copy application dependencies only after checking that each package supports Solid 2.
-Replace a package when it imports Solid 1 internals or requires SolidStart runtime modules.
+各パッケージが Solid 2 をサポートすることを確認してから、アプリケーションの依存関係をコピーします。
+Solid 1 の内部実装をインポートしている、または SolidStart のランタイムモジュールを必要とするパッケージは置き換えます。
 
-### Configure start mode
+### start モードを設定する
 
-Add `@solidjs/vite-plugin` start mode in `vite.config.ts`.
-The `start` option owns entries, development serving, preview serving, and production build wiring.
-The separate `ssr` boolean selects streaming SSR.
+`vite.config.ts` に `@solidjs/vite-plugin` の start モードを追加します。
+`start` オプションは、エントリ、開発サーブ、プレビューサーブ、本番ビルドの配線を所有します。
+独立した `ssr` ブーリアンがストリーミング SSR を選択します。
 
 ```ts title="vite.config.ts"
 import { fileRoutes } from "filesystem-routing/vite";
@@ -176,45 +176,45 @@ export default defineConfig({
 });
 ```
 
-`start: true` and `start: {}` enable the same mode.
-Use the object form only when the application needs `app`, `entryServer`, `entryClient`, `document`, `middleware`, `setup`, `env`, or `external`.
-The `extensions` entry makes the Solid transform accept route module IDs generated with query suffixes by `filesystem-routing`.
+`start: true` と `start: {}` は同じモードを有効にします。
+アプリケーションが `app`、`entryServer`、`entryClient`、`document`、`middleware`、`setup`、`env`、`external` を必要とする場合のみオブジェクト形式を使います。
+`extensions` エントリは、`filesystem-routing` がクエリ接尾辞付きで生成するルートモジュール ID を Solid の transform が受け付けるようにします。
 
-Map old configuration deliberately:
+旧設定は意図的にマッピングします:
 
-- Map source SSR to the top-level `ssr` boolean.
-- Map the app root to `start.app` only when the target does not use the `src/App.*` convention.
-- Map the route directory to `fileRoutes({ dir })`, not to `start`.
-- Map middleware to `start.middleware`.
-- Add Vite aliases under `resolve.alias`; start mode does not add the SolidStart `~` alias.
-- Move host build and serving ownership behind the deployment boundary.
-  Do not place Nitro options in `start`.
+- ソースの SSR はトップレベルの `ssr` ブーリアンにマッピングします。
+- アプリルートは、ターゲットが `src/App.*` 規約を使わない場合のみ `start.app` にマッピングします。
+- ルートディレクトリは `start` ではなく `fileRoutes({ dir })` にマッピングします。
+- ミドルウェアは `start.middleware` にマッピングします。
+- Vite エイリアスは `resolve.alias` 配下に追加します。start モードは SolidStart の `~` エイリアスを追加しません。
+- ホストのビルドとサーブの所有権はデプロイ境界の後ろに移します。
+  Nitro のオプションを `start` に置かないでください。
 
-See the [`StartOptions` reference](/reference/vite-plugin-solid/start) for the complete option contracts.
+完全なオプション契約は [`StartOptions` リファレンス](/reference/vite-plugin-solid/start)を参照してください。
 
-### Let the plugin generate entries
+### プラグインにエントリを生成させる
 
-Delete or move the SolidStart `src/entry-client.*` and `src/entry-server.*` files before the first target build.
-If those conventional files remain, start mode selects them instead of generating entries.
-SolidStart entry modules cannot serve as start-mode entries because their imports and exports use different contracts.
+最初のターゲットビルドの前に、SolidStart の `src/entry-client.*` と `src/entry-server.*` ファイルを削除するか移動します。
+これらの規約ファイルが残っていると、start モードはエントリを生成せずそれらを選択します。
+SolidStart のエントリモジュールはインポートとエクスポートの契約が異なるため、start モードのエントリとして使えません。
 
-Generated SSR entries:
+生成される SSR エントリは:
 
-- Render `<Document><App /></Document>` on the server.
-- Hydrate the same tree in the browser.
-- Inject the built client entry and styles.
+- サーバーで `<Document><App /></Document>` をレンダーします。
+- ブラウザーで同じツリーをハイドレートします。
+- ビルド済みのクライアントエントリとスタイルを注入します。
 
-The start-mode handler creates the request event used by middleware, page rendering, and server functions.
+start モードのハンドラーは、ミドルウェア、ページレンダリング、サーバー関数が使うリクエストイベントを作成します。
 
-Keep generated entries unless the old entries contain behavior that cannot move into `App`, `Document`, middleware, `start.setup`, or a server function.
-When authored entries are necessary, rewrite both files as a pair.
-The server entry must export `render(request?, context?)`, and the client entry must hydrate the same document tree.
+旧エントリに `App`、`Document`、ミドルウェア、`start.setup`、サーバー関数へ移せない動作が含まれない限り、生成されたエントリをそのまま使います。
+自作のエントリが必要な場合は、両方のファイルをペアとして書き直します。
+サーバーエントリは `render(request?, context?)` をエクスポートし、クライアントエントリは同じドキュメントツリーをハイドレートしなければなりません。
 
-### Split `App.tsx` and `Document.tsx`
+### `App.tsx` と `Document.tsx` に分割する
 
-Create `src/App.tsx` as the default-exporting application root.
-Move the router, providers, layouts, and application UI here.
-Do not put `<html>`, `<head>`, or `<body>` in `App`.
+デフォルトエクスポートするアプリケーションルートとして `src/App.tsx` を作成します。
+ルーター、プロバイダー、レイアウト、アプリケーション UI をここへ移します。
+`App` に `<html>`、`<head>`、`<body>` は置きません。
 
 ```tsx title="src/App.tsx"
 import { Router } from "./router";
@@ -224,9 +224,9 @@ export default function App() {
 }
 ```
 
-Create `src/Document.tsx` as the default-exporting HTML shell.
-Move language, meta, icon, and document-level tags here.
-Render `props.children` in the body and include `<HydrationScript />` for SSR.
+デフォルトエクスポートする HTML シェルとして `src/Document.tsx` を作成します。
+言語、meta、アイコン、ドキュメントレベルのタグをここへ移します。
+body 内で `props.children` をレンダーし、SSR では `<HydrationScript />` を含めます。
 
 ```tsx title="src/Document.tsx"
 import type { ParentProps } from "solid-js";
@@ -246,20 +246,20 @@ export default function Document(props: ParentProps) {
 }
 ```
 
-The generated entry injects its client script into the document head.
-Do not copy SolidStart `props.assets`, `props.scripts`, or an `#app` mount wrapper into this component.
+生成されるエントリはクライアントスクリプトをドキュメントの head に注入します。
+SolidStart の `props.assets`、`props.scripts`、`#app` マウントラッパーをこのコンポーネントへコピーしないでください。
 
-### Select and mount a router
+### ルーターを選択してマウントする
 
-Start mode does not select a router or discover pages.
-Choose the router before copying route files.
+start モードはルーターを選択せず、ページを検出もしません。
+ルートファイルをコピーする前にルーターを選択します。
 
-For Solid Router:
+Solid Router の場合:
 
-1. Add `filesystem-routing` and its Vite plugin when file-based routes are required.
-2. Convert `pageRoutes` with `fileRoutes()` from `@solidjs/router/fs`.
-3. Create one router and render it under `App`.
-4. Rewrite old `FileRoutes` imports and route configuration types.
+1. ファイルベースのルートが必要な場合、`filesystem-routing` とその Vite プラグインを追加します。
+2. `@solidjs/router/fs` の `fileRoutes()` で `pageRoutes` を変換します。
+3. ルーターを 1 つ作成し、`App` の配下でレンダーします。
+4. 旧 `FileRoutes` のインポートとルート設定の型を書き直します。
 
 ```ts title="src/router.ts"
 import { pageRoutes } from "virtual:file-routes";
@@ -271,48 +271,48 @@ export const Router = createRouter({
 });
 ```
 
-The default nested file convention preserves common paths such as:
+デフォルトのネストファイル規約は、次のような一般的なパスを維持します:
 
-- `routes/index.tsx` to `/`.
-- `routes/blog/index.tsx` to `/blog/`.
-- `routes/users/[id].tsx` to `/users/:id`.
-- `routes/docs/[...path].tsx` to `/docs/*path`.
+- `routes/index.tsx` は `/` に。
+- `routes/blog/index.tsx` は `/blog/` に。
+- `routes/users/[id].tsx` は `/users/:id` に。
+- `routes/docs/[...path].tsx` は `/docs/*path` に。
 
-Pairing `routes/users.tsx` with `routes/users/` creates a layout and nested pages.
-Route groups remain available, but compare every generated path before moving the next route.
-See the [file-system route conventions](/reference/filesystem-routing/conventions) and [Solid Router route conversion](/routing/solid-router/route-definitions#convert-a-file-system-manifest).
+`routes/users.tsx` と `routes/users/` を組み合わせると、レイアウトとネストされたページが作られます。
+ルートグループも利用できますが、次のルートを移す前に生成されたすべてのパスを比較してください。
+[ファイルシステムルートの規約](/reference/filesystem-routing/conventions)と [Solid Router のルート変換](/routing/solid-router/route-definitions#convert-a-file-system-manifest)を参照してください。
 
-For TanStack Router, start from the pinned `fullstack-tanstack` template.
-Its router plugin owns `src/routes` and generates `routeTree.gen.ts`.
-For SSR, `start.setup` creates and loads a request-specific router before the generated entry renders.
-Do not reuse SolidStart's router server or client entry protocol.
-See the [TanStack Router integration](/routing/tanstack).
+TanStack Router の場合は、ピン留めされた `fullstack-tanstack` テンプレートから始めます。
+そのルータープラグインは `src/routes` を所有し、`routeTree.gen.ts` を生成します。
+SSR では、`start.setup` が生成されたエントリのレンダー前にリクエスト固有のルーターを作成して読み込みます。
+SolidStart のルーターサーバーやクライアントエントリのプロトコルは再利用しません。
+[TanStack Router 統合](/routing/tanstack)を参照してください。
 
-### Move route modules incrementally
+### ルートモジュールを段階的に移す
 
-Move one layout and its child routes at a time.
-For each route:
+一度に 1 つのレイアウトとその子ルートを移します。
+各ルートについて:
 
-1. Confirm the generated path.
-2. Copy the component body.
-3. Rewrite router imports, route props, preload functions, search validation, and redirects.
-4. Replace SolidStart metadata or data APIs with APIs from the selected router and `@solidjs/meta`.
-5. Test direct SSR, client navigation, refresh, parameters, pending UI, errors, and `404` status.
+1. 生成されるパスを確認します。
+2. コンポーネント本体をコピーします。
+3. ルーターのインポート、ルート props、プリロード関数、search バリデーション、リダイレクトを書き直します。
+4. SolidStart のメタデータやデータ API を、選択したルーターと `@solidjs/meta` の API に置き換えます。
+5. 直接の SSR、クライアントナビゲーション、リフレッシュ、パラメーター、保留中 UI、エラー、`404` ステータスをテストします。
 
-Do not copy `FileRoutes` or assume a SolidStart route export has the same type in Solid Router 2 or TanStack Solid Router 1.
-The route component is usually reusable.
-The route registration and data boundary usually require changes.
+`FileRoutes` をコピーしたり、SolidStart のルートエクスポートが Solid Router 2 や TanStack Solid Router 1 で同じ型になると想定したりしないでください。
+ルートコンポーネントは通常再利用できます。
+ルートの登録とデータバウンダリは通常変更が必要です。
 
-The data boundary is where most SolidStart 1 route code changes.
-`createAsync(() => getUser(params.id))` becomes `createMemo(() => getUser(params.id))`, a route `load` that returned data becomes a `preload` that starts the query with `void` and lets the component read it, and `useSubmission(action).pending` splits into `aria-busy` on the form, an optimistic store, and `useSubmissions` for errors.
-[Migrate from Solid Router 1](/migration/from-solid-router#migrate-data-loading-and-caching) shows each before and after, and [Data loading and mutations](/routing/solid-router/data) teaches the resulting shape.
+SolidStart 1 のルートコードが最も変わるのはデータバウンダリです。
+`createAsync(() => getUser(params.id))` は `createMemo(() => getUser(params.id))` になり、データを返していたルートの `load` は `void` でクエリを開始しコンポーネントに読み取らせる `preload` になり、`useSubmission(action).pending` はフォームの `aria-busy`、楽観的ストア、エラー用の `useSubmissions` に分かれます。
+[Solid Router 1 からの移行](/migration/from-solid-router#migrate-data-loading-and-caching)にそれぞれの変更前後が示され、[データ読み込みとミューテーション](/routing/solid-router/data)で結果の形を学べます。
 
-### Move server functions
+### サーバー関数を移す
 
-Enable `serverFunctions: true` before moving any `"use server"` functions.
-The default endpoint remains `/_server`.
+`"use server"` 関数を移す前に `serverFunctions: true` を有効にします。
+デフォルトのエンドポイントは `/_server` のままです。
 
-Function-level and module-level directives are supported:
+関数レベルとモジュールレベルのディレクティブがサポートされています:
 
 ```ts title="src/lib/users.ts"
 export async function findUser(id: string) {
@@ -321,34 +321,34 @@ export async function findUser(id: string) {
 }
 ```
 
-Copy the implementation only after applying these checks:
+次のチェックを適用してから実装をコピーします:
 
-- Keep database and credential imports in server-only modules.
-- Replace SolidStart HTTP helpers with web `Request`, `Response`, and `getRequestEvent()` from `@solidjs/web`.
-- Validate arguments and authorization inside every callable function.
-- Retest values that depended on SolidStart serialization.
-- Replace old `query` and `action` wrappers with the selected router's Solid 2 APIs.
-- Replace response helpers with the current `@solidjs/web` or router contract.
+- データベースと認証情報のインポートはサーバー専用モジュールに保持します。
+- SolidStart の HTTP ヘルパーを、Web の `Request`、`Response`、そして `@solidjs/web` の `getRequestEvent()` に置き換えます。
+- 呼び出し可能なすべての関数内で引数と認可をバリデートします。
+- SolidStart のシリアライズに依存していた値を再テストします。
+- 旧 `query` と `action` ラッパーを、選択したルーターの Solid 2 API に置き換えます。
+- レスポンスヘルパーを現在の `@solidjs/web` またはルーターの契約に置き換えます。
 
-Apply these server-function API replacements:
+次のサーバー関数 API の置き換えを適用します:
 
-- Import `GET` from `@solidjs/web/server-functions` instead of `@solidjs/start`.
-- Replace a `.GET` proxy property with `GET(fn)`.
-- Replace `.withOptions(init)` session policy with `configureServerFunctionsClient({ prepareRequest })`.
-- Build custom codec plugins with `createPlugin` from `@solidjs/web/serialization`, then pass matching `codec` options to the client and server runtime.
-- Remove manually attached single-flight headers.
-  The router opts in by registering its flight-data consumer.
+- `GET` は `@solidjs/start` ではなく `@solidjs/web/server-functions` からインポートします。
+- `.GET` プロキシプロパティを `GET(fn)` に置き換えます。
+- `.withOptions(init)` のセッションポリシーを `configureServerFunctionsClient({ prepareRequest })` に置き換えます。
+- カスタムコーデックプラグインを `@solidjs/web/serialization` の `createPlugin` で構築し、一致する `codec` オプションをクライアントとサーバーのランタイムに渡します。
+- 手動で付けたシングルフライトヘッダーを取り除きます。
+  ルーターはフライトデータのコンシューマーを登録することでオプトインします。
 
-Server functions are transport primitives in the plugin.
-Router caching, submissions, revalidation, and single-flight behavior require the matching router integration.
-See [Server functions](/building-apps/server-functions).
+サーバー関数はプラグイン内のトランスポートプリミティブです。
+ルーターのキャッシュ、サブミッション、再検証、シングルフライトの動作には、対応するルーター統合が必要です。
+[サーバー関数](/building-apps/server-functions)を参照してください。
 
-### Rebuild environment handling
+### 環境の扱いを再構築する
 
-Vite public variables that use the configured `VITE_` prefix remain available through `import.meta.env`.
-Keep secrets in server-only modules.
+設定された `VITE_` 接頭辞を使う Vite の公開変数は、`import.meta.env` を通じて引き続き利用できます。
+シークレットはサーバー専用モジュールに保持します。
 
-Start mode also supports a typed Standard Schema file at `env.ts` or `env.js` in the project root:
+start モードは、プロジェクトルートの `env.ts` または `env.js` に置く型付き Standard Schema ファイルもサポートします:
 
 ::::tab-group[validation-library]
 
@@ -407,40 +407,40 @@ export default {
 
 ::::
 
-Import validated values from `virtual:env/server` in server-only modules and from `virtual:env/client` in shared or client code.
-The plugin generates `solid-env.d.ts` next to the schema.
-Do not copy a SolidStart `@solidjs/start/env` type reference.
+検証済みの値は、サーバー専用モジュールでは `virtual:env/server` から、共有コードやクライアントコードでは `virtual:env/client` からインポートします。
+プラグインはスキーマの隣に `solid-env.d.ts` を生成します。
+SolidStart の `@solidjs/start/env` 型参照はコピーしないでください。
 
-The server module reads and validates server values from `process.env` when the server starts.
-Client values are validated and embedded in the browser bundle.
-Copy `.env.example`, but do not copy local secrets into source control.
-See [Environment](/building-apps/environment).
+サーバーモジュールは、サーバー起動時に `process.env` からサーバーの値を読み取り検証します。
+クライアントの値は検証され、ブラウザーバンドルに埋め込まれます。
+`.env.example` はコピーしますが、ローカルのシークレットをソース管理へコミットしないでください。
+[環境](/building-apps/environment)を参照してください。
 
-### Rewrite sessions and authentication
+### セッションと認証を書き直す
 
-Start mode supplies a request event, cookies on web headers, and response metadata.
-It does not supply SolidStart session helpers or an authentication system.
+start モードは、リクエストイベント、Web ヘッダー上の cookie、レスポンスメタデータを提供します。
+SolidStart のセッションヘルパーや認証システムは提供しません。
 
-Rewrite calls to `useSession`, `getSession`, `setCookie`, and related SolidStart, Vinxi, or H3 helpers.
-The official fullstack template composes `@remix-run/cookie` with:
+`useSession`、`getSession`、`setCookie`、関連する SolidStart、Vinxi、H3 のヘルパーへの呼び出しを書き直します。
+公式の fullstack テンプレートは `@remix-run/cookie` を次のものと組み合わせています:
 
-- `getRequestEvent()` from `@solidjs/web`.
-- The incoming `event.request.headers`.
-- Outgoing `Set-Cookie` values appended to `event.response.headers`.
-- A secret read from `virtual:env/server`.
+- `@solidjs/web` の `getRequestEvent()`。
+- 受信した `event.request.headers`。
+- `event.response.headers` に追加する送信側の `Set-Cookie` 値。
+- `virtual:env/server` から読み取るシークレット。
 
-That template cookie is signed and tamper-evident, but it is not encrypted.
-Do not put secrets in its payload.
-Use a storage-backed session library when the application requires revocation, larger data, or server-owned session state.
+このテンプレートの cookie は署名済みで改ざん検知できますが、暗号化はされていません。
+ペイロードにシークレットを入れないでください。
+失効、より大きなデータ、サーバー所有のセッション状態が必要な場合は、ストレージに裏付けられたセッションライブラリを使います。
 
-Keep authorization inside every protected server function and API handler.
-Middleware can populate `event.locals`, but hiding UI or checking a page request does not authorize another server entry point.
-See [Sessions and auth](/building-apps/sessions-and-auth).
+認可は保護されたすべてのサーバー関数と API ハンドラー内に保持します。
+ミドルウェアは `event.locals` に値を設定できますが、UI を隠すことやページリクエストのチェックは、他のサーバーエントリポイントを認可しません。
+[セッションと認証](/building-apps/sessions-and-auth)を参照してください。
 
-### Rewrite middleware and API routes
+### ミドルウェアと API ルートを書き直す
 
-Configure a server-only module through `start.middleware`.
-Its default export is one fetch-style middleware function or an array:
+`start.middleware` を通じてサーバー専用モジュールを設定します。
+そのデフォルトエクスポートは、1 つの fetch スタイルミドルウェア関数またはその配列です:
 
 ```ts
 type Middleware = (
@@ -449,13 +449,13 @@ type Middleware = (
 ) => Response | Promise<Response>;
 ```
 
-Code before `await next()` runs in declaration order.
-Code after it runs while the chain unwinds.
-Return a `Response` without calling `next()` to stop dispatch.
-Use `getRequestEvent()` inside the chain to read or write request-scoped locals and response metadata.
+`await next()` の前のコードは宣言順に実行されます。
+その後のコードはチェーンが巻き戻る間に実行されます。
+`next()` を呼ばずに `Response` を返すとディスパッチを停止します。
+チェーン内では `getRequestEvent()` を使って、リクエストスコープの locals とレスポンスメタデータを読み書きします。
 
-API route discovery is a separate `filesystem-routing` integration.
-Enable `fileRoutes({ httpMethods: true })`, then place its dispatcher in the middleware chain:
+API ルートの検出は独立した `filesystem-routing` 統合です。
+`fileRoutes({ httpMethods: true })` を有効にし、そのディスパッチャーをミドルウェアチェーンに置きます:
 
 ```ts title="src/middleware.ts"
 import { createAPIHandler } from "filesystem-routing/api";
@@ -464,7 +464,7 @@ import routes from "virtual:file-routes";
 export default [createAPIHandler(routes)];
 ```
 
-An API module exports uppercase HTTP methods:
+API モジュールは大文字の HTTP メソッドをエクスポートします:
 
 ```ts title="src/routes/api/users.ts"
 import type { APIHandler } from "filesystem-routing/api";
@@ -477,21 +477,21 @@ export const GET: APIHandler = ({ request, params }) => {
 };
 ```
 
-A method-only module is an API route without a page.
-A module can also default-export a page and export methods.
-The handler result and fallback rules are not identical to SolidStart, so retest `HEAD`, missing methods, `undefined` results, route parameters, cookies, and errors.
-See [Middleware and API routes](/building-apps/middleware-and-api-routes).
+メソッドのみのモジュールはページを持たない API ルートです。
+モジュールはページをデフォルトエクスポートし、かつメソッドをエクスポートすることもできます。
+ハンドラーの結果とフォールバックのルールは SolidStart と同一ではないため、`HEAD`、存在しないメソッド、`undefined` の結果、ルートパラメーター、cookie、エラーを再テストしてください。
+[ミドルウェアと API ルート](/building-apps/middleware-and-api-routes)を参照してください。
 
-### Rebuild the deployment boundary
+### デプロイ境界を再構築する
 
-Run `vite build` before adding provider-specific integration.
-With `start` and `ssr: true`, the build writes:
+プロバイダー固有の統合を追加する前に `vite build` を実行します。
+`start` と `ssr: true` を指定すると、ビルドは次を書き出します:
 
-- Browser assets to `dist/client`.
-- A server module to `dist/server/server.js`.
+- ブラウザーアセットを `dist/client` へ。
+- サーバーモジュールを `dist/server/server.js` へ。
 
-The server module exports `handleRequest`.
-Its contract is a web `Request` in and a promised web `Response` out:
+サーバーモジュールは `handleRequest` をエクスポートします。
+その契約は、Web の `Request` を受け取り、Promise 化された Web の `Response` を返すものです:
 
 ```ts
 import { handleRequest } from "./dist/server/server.js";
@@ -499,49 +499,49 @@ import { handleRequest } from "./dist/server/server.js";
 const response = await handleRequest(request);
 ```
 
-Serve `dist/client` before passing unmatched requests to the handler.
-Preserve the request URL, method, headers, and body.
-Preserve the response status, headers, separate `Set-Cookie` values, and streamed body.
+マッチしなかったリクエストをハンドラーへ渡す前に `dist/client` をサーブします。
+リクエストの URL、メソッド、ヘッダー、ボディを保持します。
+レスポンスのステータス、ヘッダー、個別の `Set-Cookie` 値、ストリームされたボディを保持します。
 
-Do not deploy the old Nitro output or reuse a SolidStart provider preset.
-For Node, set `start: { node: true }`; the build then writes `dist/server/node.js`, a server that implements this boundary and runs with `node dist/server/node.js`.
-Other hosts need an adapter or Vite integration that implements this exact asset and handler boundary.
+旧 Nitro の出力をデプロイしたり、SolidStart のプロバイダープリセットを再利用したりしないでください。
+Node の場合は `start: { node: true }` を設定します。ビルドは `dist/server/node.js` を書き出し、これはこの境界を実装するサーバーで `node dist/server/node.js` で実行できます。
+他のホストでは、この正確なアセットとハンドラーの境界を実装するアダプターまたは Vite 統合が必要です。
 
-Set `start.external: true` only when a host integration owns both server build wiring and HTTP serving.
-The plugin continues to provide generated entries, the client manifest, and its virtual handler.
-See [Deployment](/building-apps/deployment).
+`start.external: true` は、ホスト統合がサーバービルドの配線と HTTP サーブの両方を所有する場合のみ設定します。
+プラグインは引き続き、生成されるエントリ、クライアントマニフェスト、仮想ハンドラーを提供します。
+[デプロイ](/building-apps/deployment)を参照してください。
 
-### Resolve removed framework features
+### 削除されたフレームワーク機能を解決する
 
-Start mode does not replace every SolidStart feature.
-Resolve each old dependency explicitly:
+start モードは SolidStart のすべての機能を置き換えるわけではありません。
+旧来の依存関係をそれぞれ明示的に解決します:
 
-- Replace the `~` alias with a Vite alias or relative imports.
-- Replace `appRoot` and route directory behavior with plugin paths and `fileRoutes({ dir })`.
-- Replace the SolidStart development toolbar with Vite and browser tooling.
-- Replace framework route prerendering with a host or build integration.
-- Replace Nitro tasks, storage, WebSockets, and deployment presets with runtime-specific services.
-- Replace islands and other SolidStart rendering modes with a supported Solid 2 application design.
-- Retest values that depended on SolidStart's `serialization` option against the Solid 2 server-function codec.
-- Replace `@solidjs/start/http` convenience helpers with web APIs, `@solidjs/web`, or focused libraries.
-- Replace framework API route dispatch with `filesystem-routing` middleware or another server integration.
+- `~` エイリアスを Vite エイリアスまたは相対インポートに置き換えます。
+- `appRoot` とルートディレクトリの動作を、プラグインのパスと `fileRoutes({ dir })` に置き換えます。
+- SolidStart の開発ツールバーを Vite とブラウザーのツールに置き換えます。
+- フレームワークのルートプリレンダリングをホストまたはビルド統合に置き換えます。
+- Nitro のタスク、ストレージ、WebSocket、デプロイプリセットをランタイム固有のサービスに置き換えます。
+- アイランドやその他の SolidStart レンダリングモードを、サポートされる Solid 2 のアプリケーション設計に置き換えます。
+- SolidStart の `serialization` オプションに依存していた値を、Solid 2 のサーバー関数コーデックに対して再テストします。
+- `@solidjs/start/http` の便利ヘルパーを、Web API、`@solidjs/web`、または専用ライブラリに置き換えます。
+- フレームワークの API ルートディスパッチを、`filesystem-routing` ミドルウェアまたは別のサーバー統合に置き換えます。
 
-Keep an item unresolved when its target host has no verified Solid 2 adapter.
-Do not hide a host-specific gap behind `start.external`.
+ターゲットホストに検証済みの Solid 2 アダプターがない項目は、未解決のままにします。
+ホスト固有のギャップを `start.external` の後ろに隠さないでください。
 
-## Verify each migration slice
+## 各移行スライスを検証する
 
-Run these checks after every route group or server feature moves:
+ルートグループやサーバー機能を移すたびに、次のチェックを実行します:
 
-1. Open the route directly in a new browser request.
-2. Navigate to and from the route in the browser.
-3. Compare the rendered document head and status code.
-4. Exercise server-function success, validation failure, authorization failure, and redirects.
-5. Exercise API methods, middleware order, cookies, and session expiry.
-6. Run `vite build` and `vite preview`.
-7. Run the production adapter with streamed responses and multiple `Set-Cookie` headers.
-8. Check the client output for server-only modules and secret values.
-9. Remove the migrated source feature only after the target passes the same behavioral tests.
+1. 新しいブラウザーリクエストでそのルートを直接開きます。
+2. ブラウザーでそのルートへ遷移し、そこから離れます。
+3. レンダーされたドキュメントの head とステータスコードを比較します。
+4. サーバー関数の成功、バリデーション失敗、認可失敗、リダイレクトを確認します。
+5. API メソッド、ミドルウェア順序、cookie、セッション期限切れを確認します。
+6. `vite build` と `vite preview` を実行します。
+7. ストリームされたレスポンスと複数の `Set-Cookie` ヘッダーで本番アダプターを実行します。
+8. クライアント出力にサーバー専用モジュールやシークレット値が含まれていないか確認します。
+9. ターゲットが同じ動作テストを通過してから、移行元のソース機能を削除します。
 
-Finish by testing the actual deployment host.
-Preview verifies the generated artifacts, but it does not verify provider routing, environment injection, asset rules, streaming, or cookie forwarding.
+最後に実際のデプロイホストでテストします。
+プレビューは生成された成果物を検証しますが、プロバイダーのルーティング、環境変数の注入、アセットルール、ストリーミング、cookie 転送は検証しません。
