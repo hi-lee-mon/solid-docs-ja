@@ -1,7 +1,7 @@
 ---
 layout: home
 hero:
-  name: Solid 2.0 非公式日本語ドキュメント
+  name: Solid 2.0 非公式ドキュメント
   text: v2.solidjs.com・公式ブログ・チュートリアルの非公式日本語翻訳
   tagline: すべてのドキュメントを日本語で学習できます
   actions:
@@ -14,6 +14,9 @@ hero:
     - theme: alt
       text: チュートリアル
       link: /tutorial/
+    - theme: alt
+      text: 公式サイト（原文）↗
+      link: https://v2.solidjs.com/
 features:
   - title: Solid 2.0 ドキュメント
     details: v2.solidjs.com の全ページを翻訳。入門・概念・アプリ構築・ルーティング・移行・リファレンス。
@@ -24,4 +27,7 @@ features:
   - title: 用語集
     details: Solid 用語の英日対訳表。翻訳の基準となった用語集。
     link: /docs/glossary
+  - title: 公式サイト（原文）
+    details: v2.solidjs.com — 正確な最新情報は原文を参照してください。
+    link: https://v2.solidjs.com/
 ---

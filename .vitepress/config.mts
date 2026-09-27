@@ -266,12 +266,14 @@ export default defineConfig({
     ],
   },
   themeConfig: {
+    siteTitle: 'Solid 2.0 非公式ドキュメント',
     nav: [
       { text: 'ドキュメント', link: '/docs/' },
       { text: 'ブログ', link: '/blog/' },
       { text: 'チュートリアル', link: '/tutorial/' },
       { text: '旧版', link: '/legacy/' },
       { text: '用語集', link: '/docs/glossary' },
+      { text: '公式サイト', link: 'https://v2.solidjs.com/' },
     ],
     sidebar: {
       '/docs/': docsSidebar(),
