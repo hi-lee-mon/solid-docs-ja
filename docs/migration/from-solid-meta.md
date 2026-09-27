@@ -1,23 +1,23 @@
 ---
-title: From Solid Meta 0.x
+title: Solid Meta 0.x から
 version: "1.0"
-description: "Migrate your application from @solidjs/meta 0.x to 1.0."
+description: "アプリケーションを @solidjs/meta 0.x から 1.0 へ移行します。"
 ---
 
-Solid Meta 1.0 was rebuilt as a thin layer over Solid 2.0's built-in head registry.
-Most components keep their names and props, but the provider, the server plumbing, and the deduplication semantics changed.
+Solid Meta 1.0 は、Solid 2.0 の組み込み head レジストリの上の薄いレイヤーとして再構築されました。
+ほとんどのコンポーネントは名前と props を維持していますが、プロバイダー、サーバーの配管処理、重複排除のセマンティクスは変わりました。
 
-::::caution[Solid 2 is required]
-Solid Meta 1.0 requires Solid 2 and cannot upgrade a Solid 1 application by itself.
-Migrate the application runtime with [From Solid 1](/migration/from-solid-1) before installing Solid Meta 1.0.
+::::caution[Solid 2 が必要です]
+Solid Meta 1.0 は Solid 2 を必要とし、単体では Solid 1 アプリケーションをアップグレードできません。
+Solid Meta 1.0 をインストールする前に、[Solid 1 から](/migration/from-solid-1)でアプリケーションのランタイムを移行してください。
 ::::
 
-## Migration steps
+## 移行手順
 
-### Delete `<MetaProvider>`
+### `<MetaProvider>` を削除する
 
-The head registry is ambient — the provider and `MetaContext` no longer exist.
-Remove the wrapper:
+head レジストリはアンビエントになりました。プロバイダーと `MetaContext` はもう存在しません。
+ラッパーを削除してください:
 
 ```tsx del={1,5,7}
 import { MetaProvider } from "@solidjs/meta";
@@ -31,18 +31,18 @@ export default function App() {
 }
 ```
 
-### Delete server plumbing
+### サーバーの配管処理を削除する
 
-The 0.x server flow — passing a `tags={[]}` array into `MetaProvider` and splicing `renderTags(tags)` into your template — is gone.
-Rendering the document with `renderToString` / `renderToStream` splices the winning tags into `<head>` automatically, and tags registered under [`Loading` boundaries](/concepts/boundaries) stream to the client as patches.
-If you assemble the HTML document yourself, use the `onHead` render option to receive the head markup instead.
+0.x のサーバーフロー、`MetaProvider` に `tags={[]}` の配列を渡し、`renderTags(tags)` をテンプレートに差し込む流れはなくなりました。
+`renderToString` / `renderToStream` でドキュメントをレンダーすると、重複排除で残ったタグが自動的に `<head>` に差し込まれ、[`Loading` バウンダリ](/concepts/boundaries)の下で登録されたタグはパッチとしてクライアントにストリーミングされます。
+HTML ドキュメントを自分で組み立てる場合は、代わりに `onHead` レンダーオプションで head マークアップを受け取ってください。
 
-### Review duplicate-tag semantics
+### タグ重複のセマンティクスを確認する
 
-0.x kept multiple `<Meta>` tags with the same `name` if their other attributes differed.
-1.x dedupes by `name`/`property`/`http-equiv` (qualified by `media`) with last-wins.
+0.x では、他の属性が異なれば同じ `name` の `<Meta>` タグを複数保持できました。
+1.x では `name`/`property`/`http-equiv`（`media` による修飾付き）で重複排除され、後のものが勝ちます。
 
-For deliberate sets — multiple `og:image`s that should coexist — wrap them in [`<Head>`](/reference/solid-meta/head):
+複数の `og:image` を共存させたいような意図的なセットでは、それらを [`<Head>`](/reference/solid-meta/head) で囲んでください:
 
 ```tsx
 <Head>
@@ -51,12 +51,12 @@ For deliberate sets — multiple `og:image`s that should coexist — wrap them i
 </Head>
 ```
 
-To fork an identity that would otherwise collide, give each tag a distinct `key`.
+衝突してしまう同一性を分岐させたい場合は、各タグに個別の `key` を付けてください。
 
-### Update `useHead` calls
+### `useHead` の呼び出しを更新する
 
-`useHead` is no longer exported from `@solidjs/meta` — the primitive belongs to Solid 2.0 itself.
-Import it from `@solidjs/web`; it takes `HeadTag` descriptors (`{ tag, props, key? }`) — a single tag, an array (a group), or a function (a reactive group):
+`useHead` は `@solidjs/meta` からエクスポートされなくなりました。このプリミティブは Solid 2.0 本体に属しています。
+`@solidjs/web` からインポートしてください。`HeadTag` 記述子（`{ tag, props, key? }`）を受け取ります。単一のタグ、配列（グループ）、または関数（リアクティブなグループ）です:
 
 ```tsx
 import { useHead } from "@solidjs/web";
@@ -64,16 +64,16 @@ import { useHead } from "@solidjs/web";
 useHead({ tag: "meta", props: { name: "description", content: () => desc() } });
 ```
 
-### Removed features
+### 削除された機能
 
-- **`escape` prop** — everything is escaped now; text is applied via `textContent`, so markup injection isn't possible.
-- **`ref` and event handlers on head tags** — head tags are data, not managed elements. Query the DOM directly for the rare case that needs it.
-- **Client-dynamic `<Base>` / `<Meta charset>`** — these are rendered into the server shell only, and are ignored (with a dev warning) on the client. A base or charset that changes after the document loaded is incoherent.
-- **`noscript`** — excluded from the core tag union: author it statically in your document shell.
+- **`escape` prop** — すべてがエスケープされるようになりました。テキストは `textContent` 経由で適用されるため、マークアップのインジェクションはできません。
+- **head タグ上の `ref` とイベントハンドラー** — head タグはデータであり、管理される要素ではありません。必要な稀なケースでは DOM を直接クエリしてください。
+- **クライアントで動的な `<Base>` / `<Meta charset>`** — これらはサーバーのシェルにのみレンダーされ、クライアントでは（開発時の警告とともに）無視されます。ドキュメントのロード後に変わる base や charset は矛盾しています。
+- **`noscript`** — コアのタグユニオンから除外されました。ドキュメントシェルに静的に記述してください。
 
-### New capabilities
+### 新しい機能
 
-- [`<Script>`](/reference/solid-meta/script) is new — JSON-LD and other head scripts no longer need the `useHead` escape hatch.
-- [`<Head>`](/reference/solid-meta/head) groups child tags into one replacement set with reactive membership.
-- Icons (`rel="icon"` / `rel="apple-touch-icon"`) are replaceable: swapping the `href` replaces the favicon rather than accumulating, and unmounting restores the previous one.
-- `theme-color` variants with different `media` queries coexist.
+- [`<Script>`](/reference/solid-meta/script) は新機能です。JSON-LD やその他の head スクリプトに `useHead` の抜け道は不要になりました。
+- [`<Head>`](/reference/solid-meta/head) は子タグを、リアクティブなメンバーシップを持つ 1 つの置換セットにグループ化します。
+- アイコン（`rel="icon"` / `rel="apple-touch-icon"`）は置換可能です。`href` を差し替えると、蓄積されるのではなくファビコンが置き換わり、アンマウントすると以前のものに戻ります。
+- 異なる `media` クエリを持つ `theme-color` のバリアントは共存します。
