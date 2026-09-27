@@ -1,15 +1,15 @@
 ---
-title: "Route definitions"
+title: "ルート定義"
 version: "2.0"
-description: "Write the route objects Solid Router matches against: path patterns with required, optional, and wildcard segments, typed parameters, match filters, metadata, lazy subtrees, and the file-system manifest."
+description: "Solid Router がマッチングに使うルートオブジェクトの書き方：必須・オプション・ワイルドカードのセグメントを持つパスパターン、型付きパラメーター、マッチフィルター、メタデータ、遅延サブツリー、ファイルシステムマニフェスト。"
 ---
 
-The URL `/products/mug` has a product id in it.
-The product page needs that id as `props.params.id`, the link that points at it needs `paths.products("mug")` to be checked by the type checker, and neither should accept `/products/` with nothing after it.
-All of that comes from one object in the route tree.
+URL `/products/mug` には商品 ID が含まれています。
+商品ページはその ID を `props.params.id` として必要とし、そこを指すリンクは `paths.products("mug")` が型チェッカーに検査される必要があり、どちらも `/products/` の後ろに何も続かないものを受け付けてはいけません。
+これらのすべてが、ルートツリー内の1つのオブジェクトから生まれます。
 
-A route definition is a plain object: a path pattern, the component to render, and optionally a `preload`, `children`, match filters, and metadata.
-Most apps need only [Match path patterns](#match-path-patterns) and [Type a route at its definition](#type-a-route-at-its-definition); the sections after those cover filters, metadata, lazy subtrees, and the file-system manifest for when a project grows into them.
+ルート定義はプレーンなオブジェクトです。パスパターン、レンダリングするコンポーネント、そしてオプションで `preload`・`children`・マッチフィルター・メタデータを持ちます。
+ほとんどのアプリに必要なのは [パスパターンをマッチさせる](#match-path-patterns) と [定義時点でルートに型を付ける](#type-a-route-at-its-definition) だけです。その後のセクションでは、プロジェクトがそれらを必要とする規模に育ったときのために、フィルター・メタデータ・遅延サブツリー・ファイルシステムマニフェストを扱います。
 
 ```tsx
 import { defineRoutes } from "@solidjs/router";
@@ -21,9 +21,9 @@ export const routes = defineRoutes([
 ]);
 ```
 
-The route array is also where the types come from.
-`paths.products` exists and `paths.prodcuts` does not because TypeScript kept the literal `"/products/:id"`.
-An inline array passed to `createRouter` keeps its literals on its own; an array assigned to a variable first widens to `string`:
+ルート配列は型の出どころでもあります。
+TypeScript がリテラル `"/products/:id"` を保持しているため、`paths.products` は存在し、`paths.prodcuts` は存在しません。
+`createRouter` にインラインで渡した配列はリテラルをそのまま保ちますが、一度変数に代入した配列は `string` に広がります。
 
 ```tsx
 // Avoid: the literal paths widen to string, so paths accepts anything
@@ -41,13 +41,13 @@ const routes = defineRoutes([
 export const Router = createRouter({ routes });
 ```
 
-With the `Avoid` version, `paths.prodcuts` compiles, and the typo is a dead link found at runtime.
-With `defineRoutes`, it is a type error at the call site.
+`Avoid` 版では `paths.prodcuts` がコンパイルを通り、タイプミスは実行時に見つかるデッドリンクになります。
+`defineRoutes` では、呼び出し側で型エラーになります。
 
-## Type a route at its definition
+## 定義時点でルートに型を付ける
 
-Inside a route's own `component` and `preload`, `params` is an open record by default: every key is `string | undefined`, even `:id`, which the pattern guarantees.
-Wrap the route in `defineRoute` and both are typed from the route's own `path`:
+ルート自身の `component` と `preload` の中では、`params` はデフォルトで開いたレコードです。パターンが保証する `:id` でさえも、すべてのキーが `string | undefined` です。
+ルートを `defineRoute` でラップすると、そのルート自身の `path` から両方に型が付きます。
 
 ```tsx
 import { defineRoute } from "@solidjs/router";
@@ -61,14 +61,14 @@ const productRoute = defineRoute({
 });
 ```
 
-Required parameters such as `:id` are typed as `string`.
-Optional parameters such as `:tab?` are typed as `string | undefined`.
-Parameters inherited from a parent remain accessible as `string | undefined`.
+`:id` のような必須パラメーターは `string` 型になります。
+`:tab?` のようなオプションパラメーターは `string | undefined` 型になります。
+親から継承したパラメーターは `string | undefined` として引き続きアクセスできます。
 
-Whatever `preload` returns is typed as the component's `props.data`.
-It is captured once when the route matches, so for async data the pattern on the [Data loading and mutations](/routing/solid-router/data) page is to start the query in `preload` with `void` and read it through a memo in the component, where it stays reactive to `params`.
+`preload` が返すものは何でも、コンポーネントの `props.data` の型になります。
+ルートがマッチした時点で一度だけキャプチャされるため、非同期データでは [データロードとミューテーション](/routing/solid-router/data) ページのパターンに従います。つまり `preload` で `void` を付けてクエリを開始し、コンポーネント内でメモを通して読み取ることで、`params` に対してリアクティブなままにします。
 
-For a component declared in another module, annotate it with a path witness:
+別モジュールで宣言されたコンポーネントには、パスウィットネスでアノテーションを付けます。
 
 ```tsx
 import type { RouteComponent } from "@solidjs/router";
@@ -79,15 +79,15 @@ const Product: RouteComponent<typeof Router.paths.products> = (props) => (
 );
 ```
 
-`RouteProps<typeof Router.paths.products>` provides the corresponding props-object type.
+対応する props オブジェクトの型は `RouteProps<typeof Router.paths.products>` が提供します。
 
-## Match path patterns
+## パスパターンをマッチさせる
 
-Choose a path token for each parameter:
+パラメーターごとにパストークンを選びます。
 
-- Use `:name` for a required segment.
-- Use `:name?` for an optional segment.
-- Use `*name` for the remaining path.
+- 必須セグメントには `:name` を使います。
+- オプションセグメントには `:name?` を使います。
+- 残りのパスには `*name` を使います。
 
 ```tsx
 const routes = defineRoutes([
@@ -97,27 +97,27 @@ const routes = defineRoutes([
 ]);
 ```
 
-`/products/mug` matches the first route with `params.id === "mug"`; `/products` does not match it.
-`/docs` and `/docs/install` both match the second.
-`/files/2024/invoices/march.pdf` matches the third with `params.path === "2024/invoices/march.pdf"`.
+`/products/mug` は `params.id === "mug"` で1つ目のルートにマッチします。`/products` はマッチしません。
+`/docs` と `/docs/install` はどちらも2つ目にマッチします。
+`/files/2024/invoices/march.pdf` は `params.path === "2024/invoices/march.pdf"` で3つ目にマッチします。
 
-:::caution[A wildcard ends the pattern]
-`*name` must be the final segment; everything after the `*` is read as the parameter name, so a pattern such as `/files/*path/preview` does not match what it looks like it matches.
-Put the fixed segments before the wildcard, or use a child route for the variant.
+:::caution[ワイルドカードはパターンを終わらせる]
+`*name` は最後のセグメントでなければなりません。`*` の後のすべてがパラメーター名として読まれるため、`/files/*path/preview` のようなパターンは見た目が示すものにはマッチしません。
+固定セグメントはワイルドカードの前に置くか、そのバリアントには子ルートを使ってください。
 :::
 
-A route can also match any path in an array:
+ルートは配列内のどのパスにもマッチさせることができます。
 
 ```tsx
 { path: ["/sign-in", "/register"], component: AccountAccess }
 ```
 
-The same route definition stays mounted when navigation moves between its matching paths, so a form in `AccountAccess` keeps its state when the user switches from `/sign-in` to `/register`.
+マッチするパス間を移動しても同じルート定義はマウントされたままなので、ユーザーが `/sign-in` から `/register` に切り替えても `AccountAccess` 内のフォームは状態を保ちます。
 
-## Filter parameters
+## パラメーターをフィルターする
 
-`matchFilters` rejects parameter values that do not satisfy the configured filter.
-Use an array, regular expression, or predicate as the filter:
+`matchFilters` は、設定したフィルターを満たさないパラメーター値を拒否します。
+フィルターには配列・正規表現・述語が使えます。
 
 ```tsx
 import { defineRoute, int } from "@solidjs/router";
@@ -129,20 +129,20 @@ const orderRoute = defineRoute({
 });
 ```
 
-`/account/orders/42` matches; `/account/orders/latest` falls through to the next route that matches, usually the `*404` catch-all.
+`/account/orders/42` はマッチし、`/account/orders/latest` は次にマッチするルート（通常は `*404` のキャッチオール）へフォールスルーします。
 
-The built-in `int` filter accepts integer strings at runtime.
-It also changes the corresponding `Router.paths` argument to `number`, so `paths.account.orders(42)` type-checks and `paths.account.orders("latest")` does not.
+組み込みの `int` フィルターは実行時に整数文字列を受け付けます。
+また、対応する `Router.paths` の引数を `number` に変えるため、`paths.account.orders(42)` は型チェックを通り、`paths.account.orders("latest")` は通りません。
 
-:::note[Filters change the type of the link, not the param]
-Route components still receive URL parameters as strings.
-`params.id` is `"42"` inside `Order` even with `int` on the route, because that is what a URL holds; convert where you read it.
+:::note[フィルターが変えるのはリンクの型であり、param の型ではない]
+ルートコンポーネントが受け取る URL パラメーターは引き続き文字列です。
+ルートに `int` を付けても `Order` 内の `params.id` は `"42"` のままです。URL が保持するのは文字列だからです。読み取る側で変換してください。
 :::
 
-## Add route metadata
+## ルートメタデータを追加する
 
-The `info` property stores application metadata on a route.
-Read matched metadata with `useRouteMatches()` or with `Router.match(url)`:
+`info` プロパティはアプリケーションのメタデータをルートに保存します。
+マッチしたメタデータは `useRouteMatches()` または `Router.match(url)` で読み取ります。
 
 ```tsx
 const routes = defineRoutes([
@@ -154,7 +154,7 @@ const routes = defineRoutes([
 ]);
 ```
 
-Augment `RouteInfo` to check shared metadata keys throughout the application:
+アプリケーション全体で共有するメタデータのキーをチェックするには、`RouteInfo` を拡張（augment）します。
 
 ```ts
 declare module "@solidjs/router" {
@@ -164,10 +164,10 @@ declare module "@solidjs/router" {
 }
 ```
 
-## Load a route subtree lazily
+## ルートサブツリーを遅延ロードする
 
-A `children` thunk can load an entire nested route table.
-The module may export the route array as `default` or as `routes`:
+`children` のサンクで、ネストしたルートテーブル全体をロードできます。
+そのモジュールはルート配列を `default` として、または `routes` としてエクスポートできます。
 
 ```tsx
 const Router = createRouter({
@@ -192,16 +192,16 @@ export default defineRoutes([
 ]);
 ```
 
-Visit `/` and the admin route table is not downloaded.
-Visit `/admin/products/mug`, or hover a link to it, and the thunk runs, the router adds the resolved subtree to the compiled route tree, and the match completes.
-TypeScript infers `paths.admin.products("mug")` through the import's promise type when the imported route array retains literal types.
+`/` を訪れたとき、admin のルートテーブルはダウンロードされません。
+`/admin/products/mug` を訪れるか、そこへのリンクをホバーすると、サンクが実行され、ルーターは解決済みのサブツリーをコンパイル済みルートツリーに追加し、マッチが完了します。
+インポートされたルート配列がリテラル型を保持していれば、TypeScript はインポートの Promise 型を通じて `paths.admin.products("mug")` を推論します。
 
-Use a deterministic thunk such as `() => import("./admin/routes")`.
-The resolved subtree is cached and shared, so it does not switch based on later runtime state.
+`() => import("./admin/routes")` のような決定論的なサンクを使ってください。
+解決済みのサブツリーはキャッシュされ共有されるため、後の実行時状態によって切り替わることはありません。
 
-## Convert a file-system manifest
+## ファイルシステムマニフェストを変換する
 
-Enable the `filesystem-routing` Vite plugin to generate `virtual:file-routes`:
+`filesystem-routing` Vite プラグインを有効にすると、`virtual:file-routes` が生成されます。
 
 ```ts
 // vite.config.ts
@@ -214,7 +214,7 @@ export default defineConfig({
 });
 ```
 
-The `@solidjs/router/fs` adapter converts the generated `pageRoutes` export into Solid Router route definitions:
+`@solidjs/router/fs` アダプターは、生成された `pageRoutes` エクスポートを Solid Router のルート定義に変換します。
 
 ```tsx
 import { pageRoutes } from "virtual:file-routes";
@@ -226,8 +226,8 @@ export const Router = createRouter({
 });
 ```
 
-Each route module exports its component as `default`.
-An optional named `route` export can supply `preload`, `matchFilters`, `search`, and `info`:
+各ルートモジュールはコンポーネントを `default` としてエクスポートします。
+オプションの名前付き `route` エクスポートで `preload`・`matchFilters`・`search`・`info` を提供できます。
 
 ```tsx
 // src/routes/products/[id].tsx
@@ -247,29 +247,29 @@ export default function Product(props: RouteProps<typeof route>) {
 }
 ```
 
-Inside a route file the pattern lives in the filename, so there is no `paths` node to type against.
-The string passed to [`defineFileRoute`](/reference/solid-router/filesystem) stands in for it: it types `preload`'s params, validates `matchFilters`, and lets the config double as the component's `RouteProps` witness.
-The manifest path remains the runtime source of truth; if the file moves, update the string with it.
+ルートファイル内ではパターンはファイル名に存在するため、型付けの対象となる `paths` ノードがありません。
+[`defineFileRoute`](/reference/solid-router/filesystem) に渡す文字列がその代わりを務め、`preload` の params に型を付け、`matchFilters` を検証し、その設定をコンポーネントの `RouteProps` ウィットネスとして兼用させます。
+実行時の真実の源（source of truth）はマニフェストのパスのままなので、ファイルを移動したらその文字列も一緒に更新してください。
 
-:::deep-dive[What the adapter does with the manifest]
-When the manifest has generated literal types, route paths, filters, and search schemas continue into `Router.paths`, so `paths.products("mug")` is typed the same way it would be from a hand-written array.
-Code-split manifest components become Solid `lazy` components.
-An eagerly delivered component from a manifest built with `codeSplitting: false` is passed through without a `lazy` wrapper.
-The `route` export is read from the module the manifest points at; a hand-written route tree does not read it, which is why the preload sits on the route object in `src/router.ts` on the [introduction](/routing/solid-router#load-data-for-a-page) page.
+:::deep-dive[アダプターがマニフェストをどう処理するか]
+マニフェストが生成したリテラル型を持つ場合、ルートパス・フィルター・検索スキーマは `Router.paths` に引き継がれるため、`paths.products("mug")` には手書きの配列の場合と同じように型が付きます。
+コード分割されたマニフェストのコンポーネントは Solid の `lazy` コンポーネントになります。
+`codeSplitting: false` でビルドされたマニフェストから即時配信されるコンポーネントは、`lazy` ラッパーなしでそのまま渡されます。
+`route` エクスポートはマニフェストが指すモジュールから読み取られます。手書きのルートツリーはこれを読みません。そのため、[イントロダクション](/routing/solid-router#load-data-for-a-page) ページでは preload が `src/router.ts` のルートオブジェクトに置かれています。
 :::
 
-## Recap
+## まとめ
 
-- Keep path literals with `defineRoutes` or an inline array, so `paths` is typed from the route tree.
-- Use `:name` for a required segment, `:name?` for an optional one, and `*name` as the final segment for the rest of the path.
-- Wrap a route in `defineRoute` to type `params` in its own `component` and `preload`.
-- Start async work in `preload` with `void` and read it through a memo; `props.data` is captured once.
-- Use `matchFilters` to reject values at match time; params stay strings, and `int` types the `paths` argument as a number.
-- Put a large section's routes in their own module and load them with a `children` thunk.
-- In a route file, put `preload` and filters in the `route` export with `defineFileRoute`.
+- `defineRoutes` またはインライン配列でパスリテラルを保ち、`paths` がルートツリーから型付けされるようにします。
+- 必須セグメントには `:name`、オプションには `:name?`、残りのパスの最終セグメントには `*name` を使います。
+- ルートを `defineRoute` でラップすると、自身の `component` と `preload` 内の `params` に型が付きます。
+- 非同期処理は `preload` で `void` 付きで開始し、メモ経由で読み取ります。`props.data` は一度だけキャプチャされます。
+- `matchFilters` でマッチ時に値を拒否します。params は文字列のままで、`int` は `paths` の引数を number 型にします。
+- 大きなセクションのルートは専用のモジュールに置き、`children` サンクでロードします。
+- ルートファイルでは、`preload` とフィルターを `defineFileRoute` を使った `route` エクスポートに置きます。
 
-## Next steps
+## 次のステップ
 
-- [Nested routes and layouts](/routing/solid-router/nested-routes): how a route with `children` renders a layout around the matched page, and what stays mounted.
-- [Navigation and typed paths](/routing/solid-router/navigation): the typed `paths` these definitions produce, and search parameters with a schema.
-- [Data loading and mutations](/routing/solid-router/data): what to put in `preload`, and how the component reads it.
+- [ネストルートとレイアウト](/routing/solid-router/nested-routes): `children` を持つルートが、マッチしたページの周りにレイアウトをレンダリングする方法と、マウントされたままになるもの。
+- [ナビゲーションと型付きパス](/routing/solid-router/navigation): これらの定義が生み出す型付き `paths` と、スキーマ付きの検索パラメーター。
+- [データロードとミューテーション](/routing/solid-router/data): `preload` に何を置くか、そしてコンポーネントがそれをどう読み取るか。

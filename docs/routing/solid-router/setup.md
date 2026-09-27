@@ -1,25 +1,25 @@
 ---
-title: "Setup"
+title: "セットアップ"
 version: "2.0"
-description: "Add Solid Router to a project that does not have it, mount one router at the application root, and set the options for a base path, hash history, or preloading."
+description: "Solid Router のないプロジェクトに追加し、アプリケーションルートにルーターを1つマウントして、ベースパス・ハッシュ履歴・プリロードのオプションを設定します。"
 ---
 
-A project created from the `bare` shape has an `<a href="/products/mug">` in its header, and clicking it reloads the whole document: the cart signal resets, the scroll position is lost, and the page flashes white.
-The router is what turns that click into a client-side navigation that keeps the app alive.
+`bare` シェイプから作成したプロジェクトは、ヘッダーに `<a href="/products/mug">` を持ち、クリックするとドキュメント全体がリロードされます。カートのシグナルはリセットされ、スクロール位置は失われ、ページが一瞬白くなります。
+そのクリックを、アプリを維持したままのクライアントサイドナビゲーションに変えるのがルーターです。
 
-The `basic` and `fullstack` templates from `npm create solid` already install and mount Solid Router, so if you started from one of them, skip to [Configure the router](#configure-the-router) when you need to change an option.
-The rest of this page adds the router to a project that does not have it, such as the `bare` shape or an existing Vite app.
+`npm create solid` の `basic`・`fullstack` テンプレートは Solid Router のインストールとマウントが済んでいます。そのため、これらから始めた場合は、オプションを変更したくなったら [ルーターを設定する](#configure-the-router) に進んでください。
+このページの残りでは、`bare` シェイプや既存の Vite アプリのように、ルーターのないプロジェクトにルーターを追加します。
 
-## Install and create the router
+## インストールしてルーターを作成する
 
-Install the package:
+パッケージをインストールします。
 
 ```sh
 pnpm add @solidjs/router@next
 ```
 
-Define the route tree and create the router at module scope.
-This is the same `src/router.ts` as the [introduction](/routing/solid-router#one-app-three-pages):
+ルートツリーを定義し、モジュールスコープでルーターを作成します。
+これは [イントロダクション](/routing/solid-router#one-app-three-pages) と同じ `src/router.ts` です。
 
 ```tsx
 // src/router.ts
@@ -37,11 +37,11 @@ export const Router = createRouter({
 export const { paths } = Router;
 ```
 
-[`createRouter`](/reference/solid-router/router-factory#createrouter) returns both the provider component and the application-wide static routing instance.
-The instance members `routes`, `config`, `paths`, and `match()` describe the route tree, not one visitor's current location.
-Session-specific state comes from routing primitives inside the provider.
+[`createRouter`](/reference/solid-router/router-factory#createrouter) はプロバイダーコンポーネントと、アプリケーション全体で共有される静的なルーティングインスタンスの両方を返します。
+インスタンスのメンバーである `routes`・`config`・`paths`・`match()` は、個々の訪問者の現在位置ではなくルートツリーを表します。
+セッション固有の状態は、プロバイダー内のルーティングプリミティブから取得します。
 
-## Mount it at the application root
+## アプリケーションルートにマウントする
 
 ```tsx
 // src/App.tsx
@@ -67,16 +67,16 @@ export default function App() {
 }
 ```
 
-Click **Featured** now and the URL changes without a reload: the header keeps its DOM and any state it holds.
+ここで **Featured** をクリックすると、リロードなしで URL が変わります。ヘッダーは自身の DOM と保持している状態を維持します。
 
-The function child is the app shell.
-It is never part of a route match, so it stays mounted for the life of the app while matched route components render through `props.children`.
-The `Loading` boundary gives the first page load a fallback while a lazy page or its data is pending; later navigations keep the current page on screen without it.
-If the router config has a top-level `preload`, its return value is available as `props.data`.
-In start mode, the generated client and server entries render `src/App.tsx`, so this is the whole mount.
+関数 children はアプリのシェルです。
+ルートマッチには一切含まれないため、アプリの存続中はずっとマウントされたままになり、マッチしたルートコンポーネントは `props.children` を通してレンダリングされます。
+`Loading` バウンダリは、遅延ページやそのデータが保留中の間、最初のページロードにフォールバックを表示します。後続のナビゲーションでは、フォールバックを挟まず現在のページが画面に残ります。
+ルーター設定にトップレベルの `preload` がある場合、その戻り値は `props.data` として利用できます。
+start モードでは、生成されるクライアント・サーバーのエントリーが `src/App.tsx` をレンダリングするため、これでマウントは完了です。
 
-:::pitfall[A second router inside the first]
-A section that wants its own routes sometimes gets its own `<Router>`:
+:::pitfall[最初のルーターの中にもう1つのルーター]
+独自のルートを持ちたいセクションに、独自の `<Router>` が置かれることがあります。
 
 ```tsx
 // Avoid: a nested router fights the outer one for the URL
@@ -97,13 +97,13 @@ export const Router = createRouter({
 });
 ```
 
-Run the `Avoid` version and development warns `Mounting a router inside another router is not supported. Compose route trees in one createRouter config instead.`, and link clicks can show stale content because two routers each try to own the navigation.
-[Lazy route subtrees](/routing/solid-router/route-definitions#load-a-route-subtree-lazily) are how a section keeps its own route file.
+`Avoid` 版を実行すると、開発環境は `Mounting a router inside another router is not supported. Compose route trees in one createRouter config instead.` と警告します。2つのルーターがそれぞれナビゲーションを支配しようとするため、リンククリックで古いコンテンツが表示されることがあります。
+[遅延ルートサブツリー](/routing/solid-router/route-definitions#load-a-route-subtree-lazily) が、セクションが独自のルートファイルを持つための方法です。
 :::
 
-### Mount without start mode
+### start モードなしでマウントする
 
-For a transform-only Vite application, render the same application component from a client entry:
+トランスフォームのみの Vite アプリケーションでは、クライアントエントリーから同じアプリケーションコンポーネントをレンダリングします。
 
 ```tsx
 // src/index.tsx
@@ -113,24 +113,24 @@ import App from "./App";
 render(() => <App />, document.getElementById("app")!);
 ```
 
-## Configure the router
+## ルーターを設定する
 
-Most apps pass only `routes`.
-The other options exist for a specific situation each:
+ほとんどのアプリは `routes` だけを渡します。
+残りのオプションは、それぞれ特定の状況のために用意されています。
 
-| Option              | Reach for it when                                                                                                                 |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `base`              | The app is served under a prefix such as `/app`; matching and `paths` both include it.                                            |
-| `history`           | The app is not a normal page: an Electron shell or `file://` needs `hashHistory()`, tests need `memoryHistory()`.                 |
-| `preload`           | The root layout needs data of its own; it runs once per mount or server request and reaches the function child as `props.data`.   |
-| `preloadLinks`      | Hover and focus preloading costs more than it saves; set `false` and use `preload="false"` per link for finer control.            |
-| `explicitLinks`     | Some anchors inside the router must stay as full page loads; only anchors with a `link` attribute are then handled by the router. |
-| `scrollRestoration` | The app manages scroll itself; set `false` to stop the router restoring the position on back and forward (on by default).         |
-| `transformUrl`      | Incoming pathnames need rewriting before matching, for example to strip a locale prefix.                                          |
-| `singleFlight`      | The router's server-function data consumer should be off; it is `true` by default.                                                |
-| `actionBase`        | Server actions are served from a prefix other than the default `/_server`.                                                        |
+| オプション           | 使う場面                                                                                                                                           |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `base`              | アプリが `/app` のようなプレフィックス配下で配信される場合。マッチングと `paths` の両方がこれを含みます。                                             |
+| `history`           | アプリが通常のページでない場合。Electron シェルや `file://` には `hashHistory()`、テストには `memoryHistory()` が必要です。                             |
+| `preload`           | ルートレイアウトが独自のデータを必要とする場合。マウント時またはサーバーリクエストごとに1回実行され、関数 children に `props.data` として届きます。        |
+| `preloadLinks`      | ホバー・フォーカスによるプリロードが得られるものよりコストがかかる場合。`false` に設定し、リンクごとの `preload="false"` でより細かく制御します。          |
+| `explicitLinks`     | ルーター内の一部のアンカーをフルページロードのままにしたい場合。`link` 属性を持つアンカーだけがルーターに処理されます。                                  |
+| `scrollRestoration` | アプリがスクロールを自前で管理する場合。`false` にすると、戻る・進むでルーターが位置を復元しなくなります（デフォルトはオン）。                              |
+| `transformUrl`      | マッチングの前に入力パス名を書き換える必要がある場合。例えばロケールプレフィックスを取り除くときです。                                                  |
+| `singleFlight`      | ルーターのサーバー関数データコンシューマーをオフにする場合。デフォルトは `true` です。                                                                |
+| `actionBase`        | サーバーアクションがデフォルトの `/_server` 以外のプレフィックスから配信される場合。                                                                  |
 
-The router uses browser history by default on the client and the current request URL on the server, so `history` is rarely set in a web app:
+ルーターはクライアントではデフォルトでブラウザー履歴を使い、サーバーでは現在のリクエスト URL を使うため、Web アプリで `history` が設定されることはほとんどありません。
 
 ```tsx
 import { createRouter, hashHistory } from "@solidjs/router";
@@ -142,36 +142,36 @@ export const Router = createRouter({
 });
 ```
 
-:::advanced[Options that pair with the server]
-`singleFlight` and `actionBase` only matter in a `fullstack` project.
-The first turns off the consumer that seeds the `query` cache from a mutation response; the second must match the server-function endpoint if it was moved off `/_server`.
-[Server rendering and hydration](/routing/solid-router/server-rendering#one-round-trip-for-a-mutation) explains both.
+:::advanced[サーバーと対になるオプション]
+`singleFlight` と `actionBase` が意味を持つのは `fullstack` プロジェクトだけです。
+前者はミューテーションレスポンスから `query` キャッシュへ値をシードするコンシューマーをオフにし、後者はサーバー関数エンドポイントが `/_server` から移された場合にそれと一致させる必要があります。
+両方とも [サーバーレンダリングとハイドレーション](/routing/solid-router/server-rendering#one-round-trip-for-a-mutation) で説明しています。
 :::
 
-## Common problems
+## よくある問題
 
 ### `'use' router primitives can be only used inside a Route`
 
-A component that calls `useNavigate`, `useLocation`, or another router primitive is rendered outside the `<Router>`, for example next to it in `App` or in `Document.tsx`.
-Move the component into the function child, where every router primitive works, or pass the value it needs down as a prop.
+`useNavigate`・`useLocation` などのルータープリミティブを呼ぶコンポーネントが `<Router>` の外側でレンダリングされています。例えば `App` 内のルーターの隣や、`Document.tsx` の中です。
+すべてのルータープリミティブが使える関数 children の中にコンポーネントを移すか、必要な値を prop として渡してください。
 
-### Clicking a link still reloads the page
+### リンクをクリックしてもページがリロードされる
 
-The anchor is outside the `<Router>`, has a `target` or `rel="external"`, or points to another origin.
-With `explicitLinks: true`, it is missing the `link` attribute.
-[Navigation and typed paths](/routing/solid-router/navigation#links-are-anchors) lists every attribute that makes the router leave an anchor alone.
+そのアンカーは `<Router>` の外側にあるか、`target` や `rel="external"` を持つか、別のオリジンを指しています。
+`explicitLinks: true` の場合は、`link` 属性が欠けています。
+ルーターがアンカーをそのまま素通りさせる属性の一覧は [ナビゲーションと型付きパス](/routing/solid-router/navigation#links-are-anchors) にあります。
 
-## Recap
+## まとめ
 
-- Create the router once at module scope and export `Router` and `paths` from `src/router.ts`.
-- Mount `<Router>` once, at the application root; the function child is the root layout.
-- Wrap `props.children` in a `Loading` boundary so the first load has a fallback.
-- Do not nest a `<Router>` inside another; compose one route tree, with lazy subtrees for sections.
-- Pass only `routes` unless you have a specific reason for `base`, `history`, or a preloading option.
-- Keep `actionBase` in step with the server-function endpoint if that endpoint moves.
+- ルーターはモジュールスコープで一度だけ作成し、`Router` と `paths` を `src/router.ts` からエクスポートします。
+- `<Router>` はアプリケーションルートに一度だけマウントします。関数 children がルートレイアウトです。
+- `props.children` を `Loading` バウンダリで囲み、最初のロードにフォールバックを用意します。
+- `<Router>` を別の `<Router>` の中にネストしないでください。1つのルートツリーにまとめ、セクションには遅延サブツリーを使います。
+- `base`・`history`・プリロード系オプションに具体的な理由がない限り、`routes` だけを渡します。
+- サーバー関数エンドポイントが `/_server` から移ったら、`actionBase` を合わせます。
 
-## Next steps
+## 次のステップ
 
-- [Route definitions](/routing/solid-router/route-definitions): path patterns, parameter filters, metadata, and lazy subtrees for the `routes` array you passed in.
-- [Nested routes and layouts](/routing/solid-router/nested-routes): layouts that stay mounted while the page inside them changes.
-- [Navigation and typed paths](/routing/solid-router/navigation): links, typed `paths`, and search parameters.
+- [ルート定義](/routing/solid-router/route-definitions): 渡した `routes` 配列のパスパターン・パラメーターフィルター・メタデータ・遅延サブツリー。
+- [ネストルートとレイアウト](/routing/solid-router/nested-routes): 内側のページが変わってもマウントされたままになるレイアウト。
+- [ナビゲーションと型付きパス](/routing/solid-router/navigation): リンク、型付き `paths`、検索パラメーター。
