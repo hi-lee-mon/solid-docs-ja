@@ -1,7 +1,7 @@
 ---
 title: "ref"
-category: "JSX properties"
-use_cases: "accessing dom elements, composing element directives"
+category: "JSX プロパティ"
+use_cases: "DOM 要素へのアクセス、要素ディレクティブの合成"
 tags:
   - "ref"
   - "jsx"
@@ -10,28 +10,28 @@ tags:
   - "reference"
   - "v2"
 version: "2.0"
-description: "Receives a DOM element or composes several callbacks that apply behavior to it."
+description: "DOM 要素を受け取るか、要素に振る舞いを適用する複数のコールバックを合成します。"
 source_repo: "ryansolid/dom-expressions"
 source_ref: "next"
 source_path: "packages/runtime/src/client.js"
 ---
 
-`ref` provides access to a DOM element after Solid creates it.
-It accepts an assignable variable, a callback, or a nested array of callbacks.
+`ref` は、Solid が作成した DOM 要素へのアクセスを提供します。
+代入可能な変数、コールバック、またはコールバックのネストした配列を受け取ります。
 
-## Type
+## 型
 
 ```ts
 type RefCallback<T> = (element: T) => void;
 type Ref<T> = T | RefCallback<T> | undefined | Ref<T>[];
 ```
 
-`ref` is available on intrinsic DOM elements.
-It does not require an import.
+`ref` は組み込み DOM 要素で利用できます。
+インポートは不要です。
 
-## Assign an element
+## 要素を代入する
 
-Pass an assignable variable to store the element:
+代入可能な変数を渡して要素を格納します:
 
 ```tsx
 function SearchField() {
@@ -48,15 +48,15 @@ function SearchField() {
 }
 ```
 
-A callback receives the same element:
+コールバックも同じ要素を受け取ります:
 
 ```tsx
 <input ref={(element) => (input = element)} />
 ```
 
-## Compose callbacks
+## コールバックを合成する
 
-Pass an array when several independent behaviors need the element:
+複数の独立した振る舞いが要素を必要とする場合は配列を渡します:
 
 ```tsx
 function autofocus(element: HTMLInputElement) {
@@ -68,14 +68,14 @@ function autofocus(element: HTMLInputElement) {
 />;
 ```
 
-Solid recursively flattens nested ref arrays and invokes each callback in order.
-This composes element access, reusable directives, and third-party integrations without a wrapper callback.
+Solid はネストした ref 配列を再帰的に平坦化し、各コールバックを順に呼び出します。
+これにより、ラッパーコールバックなしで要素アクセス・再利用可能なディレクティブ・サードパーティ統合を合成できます。
 
-## Ownership and cleanup
+## オーナーシップとクリーンアップ
 
-Ref callbacks run untracked and without a reactive owner.
-Their return values are ignored.
-Do not create owned reactive primitives or return cleanup functions from a ref callback.
+ref コールバックは追跡されず、リアクティブオーナーなしで実行されます。
+その戻り値は無視されます。
+ref コールバック内でオーナーを持つリアクティブプリミティブを作成したり、クリーンアップ関数を返したりしないでください。
 
-When a reusable directive needs setup and cleanup, create those primitives in an owned factory and return only the callback that receives the element.
-See [Refs and directives](/concepts/components-and-jsx#refs-and-directives) for the complete pattern, and [Integrate non-Solid code](/guides/integrate-non-solid-code) for a chart, a map, and a web component driven through refs.
+再利用可能なディレクティブがセットアップとクリーンアップを必要とする場合は、オーナーを持つファクトリー内でそれらのプリミティブを作成し、要素を受け取るコールバックだけを返してください。
+完全なパターンは [ref とディレクティブ](/concepts/components-and-jsx#refs-and-directives) を、ref を通じて駆動するチャート・マップ・Web コンポーネントの例は [非 Solid コードの統合](/guides/integrate-non-solid-code) を参照してください。

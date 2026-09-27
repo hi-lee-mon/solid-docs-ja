@@ -1,7 +1,7 @@
 ---
 title: "textContent"
-category: "JSX properties"
-use_cases: "rendering plain text, optimized text updates"
+category: "JSX プロパティ"
+use_cases: "プレーンテキストのレンダー、最適化されたテキスト更新"
 tags:
   - "textcontent"
   - "jsx"
@@ -10,25 +10,25 @@ tags:
   - "reference"
   - "v2"
 version: "2.0"
-description: "Writes plain text as an element's complete contents through an optimized text-only path."
+description: "最適化されたテキスト専用パスを通じて、プレーンテキストを要素の完全な内容として書き込みます。"
 source_repo: "ryansolid/dom-expressions"
 source_ref: "next"
 source_path: "packages/compiler/src/dom/attrs.rs"
 ---
 
-`textContent` writes a string or number as an element's complete contents.
-The browser treats the value as text and does not parse it as HTML.
+`textContent` は文字列または数値を要素の完全な内容として書き込みます。
+ブラウザはその値をテキストとして扱い、HTML としてパースしません。
 
-## Type
+## 型
 
 ```ts
 textContent?: string | number;
 ```
 
-`textContent` is available on intrinsic DOM elements.
-It does not require an import.
+`textContent` は組み込み DOM 要素で利用できます。
+インポートは不要です。
 
-## Usage
+## 使い方
 
 ```tsx
 function Status(props: { message: string }) {
@@ -36,7 +36,7 @@ function Status(props: { message: string }) {
 }
 ```
 
-A reactive expression updates the existing text node:
+リアクティブな式は既存のテキストノードを更新します:
 
 ```tsx
 import { createSignal } from "solid-js";
@@ -46,27 +46,27 @@ const [count, setCount] = createSignal(0);
 return <output textContent={`Count: ${count()}`} />;
 ```
 
-The compiler knows that the element contains only text.
-For a dynamic value, it creates a text node and updates that node's character data directly instead of using the general child insertion path.
-Use this property when the element's full contents are text and the explicit text-only path is useful.
-Ordinary JSX children remain clearer for most text:
+コンパイラは、その要素がテキストのみを含むことを認識しています。
+動的な値に対しては、一般的な子要素挿入パスではなく、テキストノードを作成してそのノードの文字データを直接更新します。
+要素の内容全体がテキストであり、明示的なテキスト専用パスが有用な場合にこのプロパティを使います。
+ほとんどのテキストでは、通常の JSX children のほうが明確です:
 
 ```tsx
 <output>Count: {count()}</output>
 ```
 
-## Escaping
+## エスケープ
 
-Markup in the value renders as text:
+値に含まれるマークアップはテキストとしてレンダーされます:
 
 ```tsx
 <p textContent={"<strong>Not bold</strong>"} />
 ```
 
-Server rendering also escapes the value.
-Use [`innerHTML`](/reference/solid-web/jsx-properties/inner-html) only when the value contains trusted or sanitized markup that the browser should parse.
+サーバーレンダリングでも値はエスケープされます。
+値に、ブラウザがパースすべき信頼されたまたはサニタイズ済みのマークアップが含まれる場合のみ [`innerHTML`](/reference/solid-web/jsx-properties/inner-html) を使ってください。
 
-## Children
+## 子要素
 
-Do not combine `textContent` with JSX children.
-Both define the element's complete contents, so their updates can conflict.
+`textContent` と JSX children を組み合わせないでください。
+どちらも要素の完全な内容を定義するため、互いの更新が衝突する可能性があります。

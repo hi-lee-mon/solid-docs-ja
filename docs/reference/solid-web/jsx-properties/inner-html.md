@@ -1,7 +1,7 @@
 ---
 title: "innerHTML"
-category: "JSX properties"
-use_cases: "rendering trusted html, rendering sanitized markup"
+category: "JSX プロパティ"
+use_cases: "信頼された HTML のレンダー、サニタイズ済みマークアップのレンダー"
 tags:
   - "innerhtml"
   - "jsx"
@@ -10,25 +10,25 @@ tags:
   - "reference"
   - "v2"
 version: "2.0"
-description: "Parses an HTML string as an element's complete contents."
+description: "HTML 文字列を要素の完全な内容としてパースします。"
 source_repo: "ryansolid/dom-expressions"
 source_ref: "next"
 source_path: "packages/compiler/src/ssr/transform.rs"
 ---
 
-`innerHTML` parses an HTML string as an element's complete contents.
-Use it for trusted markup or for untrusted markup that has passed through an HTML sanitizer.
+`innerHTML` は HTML 文字列を要素の完全な内容としてパースします。
+信頼されたマークアップ、または HTML サニタイザーを通過した信頼できないマークアップに使用します。
 
-## Type
+## 型
 
 ```ts
 innerHTML?: string;
 ```
 
-`innerHTML` is available on intrinsic DOM elements.
-It does not require an import.
+`innerHTML` は組み込み DOM 要素で利用できます。
+インポートは不要です。
 
-## Usage
+## 使い方
 
 ```tsx
 import { createMemo } from "solid-js";
@@ -38,25 +38,25 @@ const html = createMemo(() => sanitize(renderMarkdown(props.source)));
 return <article innerHTML={html()} />;
 ```
 
-A reactive expression replaces the element's parsed contents when its value changes.
-Nodes created from the previous value do not keep their identity or state.
+リアクティブな式は、値が変わったときに要素のパース済み内容を置き換えます。
+以前の値から作成されたノードは、同一性や状態を保持しません。
 
-## Security
+## セキュリティ
 
-Solid does not escape or sanitize an `innerHTML` value.
-During server rendering, Solid also writes the value into the response as raw HTML.
+Solid は `innerHTML` の値をエスケープもサニタイズもしません。
+サーバーレンダリング中、Solid はその値を生の HTML としてレスポンスに書き込みます。
 
-Do not pass user-controlled content directly:
+ユーザーが制御するコンテンツを直接渡さないでください:
 
 ```tsx
 // Avoid: an attacker can inject markup or executable content.
 <article innerHTML={comment.body} />
 ```
 
-Use a sanitizer that matches the markup and URL policies of your application before passing untrusted content to `innerHTML`.
-Use [`textContent`](/reference/solid-web/jsx-properties/text-content) when the value should render as plain text.
+信頼できないコンテンツを `innerHTML` に渡す前に、アプリケーションのマークアップおよび URL ポリシーに合ったサニタイザーを使用してください。
+値をプレーンテキストとしてレンダーすべき場合は [`textContent`](/reference/solid-web/jsx-properties/text-content) を使います。
 
-## Children
+## 子要素
 
-Do not combine `innerHTML` with JSX children.
-Both define the element's complete contents, so their updates can replace each other.
+`innerHTML` と JSX children を組み合わせないでください。
+どちらも要素の完全な内容を定義するため、互いの更新が置き換え合うことがあります。

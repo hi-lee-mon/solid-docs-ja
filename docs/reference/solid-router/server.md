@@ -1,13 +1,13 @@
 ---
-title: "Server integration"
+title: "サーバー統合"
 version: "2.0"
-description: "Reference for the Solid Router server-function flight-data collector."
+description: "Solid Router のサーバー関数フライトデータコレクターのリファレンス。"
 source_repo: "solidjs/solid-router"
 source_ref: "next"
 source_path: "src/server.ts"
 ---
 
-## Import
+## インポート
 
 ```ts
 import {
@@ -16,12 +16,12 @@ import {
 } from "@solidjs/router/server";
 ```
 
-Keep this server-only entry out of client bundles.
-The server entry imports the request-event storage integration.
+このサーバー専用エントリーはクライアントバンドルに含めないでください。
+サーバーエントリーはリクエストイベントストレージ統合をインポートします。
 
 ## `createFlightDataCollector`
 
-Creates the `collectFlightData` hook for the Solid server-function handler.
+Solid のサーバー関数ハンドラー向けの `collectFlightData` フックを作成します。
 
 ```ts
 function createFlightDataCollector(
@@ -29,13 +29,13 @@ function createFlightDataCollector(
 ): CollectFlightDataHook;
 ```
 
-Pass a `createRouter` instance:
+`createRouter` インスタンスを渡します:
 
 ```ts
 const collectFlightData = createFlightDataCollector(Router);
 ```
 
-Or pass an options object:
+またはオプションオブジェクトを渡します:
 
 ```ts
 interface FlightDataCollectorOptions {
@@ -48,11 +48,11 @@ interface FlightDataCollectorOptions {
 }
 ```
 
-`routes` can be built lazily by a thunk.
-`rootPreload` corresponds to the router config's `preload`.
-`base` corresponds to the router config's `base`.
+`routes` はサンクによって遅延構築できます。
+`rootPreload` はルーター設定の `preload` に対応します。
+`base` はルーター設定の `base` に対応します。
 
-## Register with server functions
+## サーバー関数への登録
 
 ```ts
 import { configureServerFunctionsServer } from "@solidjs/web/server-functions/server";
@@ -62,33 +62,33 @@ configureServerFunctionsServer({
 });
 ```
 
-The collector:
+コレクターは次の処理を行います:
 
-1. Reads the target and revalidation keys from the server-function outcome.
-2. Resolves lazy route subtrees matched by the previous or target URL.
-3. Runs the root preload with `intent: "initial"`.
-4. Runs target route preloads with `intent: "preload"`.
-5. Returns collected keyed query values.
+1. サーバー関数の結果からターゲットと再検証キーを読み取ります。
+2. 直前の URL またはターゲット URL にマッチする遅延ルートサブツリーを解決します。
+3. `intent: "initial"` でルートプリロードを実行します。
+4. `intent: "preload"` でターゲットルートのプリロードを実行します。
+5. 収集したキー付きクエリ値を返します。
 
-Returns `undefined` when the outcome has no target URL or no collected values.
-The collector logs errors from lazy resolution or preload collection.
-The errors do not replace the mutation outcome.
+結果にターゲット URL がない、または収集された値がない場合は `undefined` を返します。
+コレクターは遅延解決やプリロード収集で発生したエラーをログに記録します。
+これらのエラーはミューテーションの結果を置き換えません。
 
-The server-function handler folds the returned data into the mutation response.
-A mounted client router consumes the data when single flight is enabled.
+サーバー関数ハンドラーは、返されたデータをミューテーションレスポンスに折り込みます。
+マウント済みのクライアントルーターは、シングルフライトが有効な場合にそのデータを消費します。
 
-## Types
+## 型
 
-The server entry re-exports:
+サーバーエントリーは次を再エクスポートします:
 
 ```ts
 type CollectFlightDataHook;
 type ServerFunctionOutcome;
 ```
 
-`CollectFlightDataHook` and `ServerFunctionOutcome` originate from `@solidjs/web/server-functions/server`.
+`CollectFlightDataHook` と `ServerFunctionOutcome` は `@solidjs/web/server-functions/server` 由来です。
 
-## Related
+## 関連項目
 
-- [Data APIs](/reference/solid-router/data)
+- [データ API](/reference/solid-router/data)
 - [`createRouter`](/reference/solid-router/router-factory#createrouter)
