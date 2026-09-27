@@ -1,93 +1,85 @@
-The year has kicked off with a bang for our small but rapidly growing community. It's been incredibly exciting to witness so much interest in what the project has to give. We've been feverishly at work solidifying Solid Start, improving core, managing the hackathon and planning for some new exciting features.
+小さいながらも急速に成長する私たちのコミュニティにとって、今年は勢いのあるスタートとなりました。このプロジェクトが提供するものへのこれほどの関心を目の当たりにするのは、本当に胸が躍ります。私たちは Solid Start の強化、コアの改善、ハッカソンの運営、そしていくつかのエキサイティングな新機能の計画に懸命に取り組んできました。
 
-Before we jump in: on behalf of the Core Team, we want to thank every Solid community member for your encouragement, support, and contributions over the past few months. Solid is so much more than a web framework; it's a community of generous, talented and caring developers that have come together to build great things. We couldn't be more grateful.
+本題に入る前に: コアチームを代表して、ここ数か月間、励まし、支援、貢献をくださったすべての Solid コミュニティメンバーに感謝します。Solid は単なる Web フレームワークではありません。素晴らしいものを作るために集まった、寛大で才能があり思いやりのある開発者のコミュニティです。感謝してもしきれません。
 
-# Sponsorships
+# スポンサーシップ
 
-The year brought in some exciting sponsors. Today, we're honored to announce two new financial supporters: `<div>riots` and `Vercel`.
+今年は心躍るスポンサーが加わりました。本日、2 つの新しい支援者を発表できることを光栄に思います: `<div>riots` と `Vercel` です。
 
-`<div>riots` believes that front-end creation is an art form. Their team builds some of the most exciting and forward-thinking tooling for front-end teams. We're very pleased that they've pledged $100 monthly to our OpenCollective, but they've also launched Solid support for their Backlight project, a futuristic tool for teams to ship great design systems.
+`<div>riots` は、フロントエンドの創造は一つの芸術形式だと考えています。彼らのチームは、フロントエンドチーム向けに最もエキサイティングで先進的なツールをいくつか構築しています。私たちの OpenCollective に月額 100 ドルの支援を約束してくれたことを大変嬉しく思いますが、それだけでなく、チームが優れたデザインシステムを届けるための未来的なツールである Backlight プロジェクトで Solid のサポートも開始してくれました。
 
-<a href="https://www.backlight.dev/" target="_blank">
-  ![Backlight](/img/blog/state-of-solid-march-2022/backlight.png)
-</a>
+[![Backlight](/img/blog/state-of-solid-march-2022/backlight.png)](https://www.backlight.dev/)
 
-We're also pleased to welcome `Vercel` into our growing list of supporters offering up a $100 monthly pledge. Vercel's vision is to enable frontend teams to do their best work. Solid and Vercel share a similar vision to shape the future of the web by making that work easy and fast. Having Vercel in our corner along with our other amazing sponsors brings true recognition to the work we're doing in building a web framework that puts both simplicity and performance first.
+また、増え続ける支援者の仲間として、月額 100 ドルの支援を申し出てくれた `Vercel` を迎えられることも嬉しく思います。Vercel のビジョンは、フロントエンドチームが最高の仕事をできるようにすることです。Solid と Vercel は、その仕事を簡単かつ高速にすることで Web の未来を形作るという似たビジョンを共有しています。他の素晴らしいスポンサーとともに Vercel が味方についていることは、シンプルさとパフォーマンスの両方を第一に据える Web フレームワークを構築する私たちの仕事への真の評価となります。
 
-<a href="https://www.vercel.com/" target="_blank">
-  ![Backlight](/img/blog/state-of-solid-march-2022/vercel.png)
-</a>
+[![Vercel](/img/blog/state-of-solid-march-2022/vercel.png)](https://www.vercel.com/)
 
-To all of our generous sponsors, thank you! Your support recognizes and enables the work we do daily to grow the project and the community.
+寛大なスポンサーの皆さん、ありがとうございます! 皆さんの支援は、プロジェクトとコミュニティを成長させるための私たちの日々の仕事を評価し、それを可能にしてくれています。
 
-# Community, Growth and Ecosystem
+# コミュニティ・成長・エコシステム
 
-Community growth this quarter has been remarkable: we're growing at the fastest pace we've seen to date. Our key indicators continuously show week over week across our website, Twitter, GitHub, and Discord. Website traffic is a major indicator and sees unique visits growing at a constant rate of ~15% week over week. Discord membership has increased 20%, GitHub contributors/interactions by 60% and total Twitter engagements + followers by 453%.
+今四半期のコミュニティの成長は目覚ましく、これまでで最も速いペースで成長しています。主要な指標は、ウェブサイト、Twitter、GitHub、Discord のすべてで継続的な週ごとの伸びを示しています。ウェブサイトのトラフィックは主要な指標であり、ユニーク訪問数が週ごとに約 15% の一定割合で増加しています。Discord のメンバー数は 20% 増加し、GitHub のコントリビューター/インタラクションは 60%、Twitter のエンゲージメントとフォロワーの合計は 453% 増加しました。
 
-<a href="https://star-history.com/#solidjs/solid&Date" target="_blank">
-  ![Backlight](/img/blog/state-of-solid-march-2022/star-history.png)
-</a>
+[![Star History](/img/blog/state-of-solid-march-2022/star-history.png)](https://star-history.com/#solidjs/solid&Date)
 
-Solid's GitHub star count just surpassed 16,000 stars recently, overtaking Inferno.js and climbing towards Alpine.js's 20k stars.
+Solid の GitHub スター数は先日 16,000 を突破し、Inferno.js を追い越して Alpine.js の 20k スターへと向かっています。
 
-Community growth has been spectacular, bolstered by SolidJS becoming the [top-rated framework in developer satisfaction](https://2021.stateofjs.com/en-US/libraries/front-end-frameworks/) on this year's State of JS survey. This is a testament to the health of the community we've built. We couldn't be more pleased with the result, but we should note that Solid adoption isn't yet widespread: the following chart from State of JS indicates extremely high satisfaction, but with low user count.
+今年の State of JS 調査で SolidJS が[開発者満足度で最高評価のフレームワーク](https://2021.stateofjs.com/en-US/libraries/front-end-frameworks/)になったことも後押しとなり、コミュニティの成長は壮観です。これは、私たちが築いてきたコミュニティの健全さの証です。この結果をこれ以上ないほど嬉しく思いますが、Solid の採用がまだ広まっていないことも付記すべきでしょう。次の State of JS のグラフが示すように、満足度は非常に高い一方で、ユーザー数はまだ少ないのです。
 
-<a href="https://2021.stateofjs.com/en-US/libraries/#scatterplot_overview" target="_blank">
-  ![Backlight](/img/blog/state-of-solid-march-2022/state-of-js.png)
-</a>
+[![State of JS](/img/blog/state-of-solid-march-2022/state-of-js.png)](https://2021.stateofjs.com/en-US/libraries/#scatterplot_overview)
 
-We're confident as the user base grows that the satisfaction rate will remain competitive alongside our fellow frameworks such as Svelte and Vue. We should, however, admit that the methodology of this survey allows a small project such as Solid to quickly top the charts. We thank everyone who showed their support on the survey and welcome all of our new users that discovered Solid through the results!
+ユーザーベースが拡大しても、Svelte や Vue といった仲間のフレームワークと並んで満足度の競争力は維持されると確信しています。ただし、この調査の方法論では Solid のような小規模プロジェクトが一気にチャートの上位に来やすいことは認めるべきでしょう。調査で支持を示してくださった皆さんに感謝するとともに、この結果を通じて Solid を見つけてくれたすべての新しいユーザーを歓迎します!
 
-The quarter was also quite busy for Ryan, talking and writing on numerous topics in addition to his core development work. Our favorite to date was an awesome interview with CoderPad where Ryan and Corbin give a really fantastic explanation of how the library works. Ryan also had an [opportunity to jump on PurrfectDev](https://www.youtube.com/watch?v=Jn5e1NYFfN4).
+今四半期は Ryan にとっても忙しい時期で、コアの開発作業に加えて、数多くのテーマで講演や執筆を行いました。これまでのお気に入りは CoderPad での素晴らしいインタビューで、Ryan と Corbin がこのライブラリの仕組みを本当に見事に解説しています。また、Ryan は [PurrfectDev に出演する機会](https://www.youtube.com/watch?v=Jn5e1NYFfN4)もありました。
 
-<Twitch twitchId="1275982315" />
+[Twitch で見る](https://www.twitch.tv/videos/1275982315)
 
-In the Twittersphere, Solid has been a hot topic of conversation. Here are some fun highlights:
+Twitter でも Solid は話題の中心になっています。面白いハイライトをいくつか紹介します:
 
-<Tweet tweetLink="mjackson/status/1486468989156937728" />
-<Tweet tweetLink="AdamRackis/status/1499401951447969794" />
-<Tweet tweetLink="tannerlinsley/status/1502116674689925123" />
-<Tweet tweetLink="housecor/status/1502622181859237900" />
+[ツイートを見る](https://twitter.com/mjackson/status/1486468989156937728)
+[ツイートを見る](https://twitter.com/AdamRackis/status/1499401951447969794)
+[ツイートを見る](https://twitter.com/tannerlinsley/status/1502116674689925123)
+[ツイートを見る](https://twitter.com/housecor/status/1502622181859237900)
 
-Lastly, the articles about Solid keep rolling in. You can find them listed on the website's Resource section but we want to highlight this particularly [exciting piece by Nick Scialli](https://typeofnan.dev/solid-js-feels-like-what-i-always-wanted-react-to-be/).
+最後に、Solid に関する記事が次々と寄せられています。それらはウェブサイトの Resource セクションで一覧できますが、特に [Nick Scialli によるこのエキサイティングな記事](https://typeofnan.dev/solid-js-feels-like-what-i-always-wanted-react-to-be/)を強調したいと思います。
 
 # SolidHack 2022
 
-This January we launched our first SolidHack hackathon. We see the hackathon as an opportunity to bring community members to the forefront of the ecosystem and reward them with cash prizes. We're heading into the final week of the competition and submissions are starting to roll in a lot quicker.
+今年 1 月、私たちは初の SolidHack ハッカソンを開始しました。私たちはこのハッカソンを、コミュニティメンバーをエコシステムの最前線に押し出し、賞金で報いる機会と捉えています。コンテストは最終週に入り、提出物が急速に集まり始めています。
 
-If you're planning on submitting, then you may want to consider finishing testing and deploying your application. Documentation and presentation will be critical to win votes!
+提出を予定している方は、アプリケーションのテストとデプロイを済ませることを検討してください。ドキュメントとプレゼンテーションは票を獲得するために重要です!
 
-We also want to thank our sponsors at Stytch, Builder.io, ClearSpend and 402 for their support throughout this launch, and special thanks to our private donors for pitching in to get us to our US$12K prize money.
+また、この立ち上げを通じて支援してくださったスポンサーの Stytch、Builder.io、ClearSpend、402 に感謝するとともに、12,000 ドルの賞金を実現するために協力してくださった個人の寄付者の皆さんに特別な感謝を捧げます。
 
-Final submissions are April 7th, at which point voting begins. Don't forget to visit [https://hack.solidjs.com](https://hack.solidjs.com) to cast your votes on your favorite projects. We're very eager to see what the community cooks up!
+最終提出は 4 月 7 日で、その時点で投票が始まります。[https://hack.solidjs.com](https://hack.solidjs.com) にアクセスして、お気に入りのプロジェクトに投票することをお忘れなく。コミュニティが何を作り上げるのか、とても楽しみにしています!
 
-# Docs & Website
+# ドキュメントとウェブサイト
 
-We've made a big splash in the JavaScript world, and as our potential user base grows so does the importance of our homepage and onboarding experience. To that end, Core has been discussing a complete rehaul of [solidjs.com](https://www.solidjs.com/), including how we do docs. We've been recruiting a team of talented communicators to form a docs team which will work across Solid Core, Solid Start, and ecosystem projects to develop beginner-friendly guides, comprehensive and readable API docs, and an MDX-based component infrastructure to support it all.
+私たちは JavaScript の世界で大きな注目を集めてきました。潜在的なユーザーベースが拡大するにつれ、ホームページとオンボーディング体験の重要性も高まっています。そのために、コアチームではドキュメントのあり方を含めた [solidjs.com](https://www.solidjs.com/) の全面的な刷新について議論してきました。私たちは、Solid Core、Solid Start、エコシステムプロジェクトを横断して、初心者にやさしいガイド、包括的で読みやすい API ドキュメント、そしてそれらすべてを支える MDX ベースのコンポーネント基盤を開発するドキュメントチームを結成するため、優れたコミュニケーターを集めてきました。
 
-This team includes Nick Scialli working on Guides and Erik Demaine working on API [docs and more](https://www.solidjs.com/guides/typescript). Nikhil Saraf has brought docs to the forefront of the Solid Start effort. They've joined Dan (our core team docs fanatic) who is extremely grateful to not work alone! He's also been working on some Solid walkthrough videos for learning the framework - [check out the latest draft](https://www.youtube.com/watch?v=WW8eFwEb8Nc), inspired by the CoderPad talk, and let us know what you think!
+このチームには、ガイドを担当する Nick Scialli と、API [ドキュメントなど](https://www.solidjs.com/guides/typescript)を担当する Erik Demaine が含まれます。Nikhil Saraf は Solid Start の取り組みにおいてドキュメントを前面に押し出してくれました。彼らは、一人で作業しなくて済むことを非常に感謝している Dan(コアチームのドキュメント愛好家)に加わりました! また彼は、フレームワークを学ぶための Solid ウォークスルー動画にも取り組んでいます - CoderPad の講演に触発された[最新のドラフト](https://www.youtube.com/watch?v=WW8eFwEb8Nc)をチェックして、感想を聞かせてください!
 
 # Solid Start
 
-Solid Start has continued some key development this quarter aided by the contributions of the community. But a lot of credit goes to the amazing work of Nikhil Saraf who has implemented 3 key features that bring us ever closer to a Solid Start Beta:
-Server Functions
-Progressively Enhanced Forms
-Improved CLI
+Solid Start はこの四半期も、コミュニティの貢献に助けられながら重要な開発を続けてきました。しかし、Solid Start のベータに近づける 3 つの重要な機能を実装した Nikhil Saraf の素晴らしい仕事に大きく負うところです:
+サーバー関数
+プログレッシブエンハンスメント対応フォーム
+改善された CLI
 
-Server Functions allow instant type safe RPC calls to be embedded around your codebase. Simply wrap any existing function with a server function and it will always run on the server, regardless of where it is called.
+サーバー関数を使うと、型安全な RPC 呼び出しをコードベースのあらゆる場所に即座に埋め込めます。既存の任意の関数をサーバー関数でラップするだけで、どこから呼び出されても常にサーバー上で実行されます。
 
-We've added fully progressive enhanceable forms with optimistic updates that will work when JavaScript has been turned off. Our forms are built on our foundation of using those Server functions so you can declare them anywhere and use them as needed.
+JavaScript がオフになっている状態でも動作する、楽観的更新を備えた完全なプログレッシブエンハンスメント対応フォームを追加しました。私たちのフォームはこれらのサーバー関数を使うという基盤の上に構築されているので、どこにでも宣言して必要に応じて使えます。
 
-Finally, we've made big improvements to the examples and CLI. All examples are available in both JS and TS flavors and can be configured to be client-only or full isomorphic. This makes it easier than ever to get started with Solid Start, as the same setup works for client only apps and makes it easy to transition to server rendered as the need presents itself.
+最後に、サンプルと CLI を大幅に改善しました。すべてのサンプルは JS と TS の両方で利用でき、クライアントのみまたは完全なアイソモーフィックのいずれかに設定できます。同じセットアップがクライアントのみのアプリでも機能し、必要に応じてサーバーレンダーへの移行も簡単になるため、これまで以上に Solid Start を始めやすくなりました。
 
-We are stabilizing APIs, writing docs, and polishing a CLI that makes it easy to scaffold a project to fit your needs. Expect a Solid Start beta release to be coming soon!
+私たちは API の安定化、ドキュメントの執筆、そしてニーズに合ったプロジェクトを簡単にスキャフォールドできる CLI の磨き上げを進めています。Solid Start のベータリリースはまもなくですので、ご期待ください!
 
-# Conclusion
+# まとめ
 
-Solid has grown an incredible amount in the last year. A year ago this time, our focus was on building the documentation site to finish up the 1.0 release. A year later we are closing up our first Hackathon, and it is amazing to see how much the ecosystem has grown.
+Solid はこの 1 年で信じられないほど成長しました。1 年前のこの時期、私たちの焦点は 1.0 リリースを仕上げるためのドキュメントサイトの構築でした。1 年後の今、私たちは初のハッカソンを締めくくろうとしており、エコシステムがどれだけ成長したかを見るのは驚くべきことです。
 
-A year ago, we had no component libraries and now we have several, ranging from [fully-styled ports of Material UI](https://suid.io/) to [multiple options for headless components](https://hope-ui.com/). We've seen [incredible 3D scenes](https://www.youtube.com/watch?v=lsWXyyEsw7E&t=1836s), compiler plugins offering every flavor of syntax, and even demos that defied expectation of what can be done without a Virtual DOM. We've streamed from the edge, taken over the terminal, and even made [our way to native mobile with CapacitorJS](https://ionicframework.com/blog/new-capacitor-templates-solidjs-vite/).
+1 年前、私たちにはコンポーネントライブラリが一つもありませんでしたが、今では[フルスタイルの Material UI 移植版](https://suid.io/)から[ヘッドレスコンポーネントの複数の選択肢](https://hope-ui.com/)まで、いくつかのライブラリが揃っています。[信じられない 3D シーン](https://www.youtube.com/watch?v=lsWXyyEsw7E&t=1836s)、あらゆる種類の構文を提供するコンパイラプラグイン、さらには Virtual DOM なしでできることの予想を覆すデモまで見てきました。エッジからストリーミングし、ターミナルを制覇し、[CapacitorJS でネイティブモバイルに到達](https://ionicframework.com/blog/new-capacitor-templates-solidjs-vite/)することさえしました。
 
-We've learned a lot and that is going right back into the framework. Over the past few years, innovation on the web has slowed down and everyone has been bundling up experiences, but we are at turning point. To enable what the next generation of web applications need we are returning focus to primitives.
+多くのことを学び、それはそのままフレームワークに還元されます。ここ数年、Web におけるイノベーションは鈍化し、どこもかしこも体験をまとめて包み込んできましたが、私たちは転換点にいます。次世代の Web アプリケーションが必要とするものを実現するため、私たちはプリミティブへと焦点を戻しています。
 
-The plans for the next major version of Solid are coming together and the next few minor releases will be about aligning to that vision. We'll be revisiting the rough edges on Resource and Store primitives and look at what other tools are needed to build great patterns around async data. We'll be looking at how we can use reactivity to reduce hydration costs. These learnings will improve the core library while laying the best possible groundwork for Solid Start and the rest of the ecosystem—we can't wait for you to be a part of it.
+Solid の次のメジャーバージョンの計画はまとまりつつあり、今後のマイナーリリースはそのビジョンへの整合が中心になります。Resource と Store プリミティブの粗い部分を再検討し、非同期データを中心に優れたパターンを構築するために他にどんなツールが必要かを検討します。また、リアクティビティを使ってハイドレーションコストを削減する方法も検討します。これらの学びはコアライブラリを改善すると同時に、Solid Start とエコシステムの残りの部分に可能な限り最高の基盤を築きます - あなたがその一員になるのを楽しみにしています。
