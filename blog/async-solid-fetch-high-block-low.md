@@ -1,26 +1,26 @@
-*This is part one of a deep dive into how Solid 2.0 handles async. Part one is about reads.*
+*これは Solid 2.0 が非同期をどう扱うかを深掘りするシリーズの第 1 回です。第 1 回のテーマは読み取りです。*
 
-Humor me for a moment. I want to open with a mental exercise. Or better yet, try this on your current codebase.
+少し付き合ってください。頭の中での実験から始めたいと思います。いや、実際に今のコードベースで試してみてください。
 
-Pick one value your UI renders. It could be a user, a list, a setting. Something that lives in a component today. And now make it come from the server. Don't move anything. Don't redesign. Same component. Same screen. The value is just remote now.
+UI がレンダーしている値を 1 つ選んでください。ユーザーでも、リストでも、設定でも構いません。今日コンポーネントの中にある値です。そしてそれをサーバーから来るようにしてください。何も動かさないでください。再設計もしないでください。同じコンポーネント、同じ画面。値がリモートになっただけです。
 
-*How many files did you touch?*
+*何ファイル変更しましたか？*
 
-It should be one. A value that is async is still a value, it just takes 80ms to get there. But in most solutions you immediately are presented with this tension:
+1 つであるべきです。非同期な値も値であることに変わりはなく、届くまで 80ms かかるだけです。しかし多くの解決策では、すぐに次のような緊張関係に直面します。
 
-You could fetch and await inline but that means three things. You need to put the loading affordance right there. Every child doesn't appear until this is resolved. And you need to be aware of all async below you as you could be causing waterfalls. It is no wonder client side apps have classically had cascading loading spinner hell.
+その場で fetch して await することもできますが、それは 3 つのことを意味します。ローディングのアフォーダンスをまさにそこに置く必要がある。この値が解決するまで子要素は一切表示されない。そしてウォーターフォールを引き起こしていないか、自分より下にあるすべての非同期を把握しておく必要がある。クライアントサイドのアプリが古典的に連鎖するローディングスピナー地獄に陥ってきたのも不思議ではありません。
 
-The best practice is the opposite. Lift the async fetches as high as you can to prevent waterfalls, and move the affordance down as low as you can to block less of the UI. But that means you touch every single component along the path. Props become `Promise<User>` and they no longer can participate in normal composed behavior. You can't format a user's name once and use it in three places without either blocking right there or pushing that logic down into the leaves. That isn't always an option if they are reusable components.
+ベストプラクティスは逆です。ウォーターフォールを防ぐために非同期の fetch をできるだけ高く持ち上げ、UI のブロックを減らすためにアフォーダンスをできるだけ低く下げます。しかしそれは、パス上のすべてのコンポーネントに触れることを意味します。props は `Promise<User>` になり、通常の合成された振る舞いに参加できなくなります。ユーザー名を一度フォーマットして 3 か所で使うことは、その場でブロックするか、そのロジックを葉の要素まで押し下げない限りできません。再利用可能なコンポーネントでは、それが選択肢にならないこともあります。
 
-Every async value that is used in a framework has 4 distinct moments in its lifecycle: creating (the fetch), consuming (the await), blocking (the boundary), and reading (the JSX). Creating and reading are the same as synchronous values, but consuming and blocking create a unique tension that honestly is mirrored in JavaScript language itself with `async functions` and `await`. They become welded together. Except they serve different masters. Consume is a developer-experience decision. Block is a user-experience decision. You only get to make one choice.
+フレームワークで使われる非同期の値には、ライフサイクルに 4 つの明確な瞬間があります。生成（fetch）、消費（await）、ブロック（バウンダリ）、読み取り（JSX）です。生成と読み取りは同期の値と同じですが、消費とブロックは独自の緊張関係を生みます。これは正直なところ、JavaScript 言語自体の `async functions` と `await` にも映し出されています。2 つは溶接されてしまうのです。しかし仕える主人が違います。消費は開発者体験の決定であり、ブロックはユーザー体験の決定です。なのに選べるのは 1 つだけです。
 
-![The tension between consuming and blocking on an async value](/img/blog/async-solid-fetch-high-block-low/consume-block-tension.png)
+![非同期の値における消費とブロックの緊張関係](/img/blog/async-solid-fetch-high-block-low/consume-block-tension.png)
 
-Solid's position is simple. This tension was never necessary. If we break this correlation at its poles, not only do you not have to make the dreaded choice, we can do the right thing automatically.
+Solid の立場はシンプルです。この緊張関係は最初から必要なかったのです。この相関を両極で断ち切れば、あの忌々しい選択をしなくて済むだけでなく、正しいことを自動的にやれます。
 
-## A Memo That Happens to Be Async
+## たまたま非同期なメモ
 
-That's all there is to it, really:
+本当にこれだけです。
 
 ```tsx
 import { createMemo, Loading } from "solid-js";
@@ -44,25 +44,25 @@ function StoryDetail(props) {
 }
 ```
 
-There is no special primitive. No `loading` flag. No `story()?.title`. `story()` is a `Story`, not a `Story | undefined`. The types reflect what you see. If it is running, it is there.
+特別なプリミティブはありません。`loading` フラグも、`story()?.title` もありません。`story()` は `Story` であり、`Story | undefined` ではありません。型は見えるものをそのまま反映します。実行中でも、そこにあるのです。
 
-`<Loading>` covers the subtree until its first real value resolves. When `props.id` changes later, the `fallback` does *not* come back. The old story stays on screen while the new one is in flight. Initial readiness and revalidation are different situations, and the framework treats them differently by default.
+`<Loading>` は最初の実際の値が解決するまでサブツリーを覆います。後で `props.id` が変わっても、`fallback` は戻って*きません*。新しい story が到着する間、古い story は画面に残ります。初期の準備完了と再検証は別の状況であり、フレームワークはデフォルトで異なる扱いをします。
 
-If that looks like suspiciously little code, good. That's the common thread here.
+コードが怪しいほど少なく見えたなら、それで正解です。それがここでの共通テーマです。
 
-## Passing Props Isn't Reading
+## props の受け渡しは読み取りではない
 
-I've always contended that Solid's Signals are a bit of a superpower. But it doesn't get much more evident than this. Async is all about reads.
+Solid のシグナルは一種のスーパーパワーだと私はずっと主張してきました。これほどそれが分かりやすい例もありません。非同期はすべて読み取りの話です。
 
-*Am I ready to display content? Is what I'm showing stale?*
+*コンテンツを表示する準備はできたか？ 表示しているものは古くないか？*
 
-Reads are what Signals have always solved. The same architecture that gave us fine-grained guarantees and performance points to the solution to our problem.
+読み取りはシグナルがずっと解決してきたことです。細粒度の保証とパフォーマンスをもたらしたのと同じアーキテクチャが、この問題の解決策を指し示しています。
 
-Components run once. There is no re-render, so there is no component to suspend on async. Components aren't the ones that wait. Even under a fallback, we never have to redo settled work.
+コンポーネントは一度だけ実行されます。再レンダーはないので、非同期で suspend するコンポーネントは存在しません。コンポーネントは待つ側ではないのです。フォールバックの下でも、確定済みの仕事をやり直すことはありません。
 
-JSX expressions and props compile to accessors that evaluate where they're *used*, not where they're written. So when a not-ready value flows through a component as a prop, nothing happens. Passing isn't reading. Only the expressions that actually consume the value participate in waiting.
+JSX の式と props は、書かれた場所ではなく*使われた*場所で評価されるアクセサーにコンパイルされます。つまり、まだ準備できていない値が prop としてコンポーネントを通過しても、何も起きません。渡すことは読み取りではありません。実際にその値を消費する式だけが待機に参加します。
 
-This means with:
+つまり、こうなります。
 
 ```tsx
 function StoryPage(props) {
@@ -82,9 +82,9 @@ function StoryLayout(props) {
 }
 ```
 
-`StoryLayout` renders immediately. The sidebar renders immediately. `story={story()}` looks like it should blow up — we're calling the accessor before the data exists — but that expression is lazy. It evaluates when `StoryDetail` finally reads `props.story.title`, and that's the only place waiting happens.
+`StoryLayout` はすぐにレンダーされます。サイドバーもすぐにレンダーされます。`story={story()}` は爆発しそうに見えます——データが存在する前にアクセサーを呼んでいるのですから——でも、この式は遅延評価です。`StoryDetail` が最終的に `props.story.title` を読み取るときに評価され、待機が起きるのはそこだけです。
 
-Derivations work the same way:
+派生も同じように動きます。
 
 ```tsx
 function StoryDetail(props) {
@@ -100,13 +100,13 @@ function StoryDetail(props) {
 }
 ```
 
-`byline` doesn't know `story` was async. It doesn't block the component. It becomes async itself. Under the hood, a read of a not-ready value throws a `NotReadyError` that the graph catches and retries on resolution. You'll never handle one yourself. It's why there are no promise types in any of these signatures. The promise stopped being your problem at the `createMemo` that created it.
+`byline` は `story` が非同期だとは知りません。コンポーネントをブロックもしません。自分自身が非同期になるのです。内部では、準備未了の値を読み取ると `NotReadyError` が投げられ、グラフがそれをキャッチして解決時に再試行します。自分でこれを処理することはありません。これらのシグネチャに Promise 型が一切ないのはこのためです。Promise は、それを生成した `createMemo` の時点であなたの問題ではなくなっています。
 
-Because this is all about reads, async rides the same graph flattening and isolation — children effectively become siblings — that gives Solid its clear execution model and extraordinary performance.
+これはすべて読み取りの話なので、非同期は同じグラフの平坦化と分離——子は事実上兄弟になる——に乗ります。それが Solid の明確な実行モデルと卓越したパフォーマンスをもたらしているのです。
 
-## Fetch High, Block Low
+## 高く fetch し、低くブロックする
 
-So let's do the two moves in the opening we thought we couldn't afford. Lift the fetch from `StoryDetail` up to the top of the app, and push the loading boundary down to wrap just the detail pane:
+では、冒頭で「できない」と思っていた 2 つの動きをやってみましょう。fetch を `StoryDetail` からアプリの最上部まで持ち上げ、ローディングのバウンダリを詳細ペインだけを包む位置まで押し下げます。
 
 ```tsx
 function App() {
@@ -130,15 +130,15 @@ function StoryPage(props) {
 }
 ```
 
-The fetch now starts at the top, as early as possible. The skeleton now covers only the pane that actually waits. The list never flickers.
+fetch は最上部、できるだけ早いタイミングで始まります。スケルトンは実際に待つペインだけを覆います。リストはちらつきません。
 
-Notice anything? Do this same refactor with a *hardcoded story object*, a plain synchronous constant lifted from child to parent. It's identical. Same component structure. Same props. The async version costs exactly what the sync version costs, plus one `<Loading>` placed where the design wants a skeleton. A concession you'd always have to make.
+気づきましたか？ *ハードコードされた story オブジェクト*——子から親に持ち上げた単なる同期定数——で同じリファクタをしてみてください。完全に同じです。同じコンポーネント構造、同じ props。非同期版のコストは同期版とまったく同じで、デザインがスケルトンを求める場所に `<Loading>` を 1 つ置くだけです。それはどのみち常に必要な妥協です。
 
-Where you create a value is a performance decision. Where you block on it is a design decision. Neither is an architecture decision anymore, because neither touches the components between them.
+値をどこで生成するかはパフォーマンスの決定です。どこでブロックするかはデザインの決定です。もはやどちらもアーキテクチャの決定ではありません。どちらも間にあるコンポーネントに触れないからです。
 
-## Nesting Isn't a Waterfall
+## ネストはウォーターフォールではない
 
-The opening highlighted one more concern. When blocking, you'd better know about every `await` beneath you. Let's challenge that.
+冒頭ではもう 1 つの懸念も挙げました。ブロックするときは、自分より下にあるすべての `await` を把握しておかなければならない、というものです。それに挑戦しましょう。
 
 ```tsx
 function StoryDetail(props) {
@@ -164,24 +164,24 @@ function Comments(props) {
 }
 ```
 
-`Comments` sits below JSX that reads `story()`. In an await-based (or `use`) model that's a waterfall by construction. The child can't exist until the parent's data resolves. But here both requests run in parallel.
+`Comments` は `story()` を読み取る JSX の下にあります。await ベース（または `use`）のモデルでは、構造上これはウォーターフォールです。親のデータが解決するまで子は存在できません。しかしここでは、2 つのリクエストは並列に実行されます。
 
-It's the same mechanism as earlier. Components run once, immediately. The whole tree mounts up front, and only the expressions that read async values wait. `Comments` never reads `story()`. It reads `props.storyId`, which is readily available. Requests are ordered by data dependency, not by where the UI design has the components sit.
+仕組みは先ほどと同じです。コンポーネントは一度だけ、即座に実行されます。ツリー全体が最初にマウントされ、非同期の値を読み取る式だけが待ちます。`Comments` は `story()` を読みません。読むのは `props.storyId` で、これはすぐに使えます。リクエストの順序はデータの依存関係で決まり、UI デザインでコンポーネントがどこに置かれているかでは決まりません。
 
-That doesn't mean waterfalls are impossible. It means a real waterfall is now something you can see in the code:
+ウォーターフォールが不可能になったわけではありません。本物のウォーターフォールがコードを見れば分かるものになったということです。
 
 ```tsx
 const story = createMemo(() => fetchStory(props.storyId));
 const author = createMemo(() => fetchAuthor(story().authorId));
 ```
 
-`author` can't start until `story` resolves as the id comes from the response. That's sequential because the data is sequential. But anything derived from the same input runs in parallel, however deeply it's nested.
+`author` は `story` が解決するまで開始できません。id がレスポンスから来るからです。データが逐次的なので、これは逐次です。しかし同じ入力から派生するものは、どれだけ深くネストされていても並列に実行されます。
 
-## Pending Is a Question, Not State
+## 保留中は状態ではなく質問
 
-Initial load is the easy part. What is more interesting is when a value you already have starts changing.
+初期ロードは簡単なほうです。より面白いのは、すでに持っている値が変わり始めるときです。
 
-Let's add search:
+検索を追加してみましょう。
 
 ```tsx
 import { createSignal, createMemo, isPending, For } from "solid-js";
@@ -201,21 +201,21 @@ function Search() {
 }
 ```
 
-When you type a character `query` changes, `results` recompute, and a request goes out. The old results stay on screen. No fallback. No unmount. No flash of skeleton. No special logic.
+1 文字タイプすると `query` が変わり、`results` が再計算され、リクエストが飛びます。古い結果は画面に残ります。フォールバックなし。アンマウントなし。スケルトンのちらつきなし。特別なロジックなし。
 
-Instead we have `isPending(results)`, a new way to answer "Is this on the way?" This isn't global. It's not some app-wide trigger that will show spinners everywhere. It's a per signal question that can be asked anywhere. On the async source. Below the async source. On a derived prop. Even above an async source but below the source of change.
+代わりに `isPending(results)` があります。「これは到着途中か？」に答える新しい方法です。これはグローバルではありません。アプリ全体であちこちにスピナーを出すトリガーではありません。シグナルごとの質問で、どこからでも聞けます。非同期ソース上で。その下で。派生 prop 上で。非同期ソースより上、変化の源より下でも。
 
-Here it dims the stale list. On a different page it disables a submit button.
+ここでは古いリストを暗くしています。別のページでは送信ボタンを無効化するかもしれません。
 
-That's the difference between state and a question. State has to live somewhere. A question can be answered anywhere.
+それが状態と質問の違いです。状態はどこかに置かなければなりません。質問はどこでも答えられます。
 
-## API-less Transitions
+## API のいらないトランジション
 
-So now you click a story in the list. `selectedId` changes, the `story` memo goes pending, and the detail pane stays exactly where it is, showing the old story, until the new one is ready. Then it swaps in whole. At no point does the UI disagree with itself by combining stale and in-flight content.
+ではリストの story をクリックします。`selectedId` が変わり、`story` メモが保留中になり、詳細ペインは新しい story が準備できるまでそのまま古い story を表示し続けます。そして丸ごと入れ替わります。古い内容と飛行中の内容を混ぜて UI が自分と矛盾する瞬間はありません。
 
-If you've used React or Solid in the past you might know this behavior as "Transitions". In 2.0 the entire API is gone. The graph doesn't show inconsistent state because it *can't*. Pending signals hold their previous value, and everything derived from them holds too, until the whole update is ready to land together.
+React や Solid を使ったことがあれば、この振る舞いを「トランジション」として知っているかもしれません。2.0 ではその API は完全に消えました。グラフは不整合な状態を表示*できない*のです。保留中のシグナルは前の値を保持し、そこから派生するすべても保持します。更新全体が一緒に着地できるようになるまで。
 
-What was previously an opt-in is now the default. If you want the user to feel the navigation, that's what `isPending` is for:
+以前はオプトインだったものが、今はデフォルトです。ユーザーにナビゲーションを感じさせたいなら、そのための `isPending` があります。
 
 ```tsx
 function App() {
@@ -232,13 +232,13 @@ function App() {
 }
 ```
 
-This time the fetch lives inside `StoryPage` — where a real router would put it, with the page that owns it.
+今回は fetch は `StoryPage` の中にあります。実際のルーターが置く場所、それを所有するページと一緒です。
 
-`App` knows nothing about the fetch now. But `isPending(selectedId)` doesn't care. Change starts with the write and it holds until everything is settled. The source signal is the first to know regardless of where the async lives.
+`App` は fetch について何も知りません。しかし `isPending(selectedId)` は気にしません。変化は書き込みから始まり、すべてが確定するまで保持されます。非同期がどこにあろうと、ソースのシグナルが最初に知るのです。
 
-When you click a story, the highlight doesn't move. It holds its old value like everything else. If it moved early, you'd have the new selection pointing at the old content. Pair the pending class with a short CSS transition delay and the pane only greys out when the swap is slow enough to notice.
+story をクリックしても、ハイライトは動きません。他のすべてと同様に古い値を保持します。もし早く動いたら、新しい選択が古いコンテンツを指すことになります。保留中クラスに短い CSS トランジションのディレイを組み合わせれば、スワップが気づくほど遅いときだけペインがグレーになります。
 
-And if the design wants the highlight to move on click? We have a primitive for that. `latest(selectedId)` hands you the value the graph is still working toward. Two questions: `isPending` for "is something coming?", `latest` for "what is it?" Each gets asked exactly where the design needs the answer.
+デザインがクリックでハイライトを動かしたい場合は？ そのためのプリミティブがあります。`latest(selectedId)` はグラフがまだ向かっている途中の値を渡します。2 つの質問です。「何か来ているか？」には `isPending`、「それは何か？」には `latest`。それぞれ、デザインが答えを必要とするまさにその場所で聞きます。
 
 ```tsx
 function App() {
@@ -255,14 +255,14 @@ function App() {
 }
 ```
 
-You didn't start a transition. You set a signal. Reactivity did the rest.
+あなたはトランジションを開始しませんでした。シグナルをセットしただけです。あとはリアクティビティがやりました。
 
-## The Graph Always Knows
+## グラフは常に知っている
 
-If you've been following, the fetch now has lived at every level of this app: in the details component, in the page, at the root, and back in the page again. Each with almost no consequence and with little code change.
+ここまで読んできたなら、fetch はこのアプリのあらゆる階層に置かれてきたことになります。詳細コンポーネント、ページ、ルート、そしてまたページへ。どれもほとんど影響なく、コード変更もわずかです。
 
-Latency is a property of the value now and is queryable. In a true Solid manner Components just disappear. They are functions that happened to be called once. You fetch high because it's fast, and you block low because it's good design. For the first time those are free.
+レイテンシは今や値の属性であり、問い合わせ可能です。真に Solid らしいやり方で、コンポーネントは消えます。それらはたまたま一度呼ばれた関数です。速いから高く fetch し、良いデザインだから低くブロックする。初めて、それらが自由になりました。
 
-So while this is a performance win as unnecessary waterfalls fall away as a consequence of the design, the real win is the freedom to arrange your async, your affordances, your components, your code the way that makes sense to you. Not defined by the structure of the framework. It's the same promise that synchronous Solid's Signals provided and now it completes the whole async story as well.
+不要なウォーターフォールがデザインの帰結として消えていくのはパフォーマンス上の勝利ですが、本当の勝利は、非同期も、アフォーダンスも、コンポーネントも、コードも、あなたにとって意味のあるように配置できる自由です。フレームワークの構造に規定されません。それは同期の Solid のシグナルが提供してきたのと同じ約束であり、今それが非同期の物語全体をも完成させます。
 
-That's reads. Writes are better. Until next week.
+読み取りは以上です。書き込みはもっとすごいですよ。また来週。
