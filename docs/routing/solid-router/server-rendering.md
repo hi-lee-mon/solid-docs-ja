@@ -1,27 +1,27 @@
 ---
-title: "Server rendering and hydration"
+title: "サーバーレンダリングとハイドレーション"
 version: "2.0"
-description: "Render Solid Router on the server: read the URL from the request, hydrate query results without a second fetch, return fresh data from a mutation in one round trip, and keep forms working without JavaScript."
+description: "Solid Router をサーバーでレンダリングします。リクエストから URL を読み取り、2回目のフェッチなしでクエリ結果をハイドレートし、ミューテーションから1回の往復で新鮮なデータを返し、JavaScript なしでもフォームを動かし続けます。"
 ---
 
-Open the network tab on a server-rendered product page and there is one request, for the document, and none for the product.
-Submit the **Add to cart** form and there is one `POST`, after which the cart in the header is already up to date.
-Turn JavaScript off and the same form still adds to the cart.
+サーバーレンダリングされた商品ページでネットワークタブを開くと、リクエストはドキュメントへの1つだけで、商品のものはありません。
+**Add to cart** フォームを送信すると `POST` が1つだけ発生し、その後ヘッダーのカートはすでに最新になっています。
+JavaScript をオフにしても、同じフォームがやはりカートに追加します。
 
-None of that needs a change to the earlier pages.
-The same `Router` from `src/router.ts` renders on both sides; there is no server variant to import.
-This page explains what the server side does to make those three things true, and where the switches are when you need to change them.
+これらのどれも、これまでのページへの変更を必要としません。
+`src/router.ts` の同じ `Router` が両側でレンダリングします。インポートすべきサーバー用バリアントはありません。
+このページでは、サーバー側がこれら3つを実現するために何をしているか、そして変更したいときにスイッチがどこにあるかを説明します。
 
-The `fullstack` project shape wires all of this up.
-If you started there, read this page to understand what it does; if you are adding server rendering to a project by hand, it tells you what to add.
+`fullstack` プロジェクトシェイプはこれらすべてを結線済みです。
+そこから始めた場合は、これが何をしているかを理解するためにこのページを読んでください。手作業でプロジェクトにサーバーレンダリングを追加する場合は、何を追加すべきかを示します。
 
-## Where the URL comes from
+## URL はどこから来るか
 
-In the browser the router reads `window.location`.
-On the server there is no window, so it reads the request: under start mode, the request event's `request.url`.
-Only the pathname and search string take part in matching.
+ブラウザーではルーターは `window.location` を読みます。
+サーバーには window がないため、リクエストを読みます。start モードでは、リクエストイベントの `request.url` です。
+マッチングに関与するのはパス名と検索文字列だけです。
 
-When there is no request, such as a test or a prerender script, pass the URL in:
+テストやプリレンダースクリプトのようにリクエストがない場合は、URL を渡します。
 
 ```tsx
 import { renderToStream } from "@solidjs/web";
@@ -32,38 +32,38 @@ const html = await renderToStream(() => (
 ));
 ```
 
-A request event wins over the `url` prop when both are present.
+リクエストイベントと `url` prop の両方がある場合は、リクエストイベントが優先されます。
 
-:::caution[Lazy subtrees need the streaming renderer]
-Lazy route subtrees, the `children: () => import(...)` form, are asynchronous work during matching.
-`renderToStream` waits for them; the synchronous `renderToString` cannot, so use the streaming entry for any route tree that has one.
+:::caution[遅延サブツリーにはストリーミングレンダラーが必要]
+`children: () => import(...)` 形式の遅延ルートサブツリーは、マッチング中の非同期処理です。
+`renderToStream` はそれらを待てますが、同期の `renderToString` は待てません。遅延サブツリーを含むルートツリーには、ストリーミングのエントリーを使ってください。
 :::
 
-## Queries render once
+## クエリは一度だけレンダリングされる
 
-The product page from the [introduction](/routing/solid-router#load-data-for-a-page) rendered `product().name` on the server, and the browser did not fetch the product again.
+[イントロダクション](/routing/solid-router#load-data-for-a-page) の商品ページはサーバーで `product().name` をレンダリングし、ブラウザーは商品を再フェッチしませんでした。
 
-During an async server render, each `query` result is serialized into the page along with its key.
-When the client runs the same `query` with the same name and arguments, it finds the serialized value and adopts it instead of starting a request.
-Two things follow:
+非同期サーバーレンダリング中、各 `query` の結果はそのキーと一緒にページにシリアライズされます。
+クライアントが同じ `query` を同じ名前と引数で実行すると、シリアライズされた値を見つけて、リクエストを開始する代わりにそれを採用します。
+そこから2つのことが導かれます。
 
-- Keep the name and arguments stable across server and client.
-  A key built from `Date.now()` or a random id never matches, and the page fetches twice.
-- Adoption has no age limit for a read outside a navigation, so a lazy route module that first reads a query well after load still adopts the server value.
-  During a navigation the serialized value is accepted only while a preload of the same age would be, five seconds, or three minutes for back and forward; anything older runs fresh rather than presenting an old server value as new.
+- サーバーとクライアントで名前と引数を安定させてください。
+  `Date.now()` やランダムな ID から作られたキーは決して一致せず、ページは2回フェッチします。
+- ナビゲーションの外での読み取りには採用できる値の経過時間に上限がないため、ロードからかなり経って初めてクエリを読み取る遅延ルートモジュールでもサーバーの値を採用します。
+  ナビゲーション中は、シリアライズされた値は同じ経過時間のプリロードが受け入れられる期間だけ受け入れられます。つまり5秒、戻る・進むでは3分です。それより古いものは、古いサーバー値を新しいものとして提示するのではなく、新たに実行されます。
 
-Adoption also works for reads that happen after hydration finishes, so a lazy chunk that loads later still finds its server data.
+採用はハイドレーションが終わった後の読み取りにも機能するため、後からロードされる遅延チャンクもサーバーのデータを見つけられます。
 
-## One round trip for a mutation
+## ミューテーションは1往復
 
-Submit a form backed by an `action` on a page that also reads a `query`.
-Without the server-side collector, the browser makes two requests: the mutation, then the revalidation fetch when the router reloads the affected queries.
-With it, the browser makes one: the mutation response carries the fresh query values, and the router seeds its cache from them before the action's caller even receives the return value.
+`query` も読み取るページで、`action` に裏付けられたフォームを送信します。
+サーバー側のコレクターがなければ、ブラウザーは2回リクエストを出します。ミューテーションと、ルーターが影響を受けたクエリをリロードするときの再検証フェッチです。
+コレクターがあれば、ブラウザーのリクエストは1回です。ミューテーションのレスポンスが新鮮なクエリ値を運び、ルーターはアクションの呼び出し元が戻り値を受け取る前にそこからキャッシュをシードします。
 
-![Two sequences between browser and server. Without the collector: the action request, its result, then a second request that reloads the affected queries. With the collector: one action request whose response carries the fresh query values; the router seeds its cache, then resolves the call.](/images/diagrams/single-flight-mutation.svg)
+![ブラウザーとサーバー間の2つのシーケンス。コレクターなし: アクションリクエスト、その結果、そして影響を受けたクエリをリロードする2回目のリクエスト。コレクターあり: レスポンスが新鮮なクエリ値を運ぶ1回のアクションリクエスト。ルーターはキャッシュをシードしてから呼び出しを解決する。](/images/diagrams/single-flight-mutation.svg)
 
-The `fullstack` template enables this in two files.
-The first registers the router as the collector:
+`fullstack` テンプレートは2つのファイルでこれを有効にします。
+1つ目はルーターをコレクターとして登録します。
 
 ```ts
 // src/server-config.ts
@@ -76,7 +76,7 @@ configureServerFunctionsServer({
 });
 ```
 
-The second makes sure that module runs before any server function is dispatched:
+2つ目は、どのサーバー関数がディスパッチされるよりも前にそのモジュールが実行されることを保証します。
 
 ```ts
 // vite.config.ts
@@ -86,76 +86,76 @@ solid({
 });
 ```
 
-Submit **Add to cart** with both in place and the network tab shows one `POST /_server` whose response carries the cart, and no request after it.
+両方を配置した状態で **Add to cart** を送信すると、ネットワークタブにはカートを運ぶレスポンスを持つ `POST /_server` が1つだけ表示され、その後のリクエストはありません。
 
-:::deep-dive[What the collector does on each mutation]
-When a mutation finishes, the collector works out which URL the client will show next, whether that is the current page or a `redirect` target.
-It resolves any lazy subtrees on that path, runs the root preload and the matched route preloads in data-only mode, and folds every `query` result they produced into the response.
-On the client, the router applies the response's revalidation and redirect metadata, seeds the delivered values, and only then resolves the action call.
-That is why the [Data](/routing/solid-router/data#what-revalidates-after-a-mutation) page recommends putting the reads a page needs in its `preload`: the collector can only refresh what the preloads touch.
-[Integrate a router](/routing/integrate-a-router#integrate-single-flight-mutations) describes the transport hooks the collector is built on.
+:::deep-dive[コレクターが各ミューテーションで行うこと]
+ミューテーションが終了すると、コレクターはクライアントが次に表示する URL（現在のページでも `redirect` 先でも）を割り出します。
+そのパス上の遅延サブツリーを解決し、ルートのプリロードとマッチしたルートのプリロードをデータのみのモードで実行して、それらが生成したすべての `query` 結果をレスポンスに畳み込みます。
+クライアント側では、ルーターがレスポンスの再検証とリダイレクトのメタデータを適用し、配信された値をシードして、その後初めてアクション呼び出しを解決します。
+[データ](/routing/solid-router/data#what-revalidates-after-a-mutation) ページが、ページが必要とする読み取りを `preload` に置くことを勧めるのはこのためです。コレクターはプリロードが触れるものしか更新できません。
+[ルーターを統合する](/routing/integrate-a-router#integrate-single-flight-mutations) では、コレクターが構築されているトランスポートフックを説明しています。
 :::
 
-To turn the protocol off, set `singleFlight: false` in `createRouter`.
-Without a client consumer the transport does not send the single-flight header and the server does not run collection.
-An app with its own server-function handler passes `collectFlightData` to `handleServerFunctionRequest` per request instead of using the `configure` module.
+このプロトコルをオフにするには、`createRouter` で `singleFlight: false` を設定します。
+クライアント側のコンシューマーがなければ、トランスポートはシングルフライトヘッダーを送らず、サーバーは収集を実行しません。
+独自のサーバー関数ハンドラーを持つアプリは、`configure` モジュールを使う代わりに、リクエストごとに `collectFlightData` を `handleServerFunctionRequest` に渡します。
 
-If the default server-function endpoint `/_server` is changed in the Vite plugin, set the router's `actionBase` to match so action URLs still reach it.
+Vite プラグインでデフォルトのサーバー関数エンドポイント `/_server` を変更した場合は、アクション URL が届くようにルーターの `actionBase` を合わせて設定してください。
 
-## Forms without JavaScript
+## JavaScript なしのフォーム
 
-Disable JavaScript and submit the cart form from the [Data](/routing/solid-router/data#mutate-with-actions) page.
-It still works.
+JavaScript を無効にして、[データ](/routing/solid-router/data#mutate-with-actions) ページのカートフォームを送信します。
+それでも動きます。
 
-The action's URL points at the server-function handler.
-The handler sees a plain form `POST` with no client runtime behind it, runs the server function, and instead of returning a payload the browser could not use, redirects back to the page with the outcome stored in a one-shot flash cookie.
-When the router renders that page on the server, it clears and decodes the cookie into the same submission records that `useSubmissions` exposes, so a validation error from a no-JavaScript submit shows up in the same `<p role="alert">` as a scripted one.
+アクションの URL はサーバー関数ハンドラーを指しています。
+ハンドラーはクライアントランタイムを伴わないプレーンなフォーム `POST` を見て、サーバー関数を実行し、ブラウザーが使えないペイロードを返す代わりに、結果をワンショットのフラッシュ Cookie に保存してページにリダイレクトで戻します。
+ルーターがそのページをサーバーでレンダリングするとき、Cookie をクリアしてデコードし、`useSubmissions` が公開するのと同じ送信レコードに入れます。これにより、JavaScript なしの送信によるバリデーションエラーも、スクリプトありのものと同じ `<p role="alert">` に表示されます。
 
-The router also covers the gap between the page loading and the action's module arriving.
-If a form is submitted before the code that defines its action has been loaded, the router recognizes the server-action URL, loads the submit path on demand, and sends the form through the server-function transport as usual.
+ルーターは、ページのロードとアクションのモジュール到着の間の隙間も埋めます。
+フォームが、そのアクションを定義するコードがロードされる前に送信された場合、ルーターはサーバーアクション URL を認識し、送信パスをオンデマンドでロードし、通常どおりサーバー関数トランスポート経由でフォームを送ります。
 
-:::note[Only server-backed actions have a no-JavaScript path]
-A client-only action has no URL the server can run, so it needs its module loaded before the form is submitted.
-[Progressive enhancement](/building-apps/server-functions/progressive-enhancement) describes what the core runtime owns in this exchange and what the router adds.
+:::note[JavaScript なしの経路を持つのはサーバーに裏付けられたアクションだけ]
+クライアントのみのアクションにはサーバーが実行できる URL がないため、フォームが送信される前にそのモジュールがロードされている必要があります。
+[プログレッシブエンハンスメント](/building-apps/server-functions/progressive-enhancement) では、このやり取りでコアランタイムが担う部分とルーターが追加する部分を説明しています。
 :::
 
-## Common problems
+## よくある問題
 
-### The first load shows nothing until every query has finished
+### すべてのクエリが終わるまで最初のロードに何も表示されない
 
-There is no `Loading` boundary around `props.children` in `App`.
-An async read with no boundary above it blocks the shell until it settles, so the server sends nothing until the slowest query returns.
-Wrap `props.children` in `<Loading fallback={...}>` as the [setup](/routing/solid-router/setup#mount-it-at-the-application-root) page shows; the shell then streams with the fallback and the page follows.
+`App` の `props.children` の周りに `Loading` バウンダリがありません。
+上にバウンダリのない非同期読み取りは、確定するまでシェルをブロックするため、サーバーは最も遅いクエリが返るまで何も送信しません。
+[セットアップ](/routing/solid-router/setup#mount-it-at-the-application-root) ページのように `props.children` を `<Loading fallback={...}>` で囲んでください。シェルはフォールバックとともにストリーミングされ、ページが後に続きます。
 
-### `Hydration tag mismatch` or `Hydration structure mismatch` in the console on a routed page
+### ルーティングされたページでコンソールに `Hydration tag mismatch` または `Hydration structure mismatch`
 
-The server and the client rendered different trees for the same URL.
-The usual causes are a component that branches on `isServer` or `typeof window`, which reports a tag mismatch when the branches are different elements, a value such as `Date.now()` in the render, or a `url` prop on the server that does not match what the browser loaded.
-Render the same structure on both sides and fill in browser-only values after hydration; [Hydrating server HTML](/concepts/rendering-and-ssr#hydrating-server-html) covers the general case.
+同じ URL に対してサーバーとクライアントが異なるツリーをレンダリングしました。
+よくある原因は、`isServer` や `typeof window` で分岐するコンポーネント（分岐が異なる要素のときにタグミスマッチを報告します）、レンダリング内の `Date.now()` のような値、あるいはブラウザーがロードしたものと一致しないサーバー上の `url` prop です。
+両側で同じ構造をレンダリングし、ブラウザー固有の値はハイドレーション後に埋めてください。一般的なケースは [サーバー HTML のハイドレート](/concepts/rendering-and-ssr#hydrating-server-html) で扱っています。
 
-### The page fetches data the server already rendered
+### ページがサーバーがすでにレンダリングしたデータをフェッチする
 
-The query key differs between server and client, or the read happened during a navigation more than five seconds after load.
-Check that the name and arguments are the same on both sides and contain nothing time-dependent or random.
+クエリキーがサーバーとクライアントで異なるか、ロードから5秒以上後のナビゲーション中に読み取りが起きました。
+名前と引数が両側で同じで、時間依存やランダムなものを含まないことを確認してください。
 
-### The mutation still makes two requests
+### ミューテーションがまだ2回リクエストを出す
 
-The `serverFunctions.configure` module is not set in `vite.config.ts`, so the collector never registered, or `singleFlight: false` is set on the router.
-With a custom server-function handler, pass `collectFlightData` to `handleServerFunctionRequest` yourself.
+`vite.config.ts` で `serverFunctions.configure` モジュールが設定されておらずコレクターが登録されていないか、ルーターに `singleFlight: false` が設定されています。
+カスタムのサーバー関数ハンドラーの場合は、`handleServerFunctionRequest` に `collectFlightData` を自分で渡してください。
 
-## Recap
+## まとめ
 
-- The same `Router` renders on both sides; on the server it reads the request URL from the request event, or from the `url` prop when there is no request.
-- Use `renderToStream` for any route tree with a lazy subtree.
-- Keep `query` names and arguments stable across server and client so the browser adopts the serialized result instead of fetching again.
-- Register `createFlightDataCollector(Router)` from a `serverFunctions.configure` module to fold fresh query results into each mutation response.
-- Put the reads a page needs in its `preload`; the collector refreshes only what the preloads touch.
-- Set `actionBase` when the server-function endpoint moves off `/_server`.
-- Wrap `props.children` in `Loading` so the shell streams before the queries settle.
+- 同じ `Router` が両側でレンダリングします。サーバーではリクエストイベントからリクエスト URL を読み取り、リクエストがないときは `url` prop から読み取ります。
+- 遅延サブツリーを持つルートツリーには `renderToStream` を使います。
+- サーバーとクライアントで `query` の名前と引数を安定させ、ブラウザーが再フェッチする代わりにシリアライズされた結果を採用するようにします。
+- `serverFunctions.configure` モジュールから `createFlightDataCollector(Router)` を登録し、新鮮なクエリ結果を各ミューテーションレスポンスに畳み込みます。
+- ページが必要とする読み取りは `preload` に置きます。コレクターはプリロードが触れるものしか更新しません。
+- サーバー関数エンドポイントが `/_server` から移ったら `actionBase` を設定します。
+- `props.children` を `Loading` で囲み、クエリが確定する前にシェルがストリーミングされるようにします。
 
-## Next steps
+## 次のステップ
 
-- [Choose a rendering mode](/guides/choose-a-rendering-mode): static shell, streaming SSR, or prerendering, and what each asks of your route code.
-- [Server functions](/building-apps/server-functions): the runtime under `query` and `action` in a `fullstack` project.
-- [Deployment](/building-apps/deployment): where the server handler runs.
-- [`@solidjs/router/server` reference](/reference/solid-router/server): `createFlightDataCollector` options.
+- [レンダリングモードを選ぶ](/guides/choose-a-rendering-mode): 静的シェル・ストリーミング SSR・プリレンダリング、そしてそれぞれがルートコードに求めるもの。
+- [サーバー関数](/building-apps/server-functions): `fullstack` プロジェクトにおける `query` と `action` の下にあるランタイム。
+- [デプロイ](/building-apps/deployment): サーバーハンドラーが動く場所。
+- [`@solidjs/router/server` リファレンス](/reference/solid-router/server): `createFlightDataCollector` のオプション。
