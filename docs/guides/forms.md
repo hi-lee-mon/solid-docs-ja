@@ -1,36 +1,36 @@
 ---
-title: "Forms"
+title: "フォーム"
 version: "2.0"
-description: "Build a form with a server function and a Solid Router action: it works before JavaScript loads, validates on the server, and after hydration shows pending state, inline errors, and the saved result before the server confirms."
+description: "サーバー関数と Solid Router のアクションでフォームを作ります: JavaScript の読み込み前から動作し、サーバーでバリデーションし、ハイドレーション後は保留中の状態・インラインエラー・サーバーが確認する前の保存結果を表示します。"
 ---
 
-The checkout needs a shipping address.
-The form has to save the address when the user clicks **Continue**, reject a postal code that is not five digits even when someone posts to it with `curl`, and show the user which field was wrong.
-On a slow connection it has to do the first of those before the JavaScript has loaded.
+チェックアウトには配送先住所が必要です。
+このフォームは、ユーザーが **Continue** をクリックしたときに住所を保存し、`curl` で直接投稿された場合でも 5 桁でない郵便番号を拒否し、どのフィールドが間違っていたかをユーザーに示さなければなりません。
+低速な接続では、その最初の処理を JavaScript が読み込まれる前に実行しなければなりません。
 
-This guide builds that form in four passes.
-The first is a form that posts to a server function through a Solid Router action, with no JavaScript in the browser at all.
-The second adds validation the user cannot bypass.
-The third shows the validation messages inline and marks the form as pending, without changing the HTML.
-The fourth turns the form into an address book entry that appears in the list before the server has confirmed it.
-Each pass is a working form on its own; stop at the one that matches what the app needs.
+このガイドでは、そのフォームを 4 つのパスで作り上げます。
+1 つ目は、ブラウザーに JavaScript が一切なくても、Solid Router のアクションを通じてサーバー関数に投稿するフォームです。
+2 つ目は、ユーザーが回避できないバリデーションを追加します。
+3 つ目は、HTML を変えずに、バリデーションメッセージをインラインで表示し、フォームを保留中として示します。
+4 つ目は、フォームをアドレス帳のエントリーに変え、サーバーが確認する前に一覧に表示されるようにします。
+各パスはそれだけで動作するフォームです。アプリが必要とする段階で止めてください。
 
-The guide assumes a `fullstack` project with [server functions](/building-apps/server-functions) enabled and [Solid Router](/routing/solid-router) mounted.
+このガイドは、[サーバー関数](/building-apps/server-functions)を有効にし、[Solid Router](/routing/solid-router)をマウントした `fullstack` プロジェクトを前提とします。
 
-:::pitfall[Two functions named action]
-This guide uses `action` from `@solidjs/router`.
-It wraps a function so a form can submit to it and the router can track the submission.
+:::pitfall[`action` という名前の関数が 2 つある]
+このガイドでは `@solidjs/router` の `action` を使います。
+これは関数をラップして、フォームがそこへサブミットでき、ルーターがそのサブミッションを追跡できるようにするものです。
 
-`solid-js` also exports an [`action`](/reference/solid-js/lifecycle-actions/action); that one runs a generator as a reactive transaction and is covered in [Mutations](/concepts/mutations).
-Editor auto-import offers both, and `<form action={coreAction}>` fails at the type level because the core `action` does not produce a URL.
-The router's `action` uses the core one internally.
-Every `action` in the code on this page is the router's.
+`solid-js` も [`action`](/reference/solid-js/lifecycle-actions/action) をエクスポートしています。そちらはジェネレーターをリアクティブなトランザクションとして実行するもので、[ミューテーション](/concepts/mutations)で説明しています。
+エディターの自動インポートは両方を提示しますが、`<form action={coreAction}>` はコアの `action` が URL を生成しないため型レベルで失敗します。
+ルーターの `action` は内部でコアのものを使っています。
+このページのコードに出てくる `action` はすべてルーターのものです。
 :::
 
-## Pass 1: a form that posts to a server function
+## パス 1: サーバー関数に投稿するフォーム
 
-Start with the server side.
-A server function that takes one `FormData` argument can receive an HTML form submission directly:
+サーバー側から始めます。
+`FormData` 引数を 1 つ取るサーバー関数は、HTML フォームのサブミッションをそのまま受け取れます:
 
 ```ts
 // src/data/address.ts
@@ -49,7 +49,7 @@ export async function saveAddress(form: FormData) {
 }
 ```
 
-Wrap it in a router `action` and pass the action to the form:
+これをルーターの `action` でラップし、そのアクションをフォームに渡します:
 
 ```tsx
 // src/routes/checkout/address.tsx
@@ -79,35 +79,35 @@ export default function AddressPage() {
 }
 ```
 
-Load the page and disable JavaScript in the browser's developer tools.
-Fill in the three fields and click **Continue to shipping**: the browser posts the form, the server saves the address, and the shipping page loads.
+ページを読み込み、ブラウザーの開発者ツールで JavaScript を無効にしてください。
+3 つのフィールドを入力して **Continue to shipping** をクリックします: ブラウザーはフォームを投稿し、サーバーは住所を保存し、配送ページが読み込まれます。
 
-:::note[Where the server function file lives]
-The server function is in `src/data/`, not next to the page.
-With method discovery on, a file under `src/routes` becomes an [API route](/building-apps/middleware-and-api-routes#api-routes) as soon as it exports an uppercase HTTP method; keeping server functions in `src/data` means a later export cannot turn one into a route by accident.
+:::note[サーバー関数のファイルの置き場所]
+サーバー関数はページの隣ではなく `src/data/` に置きます。
+メソッド検出がオンの場合、`src/routes` 配下のファイルは大文字の HTTP メソッドをエクスポートした時点で [APIルート](/building-apps/middleware-and-api-routes#api-routes)になります。サーバー関数を `src/data` に置いておけば、後からのエクスポートが誤ってそれをルートに変えてしまうことはありません。
 :::
 
-`action(saveAddress)` returns a value that serializes to the server function's URL, so `action={submitAddress}` renders as an ordinary `action="..."` attribute in the HTML.
-The browser posts to that URL, the server-function runtime sees that the request came from an HTML form rather than the Solid client, decodes the body as `FormData`, runs `saveAddress`, and follows the redirect.
+`action(saveAddress)` はサーバー関数の URL にシリアライズされる値を返すため、`action={submitAddress}` は HTML では通常の `action="..."` 属性としてレンダーされます。
+ブラウザーはその URL に投稿し、サーバー関数ランタイムはリクエストが Solid クライアントではなく HTML フォームから来たことを認識し、ボディを `FormData` としてデコードして `saveAddress` を実行し、リダイレクトに従います。
 
-With JavaScript on, the router intercepts the submit instead.
-It calls `saveAddress` through the server-function client, and when the function returns the redirect the router navigates without a page load.
-Both paths run the same function with the same `FormData`.
+JavaScript がオンの場合、代わりにルーターがサブミットをインターセプトします。
+ルーターはサーバー関数クライアントを通じて `saveAddress` を呼び出し、関数がリダイレクトを返すとページ読み込みなしで遷移します。
+どちらの経路も同じ `FormData` で同じ関数を実行します。
 
-[Add router submissions](/building-apps/server-functions/mutations-and-responses#add-router-submissions) covers the inline shape and when to use it.
+[ルーターのサブミッションを追加する](/building-apps/server-functions/mutations-and-responses#add-router-submissions)では、インラインの書き方とその使いどきを説明しています。
 
-Two details are doing the work here.
-The inputs are uncontrolled: Solid does not read their values while the user types, and the browser assembles the `FormData` on submit.
-`required` and `pattern` are the browser's own validation; the browser does not submit until they pass.
+ここでは 2 つの細部が機能しています。
+input は非制御（uncontrolled）です: Solid はユーザーが入力している間その値を読み取らず、ブラウザーがサブミット時に `FormData` を組み立てます。
+`required` と `pattern` はブラウザー自身のバリデーションであり、ブラウザーはそれらを通過するまでサブミットしません。
 
-This is a complete, deployable form.
-What it lacks is validation the user cannot bypass and any feedback other than a redirect.
+これは完全な、デプロイ可能なフォームです。
+欠けているのは、ユーザーが回避できないバリデーションと、リダイレクト以外のフィードバックです。
 
-## Pass 2: validate on the server
+## パス 2: サーバーでバリデーションする
 
-Browser validation is a convenience for the user.
-Anyone can post to the server function's URL with `curl`, so the function must check the data itself before touching the database.
-Parse the `FormData` with a schema:
+ブラウザーのバリデーションはユーザーのための利便性です。
+誰でも `curl` でサーバー関数の URL に投稿できるため、関数はデータベースに触れる前にデータを自分でチェックしなければなりません。
+`FormData` をスキーマでパースします:
 
 ```ts
 // src/data/address.ts
@@ -145,10 +145,10 @@ export async function saveAddress(form: FormData) {
 }
 ```
 
-`Object.fromEntries(form)` turns the `FormData` into a plain object for the schema.
-Post a bad postal code with `curl` and the response is a `400` whose body carries the field messages; the database is not touched.
+`Object.fromEntries(form)` は `FormData` をスキーマ用のプレーンなオブジェクトに変換します。
+`curl` で不正な郵便番号を投稿すると、レスポンスはフィールドメッセージをボディに載せた `400` になり、データベースは一切触れられません。
 
-The failure leaves the function as a thrown `respond()` envelope, and the choice of `respond()` over a plain error is what makes the messages reach the client:
+この失敗はスローされた `respond()` エンベロープとして関数を抜けます。プレーンなエラーではなく `respond()` を選ぶことが、メッセージをクライアントへ届かせる鍵です:
 
 ```ts
 // Avoid: a plain Error, which production replaces with a generic message
@@ -162,22 +162,22 @@ if (!parsed.success) {
 }
 ```
 
-Run the `Avoid` version in a production build and the client receives `Internal Server Error` with no field messages, because the runtime replaces an unmarked thrown `Error` with a generic message so a stack trace or a database error cannot leak.
-Throwing an envelope is intentional control flow: the runtime keeps the `400` and the value in development and production alike.
-[Handle thrown errors](/building-apps/server-functions/mutations-and-responses#handle-thrown-errors) covers `markSafeError` for the cases where the thrown value is an `Error` on purpose.
+本番ビルドで `Avoid` の版を実行すると、クライアントが受け取るのはフィールドメッセージのない `Internal Server Error` です。ランタイムは、スタックトレースやデータベースエラーが漏れないよう、印のないスローされた `Error` を汎用メッセージに置き換えるためです。
+エンベロープをスローするのは意図的な制御フローです: ランタイムは開発でも本番でも `400` と値を保持します。
+スローする値が意図的に `Error` であるケース向けの `markSafeError` は、[スローされたエラーを処理する](/building-apps/server-functions/mutations-and-responses#handle-thrown-errors)で説明しています。
 
-The schema and `valibot` are used only inside the `"use server"` body, so they do not enter the client bundle.
-The `AddressIssues` type is exported for the client to use in the next pass.
+スキーマと `valibot` は `"use server"` の本文内でのみ使われるため、クライアントバンドルには入りません。
+`AddressIssues` 型は、次のパスでクライアントが使うためにエクスポートされています。
 
-The component from pass 1 does not change.
-With JavaScript on, a failed submission is recorded by the router but nothing displays it yet.
-Without JavaScript, the runtime redirects back to the form and the router records the same submission on the next server render.
-On its own, pass 2 protects the database; the user sees a form that appears to have done nothing.
-Keep the browser attributes from pass 1 so most users never reach the server-side failure.
+パス 1 のコンポーネントは変更不要です。
+JavaScript がオンの場合、失敗したサブミッションはルーターに記録されますが、まだ何も表示されません。
+JavaScript がない場合、ランタイムはフォームへリダイレクトで戻し、ルーターは次のサーバーレンダーで同じサブミッションを記録します。
+パス 2 単体ではデータベースは守られますが、ユーザーには何も起きなかったように見えるフォームが見えます。
+ほとんどのユーザーがサーバー側の失敗に到達しないよう、パス 1 のブラウザー属性は残してください。
 
-## Pass 3: inline errors and pending state
+## パス 3: インラインエラーと保留中状態
 
-Read the recorded submissions with `useSubmissions` and show the messages next to the fields:
+`useSubmissions` で記録されたサブミッションを読み取り、フィールドの横にメッセージを表示します:
 
 ```tsx
 // src/routes/checkout/address.tsx
@@ -240,23 +240,23 @@ export default function AddressPage() {
 }
 ```
 
-Submit the form with an empty name and the message appears under the name field, with JavaScript on or off.
-The `<form>` element and its inputs are the same as in pass 1; only the message elements were added.
+名前を空のままフォームを送信すると、JavaScript のオン・オフにかかわらず、名前フィールドの下にメッセージが表示されます。
+`<form>` 要素とその input はパス 1 と同じです。追加されたのはメッセージ要素だけです。
 
-`useSubmissions(submitAddress)` returns a reactive array of this action's settled submissions, each with the `input` that was sent and either a `result` or an `error`.
-When `saveAddress` throws the `respond()` envelope, the carried value becomes `submission.error`, which is where `issues()` reads the field messages.
-A submission that returned a redirect does not stay in the list.
-`issues()` is a plain derived function read from JSX, following the rule from the [Reactivity](/concepts/reactivity) page.
+`useSubmissions(submitAddress)` は、このアクションの確定済みサブミッションのリアクティブな配列を返します。各要素は送信された `input` と、`result` または `error` のどちらかを持ちます。
+`saveAddress` が `respond()` エンベロープをスローすると、運ばれた値が `submission.error` になり、`issues()` はここからフィールドメッセージを読み取ります。
+リダイレクトを返したサブミッションは一覧に残りません。
+`issues()` は JSX から読み取られるプレーンな派生関数で、[リアクティビティ](/concepts/reactivity)ページのルールに従っています。
 
-:::deep-dive[How the error reaches the page without JavaScript]
-When the form posts without the client, the server-function runtime cannot hand the `400` to a script.
-It stores the thrown value in a one-shot cookie and redirects back to the form's URL.
-The router reads that cookie during the next server render and records the same submission it would have recorded from a scripted call, and the cookie is cleared once it has been read.
-`useSubmissions` sees one entry either way, so the inline errors render on that page load.
+:::deep-dive[JavaScript なしでエラーがページへ届く仕組み]
+クライアントなしでフォームが投稿されると、サーバー関数ランタイムは `400` をスクリプトへ渡せません。
+そこでスローされた値を一回限りの Cookie に保存し、フォームの URL へリダイレクトで戻します。
+ルーターは次のサーバーレンダーでその Cookie を読み取り、スクリプト経由の呼び出しで記録するのと同じサブミッションを記録します。Cookie は読み取られると消去されます。
+`useSubmissions` はどちらの経路でも 1 件のエントリーを見るため、そのページ読み込みでインラインエラーがレンダーされます。
 :::
 
-While a scripted submission is in flight, the router sets `aria-busy="true"` on the form and removes it when the call and any revalidation settle.
-Style the pending state in CSS, with no component code:
+スクリプト経由のサブミッションが実行中の間、ルーターはフォームに `aria-busy="true"` を設定し、呼び出しと再検証がすべて確定するとそれを外します。
+コンポーネントのコードなしで、保留中状態を CSS でスタイルします:
 
 ```css
 form[aria-busy] button[type="submit"] {
@@ -265,12 +265,12 @@ form[aria-busy] button[type="submit"] {
 }
 ```
 
-## Pass 4: show the saved address before the server confirms
+## パス 4: サーバーが確認する前に保存済み住所を表示する
 
-A returning customer has an address book, and the form adds to it rather than moving on to shipping.
-The list should show the new address the moment the user clicks **Save**, marked as unconfirmed until the server has it.
+リピーターの顧客はアドレス帳を持っており、フォームは配送へ進むのではなくアドレス帳に追加します。
+一覧は、ユーザーが **Save** をクリックした瞬間に新しい住所を表示し、サーバーが受け取るまでは未確認として印を付けるべきです。
 
-The server side gets a cached read for the list and a second function that saves without redirecting:
+サーバー側には、一覧用のキャッシュされた読み取りと、リダイレクトせずに保存する 2 つ目の関数を追加します:
 
 ```ts
 // src/data/address.ts
@@ -300,10 +300,10 @@ export async function addAddress(form: FormData) {
 }
 ```
 
-`toIssues` is the loop from pass 2 moved into a helper, and `currentCustomerId()` stands for the session read from [Sessions and auth](/building-apps/sessions-and-auth).
-`reload({ revalidate: getAddresses.key })` tells the router which query to refetch when the action completes.
+`toIssues` はパス 2 のループをヘルパーに移したもので、`currentCustomerId()` は[セッションと認証](/building-apps/sessions-and-auth)のセッション読み取りを表しています。
+`reload({ revalidate: getAddresses.key })` は、アクション完了時にどのクエリを再フェッチするかをルーターに伝えます。
 
-The page reads the list through an optimistic store and pushes the submitted fields into it from the action's `.onSubmit` hook:
+ページは楽観的ストアを通じて一覧を読み取り、アクションの `.onSubmit` フックから送信されたフィールドをそこへプッシュします:
 
 ```tsx
 // src/routes/checkout/address.tsx
@@ -355,22 +355,22 @@ export default function AddressPage() {
 }
 ```
 
-Click **Save address** and the new line appears at the bottom of the list with the `pending` class before any request has finished.
-When `addAddress` returns, the router revalidates `getAddresses`, the store reconciles the server's list, and the unsaved line is replaced by the saved one with its real `id`.
-Post a bad postal code and the line disappears when the `400` arrives, because an optimistic write is an overlay that Solid discards when the action settles, on success and on failure alike; the inline message from pass 3 explains why.
+**Save address** をクリックすると、リクエストが完了する前に、`pending` クラスを付けた新しい行が一覧の末尾に現れます。
+`addAddress` が戻ると、ルーターは `getAddresses` を再検証し、ストアはサーバーの一覧と突き合わせ、未保存の行は本物の `id` を持つ保存済みの行に置き換わります。
+不正な郵便番号を投稿すると、`400` が届いた時点でその行は消えます。楽観的書き込みはオーバーレイであり、成功・失敗のどちらでもアクションが確定した時点で Solid が破棄するためです。理由はパス 3 のインラインメッセージが説明します。
 
-`.onSubmit` receives the action's arguments, here the `FormData`, and runs as the first step of the action's transaction, so the write is held with the mutation instead of committing on its own.
-[Before the server confirms](/routing/solid-router/data#before-the-server-confirms) covers the hook, and [Mutations](/concepts/mutations) explains why the overlay needs no rollback code.
+`.onSubmit` はアクションの引数（ここでは `FormData`）を受け取り、アクションのトランザクションの最初のステップとして実行されるため、この書き込みは単独でコミットされるのではなくミューテーションと一緒に保持されます。
+[サーバーが確認する前](/routing/solid-router/data#before-the-server-confirms)でこのフックを説明し、[ミューテーション](/concepts/mutations)ではなぜオーバーレイにロールバックコードが不要なのかを説明しています。
 
-Disable JavaScript and submit the same form.
-The browser posts, `addAddress` runs, the `reload` sends the browser back to the page, and the server renders the list with the new address in it.
-The `createOptimisticStore` and the `.onSubmit` hook did nothing on that path, and nothing had to be written to make the form fall back to it.
-Each pass in this guide added a layer to the same `<form method="post" action={submitAddress}>`: pass 1 made it work, pass 2 made it safe, pass 3 made it explain itself, and pass 4 made it feel immediate; the shopper whose bundle has not arrived yet still gets pass 1.
+JavaScript を無効にして同じフォームを送信してください。
+ブラウザーは投稿し、`addAddress` が実行され、`reload` がブラウザーをページへ戻し、サーバーは新しい住所が入った一覧をレンダーします。
+その経路では `createOptimisticStore` と `.onSubmit` フックは何もしていません。フォームをそこへフォールバックさせるために書くものも何もありませんでした。
+このガイドの各パスは、同じ `<form method="post" action={submitAddress}>` にレイヤーを 1 つずつ重ねてきました: パス 1 は動くようにし、パス 2 は安全にし、パス 3 は説明できるようにし、パス 4 は即座に感じられるようにしました。まだバンドルが届いていない買い物客にも、パス 1 は届いています。
 
-## Live validation while typing
+## 入力中のライブバリデーション
 
-The passes above validate on submit.
-When a field should report as the user types, make that input controlled: hold its value in a signal, and derive the message from the value.
+これまでのパスはサブミット時にバリデーションしていました。
+ユーザーが入力しているときにフィールドが報告すべき場合は、その input を制御されたものにします: 値をシグナルに保持し、メッセージを値から派生させます。
 
 ```tsx
 import { createMemo, createSignal } from "solid-js";
@@ -398,20 +398,20 @@ function PostalCodeField() {
 }
 ```
 
-Type `123` and the message appears; type two more digits and it clears.
-`value={postalCode()}` writes the signal into the input, and `onInput` writes the input back into the signal.
-The message is a memo of the value rather than a second signal set from an effect; [Avoid unnecessary effects](/guides/avoid-unnecessary-effects#calculate-values-when-they-are-read) shows what the effect version does when it runs.
-The input keeps its `name`, so the same `FormData` reaches the server function and the server-side schema still runs.
+`123` と打てばメッセージが現れ、あと 2 桁打てば消えます。
+`value={postalCode()}` がシグナルを input へ書き込み、`onInput` が input をシグナルへ書き戻します。
+メッセージはエフェクトから設定される 2 つ目のシグナルではなく、値のメモです。エフェクト版が実行時に何をするかは[不要なエフェクトを避ける](/guides/avoid-unnecessary-effects#calculate-values-when-they-are-read)で説明しています。
+input は `name` を維持しているため、同じ `FormData` がサーバー関数へ届き、サーバー側のスキーマも引き続き実行されます。
 
-:::tip[Control only the fields that need live feedback]
-A controlled input updates its text on every keystroke; an uncontrolled one costs nothing until submit.
-Leave the fields that validate on submit uncontrolled, as in the four passes above.
+:::tip[ライブフィードバックが必要なフィールドだけを制御対象にする]
+制御された input はキーストロークごとにテキストを更新します。非制御のものはサブミットまで何もコストがかかりません。
+上の 4 つのパスのように、サブミット時にバリデーションするフィールドは非制御のままにしてください。
 :::
 
-## Editing an existing record
+## 既存レコードの編集
 
-When the form edits a value that came from the server, the inputs need an initial value that follows the source but can be edited locally.
-Pass a function to `createSignal` or `createStore` to create a writable derivation:
+フォームがサーバーから来た値を編集する場合、input にはソースに追従しつつローカルで編集できる初期値が必要です。
+`createSignal` または `createStore` に関数を渡して、書き込み可能な派生を作ります:
 
 ```tsx
 import { createStore } from "solid-js";
@@ -426,56 +426,56 @@ function AddressForm(props: { address: Address }) {
 }
 ```
 
-The second argument is the seed the store starts from before the first derivation lands.
-Edits write to `draft`.
-When `props.address` changes, for example after a save and revalidation, the draft resets to the new source.
-[Use a writable derivation for a local override](/guides/avoid-unnecessary-effects#use-a-writable-derivation-for-a-local-override) shows the full pattern with per-field validation, and the effect-based copy it replaces.
+第 2 引数は、最初の派生が届く前にストアが開始するシードです。
+編集は `draft` へ書き込まれます。
+`props.address` が変わると（例えば保存と再検証のあと）、ドラフトは新しいソースへリセットされます。
+フィールドごとのバリデーションを含む完全なパターンと、それが置き換えるエフェクトベースのコピーは[ローカルな上書きには書き込み可能な派生を使う](/guides/avoid-unnecessary-effects#use-a-writable-derivation-for-a-local-override)で説明しています。
 
-## Common problems
+## よくある問題
 
-### The server function receives an empty object
+### サーバー関数が空のオブジェクトを受け取る
 
-The inputs have no `name` attribute, or the form uses `method="get"`.
-Every field that should reach the server needs a `name`, and mutations must post.
+input に `name` 属性がないか、フォームが `method="get"` を使っています。
+サーバーへ届けるべきすべてのフィールドに `name` が必要で、ミューテーションは POST しなければなりません。
 
-### The form submits, but the page reloads instead of staying put
+### フォームは送信されるが、その場に留まらずページがリロードされる
 
-The router is not mounted around the form, so nothing intercepts the submit and the browser follows the `action` URL as a full-page navigation.
-Check that the page is rendered inside the `Router`.
+フォームの周囲にルーターがマウントされていないため、サブミットをインターセプトするものがなく、ブラウザーは `action` の URL をフルページ遷移としてたどります。
+ページが `Router` の内側でレンダーされているか確認してください。
 
-### `action` is not a function, or the form attribute renders as source code
+### `action` が関数でない、またはフォーム属性がソースコードとしてレンダーされる
 
-The `action` came from `solid-js` instead of `@solidjs/router`.
-The core `action` wraps generator functions for reactive transactions and has no URL to serialize.
-Import `action` from `@solidjs/router` for forms.
+`action` が `@solidjs/router` ではなく `solid-js` から来ています。
+コアの `action` はジェネレーター関数をリアクティブトランザクションのためにラップするもので、シリアライズする URL を持ちません。
+フォームには `@solidjs/router` から `action` をインポートしてください。
 
-### Errors show for a moment and then vanish
+### エラーが一瞬表示されて消える
 
-Something is clearing the submission.
-`submission.clear()` removes an entry from the list; call it when the user dismisses the error or resubmits, not from an effect that runs on every render.
+何かがサブミッションを消去しています。
+`submission.clear()` はエントリーを一覧から取り除きます。レンダーのたびに実行されるエフェクトからではなく、ユーザーがエラーを閉じたり再送信したりしたときに呼び出してください。
 
-### `respond()` reaches the client as `Internal Server Error`
+### `respond()` が `Internal Server Error` としてクライアントに届く
 
-The value was thrown as a plain object or `Error` instead of through `respond()` or `markSafeError()`.
-Production builds replace unbranded thrown errors with a generic message.
-Use `throw respond(value, { status })` for structured failures.
+値が `respond()` や `markSafeError()` を通さず、プレーンなオブジェクトや `Error` としてスローされています。
+本番ビルドはブランドのないスローされたエラーを汎用メッセージに置き換えます。
+構造化された失敗には `throw respond(value, { status })` を使ってください。
 
-## Recap
+## まとめ
 
-- Post a `FormData` argument to a server function through a router `action`, and the form works before JavaScript loads.
-- Keep server functions outside `src/routes`, where an uppercase method export would make the file an API route.
-- Import `action` from `@solidjs/router` for forms; the core `action` has no URL.
-- Leave inputs uncontrolled unless a field needs feedback while typing; the browser assembles the `FormData` on submit.
-- Validate on the server with a schema; browser attributes are a convenience anyone can bypass with `curl`.
-- Throw `respond(value, { status: 400 })` for a validation failure; a plain `Error` reaches production clients as `Internal Server Error`.
-- Read failures from `useSubmissions(action)`, where the envelope's value is `submission.error`.
-- Style the pending state from `form[aria-busy]`; the router sets and clears the attribute.
-- Push the submitted fields into a `createOptimisticStore` from the action's `.onSubmit` hook to show the result at once; the overlay is discarded when the action settles and the revalidated list replaces it.
-- Every layer after pass 1 exists only on the hydrated page; the same form still posts, and the server renders the page again, without JavaScript.
+- `FormData` 引数をルーターの `action` を通じてサーバー関数へ投稿すれば、フォームは JavaScript の読み込み前から動作します。
+- サーバー関数は `src/routes` の外に置きます。大文字のメソッドエクスポートがファイルを APIルートにしてしまうためです。
+- フォームには `@solidjs/router` から `action` をインポートします。コアの `action` には URL がありません。
+- 入力中のフィードバックが必要なフィールド以外は input を非制御のままにします。ブラウザーがサブミット時に `FormData` を組み立てます。
+- サーバーでスキーマによるバリデーションを行います。ブラウザー属性は `curl` で誰でも回避できる利便性にすぎません。
+- バリデーション失敗には `respond(value, { status: 400 })` をスローします。プレーンな `Error` は本番のクライアントには `Internal Server Error` として届きます。
+- 失敗は `useSubmissions(action)` から読み取ります。エンベロープの値は `submission.error` です。
+- 保留中状態は `form[aria-busy]` からスタイルします。属性の設定と解除はルーターが行います。
+- アクションの `.onSubmit` フックから送信フィールドを `createOptimisticStore` へプッシュすると、結果を即座に表示できます。オーバーレイはアクションが確定すると破棄され、再検証された一覧がそれに置き換わります。
+- パス 1 以降のすべてのレイヤーはハイドレートされたページ上にのみ存在します。JavaScript がなくても同じフォームは投稿され、サーバーがページを再度レンダーします。
 
-## Next steps
+## 次のステップ
 
-- [Data loading and mutations](/routing/solid-router/data): `.with()` for bound arguments, what revalidates after a mutation, and the cart version of the optimistic pattern from pass 4.
-- [Progressive enhancement](/building-apps/server-functions/progressive-enhancement): what the server-function runtime does with an unscripted request, for forms outside the router.
-- [Arguments and security](/building-apps/server-functions/arguments-and-security): the other argument encodings and the same-origin check that protects POSTs.
-- [Sessions and auth](/building-apps/sessions-and-auth): the same form shape applied to sign-in and sign-out.
+- [データの読み込みとミューテーション](/routing/solid-router/data): バインド引数向けの `.with()`、ミューテーション後に何が再検証されるか、そしてパス 4 の楽観的パターンのカート版。
+- [プログレッシブエンハンスメント](/building-apps/server-functions/progressive-enhancement): サーバー関数ランタイムがスクリプトなしのリクエストに対して何をするか。ルーターの外にあるフォーム向け。
+- [引数とセキュリティ](/building-apps/server-functions/arguments-and-security): その他の引数エンコーディングと、POST を守る同一オリジンチェック。
+- [セッションと認証](/building-apps/sessions-and-auth): 同じフォームの形をサインインとサインアウトに適用。
