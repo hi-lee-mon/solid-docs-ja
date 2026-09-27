@@ -1,18 +1,18 @@
 ---
-title: "Nested routes and layouts"
+title: "ネストされたルートとレイアウト"
 version: "2.0"
-description: "Wrap a group of pages in a shared layout, keep it mounted while pages change, share parameters down the tree, and load data at every level without a waterfall."
+description: "ページ群を共有レイアウトで包み、ページが変わってもマウントを維持し、ツリーの下へパラメータを共有し、ウォーターフォールなしで各レベルでデータをロードします。"
 ---
 
-Most apps have sections: an account area with its own sidebar, an admin area behind a sign-in check, a product catalog with a filter bar.
-Nested routes let you write the section's frame once and swap the page inside it.
+ほとんどのアプリにはセクションがあります。独自のサイドバーを持つアカウント領域、サインインチェックの背後にある管理領域、フィルターバーのある商品カタログです。
+ネストされたルートを使うと、セクションのフレームを一度書くだけで、その中のページを入れ替えられます。
 
-This page adds an account section to the store from the [Solid Router introduction](/routing/solid-router).
+このページでは[Solid Router 概要](/routing/solid-router)のストアにアカウントセクションを追加します。
 
-## A layout and its pages
+## レイアウトとそのページ
 
-A route with `children` renders its component around whichever child matched.
-The child arrives as `props.children`, the same way any Solid component receives children:
+`children` を持つルートは、マッチした子をそのコンポーネントで包んでレンダーします。
+子は `props.children` として届きます。あらゆる Solid コンポーネントが children を受け取るのと同じ仕組みです:
 
 ```tsx
 // src/router.ts
@@ -52,14 +52,14 @@ export default function AccountLayout(props: RouteProps<typeof paths.account>) {
 }
 ```
 
-Visit `/account/orders` and the page shows the account `<nav>` with the orders list in the `<section>` below it.
-Child paths are relative to the parent: `/account` renders `AccountLayout` with `Profile` inside, and `/account/orders/42` renders `AccountLayout` with `Order` inside.
-`paths` follows the same nesting, so `paths.account.orders(42)` is `/account/orders/42`.
+`/account/orders` にアクセスすると、ページはアカウントの `<nav>` と、その下の `<section>` に注文一覧を表示します。
+子のパスは親に対して相対的です。`/account` は `AccountLayout` の内側に `Profile` をレンダーし、`/account/orders/42` は `AccountLayout` の内側に `Order` をレンダーします。
+`paths` も同じネストに従うため、`paths.account.orders(42)` は `/account/orders/42` です。
 
-Every level of the match receives the same four props: `params`, `location`, `data`, and `children`.
-A leaf page has no `children`.
+マッチのすべてのレベルは同じ4つの props を受け取ります: `params`、`location`、`data`、`children`。
+葉のページには `children` がありません。
 
-The habit from component libraries is to import the frame into each page and wrap the page in it:
+コンポーネントライブラリの習慣では、フレームを各ページにインポートしてページを包みがちです:
 
 ```tsx
 // Avoid: each page wraps itself, so every page change builds a new layout
@@ -77,11 +77,11 @@ export default function Orders() {
 }
 ```
 
-Run the `Avoid` version and click from Profile to Orders: the account `<nav>` is torn down and rebuilt, a search box in it loses its text, and two pages that both render `<AccountLayout>` are two separate layouts with nothing shared between them.
-With the layout as a route, the next section describes what happens instead.
+`Avoid` 版を実行して Profile から Orders へクリックすると、アカウントの `<nav>` は破棄・再構築され、その中の検索ボックスはテキストを失います。どちらも `<AccountLayout>` をレンダーする2つのページは、何も共有しない2つの別レイアウトです。
+レイアウトをルートにした場合に代わりに何が起きるかを、次のセクションで説明します。
 
-:::pitfall[A layout that does not render its children]
-A layout route whose component leaves out `props.children` renders its own frame and nothing else, without an error:
+:::pitfall[children をレンダーしないレイアウト]
+`props.children` を省いたレイアウトルートのコンポーネントは、エラーなしに自分のフレームだけをレンダーします:
 
 ```tsx
 // Avoid: the frame renders, the matched page does not
@@ -95,36 +95,36 @@ export default function AccountLayout(props: RouteProps<typeof paths.account>) {
 }
 ```
 
-The `<section>` stays empty on every URL under `/account`.
-When a nested page does not appear, check that the layout renders `props.children` before looking anywhere else.
+`<section>` は `/account` 以下のすべての URL で空のままです。
+ネストされたページが表示されないときは、他を調べる前にまずレイアウトが `props.children` をレンダーしているか確認してください。
 :::
 
-## What stays mounted
+## マウントされ続けるもの
 
-Click from Profile to Orders and watch what happens.
-`AccountLayout` does not re-run.
-Its `<nav>` keeps its DOM, a search box in it keeps its text, a signal created in it keeps its value.
-Only the `<section>` contents change.
+Profile から Orders へクリックして、何が起きるか見てみましょう。
+`AccountLayout` は再実行されません。
+その `<nav>` は DOM を保ち、その中の検索ボックスはテキストを保ち、その中で作られたシグナルは値を保ちます。
+変わるのは `<section>` の中身だけです。
 
-![Two component trees, for /account/profile and /account/orders. The Router function child and AccountLayout are the same instance in both; only the page level, Profile then Orders, is disposed and created.](/images/diagrams/nested-routes-what-stays-mounted.svg)
+![/account/profile と /account/orders の2つのコンポーネントツリー。Router の関数 child と AccountLayout は両方で同じインスタンスで、ページレベル（Profile から Orders）だけが破棄・生成される。](/images/diagrams/nested-routes-what-stays-mounted.svg)
 
-The router keeps a route's component alive as long as that route definition is still part of the match.
-It creates and disposes only the levels that changed.
-The consequences are the ones you would want:
+ルーターは、ルートのコンポーネントを、そのルート定義がマッチの一部である限り生存させます。
+変化したレベルだけを生成・破棄します。
+その結果は期待どおりです:
 
-- State that belongs to the section lives in the layout and survives page changes.
-- State that belongs to a page lives in the page and resets when the user leaves it.
-- Moving from `/account/orders/42` to `/account/orders/43` keeps `Order` mounted too, since the route definition did not change; `props.params.id` updates and anything that reads it updates with it.
+- セクションに属する状態はレイアウトに置かれ、ページ遷移を生き残ります。
+- ページに属する状態はページに置かれ、ユーザーが離れるとリセットされます。
+- `/account/orders/42` から `/account/orders/43` への移動では、ルート定義が変わらないため `Order` もマウントされたままです。`props.params.id` が更新され、それを読むものが追従します。
 
-The function child of `<Router>` is one level above all of this.
-It is never part of a match, so it stays mounted for the life of the app.
-Put the app shell and app-wide providers there; put section chrome in a layout route.
+`<Router>` の関数 child はこれらすべての一段上にあります。
+マッチの一部にはならないため、アプリの存続期間中ずっとマウントされたままです。
+アプリシェルとアプリ全体のプロバイダーはそこに置き、セクション固有の外枠はレイアウトルートに置きます。
 
-## Layouts without a URL segment
+## URL セグメントを持たないレイアウト
 
-Sometimes the frame is not a place the user visits.
-A sign-in check around a set of pages is the common case.
-Leave `path` off and the route adds a component to the match without adding to the URL:
+フレームがユーザーが訪れる場所でないこともあります。
+ページ群を囲むサインインチェックは典型的な例です。
+`path` を省略すると、ルートは URL を追加せずにマッチへコンポーネントを追加します:
 
 ```tsx
 {
@@ -157,22 +157,22 @@ export default function RequireSignIn(props: RouteSectionProps) {
 }
 ```
 
-Visit `/checkout` signed out and the page shows "Sign in to continue"; sign in and the same URL shows the checkout.
-`/account` and `/checkout` are still the URLs; `RequireSignIn` sits in front of both.
-A pathless route has no `paths` node to give `RouteProps` as a witness, so its component takes the untyped `RouteSectionProps`, whose `params` is the open `Params` type.
+サインアウトした状態で `/checkout` にアクセスするとページは "Sign in to continue" を表示し、サインインすると同じ URL がチェックアウトを表示します。
+`/account` と `/checkout` は URL としてそのままで、`RequireSignIn` が両方の前に立ちます。
+パスなしルートには `RouteProps` の手がかりとして渡せる `paths` ノードがないため、そのコンポーネントは型付けされない `RouteSectionProps` を受け取り、その `params` はオープンな `Params` 型です。
 
-A pathless route can also carry a `preload` without a component, when you want to start a request for a group of pages without wrapping them in anything.
+パスなしルートは、コンポーネントなしで `preload` だけを持つこともできます。ページ群を何かで包まずに、そのグループのためのリクエストを開始したい場合に使います。
 
-:::caution[A client-side check is not authorization]
-`RequireSignIn` decides what to render; it does not stop a request.
-The server functions behind `/account` and `/checkout` must check the session themselves, as [Sessions and auth](/building-apps/sessions-and-auth) shows, or anyone can call them directly.
-[Protected routes](/guides/protected-routes) turns this check into a redirect that runs on the server and in the browser, and sends the visitor back afterwards.
+:::caution[クライアントサイドのチェックは認可ではない]
+`RequireSignIn` が決めるのは何をレンダーするかであって、リクエストを止めるわけではありません。
+`/account` と `/checkout` の背後にあるサーバー関数は、[セッションと認証](/building-apps/sessions-and-auth)が示すように、それ自身でセッションを確認しなければなりません。さもなければ誰でも直接呼び出せます。
+[保護されたルート](/guides/protected-routes)はこのチェックを、サーバーとブラウザの両方で実行されるリダイレクトに変え、訪問者を後で元の場所に戻します。
 :::
 
-## Parameters flow down
+## パラメータは下へ流れる
 
-A child sees its own parameters and every parameter above it.
-Add collections to the store:
+子は自分のパラメータと、上にあるすべてのパラメータを見られます。
+ストアにコレクションを追加します:
 
 ```tsx
 {
@@ -185,9 +185,9 @@ Add collections to the store:
 }
 ```
 
-At `/collections/mugs/products/blue`, `CollectionLayout` reads `params.collection`, and `CollectionProduct` reads both `params.collection` and `params.id`.
+`/collections/mugs/products/blue` では、`CollectionLayout` は `params.collection` を読み、`CollectionProduct` は `params.collection` と `params.id` の両方を読みます。
 
-Type the leaf from its path in `paths` so both names are checked:
+葉を `paths` 内のパスで型付けすれば、両方の名前がチェックされます:
 
 ```tsx
 import type { RouteProps } from "@solidjs/router";
@@ -204,13 +204,13 @@ export default function CollectionProduct(
 }
 ```
 
-Outside a route component, `useParams(Router.paths.collections.products)` returns the same typed object.
-Parameters are always strings at runtime, even when a [match filter](/routing/solid-router/route-definitions#filter-parameters) such as `int` changes what `paths` accepts.
+ルートコンポーネントの外では、`useParams(Router.paths.collections.products)` が同じ型付きオブジェクトを返します。
+`int` のような[マッチフィルター](/routing/solid-router/route-definitions#filter-parameters)が `paths` の受け付けるものを変えても、実行時のパラメータは常に文字列です。
 
-## Load data at every level
+## 各レベルでデータをロードする
 
-Each level can have its own `preload`, and the router starts all of them when the match is created.
-The child's preload does not wait for the parent's:
+各レベルは独自の `preload` を持て、ルーターはマッチが作られた時点ですべてを開始します。
+子のプリロードは親を待ちません:
 
 ```tsx
 {
@@ -227,12 +227,12 @@ The child's preload does not wait for the parent's:
 }
 ```
 
-Navigating to `/collections/mugs/products/blue` sends both requests at once.
-Each component then reads its own query through a memo, as on the [Data loading and mutations](/routing/solid-router/data) page, and the `Loading` boundary above them decides what to show while they are pending.
-The parallel start is the point of nesting the preloads rather than fetching the product from inside `CollectionLayout` after the collection arrives, which would be a waterfall.
-[Async reactivity](/concepts/async-reactivity#nesting-is-not-a-waterfall) covers the general principle.
+`/collections/mugs/products/blue` へのナビゲーションは両方のリクエストを一度に送ります。
+その後、各コンポーネントは[データロードとミューテーション](/routing/solid-router/data)ページと同様にメモ経由で自分のクエリを読み、その上の `Loading` バウンダリが保留中に何を表示するかを決めます。
+並列で開始することこそが、コレクションが届いてから `CollectionLayout` の中で商品をフェッチする（ウォーターフォールになる）のではなく、プリロードをネストする理由です。
+一般的な原理は[非同期リアクティビティ](/concepts/async-reactivity#nesting-is-not-a-waterfall)で説明しています。
 
-When a layout has data every page under it needs, load it in the layout and hand it down through context:
+配下のすべてのページが必要とするデータをレイアウトが持つ場合、レイアウトでロードしてコンテキスト経由で渡します:
 
 ```tsx
 // src/pages/collections/CollectionLayout.tsx
@@ -257,13 +257,13 @@ export default function CollectionLayout(
 }
 ```
 
-A page under it calls `useCollection()()` and never fetches the collection itself.
-Because `getCollection` is a `query`, a page that did call it would get the cached result anyway; the context saves the page from knowing the parameter.
+配下のページは `useCollection()()` を呼ぶだけで、コレクションを自分でフェッチしません。
+`getCollection` は `query` なので、呼び出したページも結局キャッシュ済みの結果を得ます。コンテキストはページがパラメータを知らなくて済むようにします。
 
-## Split a section into its own module
+## セクションを独自のモジュールに分割する
 
-A large section can live in its own file and its own chunk.
-Pass a thunk as `children` and the router loads the subtree the first time a URL under it is matched or preloaded:
+大きなセクションは独自のファイルと独自のチャンクに置けます。
+`children` にサンクを渡すと、その配下の URL が最初にマッチまたはプリロードされたときにルーターがサブツリーをロードします:
 
 ```tsx
 {
@@ -273,45 +273,45 @@ Pass a thunk as `children` and the router loads the subtree the first time a URL
 }
 ```
 
-The imported module exports the route array as `default` or `routes`.
-Typed `paths` still work through the import, so `paths.admin.users(7)` is checked at build time.
-[Route definitions](/routing/solid-router/route-definitions#load-a-route-subtree-lazily) has the details.
+インポートされたモジュールはルート配列を `default` または `routes` としてエクスポートします。
+型付き `paths` はインポート越しでも機能するため、`paths.admin.users(7)` はビルド時にチェックされます。
+詳細は[ルート定義](/routing/solid-router/route-definitions#load-a-route-subtree-lazily)にあります。
 
-## Common problems
+## よくある問題
 
-### The nested page renders nothing
+### ネストされたページが何もレンダーしない
 
-The layout is not rendering `props.children`.
-Add `{props.children}` where the page should appear; there is no error when it is missing.
+レイアウトが `props.children` をレンダーしていません。
+ページを表示したい場所に `{props.children}` を追加します。欠けていてもエラーは出ません。
 
-### The layout re-runs on every page change
+### ページが変わるたびにレイアウトが再実行される
 
-The layout is a component each page imports and wraps itself in, not a route with `children`.
-Two pages that each render `<AccountLayout>` create two separate layouts.
-Move the layout into the route tree and have each page render only its own content.
+そのレイアウトは `children` を持つルートではなく、各ページがインポートして自分を包むコンポーネントです。
+それぞれが `<AccountLayout>` をレンダーする2つのページは2つの別レイアウトを作ります。
+レイアウトをルートツリーに移し、各ページは自分のコンテンツだけをレンダーさせます。
 
-### Two sections need different app shells
+### 2つのセクションが別々のアプリシェルを必要とする
 
-The shell lives in the `<Router>` function child, which is shared by every route.
-Move it into a layout route for each section; the function child then renders only `props.children`.
+シェルはすべてのルートで共有される `<Router>` の関数 child にあります。
+各セクションのレイアウトルートに移します。関数 child は `props.children` だけをレンダーするようになります。
 
-### A pathless route needs a parameter from below
+### パスなしルートが下位のパラメータを必要とする
 
-It cannot have one; parameters flow down, not up.
-Read the location with `useLocation()`, or move the check into the child that owns the parameter.
+それはできません。パラメータは下へ流れ、上には流れません。
+`useLocation()` でロケーションを読むか、そのパラメータを持つ子にチェックを移動します。
 
-## Recap
+## まとめ
 
-- Give a section its frame with a route that has `children`; the frame renders the matched page through `props.children`.
-- A route's component stays mounted as long as that route is still part of the match; only the levels that changed are created and disposed.
-- Put section state in the layout and page state in the page; the first survives page changes and the second resets.
-- Leave `path` off a route to add a component such as a sign-in check to the match without adding to the URL.
-- A child reads its own parameters and every parameter above it; type the leaf from its `paths` node so all of them are checked.
-- Give each level its own `preload`; the router starts them together, so the child does not wait for the parent.
-- Load a large section with `children: () => import(...)` and typed `paths` still work through the import.
+- セクションのフレームは `children` を持つルートで与えます。フレームはマッチしたページを `props.children` 経由でレンダーします。
+- ルートのコンポーネントは、そのルートがマッチの一部である限りマウントされたままです。変化したレベルだけが生成・破棄されます。
+- セクションの状態はレイアウトに、ページの状態はページに置きます。前者はページ遷移を生き残り、後者はリセットされます。
+- ルートの `path` を省略すると、サインインチェックのようなコンポーネントを URL を追加せずにマッチへ追加できます。
+- 子は自分のパラメータと上のすべてのパラメータを読みます。葉を `paths` ノードで型付けすればすべてがチェックされます。
+- 各レベルに独自の `preload` を与えます。ルーターはそれらを一緒に開始するため、子は親を待ちません。
+- 大きなセクションは `children: () => import(...)` でロードし、型付き `paths` はインポート越しでも機能します。
 
-## Next steps
+## 次のステップ
 
-- [Navigation and typed paths](/routing/solid-router/navigation): typed `paths`, active and pending link styling, and navigation guards for sections such as `RequireSignIn`.
-- [Data loading and mutations](/routing/solid-router/data): what the preloads above start, and how the cache shares results between a layout and its pages.
-- [Route definitions](/routing/solid-router/route-definitions): path patterns, match filters, metadata, and the file-system adapter, which produces the same nested structure from directories.
+- [ナビゲーションと型付きパス](/routing/solid-router/navigation): 型付き `paths`、アクティブ・保留中リンクのスタイル、`RequireSignIn` のようなセクションのナビゲーションガード。
+- [データロードとミューテーション](/routing/solid-router/data): 上のプリロードが開始するものと、レイアウトとそのページ間でキャッシュが結果を共有する仕組み。
+- [ルート定義](/routing/solid-router/route-definitions): パスパターン、マッチフィルター、メタデータ、そしてディレクトリから同じネスト構造を生成するファイルシステムアダプター。

@@ -1,16 +1,16 @@
 ---
-title: "Navigation and typed paths"
+title: "ナビゲーションと型付きパス"
 version: "2.0"
-description: "Link between pages with plain anchors, build URLs the compiler checks, navigate from code, read the location and search parameters, show active and pending links, and guard against leaving a page."
+description: "素の anchor でページ間をリンクし、コンパイラがチェックする URL を構築し、コードからナビゲートし、ロケーションと検索パラメータを読み取り、アクティブ・保留中のリンクを表示し、ページからの離脱をガードします。"
 ---
 
-The first thing to look for in a new router is its `<Link>` component, and Solid Router does not have one.
-A link is an `<a>`, and the router turns clicks on same-origin anchors inside it into client-side navigations.
-That choice shapes this whole page: the URL is the API, and the router's job is to help you build URLs that are correct and react to the one the user is on.
+新しいルーターで最初に探すのは `<Link>` コンポーネントですが、Solid Router にはそれがありません。
+リンクは `<a>` であり、ルーターは自身の内側にある同一オリジンの anchor へのクリックをクライアントサイドのナビゲーションに変えます。
+この選択がこのページ全体を形づくっています。URL が API であり、ルーターの役割は、正しい URL を構築し、ユーザーがいる URL に反応するのを助けることです。
 
-The examples continue the store from the [introduction](/routing/solid-router).
+例は[概要](/routing/solid-router)のストアを引き続き使います。
 
-## Links are anchors
+## リンクは anchor
 
 ```tsx
 <nav>
@@ -20,24 +20,24 @@ The examples continue the store from the [introduction](/routing/solid-router).
 </nav>
 ```
 
-Click **Featured** and the product page renders without a document reload; click **Source** and the browser leaves for GitHub as it would for any anchor.
-The router handles the first two and leaves the third alone because it is another origin.
-It also leaves an anchor alone when it has a `target`, `rel="external"`, a `download` attribute, or a non-HTTP scheme.
-Anything a browser would treat as "leave this page" still does.
+**Featured** をクリックすると商品ページがドキュメントのリロードなしでレンダーされます。**Source** をクリックすると、ブラウザは他の anchor と同様に GitHub へ移動します。
+ルーターが処理するのは最初の2つで、3つ目は別オリジンのためそのままにします。
+`target`、`rel="external"`、`download` 属性、HTTP 以外のスキームを持つ anchor も同様にそのままにします。
+ブラウザが「このページを離れる」と扱うものは、従来どおりページを離れます。
 
-Because they are anchors, links work before JavaScript loads, in reader modes, and when opened in a new tab, and every accessibility tool already knows what they are.
+anchor であるため、リンクは JavaScript がロードされる前でも、リーダーモードでも、新しいタブで開いた場合でも機能し、すべてのアクセシビリティツールがすでにそれを理解しています。
 
-A few attributes adjust how the router treats one link:
+いくつかの属性で、ルーターがリンクをどう扱うかを調整できます:
 
-- `replace` replaces the current history entry instead of pushing.
-- `noScroll` keeps the scroll position after navigation.
-- `state` supplies a JSON value for `location.state` on the destination.
-- `preload="false"` skips the route-data preload on hover for this link; the code chunk still warms.
-- `link` marks an anchor for the router when `explicitLinks: true` is set, in apps where most anchors should stay full page loads.
+- `replace` は履歴エントリーを push する代わりに、現在のエントリーを置き換えます。
+- `noScroll` はナビゲーション後もスクロール位置を維持します。
+- `state` は遷移先の `location.state` に渡す JSON 値を指定します。
+- `preload="false"` はこのリンクのホバー時のルートデータプリロードをスキップします。コードチャンクの事前ロードは継続されます。
+- `link` は `explicitLinks: true` が設定されている場合に、ほとんどの anchor をフルページロードのままにしたいアプリで、その anchor をルーター向けにマークします。
 
-## Build URLs with `paths`
+## `paths` で URL を構築する
 
-The tempting way to write a link is the string you can see in the address bar:
+リンクを書くときに手が伸びがちなのは、アドレスバーに見える文字列です:
 
 ```tsx
 // Avoid: a string the type checker cannot connect to a route
@@ -47,10 +47,10 @@ The tempting way to write a link is the string you can see in the address bar:
 <a href={paths.products(product.id)}>{product.name}</a>
 ```
 
-Both render the same `href` today.
-Rename the route to `/catalog/:id` and the `Avoid` version becomes a link to the `*404` page that nothing reports; the `Prefer` version stops compiling until every call site is updated.
+今は両者とも同じ `href` をレンダーします。
+ルートを `/catalog/:id` にリネームすると、`Avoid` 版は何も報告されないまま `*404` ページへのリンクになり、`Prefer` 版はすべての呼び出し箇所が更新されるまでコンパイルが通りません。
 
-`paths` is a proxy inferred from the route tree:
+`paths` はルートツリーから推論されるプロキシです:
 
 ```tsx
 paths(); // "/"
@@ -59,22 +59,22 @@ paths.account.orders(42); // "/account/orders/42"
 paths.search({ q: "mug", page: 2 }, "results"); // "/search?q=mug&page=2#results"
 ```
 
-Property access adds a static segment; a call binds the parameters of that segment.
-After the parameters come an optional search object and an optional hash string, mirroring the anatomy of a URL.
+プロパティアクセスは静的セグメントを追加し、呼び出しはそのセグメントのパラメータを束縛します。
+パラメータの後には、URL の構造をなぞらえて、省略可能な検索オブジェクトと省略可能なハッシュ文字列が続きます。
 
-Every node converts to a string when it lands in an `href`, `navigate()`, or `redirect()`, so a static route is written `paths.account`, not `paths.account()`.
-Call a node with no arguments only when an API insists on a plain `string`.
+すべてのノードは `href`、`navigate()`、`redirect()` に渡されると文字列に変換されるため、静的ルートは `paths.account()` ではなく `paths.account` と書きます。
+引数なしでノードを呼び出すのは、API がプレーンな `string` を要求する場合のみです。
 
-The types follow the route definitions:
+型はルート定義に従います:
 
-- `matchFilters: { id: int }` makes `paths.products(id)` accept a number.
-  The component still receives `params.id` as a string, since that is what a URL holds.
-- A route `search` schema types the search object the path end accepts, covered [below](#type-search-parameters).
+- `matchFilters: { id: int }` は `paths.products(id)` が数値を受け付けるようにします。
+  コンポーネントは引き続き `params.id` を文字列として受け取ります。URL が保持するのは文字列だからです。
+- ルートの `search` スキーマは、パスの末端が受け付ける検索オブジェクトの型を決めます。[後述](#type-search-parameters)で説明します。
 
-## Navigate from code
+## コードからナビゲートする
 
-When the navigation is a link in the interface, use an anchor.
-When it is a consequence of something else, such as a saved form or a timeout, use `useNavigate`:
+ナビゲーションがインターフェース上のリンクであるなら anchor を使います。
+フォームの保存やタイムアウトなど、他の何かの結果であるなら `useNavigate` を使います:
 
 ```tsx
 import { useNavigate } from "@solidjs/router";
@@ -91,20 +91,20 @@ function CheckoutButton() {
 }
 ```
 
-Click the button and the URL becomes `/checkout` with the cart page's history entry replaced, so **Back** returns to the page before the cart rather than to the cart.
+ボタンをクリックすると URL は `/checkout` になり、カートページの履歴エントリーが置き換えられるため、**戻る**はカートではなくカートの前のページに戻ります。
 
-The options are the same as the link attributes: `replace`, `scroll`, and `state`, plus `resolve` for how a relative string is interpreted.
-A string starting with `/` resolves under the router's `base`; other strings resolve against the current location like a relative URL.
-A number moves through history: `navigate(-1)` is back.
+オプションはリンク属性と同じです。`replace`、`scroll`、`state` に加えて、相対文字列の解釈方法を決める `resolve` があります。
+`/` で始まる文字列はルーターの `base` の下で解決されます。それ以外の文字列は相対 URL のように現在のロケーションに対して解決されます。
+数値は履歴を移動します。`navigate(-1)` は戻るです。
 
-:::tip[Let the server decide where to go]
-A mutation that ends in a navigation does not need `useNavigate` at all.
-Return `redirect(paths.account.orders(id))` from the server function or action and the router navigates when the response arrives, in the same update as the revalidation; the [Data](/routing/solid-router/data#what-revalidates-after-a-mutation) page covers that path.
+:::tip[行き先はサーバーに決めさせる]
+ナビゲーションで終わるミューテーションに `useNavigate` は不要です。
+サーバー関数やアクションから `redirect(paths.account.orders(id))` を返すと、レスポンスが届いたときに、再検証と同じ更新内でルーターがナビゲートします。その経路は[データ](/routing/solid-router/data#what-revalidates-after-a-mutation)ページで説明しています。
 :::
 
-## Read the location
+## ロケーションを読み取る
 
-`useLocation()` returns a reactive object describing where the user is:
+`useLocation()` はユーザーがどこにいるかを表すリアクティブなオブジェクトを返します:
 
 ```tsx
 const location = useLocation();
@@ -117,22 +117,22 @@ location.state;
 location.key; // changes on every navigation
 ```
 
-Each field is reactive on its own.
-A memo that reads `location.pathname` does not re-run when only the hash changes.
+各フィールドは個別にリアクティブです。
+`location.pathname` を読むメモは、ハッシュだけが変わっても再実行されません。
 
-`useParams()` returns the merged parameters of the current match, and a typed path narrows the keys:
+`useParams()` は現在のマッチのマージ済みパラメータを返し、型付きパスを渡すとキーが絞り込まれます:
 
 ```tsx
 const params = useParams(Router.paths.products);
 params.id; // string
 ```
 
-Inside a route component, `props.params` is the same object, already typed when the component is declared with `RouteProps`.
+ルートコンポーネント内では、`props.params` は同じオブジェクトで、コンポーネントが `RouteProps` で宣言されていればすでに型付きです。
 
-## Type search parameters
+## 検索パラメータに型を付ける
 
-Search parameters are the right home for state that should survive a refresh and be shareable: a filter, a sort order, a page number.
-Read and write them with `useSearchParams`:
+検索パラメータは、リフレッシュを生き残り共有可能であるべき状態（フィルター、ソート順、ページ番号）の置き場所として適しています。
+`useSearchParams` で読み書きします:
 
 ```tsx
 const [search, setSearch] = useSearchParams();
@@ -142,12 +142,12 @@ const [search, setSearch] = useSearchParams();
 </button>;
 ```
 
-Click **Next page** and the URL gains `?page=2`, the page does not scroll, and a refresh lands on the same page of results.
-`setSearch` merges into the current query string and navigates without scrolling.
-Setting a key to `""`, `undefined`, or `null` removes it.
+**Next page** をクリックすると URL に `?page=2` が付き、ページはスクロールせず、リフレッシュでも同じページの結果に着地します。
+`setSearch` は現在のクエリ文字列にマージして、スクロールなしでナビゲートします。
+キーに `""`、`undefined`、`null` を設定すると、そのキーは削除されます。
 
-Without a schema every value is a string or an array of strings, and `Number(search.page || 1)` is on you.
-Give the route a `search` schema, any synchronous Standard Schema validator, and pass the path node to get parsed, typed values:
+スキーマがなければすべての値は文字列か文字列の配列で、`Number(search.page || 1)` は自分で行います。
+ルートに `search` スキーマ（任意の同期的な Standard Schema バリデーター）を与え、パスノードを渡すと、パース済みの型付き値が得られます:
 
 ```tsx
 // src/router.ts
@@ -163,7 +163,7 @@ import * as v from "valibot";
 }
 ```
 
-The query string only holds strings, so the schema is where `"2"` becomes `2`; a plain `v.number()` would reject every value.
+クエリ文字列は文字列しか保持できないため、スキーマが `"2"` を `2` に変換する場所です。素の `v.number()` ではすべての値が拒否されてしまいます。
 
 ```tsx
 // src/pages/Search.tsx
@@ -173,27 +173,27 @@ search.page; // number
 setSearch({ page: search.page + 1 });
 ```
 
-The router runs the schemas of every route in the current match, root to leaf, and merges the parsed outputs over the raw values.
-A schema that reports issues is skipped for that read, so the raw strings remain rather than the page throwing.
+ルーターは現在のマッチに含まれるすべてのルートのスキーマをルートから葉へ実行し、パース結果を生の値にマージします。
+issues を報告したスキーマはその読み取りではスキップされるため、ページがスローする代わりに生の文字列が残ります。
 
-:::caution[Schemas run synchronously]
-An asynchronous schema throws `Async Standard Schema validation is not supported for search params`.
-Keep search schemas to synchronous parsing and coercion; a value that needs a server round trip to validate is a query, not a search parameter.
+:::caution[スキーマは同期的に実行される]
+非同期スキーマは `Async Standard Schema validation is not supported for search params` をスローします。
+検索スキーマは同期的なパースと型変換に留めてください。検証にサーバーへの往復が必要な値は、検索パラメータではなくクエリです。
 :::
 
-## Show active and pending links
+## アクティブ・保留中のリンクを表示する
 
-Click a link to a page whose data takes a moment.
-The current page stays on screen, and the clicked link gets a `data-pending` attribute until the destination is ready.
-That is the visible half of the held update described in [Async reactivity](/concepts/async-reactivity#settled-view-and-in-flight-work), and it is why an app without any loading spinner still feels responsive: the link itself shows that something is happening.
+データの準備に少し時間がかかるページへのリンクをクリックしたときを考えます。
+現在のページは画面に残り、クリックされたリンクは遷移先の準備ができるまで `data-pending` 属性を持ちます。
+これは[非同期リアクティビティ](/concepts/async-reactivity#settled-view-and-in-flight-work)で説明している保留された更新の、目に見える側面です。ローディングスピナーが一切ないアプリでもレスポンシブに感じられるのはそのためです。リンク自体が何かが起きていることを示します。
 
-The router sets three attributes on the anchors it handles:
+ルーターは処理する anchor に3つの属性を設定します:
 
-- `aria-current="page"` on an exact match.
-- `data-active` on an exact or descendant match, so the Account link is active on `/account/orders/42`.
-- `data-pending` on the target of an in-flight navigation.
+- `aria-current="page"` — 完全一致の場合。
+- `data-active` — 完全一致または子孫一致の場合。`/account/orders/42` では Account リンクがアクティブになります。
+- `data-pending` — 進行中のナビゲーションの対象。
 
-Style them in CSS with no component code:
+コンポーネントコードなしで CSS でスタイルを設定できます:
 
 ```css
 nav a[aria-current="page"] {
@@ -210,9 +210,9 @@ a[data-pending] {
 }
 ```
 
-The root path `/` is active only on an exact match; otherwise it would be active everywhere.
+ルートパス `/` は完全一致のときだけアクティブです。さもなければすべての場所でアクティブになってしまいます。
 
-For a component that is not an anchor, or an anchor that needs the state in JSX, `useLinkState` returns the same three as accessors:
+anchor でないコンポーネント、あるいは JSX 内で状態が必要な anchor には、`useLinkState` が同じ3つをアクセサーとして返します:
 
 ```tsx
 import { useLinkState } from "@solidjs/router";
@@ -228,16 +228,16 @@ function Tab(props: { href: string; children: JSX.Element }) {
 }
 ```
 
-`end: true` asks for exact matching, the `aria-current` rule rather than the `data-active` rule.
+`end: true` は完全一致、`data-active` のルールではなく `aria-current` のルールを要求します。
 
-## Observe and guard navigation
+## ナビゲーションを監視・ガードする
 
-`useIsRouting()` is true while a navigation is waiting on route work.
-Use it for a top-of-page progress bar; for a single link, `data-pending` is already there.
+`useIsRouting()` はナビゲーションがルートの処理を待っている間 true です。
+ページ上部のプログレスバーに使います。単一のリンクには `data-pending` がすでにあります。
 
-`useMatch(() => pattern)` tests a pattern against the current pathname without needing a route for it, and `useRouteMatches()` returns the matched route definitions with their `info`, which is how a breadcrumb reads route metadata.
+`useMatch(() => pattern)` は対応するルートがなくても現在のパス名に対してパターンをテストします。`useRouteMatches()` はマッチしたルート定義を `info` とともに返し、パンくずリストがルートのメタデータを読む手段です。
 
-To stop the user leaving a page with unsaved changes, register a leave guard:
+未保存の変更があるページからユーザーが離れるのを止めるには、離脱ガードを登録します:
 
 ```tsx
 import { useBeforeLeave } from "@solidjs/router";
@@ -251,46 +251,46 @@ useBeforeLeave((event) => {
 });
 ```
 
-Edit the checkout address, click **Store** in the header, and the confirm dialog appears; cancel it and the URL has not changed.
-The guard runs for router navigations and for the browser history traversal the router can intercept.
-`retry(true)` re-issues the navigation and skips the guards, so the confirmation does not appear twice.
-It cannot stop the user closing the tab; pair it with a `beforeunload` listener if that matters.
+チェックアウトの住所を編集してヘッダーの **Store** をクリックすると確認ダイアログが表示されます。キャンセルすると URL は変わっていません。
+ガードはルーターのナビゲーションと、ルーターが横取りできるブラウザ履歴の移動に対して実行されます。
+`retry(true)` はナビゲーションを再発行してガードをスキップするため、確認は2回表示されません。
+タブを閉じることは止められません。それが重要なら `beforeunload` リスナーと併用してください。
 
-## Common problems
+## よくある問題
 
-### Clicking a link reloads the whole page
+### リンクをクリックするとページ全体がリロードされる
 
-The anchor is outside the `<Router>`, has a `target`, or points to a different origin.
-With `explicitLinks: true`, it is missing the `link` attribute.
+anchor が `<Router>` の外側にある、`target` を持つ、または別のオリジンを指しています。
+`explicitLinks: true` の場合は `link` 属性がありません。
 
-### `paths.products` is a type error
+### `paths.products` が型エラーになる
 
-The route is `/products/:id`, so the node needs a call that binds the parameter: `paths.products(id)`.
-A static route is the bare node, `paths.account`; it converts to a string on its own, so the call is only needed when an API insists on a `string`.
+そのルートは `/products/:id` なので、ノードにはパラメータを束縛する呼び出しが必要です: `paths.products(id)`。
+静的ルートは裸のノード `paths.account` で、文字列に自動変換されるため、API が `string` を要求するときだけ呼び出しが必要です。
 
-### The active style is on every link
+### すべてのリンクにアクティブスタイルが付く
 
-The style targets `data-active` on the `/` link, which is a parent of everything.
-Use `aria-current="page"` for the home link, or `useLinkState` with `end: true`.
+そのスタイルは `/` リンクの `data-active` を対象にしていますが、`/` はすべての親です。
+ホームリンクには `aria-current="page"` を使うか、`useLinkState` に `end: true` を渡します。
 
-### `search.page` is a string
+### `search.page` が文字列になる
 
-There is no `search` schema on the route, or the path node was not passed to `useSearchParams`.
-Add the schema with a transform to `Number`, and read with `useSearchParams(Router.paths.search)`.
+ルートに `search` スキーマがないか、`useSearchParams` にパスノードが渡されていません。
+`Number` への変換を持つスキーマを追加し、`useSearchParams(Router.paths.search)` で読み取ります。
 
-## Recap
+## まとめ
 
-- Write links as `<a href={...}>`; the router handles same-origin anchors inside it and leaves the rest to the browser.
-- Build every URL from `paths` so a route that moves fails to compile instead of linking to the 404 page.
-- Use `useNavigate` for navigation that is a consequence of something else; return `redirect()` from a mutation when the server knows the destination.
-- Read `useLocation()` fields individually; each is reactive on its own.
-- Put shareable state in search parameters, and give the route a synchronous `search` schema to get typed, parsed values.
-- Style `aria-current="page"`, `data-active`, and `data-pending` in CSS; the router sets them on the anchors it handles.
-- Guard unsaved changes with `useBeforeLeave`, and call `retry(true)` after the user confirms.
+- リンクは `<a href={...}>` と書きます。ルーターはその内側の同一オリジン anchor を処理し、残りはブラウザに任せます。
+- すべての URL を `paths` から構築します。ルートが移動したとき、404 ページへのリンクになる代わりにコンパイルが失敗します。
+- 他の何かの結果であるナビゲーションには `useNavigate` を使います。サーバーが行き先を知っている場合はミューテーションから `redirect()` を返します。
+- `useLocation()` のフィールドは個別に読みます。それぞれが独立してリアクティブです。
+- 共有可能な状態は検索パラメータに置き、ルートに同期的な `search` スキーマを与えて型付き・パース済みの値を得ます。
+- `aria-current="page"`、`data-active`、`data-pending` を CSS でスタイルします。ルーターが処理する anchor にこれらを設定します。
+- 未保存の変更は `useBeforeLeave` でガードし、ユーザーが確認したら `retry(true)` を呼びます。
 
-## Next steps
+## 次のステップ
 
-- [Nested routes and layouts](/routing/solid-router/nested-routes): where section navigation lives and what stays mounted across links.
-- [Data loading and mutations](/routing/solid-router/data): what the router preloads on hover, and `redirect()` from an action.
-- [State management](/guides/state-management#state-in-the-url): which page state belongs in the URL at all.
-- [Navigation API reference](/reference/solid-router/navigation): signatures for every primitive on this page.
+- [ネストされたルートとレイアウト](/routing/solid-router/nested-routes): セクションナビゲーションがどこに置かれ、リンク間で何がマウントされ続けるか。
+- [データロードとミューテーション](/routing/solid-router/data): ルーターがホバーでプリロードするものと、アクションからの `redirect()`。
+- [状態管理](/guides/state-management#state-in-the-url): どのページ状態が URL に属するべきか。
+- [ナビゲーション API リファレンス](/reference/solid-router/navigation): このページのすべてのプリミティブのシグネチャ。
