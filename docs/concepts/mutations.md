@@ -1,21 +1,21 @@
 ---
-title: "Mutations"
+title: "ミューテーション"
 version: "2.0"
-description: "Move the cart's add, remove, and set-quantity writes to a server without changing the UI: actions, optimistic stores, refresh, and how a failed request undoes itself."
+description: "カートの追加・削除・数量変更という書き込みを、UI を変えずにサーバーへ移します。アクション、楽観的ストア、refresh、そして失敗したリクエストがどのように元に戻るかを扱います。"
 ---
 
-The user clicks **Add to cart**.
-The request takes 400 milliseconds.
-In that time the cart must show the new line, and when the response arrives the cart must agree with the server; if the server refuses, the line must go away again.
+ユーザーが**カートに追加**をクリックします。
+リクエストには 400 ミリ秒かかります。
+その間もカートには新しい行を表示しておく必要があり、レスポンスが届いたらカートはサーバーと一致していなければなりません。サーバーが拒否した場合、その行は再び消えなければなりません。
 
-Reads need no wrapper for any of this: change an input and the memo asks again, as the [Async reactivity](/concepts/async-reactivity) page showed.
-Writes have a different shape, because a write happens before the round trip and must be reconciled after it.
-This page takes the cart from the [Stores](/concepts/stores) page and moves its writes to a server one change at a time.
+読み取りには、こうしたことのためのラッパーは不要です。入力を変えればメモが再び問い合わせます。[非同期リアクティビティ](/concepts/async-reactivity)のページで示したとおりです。
+書き込みは形が異なります。書き込みは往復の前に起こり、往復のあとに突き合わせなければならないからです。
+このページでは、[ストア](/concepts/stores)のページのカートを題材に、その書き込みを一度に1つずつサーバーへ移していきます。
 
-## A client-only cart
+## クライアントのみのカート
 
-Start with the cart as a store and three named writes.
-The UI reads `items` and calls the functions:
+まず、カートをストアと3つの名前付き書き込みとして始めます。
+UI は `items` を読み取り、関数を呼び出します:
 
 ```ts
 import { createStore } from "solid-js";
@@ -44,12 +44,12 @@ export function createCart() {
 }
 ```
 
-Click **Add** and the row appears; there is nothing to wait for.
+**追加**をクリックすると行が表示されます。待つものは何もありません。
 
-## Move the cart to the server
+## カートをサーバーへ移す
 
-Now the list comes from an API and every write goes through it.
-The UI should still respond on the click:
+今度は、リストは API から取得し、すべての書き込みは API を通ります。
+UI はクリックに対して今までどおり反応する必要があります:
 
 ```ts
 import { action, createOptimisticStore, refresh } from "solid-js";
@@ -86,29 +86,29 @@ export function createCart() {
 }
 ```
 
-Click **Add** and the row appears at once, as before.
-When `api.add` resolves, the cart is re-read from the server and the row is replaced by the server's copy; if the two agree, nothing on screen changes.
-If `api.add` rejects, the row disappears.
+**追加**をクリックすると、以前と同様に行がすぐ表示されます。
+`api.add` が解決すると、カートはサーバーから読み直され、その行はサーバーのコピーに置き換わります。両者が一致していれば、画面上は何も変わりません。
+`api.add` が拒否された場合、その行は消えます。
 
-Compare the two versions.
-The components that render the cart did not change.
-The `setItems` calls did not change: the synchronous write already described the expected result, so it becomes the optimistic prediction.
-Three things were added:
+2つのバージョンを比較してみましょう。
+カートをレンダーするコンポーネントは変わっていません。
+`setItems` の呼び出しも変わっていません。同期の書き込みはすでに期待される結果を表していたため、そのまま楽観的な予測になります。
+追加されたのは3つです:
 
-- [`createOptimisticStore(fn, seed)`](/reference/solid-js/stores/create-optimistic-store) derives its durable value from `fn` and accepts writes that show immediately but are tentative.
-- [`action`](/reference/solid-js/lifecycle-actions/action) runs a generator as one transaction.
-  Each `yield` waits for its promise and then restores the transaction, so the write before the `yield` and the refresh after it belong to the same update.
-- [`refresh(items)`](/reference/solid-js/lifecycle-actions/refresh) re-runs the derivation so the store reconciles against what the server has.
+- [`createOptimisticStore(fn, seed)`](/reference/solid-js/stores/create-optimistic-store) は永続的な値を `fn` から導出し、すぐに表示されるものの仮のものである書き込みを受け付けます。
+- [`action`](/reference/solid-js/lifecycle-actions/action) はジェネレーターを1つのトランザクションとして実行します。
+  各 `yield` はその Promise を待ってからトランザクションを復元するため、`yield` の前の書き込みと後の refresh は同じ更新に属します。
+- [`refresh(items)`](/reference/solid-js/lifecycle-actions/refresh) は導出を再実行し、ストアをサーバーが持つ内容と突き合わせます。
 
-The optimistic write is an overlay on the durable store, not a second copy of the state.
-Solid discards the overlay when the action settles, whether the action succeeded or failed.
-If `api.add` throws, the overlay is dropped and the list is back where it started; there is no rollback code to write.
-If the server agrees with the prediction, reconciliation finds no differences and nothing updates.
+楽観的な書き込みは、永続的なストアの上に乗るオーバーレイであり、状態の2つ目のコピーではありません。
+Solid はアクションが確定したときにオーバーレイを破棄します。アクションが成功しても失敗しても同じです。
+`api.add` が throw した場合、オーバーレイは捨てられ、リストは元の状態に戻ります。ロールバックのコードを書く必要はありません。
+サーバーが予測と一致した場合、突き合わせでは差分が見つからず、何も更新されません。
 
-Because actions ride the same hold as reads, the list never shows half a mutation, and quick repeated clicks do not interleave into a corrupted list.
+アクションは読み取りと同じホールド（保留）に乗るため、リストがミューテーションの途中状態を見せることはなく、素早い連続クリックが交互に混ざって壊れたリストになることもありません。
 
-:::pitfall[An await inside an action leaves the transaction]
-JavaScript has no way to keep the action's context across a plain `await`, which is why the body is a generator.
+:::pitfall[アクション内の await はトランザクションから外れる]
+JavaScript には、素の `await` をまたいでアクションのコンテキストを保持する方法がありません。本体がジェネレーターになっているのはそのためです。
 
 ```ts
 // Avoid: the write after the await is outside the transaction
@@ -129,15 +129,15 @@ const add = action(function* (item: CartItem) {
 });
 ```
 
-In the `Avoid` version the write runs with no transaction to belong to, so the optimistic overlay is discarded at the end of that update: the row flashes in and vanishes, or never appears.
-Use `yield promise` as the suspension point.
-If you must `await`, place a bare `yield` before the next write so the transaction is restored.
+`Avoid` 版では、書き込みは所属すべきトランザクションがない状態で実行されるため、その更新の終わりに楽観的オーバーレイは破棄されます。行は一瞬表示されて消えるか、最初から表示されません。
+中断点には `yield promise` を使ってください。
+どうしても `await` しなければならない場合は、次の書き込みの前に裸の `yield` を置いて、トランザクションを復元してください。
 :::
 
-## Show that a row is saving
+## 保存中の行を表示する
 
-Immediate updates are the right default for a cart, but a user may want to know which rows the server has not confirmed yet.
-Put the affordance in the data:
+即時の更新はカートの正しいデフォルトですが、サーバーがまだ確認していない行をユーザーが知りたい場合もあります。
+その手がかりはデータの中に入れます:
 
 ```ts
 export type CartItem = {
@@ -156,15 +156,15 @@ const add = action(function* (item: CartItem) {
 });
 ```
 
-The optimistic row carries `pending: true`, and a row can render a spinner or a muted style from it.
-When the action settles, the overlay goes away and the refreshed row from the server has no flag.
-Only the row that read `pending` updates.
+楽観的な行は `pending: true` を持ち、行はそこからスピナーや控えめなスタイルをレンダーできます。
+アクションが確定するとオーバーレイは消え、サーバーからの更新済みの行にはフラグがありません。
+`pending` を読み取った行だけが更新されます。
 
-## Mark data as changing: `affects`
+## データに変化中の印を付ける: `affects`
 
-The `pending` flag describes the row.
-Sometimes the question is about the data as a whole: "is the quantity of this item about to change?"
-[`affects(target, key?)`](/reference/solid-js/lifecycle-actions/affects) marks a source, a store, or one store property as pending while the surrounding action is in flight, so readers of that data report it through `isPending`:
+`pending` フラグは行についての情報です。
+ときには、データ全体についての問いであることもあります。「この商品の数量はまさに変わろうとしているか？」
+[`affects(target, key?)`](/reference/solid-js/lifecycle-actions/affects) は、それを囲むアクションの実行中に、ソース・ストア・ストアの1つのプロパティを保留中としてマークします。これにより、そのデータの読み取り側は `isPending` を通じてそれを報告できます:
 
 ```ts
 const setQuantity = action(function* (id: string, quantity: number) {
@@ -175,16 +175,16 @@ const setQuantity = action(function* (id: string, quantity: number) {
 });
 ```
 
-Here no optimistic write is made; the old quantity stays visible and `isPending(() => item.quantity)` is `true` until the refresh lands.
-The two mechanisms are independent: an optimistic write supplies the expected value, `affects` supplies the pending status, and a mutation can use either or both.
+ここでは楽観的な書き込みは行われていません。古い数量は表示されたままで、`isPending(() => item.quantity)` は refresh が届くまで `true` です。
+2つの仕組みは独立しています。楽観的な書き込みは期待される値を提供し、`affects` は保留中の状態を提供します。ミューテーションはどちらか一方、あるいは両方を使えます。
 
-A bare `refresh(source)` asks the same question again without changing the inputs, so nothing reports pending on its own.
-Pair `affects(source)` with `refresh(source)` when the reload itself should show as pending.
+裸の `refresh(source)` は入力を変えずに同じ問いを再度発行するだけなので、それだけでは保留中は報告されません。
+リロード自体を保留中として表示したい場合は、`affects(source)` を `refresh(source)` と組み合わせてください。
 
-## Wait for the server to echo the write: `until`
+## サーバーが書き込みをエコーするのを待つ: `until`
 
-Some transports do not return the result: the request is fire-and-forget and the confirmation arrives later on a live source.
-[`until(fn)`](/reference/solid-js/lifecycle-actions/until) holds the action open until a predicate over the confirmed data becomes true:
+トランスポートによっては結果を返しません。リクエストは投げっぱなし（fire-and-forget）で、確認は後からライブソース上に届きます。
+[`until(fn)`](/reference/solid-js/lifecycle-actions/until) は、確定済みデータに対する述語が真になるまでアクションを開いたままにします:
 
 ```ts
 const send = action(function* (text: string) {
@@ -199,14 +199,14 @@ const send = action(function* (text: string) {
 });
 ```
 
-The predicate reads authoritative state, so the optimistic row pushed above cannot satisfy it; only the echo from the live source can.
-A timeout or an abort rejects, which settles the action and drops the overlay.
+述語は正本の状態を読み取るため、上でプッシュした楽観的な行ではそれを満たせません。満たせるのはライブソースからのエコーだけです。
+タイムアウトまたは中断は reject となり、アクションは確定してオーバーレイは破棄されます。
 
-## Layer state by lifetime
+## ライフタイムで状態を重ねる
 
-A production feature often combines state with different lifetimes: the durable data from the server, per-row UI state such as a recoverable error, and the optimistic overlay.
-Apply them in that order and read the composed result.
-Here each cart line has a gift-wrap toggle whose failure the row can recover from on its own:
+本番の機能では、ライフタイムの異なる状態を組み合わせることがよくあります。サーバーからの永続的なデータ、回復可能なエラーのような行ごとの UI 状態、そして楽観的オーバーレイです。
+その順に適用し、合成された結果を読み取ります。
+ここでは、カートの各行にギフト包装のトグルがあり、その失敗は行が自力で回復できます:
 
 ```tsx
 import {
@@ -313,55 +313,55 @@ function CartLines() {
 }
 ```
 
-Toggle gift wrap on a line and the checkbox moves at once with the `pending` style.
-If the request fails, the checkbox returns to the server's value and a **Retry** button appears on that line; the rest of the cart is untouched.
+行のギフト包装を切り替えると、チェックボックスは `pending` スタイルとともにすぐに動きます。
+リクエストが失敗した場合、チェックボックスはサーバーの値に戻り、その行に**再試行**ボタンが表示されます。カートの残りの部分は触れられません。
 
-`createCart()` creates all three layers under the component owner and returns one composed store with its actions, which keeps reactive state out of module scope and out of shared server memory.
-The projection reads the durable items and folds in the `errors` map.
-The map is not reactive by itself; `refresh(items)` re-runs the projection after each mutation and makes its current entries visible.
+`createCart()` は3つのレイヤーすべてをコンポーネントのオーナーの下に作成し、アクションとともに合成済みの1つのストアを返します。これにより、リアクティブな状態はモジュールスコープにも共有のサーバーメモリにも置かれません。
+プロジェクションは永続的な商品を読み取り、`errors` マップを折り込みます。
+マップ自体はリアクティブではありません。`refresh(items)` が各ミューテーションのあとにプロジェクションを再実行し、その時点のエントリを可視化します。
 
-The action catches the expected failure because the row can recover locally.
-An error the action does not catch, or an error thrown by the projection or the render, still reaches `Errored`.
+アクションが想定内の失敗を捕捉するのは、その行がローカルで回復できるからです。
+アクションが捕捉しないエラー、あるいはプロジェクションやレンダーが throw したエラーは、依然として `Errored` に届きます。
 
-## Common problems
+## よくある問題
 
-### After the request succeeds, the row snaps back to the old value
+### リクエスト成功後に行が古い値へ戻る
 
-The action settled and Solid removed the optimistic overlay, but nothing re-read the server, so the store still holds the value from before the mutation.
-Call `refresh(items)` after the `yield` so the store reconciles with what the server now has.
+アクションは確定し Solid は楽観的オーバーレイを取り除きましたが、何もサーバーを読み直していないため、ストアはミューテーション前の値を持ったままです。
+`yield` のあとに `refresh(items)` を呼んで、ストアをサーバーが現在持つ内容と突き合わせてください。
 
-### The optimistic value flashes and disappears, or never appears
+### 楽観的な値が一瞬表示されて消える、または表示されない
 
-The write ran with no transaction: either outside any action, or inside an action after a plain `await`.
-An optimistic overlay with no transaction to wait on is discarded at the end of the current update.
-Make the tentative write inside the `action` that sends the request, and suspend with `yield promise` rather than `await`.
+書き込みがトランザクションなしで実行されました。どのアクションの外側か、アクション内で素の `await` のあとかのどちらかです。
+待つべきトランザクションのない楽観的オーバーレイは、現在の更新の終わりに破棄されます。
+仮の書き込みはリクエストを送る `action` の内側で行い、`await` ではなく `yield promise` で中断してください。
 
-### The tentative write stayed after the action failed
+### アクション失敗後も仮の書き込みが残る
 
-The store is a plain `createStore`, whose writes are durable even inside an action.
-Use `createOptimisticStore` for state that should revert when the request settles.
+そのストアは素の `createStore` であり、その書き込みはアクション内でも永続的です。
+リクエスト確定時に元に戻るべき状態には `createOptimisticStore` を使ってください。
 
-### `flush()` inside an action throws `[FLUSH_IN_ACTION]`
+### アクション内の `flush()` が `[FLUSH_IN_ACTION]` を throw する
 
-An action's writes are held in its transaction until the action settles, so there is nothing for `flush()` to show.
-Remove the call and assert after the action's promise resolves.
-[Debugging reactivity](/guides/debugging-reactivity#the-test-sees-the-old-dom) explains the diagnostic.
+アクションの書き込みはアクションが確定するまでそのトランザクション内に保持されるため、`flush()` が表示できるものはありません。
+その呼び出しを取り除き、アクションの Promise が解決したあとに検証してください。
+[リアクティビティのデバッグ](/guides/debugging-reactivity#the-test-sees-the-old-dom)にこの診断の説明があります。
 
-## Recap
+## まとめ
 
-- Keep the synchronous store write; inside an `action` on a `createOptimisticStore`, it becomes the optimistic prediction.
-- Write the body as a generator and `yield` each promise so the writes before and after it share one transaction.
-- Call `refresh(source)` after the request so the store reconciles with the server.
-- The overlay is discarded when the action settles, on success and on failure; there is no rollback code.
-- Put a `pending` flag in the optimistic row when the UI should show what is unconfirmed.
-- Use `affects(target, key)` to report pending on data without predicting its value.
-- Use `until(predicate)` when the confirmation arrives on a live source rather than in the response.
-- Create durable data, per-row UI state, and the optimistic overlay under one owner and return one composed store.
+- 同期のストア書き込みはそのままにします。`createOptimisticStore` 上の `action` の内側では、それが楽観的な予測になります。
+- 本体はジェネレーターとして書き、各 Promise を `yield` してください。これにより、その前後の書き込みが1つのトランザクションを共有します。
+- リクエストのあとに `refresh(source)` を呼んで、ストアをサーバーと突き合わせてください。
+- オーバーレイはアクションの確定時に破棄されます。成功時も失敗時も同じで、ロールバックのコードはありません。
+- UI が未確認のものを表示すべきときは、楽観的な行に `pending` フラグを入れてください。
+- 値を予測せずにデータの保留中を報告するには `affects(target, key)` を使ってください。
+- 確認がレスポンスではなくライブソース経由で届くときは `until(predicate)` を使ってください。
+- 永続的なデータ、行ごとの UI 状態、楽観的オーバーレイを1つのオーナーの下に作成し、合成済みの1つのストアを返してください。
 
-## Next steps
+## 次のステップ
 
-- [Forms](/guides/forms): the same actions behind a `<form>`, with progressive enhancement, validation, and errors returned from the server.
-- [Mutations and responses](/building-apps/server-functions/mutations-and-responses): writing `api.add` as a `"use server"` function and returning redirects, statuses, and safe errors.
-- [Boundaries](/concepts/boundaries): where `Errored` catches the errors an action does not, and how an errored region recovers.
-- [Data loading and mutations](/routing/solid-router/data): Solid Router's `action` and `query` add submissions, caching, and revalidation on top of these primitives.
-- [State management](/guides/state-management): where the cart, the user, and the filter live, and why `createCart()` runs inside a provider.
+- [フォーム](/guides/forms): `<form>` の背後にある同じアクション。プログレッシブエンハンスメント、バリデーション、サーバーから返されるエラーを扱います。
+- [ミューテーションとレスポンス](/building-apps/server-functions/mutations-and-responses): `api.add` を `"use server"` 関数として書き、リダイレクト・ステータス・安全なエラーを返します。
+- [バウンダリ](/concepts/boundaries): `Errored` がアクションが捕捉しないエラーを捕捉する場所と、エラーが起きた領域の回復方法。
+- [データの読み込みとミューテーション](/routing/solid-router/data): Solid Router の `action` と `query` がこれらのプリミティブの上にサブミッション・キャッシュ・再検証を追加します。
+- [状態管理](/guides/state-management): カート・ユーザー・フィルターがどこに置かれるか、そして `createCart()` がプロバイダーの内側で実行される理由。
