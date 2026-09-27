@@ -1,13 +1,13 @@
 ---
-title: "Navigation primitives"
+title: "ナビゲーションプリミティブ"
 version: "2.0"
-description: "Reference for Solid Router location, navigation, matching, search, preloading, link state, and leave guards."
+description: "Solid Router のロケーション・ナビゲーション・マッチング・検索・プリロード・リンク状態・離脱ガードのリファレンス。"
 source_repo: "solidjs/solid-router"
 source_ref: "next"
 source_path: "src/routing.ts"
 ---
 
-## Import
+## インポート
 
 ```ts
 import {
@@ -26,7 +26,7 @@ import {
 } from "@solidjs/router";
 ```
 
-All primitives on this page require a mounted router context.
+このページのすべてのプリミティブは、マウントされたルーターコンテキストが必要です。
 
 ## `useNavigate`
 
@@ -48,7 +48,7 @@ interface NavigateOptions<S = unknown> {
 }
 ```
 
-Defaults are `resolve: true`, `replace: false`, and `scroll: true`.
+デフォルトは `resolve: true`、`replace: false`、`scroll: true` です。
 
 ```ts
 const navigate = useNavigate();
@@ -73,7 +73,7 @@ interface Location<S = unknown> {
 }
 ```
 
-Returns the reactive current location.
+現在のリアクティブなロケーションを返します。
 
 ## `useParams`
 
@@ -84,8 +84,8 @@ function useParams<P extends Params>(
 ): { [K in keyof P]: P[K] };
 ```
 
-Returns the reactive merged parameters for the current route chain.
-The path argument is a type witness and is not matched at runtime.
+現在のルートチェーンについて、マージ済みのリアクティブなパラメータを返します。
+path 引数は型のウィットネスであり、実行時にマッチングされるわけではありません。
 
 ## `useSearchParams`
 
@@ -100,9 +100,9 @@ function useSearchParams<In, Out>(
 ): [Out, (params: Partial<In>, options?: Partial<NavigateOptions>) => void];
 ```
 
-The no-argument form reads raw query values.
-The path-witness form runs synchronous search schemas from the current matched routes.
-The setter merges values and defaults to `scroll: false` and `resolve: false`.
+引数なしの形式は生のクエリ値を読み取ります。
+パスウィットネス形式は、現在マッチしているルートの同期検索スキーマを実行します。
+セッターは値をマージし、デフォルトは `scroll: false` と `resolve: false` です。
 
 ## `useMatch`
 
@@ -113,8 +113,8 @@ function useMatch<S extends string | TypedPath>(
 ): () => PathMatch | undefined;
 ```
 
-Matches the supplied path pattern against the current pathname.
-`useMatch` does not consult the route tree.
+指定されたパスパターンを現在の pathname に対してマッチングします。
+`useMatch` はルートツリーを参照しません。
 
 ```ts
 const match = useMatch(() => "/docs/*rest");
@@ -127,7 +127,7 @@ match()?.params.rest;
 function useRouteMatches(): () => RouteMatch[];
 ```
 
-Returns a copied root-to-leaf array of the resolved route-tree matches.
+解決済みのルートツリーマッチの、ルートから葉までのコピーされた配列を返します。
 
 ## `useIsRouting`
 
@@ -135,7 +135,7 @@ Returns a copied root-to-leaf array of the resolved route-tree matches.
 function useIsRouting(): () => boolean;
 ```
 
-Returns an accessor for pending programmatic navigation, native history traversal, and lazy route resolution.
+保留中のプログラム的ナビゲーション、ネイティブの履歴トラバーサル、遅延ルート解決を示すアクセサーを返します。
 
 ## `usePreloadRoute`
 
@@ -146,8 +146,8 @@ function usePreloadRoute(): (
 ) => void;
 ```
 
-Loads matched lazy components.
-Set `preloadData: true` to also run matched route preloads.
+マッチした lazy コンポーネントを読み込みます。
+`preloadData: true` を設定すると、マッチしたルートのプリロードも実行します。
 
 ## `useLinkState`
 
@@ -166,9 +166,9 @@ interface LinkState {
 }
 ```
 
-`active` includes descendants unless `end` is true.
-`current` is exact.
-`pending` matches the active in-flight target.
+`active` は `end` が true でない限り、子孫も含みます。
+`current` は完全一致です。
+`pending` は進行中のアクティブなターゲットにマッチします。
 
 ## `useResolvedPath`
 
@@ -176,7 +176,7 @@ interface LinkState {
 function useResolvedPath(path: () => string): () => string | undefined;
 ```
 
-Resolves a path against the current route context.
+現在のルートコンテキストに対してパスを解決します。
 
 ## `useHref`
 
@@ -184,7 +184,7 @@ Resolves a path against the current route context.
 function useHref<T extends string | undefined>(to: () => T): () => string | T;
 ```
 
-Applies the history adapter's output rendering, such as the `#` prefix from hash history.
+履歴アダプターの出力レンダリングを適用します（ハッシュ履歴の `#` プレフィックスなど）。
 
 ## `useBeforeLeave`
 
@@ -203,11 +203,11 @@ interface BeforeLeaveEventArgs {
 }
 ```
 
-Solid removes the listener when the owner is disposed.
-Call `preventDefault()` to block navigation.
-Call `retry(true)` to retry without running leave handlers again.
+オーナーが破棄されると、Solid はリスナーを削除します。
+ナビゲーションをブロックするには `preventDefault()` を呼び出します。
+離脱ハンドラーを再実行せずに再試行するには `retry(true)` を呼び出します。
 
-## Related
+## 関連項目
 
-- [Routes and typed paths](/reference/solid-router/routes-and-paths)
-- [History adapters](/reference/solid-router/history)
+- [ルートと型付きパス](/reference/solid-router/routes-and-paths)
+- [履歴アダプター](/reference/solid-router/history)

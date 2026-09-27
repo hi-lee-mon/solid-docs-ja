@@ -3,27 +3,27 @@ title: "@solidjs/router"
 titleTemplate: ":title"
 mainNavExclude: true
 version: "2.0"
-description: "API reference for Solid Router 2, including router creation, navigation, data, history, file routes, and server integration."
+description: "ルーター作成・ナビゲーション・データ・履歴・ファイルルート・サーバー統合を含む Solid Router 2 の API リファレンス。"
 source_repo: "solidjs/solid-router"
 source_ref: "next"
 source_path: "src/index.tsx"
 ---
 
-Solid Router is published through three package entries.
+Solid Router は 3 つのパッケージエントリーとして公開されています。
 
-## Entries
+## エントリー
 
-- `@solidjs/router` exports the router factory, route helpers, navigation primitives, history adapters, queries, actions, and public types.
-- `@solidjs/router/fs` exports the file-system manifest adapter.
-- `@solidjs/router/server` exports the server-function flight-data collector.
+- `@solidjs/router` はルーターファクトリー、ルートヘルパー、ナビゲーションプリミティブ、履歴アダプター、クエリ、アクション、公開型をエクスポートします。
+- `@solidjs/router/fs` はファイルシステムマニフェストアダプターをエクスポートします。
+- `@solidjs/router/server` はサーバー関数のフライトデータコレクターをエクスポートします。
 
-## Reference groups
+## リファレンスグループ
 
-- [Router factory](/reference/solid-router/router-factory): `createRouter`, `defineRoute`, and `defineRoutes`
-- [Routes and typed paths](/reference/solid-router/routes-and-paths): route definitions, path patterns, `int`, instance paths, and matching
-- [Navigation primitives](/reference/solid-router/navigation): location, navigation, matching, search, preloading, link state, and leave guards
-- [Data APIs](/reference/solid-router/data): `query`, `revalidate`, `action`, `useAction`, and `useSubmissions`
-- [History adapters](/reference/solid-router/history): browser, hash, and memory histories
-- [File-system adapter](/reference/solid-router/filesystem): `fileRoutes` and `defineFileRoute`
-- [Server integration](/reference/solid-router/server): `createFlightDataCollector`
-- [Types](/reference/solid-router/types): public application-facing types
+- [ルーターファクトリー](/reference/solid-router/router-factory): `createRouter`、`defineRoute`、`defineRoutes`
+- [ルートと型付きパス](/reference/solid-router/routes-and-paths): ルート定義、パスパターン、`int`、インスタンスパス、マッチング
+- [ナビゲーションプリミティブ](/reference/solid-router/navigation): ロケーション、ナビゲーション、マッチング、検索、プリロード、リンク状態、離脱ガード
+- [データ API](/reference/solid-router/data): `query`、`revalidate`、`action`、`useAction`、`useSubmissions`
+- [履歴アダプター](/reference/solid-router/history): ブラウザ・ハッシュ・メモリ履歴
+- [ファイルシステムアダプター](/reference/solid-router/filesystem): `fileRoutes` と `defineFileRoute`
+- [サーバー統合](/reference/solid-router/server): `createFlightDataCollector`
+- [型](/reference/solid-router/types): 公開されているアプリケーション向けの型

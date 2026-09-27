@@ -2,8 +2,8 @@
 title: Meta
 order: 2
 use_cases: >-
-  meta tags, seo metadata, open graph tags, social sharing, descriptions,
-  theme color
+  メタタグ、SEO メタデータ、Open Graph タグ、ソーシャル共有、description、
+  テーマカラー
 tags:
   - meta
   - head
@@ -15,18 +15,18 @@ source_repo: "solidjs/solid-meta"
 source_ref: "next"
 source_path: "src/index.ts"
 description: >-
-  Meta adds a meta element to the document head through Solid Meta.
+  Meta は Solid Meta を通じてドキュメントの head に meta 要素を追加します。
 ---
 
-`Meta` adds a [`<meta>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta) element to the document head.
+`Meta` はドキュメントの head に [`<meta>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta) 要素を追加します。
 
-## Import
+## インポート
 
 ```tsx
 import { Meta } from "@solidjs/meta";
 ```
 
-## Type
+## 型
 
 ```tsx
 const Meta: Component<
@@ -36,34 +36,34 @@ const Meta: Component<
 
 ## Props
 
-Accepts attributes for [`<meta>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta).
-Attribute values can be reactive expressions.
+[`<meta>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta) の属性を受け取ります。
+属性値にはリアクティブな式を使えます。
 
 ### `key`
 
-- **Type:** `string`
-- **Optional:** Yes
+- **型:** `string`
+- **省略可能:** はい
 
-Overrides the default identity used for deduplication.
+重複排除に使われるデフォルトの identity を上書きします。
 
-## Behavior
+## 動作
 
-- Dedupes by `name`, `property`, or `http-equiv`.
-  These are separate namespaces: `<Meta name="og:image" />` and `<Meta property="og:image" />` coexist.
-- A `media` attribute forks identity, so `theme-color` light and dark variants coexist:
+- `name`、`property`、`http-equiv` のいずれかで重複排除します。
+  これらは別々の名前空間です: `<Meta name="og:image" />` と `<Meta property="og:image" />` は共存します。
+- `media` 属性は identity を分岐させるため、`theme-color` のライトとダークのバリアントは共存します:
 
 ```tsx
 <Meta name="theme-color" media="(prefers-color-scheme: light)" content="white" />
 <Meta name="theme-color" media="(prefers-color-scheme: dark)" content="black" />
 ```
 
-- The last-registered tag for an identity wins; unmounting it restores the previous registration.
-- A `<Meta>` with none of the identity attributes (and no `key`) is append-only.
-- `<Meta charset>` is server-shell only: it is rendered into the head prelude on the first flush and ignored (with a dev warning) on the client.
+- ある identity では最後に登録されたタグが優先され、アンマウントすると前の登録が復元されます。
+- identity 属性を 1 つも持たない（`key` も持たない）`<Meta>` は追加専用です。
+- `<Meta charset>` はサーバーシェル専用です: 最初のフラッシュで head のプリリュードにレンダーされ、クライアントでは（開発時警告とともに）無視されます。
 
-## Examples
+## 例
 
-### Basic usage
+### 基本的な使い方
 
 ```tsx
 import { Meta } from "@solidjs/meta";
@@ -78,7 +78,7 @@ export default function Page() {
 }
 ```
 
-### Forcing tags to override each other
+### タグ同士を強制的に上書きさせる
 
 ```tsx
 {/* These override each other despite different attributes: */}
@@ -86,9 +86,9 @@ export default function Page() {
 <Meta key="social-image" property="og:image" content="/og.png" />
 ```
 
-### Multiple tags with the same identity
+### 同じ identity を持つ複数のタグ
 
-Wrap deliberate sets in [`<Head>`](/reference/solid-meta/head) so they coexist and override as a unit:
+意図的なセットは [`<Head>`](/reference/solid-meta/head) でラップすると、共存しつつ一単位として上書きされます:
 
 ```tsx
 <Head>
@@ -97,7 +97,7 @@ Wrap deliberate sets in [`<Head>`](/reference/solid-meta/head) so they coexist a
 </Head>
 ```
 
-## Related
+## 関連項目
 
 - [`Head`](/reference/solid-meta/head)
 - [`Title`](/reference/solid-meta/title)

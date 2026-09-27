@@ -1,13 +1,13 @@
 ---
-title: "Data APIs"
+title: "データ API"
 version: "2.0"
-description: "Reference for Solid Router query caching, revalidation, actions, action invocation, and settled submissions."
+description: "Solid Router のクエリキャッシュ・再検証・アクション・アクション呼び出し・確定済み送信のリファレンス。"
 source_repo: "solidjs/solid-router"
 source_ref: "next"
 source_path: "src/data/index.ts"
 ---
 
-## Import
+## インポート
 
 ```ts
 import {
@@ -28,7 +28,7 @@ function query<T extends (...args: any[]) => any>(
 ): CachedFunction<T>;
 ```
 
-Returns a cached function with key helpers:
+キーヘルパー付きのキャッシュ済み関数を返します:
 
 ```ts
 type CachedFunction<T extends (...args: any[]) => any> = ((
@@ -46,12 +46,12 @@ getUser.key;
 getUser.keyFor("42");
 ```
 
-Cache keys combine `name` with a stable JSON serialization of the arguments.
-Plain object keys are sorted during serialization.
+キャッシュキーは `name` と引数の安定した JSON シリアライズを組み合わせたものです。
+プレーンオブジェクトのキーはシリアライズ時にソートされます。
 
-When `fn` is a server function without a declared method, `query` wraps it as a GET server function.
+`fn` がメソッドを宣言していないサーバー関数の場合、`query` はそれを GET サーバー関数としてラップします。
 
-### Cache methods
+### キャッシュメソッド
 
 ```ts
 query.get(key: string): any;
@@ -60,9 +60,9 @@ query.delete(key: string): boolean;
 query.clear(): void;
 ```
 
-`query.get` returns the settled cached value.
-`query.get` throws when no entry exists.
-`query.set` does not accept a promise value.
+`query.get` は確定済みのキャッシュ値を返します。
+`query.get` はエントリーが存在しない場合にスローします。
+`query.set` は Promise の値を受け付けません。
 
 ## `revalidate`
 
@@ -70,10 +70,10 @@ query.clear(): void;
 function revalidate(key?: string | string[] | void, force?: boolean): void;
 ```
 
-Retriggers live matching cache entries.
-Keys match by prefix.
-Omit `key` to match all entries.
-`force` defaults to `true` and marks the matched entries stale before retriggering them.
+生存しているマッチするキャッシュエントリーを再トリガーします。
+キーは前方一致でマッチします。
+`key` を省略するとすべてのエントリーにマッチします。
+`force` のデフォルトは `true` で、マッチしたエントリーを再トリガーする前に stale としてマークします。
 
 ## `action`
 
@@ -104,11 +104,11 @@ type Action<T extends any[], U, V = T> = ((
 };
 ```
 
-Form-compatible actions implement Solid's serializable JSX attribute value.
-Client actions need a stable name when rendered on the server.
-Server functions supply their own URL.
+フォーム対応のアクションは、Solid のシリアライズ可能な JSX 属性値を実装します。
+クライアントアクションはサーバーでレンダーされる際に安定した名前が必要です。
+サーバー関数は独自の URL を提供します。
 
-### Form use
+### フォームでの使用
 
 ```tsx
 <form action={save} method="post">
@@ -116,23 +116,23 @@ Server functions supply their own URL.
 </form>
 ```
 
-Only POST forms are accepted by delegated action handling.
-The form has `aria-busy="true"` while its delegated submission is running.
+デリゲートされたアクション処理が受け付けるのは POST フォームのみです。
+デリゲートされた送信の実行中、フォームには `aria-busy="true"` が付きます。
 
 ### `with`
 
-Binds leading action arguments and returns an action for the remaining arguments.
-The bound arguments are represented in the action URL.
+先頭のアクション引数をバインドし、残りの引数を取るアクションを返します。
+バインドされた引数はアクション URL に表れます。
 
 ### `onSubmit`
 
-Registers a callback that runs before the mutation call.
-Registration under an owner is removed when the owner is disposed.
+ミューテーション呼び出しの前に実行されるコールバックを登録します。
+オーナー配下での登録は、オーナーが破棄されると削除されます。
 
 ### `onSettled`
 
-Registers a callback for every completed invocation.
-The callback receives a `Submission`, including for void, redirect, and metadata-only outcomes.
+完了した各呼び出しに対するコールバックを登録します。
+コールバックは `Submission` を受け取ります。void・リダイレクト・メタデータのみの結果でも同様です。
 
 ## `useAction`
 
@@ -142,7 +142,7 @@ function useAction<T extends any[], U, V>(
 ): (...args: T) => Promise<NarrowResponse<U>>;
 ```
 
-Binds direct action invocation to the current router context.
+アクションの直接呼び出しを現在のルーターコンテキストにバインドします。
 
 ## `useSubmissions`
 
@@ -153,8 +153,8 @@ function useSubmissions<T extends any[], U, V>(
 ): Submission<V, NarrowResponse<U>>[];
 ```
 
-Returns a reactive array proxy of settled records for the action.
-The router retains only records with a result or error.
+そのアクションの確定済みレコードのリアクティブな配列プロキシを返します。
+ルーターが保持するのは result または error を持つレコードのみです。
 
 ```ts
 type Submission<T, U> = {
@@ -167,7 +167,7 @@ type Submission<T, U> = {
 };
 ```
 
-## Related
+## 関連項目
 
-- [Route preload types](/reference/solid-router/routes-and-paths#preload)
-- [Server integration](/reference/solid-router/server)
+- [ルートプリロードの型](/reference/solid-router/routes-and-paths#preload)
+- [サーバー統合](/reference/solid-router/server)

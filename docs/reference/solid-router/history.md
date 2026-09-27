@@ -1,13 +1,13 @@
 ---
-title: "History adapters"
+title: "履歴アダプター"
 version: "2.0"
-description: "Reference for Solid Router browser, hash, and memory history adapters."
+description: "Solid Router のブラウザ・ハッシュ・メモリ履歴アダプターのリファレンス。"
 source_repo: "solidjs/solid-router"
 source_ref: "next"
 source_path: "src/routers/history.ts"
 ---
 
-## Import
+## インポート
 
 ```ts
 import {
@@ -40,8 +40,8 @@ interface LocationChange<S = unknown> {
 }
 ```
 
-Pass a history adapter as `createRouter({ history })`.
-On the server, the request URL or router `url` prop selects the location.
+履歴アダプターは `createRouter({ history })` として渡します。
+サーバーでは、リクエスト URL またはルーターの `url` prop がロケーションを選択します。
 
 ## `browserHistory`
 
@@ -49,8 +49,8 @@ On the server, the request URL or router `url` prop selects the location.
 function browserHistory(): RouterHistory;
 ```
 
-Uses `window.location`, `history.pushState`, `history.replaceState`, and `popstate`.
-The router creates this adapter by default on the client.
+`window.location`、`history.pushState`、`history.replaceState`、`popstate` を使います。
+ルーターはクライアントでこのアダプターをデフォルトで作成します。
 
 ## `hashHistory`
 
@@ -58,8 +58,8 @@ The router creates this adapter by default on the client.
 function hashHistory(): RouterHistory;
 ```
 
-Stores the routed path after `#`.
-The `hashHistory` `renderPath` utility prefixes generated `Router.paths` values with `#`.
+ルーティング対象のパスを `#` の後ろに格納します。
+`hashHistory` の `renderPath` ユーティリティは、生成される `Router.paths` の値に `#` のプレフィックスを付けます。
 
 ```ts
 const Router = createRouter({
@@ -74,7 +74,7 @@ const Router = createRouter({
 function memoryHistory(initial?: string): MemoryHistoryAdapter;
 ```
 
-`initial` defaults to `/`.
+`initial` のデフォルトは `/` です。
 
 ```ts
 interface MemoryHistoryAdapter extends RouterHistory {
@@ -93,12 +93,12 @@ const Router = createRouter({ routes, history });
 history.back();
 ```
 
-## Scroll restoration
+## スクロール復元
 
-`createRouter` wraps its default browser history with explicit scroll restoration unless `scrollRestoration` is false.
-A custom history adapter is not wrapped unless `scrollRestoration` is true.
+`createRouter` は、`scrollRestoration` が false でない限り、デフォルトのブラウザ履歴を明示的なスクロール復元でラップします。
+カスタム履歴アダプターは、`scrollRestoration` が true の場合にのみラップされます。
 
-## Related
+## 関連項目
 
 - [`createRouter`](/reference/solid-router/router-factory#createrouter)
-- [Navigation primitives](/reference/solid-router/navigation)
+- [ナビゲーションプリミティブ](/reference/solid-router/navigation)

@@ -2,7 +2,7 @@
 title: Script
 order: 6
 use_cases: >-
-  json-ld, structured data, analytics scripts, head scripts
+  json-ld、構造化データ、アナリティクススクリプト、head スクリプト
 tags:
   - script
   - json-ld
@@ -14,23 +14,23 @@ source_repo: "solidjs/solid-meta"
 source_ref: "next"
 source_path: "src/index.ts"
 description: >-
-  Script adds a script element to the document head through Solid Meta.
+  Script は Solid Meta を通じてドキュメントの head に script 要素を追加します。
 ---
 
-`Script` adds a [`<script>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script) element to the document head, including inline bodies.
-Structured data via JSON-LD (`type="application/ld+json"`) is the marquee use case.
+`Script` は、インラインの本文を含めて、ドキュメントの head に [`<script>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script) 要素を追加します。
+JSON-LD（`type="application/ld+json"`）による構造化データが代表的なユースケースです。
 
-:::note[New in 1.0]
-`Script` did not exist in `@solidjs/meta` 0.x — head scripts previously required the 0.x `useHead` escape hatch.
+:::note[1.0 の新機能]
+`Script` は `@solidjs/meta` 0.x には存在しませんでした — 以前、head スクリプトには 0.x の `useHead` エスケープハッチが必要でした。
 :::
 
-## Import
+## インポート
 
 ```tsx
 import { Script } from "@solidjs/meta";
 ```
 
-## Type
+## 型
 
 ```tsx
 const Script: Component<
@@ -40,33 +40,33 @@ const Script: Component<
 
 ## Props
 
-Accepts attributes for [`<script>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script).
+[`<script>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script) の属性を受け取ります。
 
 ### `children`
 
-- **Type:** `JSX.Element`
-- **Optional:** Yes
+- **型:** `JSX.Element`
+- **省略可能:** はい
 
-Text body of the `script` element.
-Applied via `textContent`, so it is always escaped.
-Can be a reactive expression.
+`script` 要素のテキスト本文です。
+`textContent` 経由で適用されるため、常にエスケープされます。
+リアクティブな式を指定できます。
 
 ### `key`
 
-- **Type:** `string`
-- **Optional:** Yes
+- **型:** `string`
+- **省略可能:** はい
 
-Overrides the default identity used for deduplication.
+重複排除に使われるデフォルトの identity を上書きします。
 
-## Behavior
+## 動作
 
-- Scripts with a `src` dedupe by URL and are treated as resources: they render immediately and are not retracted on unmount.
-- Keyless inline scripts are append-only: each one adds its own element, and unmounting removes it.
-- Give a `key` to make an inline script replaceable — later registrations with the same `key` override it, and unmounting restores the previous body.
+- `src` を持つスクリプトは URL で重複排除され、リソースとして扱われます: 即座にレンダーされ、アンマウントしても取り消されません。
+- key なしのインラインスクリプトは追加専用です: それぞれが独自の要素を追加し、アンマウントすると削除されます。
+- インラインスクリプトを置き換え可能にするには `key` を指定します — 同じ `key` を持つ後の登録がそれを上書きし、アンマウントすると以前の本文が復元されます。
 
-## Examples
+## 例
 
-### JSON-LD structured data
+### JSON-LD 構造化データ
 
 ```tsx
 import { Script } from "@solidjs/meta";
@@ -87,7 +87,7 @@ export default function Product(props: {
 }
 ```
 
-## Related
+## 関連項目
 
 - [`Style`](/reference/solid-meta/style)
 - [`Head`](/reference/solid-meta/head)

@@ -1,13 +1,13 @@
 ---
-title: "File-system adapter"
+title: "ファイルシステムアダプター"
 version: "2.0"
-description: "Reference for converting a file-routes manifest and typing Solid Router route-module configuration."
+description: "ファイルルートマニフェストの変換と Solid Router ルートモジュール設定の型付けのリファレンス。"
 source_repo: "solidjs/solid-router"
 source_ref: "next"
 source_path: "src/fs.ts"
 ---
 
-## Import
+## インポート
 
 ```ts
 import { defineFileRoute, fileRoutes } from "@solidjs/router/fs";
@@ -15,7 +15,7 @@ import { defineFileRoute, fileRoutes } from "@solidjs/router/fs";
 
 ## `fileRoutes`
 
-Converts nested file-route manifest entries into a route-definition tuple.
+ネストされたファイルルートのマニフェストエントリーをルート定義タプルに変換します。
 
 ```ts
 function fileRoutes<const T extends readonly FileRouteEntry[]>(
@@ -33,21 +33,21 @@ const Router = createRouter({
 });
 ```
 
-For each entry, the adapter:
+各エントリーに対して、アダプターは:
 
-- Uses the manifest `path`.
-- Loads the module's default export as `component`.
-- Spreads the module's named `route` export into the definition.
-- Adds `filesystem: true` to `info`.
-- Recursively converts `children`.
+- マニフェストの `path` を使います。
+- モジュールの default エクスポートを `component` として読み込みます。
+- モジュールの名前付き `route` エクスポートを定義にスプレッドします。
+- `info` に `filesystem: true` を追加します。
+- `children` を再帰的に変換します。
 
-Code-split component references become `lazy` components and use their source as `moduleUrl`.
-The adapter passes eager component references through without a `lazy` wrapper.
-The adapter reuses lazy components by source URL within one `fileRoutes` call.
+コード分割されたコンポーネント参照は `lazy` コンポーネントになり、そのソースを `moduleUrl` として使います。
+eager なコンポーネント参照は `lazy` ラッパーなしでそのまま渡されます。
+1 回の `fileRoutes` 呼び出し内では、lazy コンポーネントはソース URL 単位で再利用されます。
 
 ## `defineFileRoute`
 
-Types a route module's named `route` export from a path-pattern witness.
+パスパターンのウィットネスから、ルートモジュールの名前付き `route` エクスポートに型を付けます。
 
 ```ts
 function defineFileRoute<
@@ -77,10 +77,10 @@ export default function Post(props: RouteProps<typeof route>) {
 }
 ```
 
-The `path` argument is a type witness.
-The manifest entry supplies the runtime path.
+`path` 引数は型のウィットネスです。
+実行時のパスはマニフェストエントリーが提供します。
 
-## Manifest types
+## マニフェストの型
 
 ```ts
 interface FileRouteEntry {
@@ -102,10 +102,10 @@ interface FileRouteEagerRef<M = Record<string, unknown>> {
 }
 ```
 
-`FileRouteFrom<E>` maps one manifest entry to its route type.
-`FileRoutesFrom<T>` maps the full entry tuple while preserving literal paths and route-module configuration.
+`FileRouteFrom<E>` は 1 つのマニフェストエントリーをそのルート型にマッピングします。
+`FileRoutesFrom<T>` はリテラルなパスとルートモジュール設定を保持しながら、エントリータプル全体をマッピングします。
 
-## Related
+## 関連項目
 
-- [Route definitions](/reference/solid-router/routes-and-paths)
-- [File-system routing guide](/routing/solid-router/route-definitions#convert-a-file-system-manifest)
+- [ルート定義](/reference/solid-router/routes-and-paths)
+- [ファイルシステムルーティングガイド](/routing/solid-router/route-definitions#convert-a-file-system-manifest)

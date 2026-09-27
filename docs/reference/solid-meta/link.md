@@ -2,7 +2,7 @@
 title: Link
 order: 3
 use_cases: >-
-  canonical links, favicons, preload hints, stylesheets, alternate links
+  canonical リンク、ファビコン、プリロードヒント、スタイルシート、代替リンク
 tags:
   - link
   - head
@@ -14,18 +14,18 @@ source_repo: "solidjs/solid-meta"
 source_ref: "next"
 source_path: "src/index.ts"
 description: >-
-  Link adds a link element to the document head through Solid Meta.
+  Link は Solid Meta を通じてドキュメントの head に link 要素を追加します。
 ---
 
-`Link` adds a [`<link>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/link) element to the document head.
+`Link` はドキュメントの head に [`<link>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/link) 要素を追加します。
 
-## Import
+## インポート
 
 ```tsx
 import { Link } from "@solidjs/meta";
 ```
 
-## Type
+## 型
 
 ```tsx
 const Link: Component<
@@ -35,27 +35,27 @@ const Link: Component<
 
 ## Props
 
-Accepts attributes for [`<link>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/link).
-Attribute values can be reactive expressions.
+[`<link>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/link) の属性を受け取ります。
+属性値にはリアクティブな式を使えます。
 
 ### `key`
 
-- **Type:** `string`
-- **Optional:** Yes
+- **型:** `string`
+- **省略可能:** はい
 
-Overrides the default identity used for deduplication.
+重複排除に使われるデフォルトの identity を上書きします。
 
-## Behavior
+## 動作
 
-- Dedupes by `rel` + `href`: the last-registered tag wins and unmounting restores the previous one.
-- **Icons** (`rel="icon"`, `rel="apple-touch-icon"`) dedupe by `rel` + `sizes` + `type` instead — deliberately excluding `href`.
-  Swapping the `href` _replaces_ the favicon rather than accumulating, while size and type variants coexist.
-- **Resource rels** (`preload`, `modulepreload`, `prefetch`, `preconnect`, `dns-prefetch`) render immediately and are never retracted — a fetch hint cannot be meaningfully undone.
-- **Stylesheets** (`rel="stylesheet"`) are emitted eagerly (SSR streams them as soon as they register) and removed when their owner disposes.
+- `rel` + `href` で重複排除します: 最後に登録されたタグが優先され、アンマウントすると直前のものが復元されます。
+- **アイコン**（`rel="icon"`、`rel="apple-touch-icon"`）は代わりに `rel` + `sizes` + `type` で重複排除します — `href` は意図的に除外されています。
+  `href` を差し替えると、ファビコンは累積ではなく _置き換えられ_ ます。一方、サイズと type のバリアントは共存します。
+- **リソース系の rel**（`preload`、`modulepreload`、`prefetch`、`preconnect`、`dns-prefetch`）は即座にレンダーされ、取り消されることはありません — フェッチヒントを意味のある形で元に戻すことはできないためです。
+- **スタイルシート**（`rel="stylesheet"`）は eager に出力され（SSR では登録されるとすぐにストリームされます）、オーナーが破棄されると削除されます。
 
-## Examples
+## 例
 
-### Canonical link
+### canonical リンク
 
 ```tsx
 import { Link } from "@solidjs/meta";
@@ -65,9 +65,9 @@ export default function Page() {
 }
 ```
 
-### Per-route favicon
+### ルートごとのファビコン
 
-Because icon identity excludes `href`, this replaces the site favicon while the route is mounted and restores the previous one on leave:
+アイコンの identity には `href` が含まれないため、これはルートがマウントされている間はサイトのファビコンを置き換え、離れると以前のものを復元します:
 
 ```tsx
 import { Link } from "@solidjs/meta";
@@ -82,7 +82,7 @@ export default function Inbox(props: { unread: () => number }) {
 }
 ```
 
-## Related
+## 関連項目
 
 - [`Stylesheet`](/reference/solid-meta/stylesheet)
 - [`Meta`](/reference/solid-meta/meta)

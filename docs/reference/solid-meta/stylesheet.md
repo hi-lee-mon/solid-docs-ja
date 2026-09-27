@@ -2,7 +2,7 @@
 title: Stylesheet
 order: 4
 use_cases: >-
-  stylesheets, css loading, route-scoped styles
+  スタイルシート、CSS の読み込み、ルートスコープのスタイル
 tags:
   - stylesheet
   - css
@@ -14,19 +14,19 @@ source_repo: "solidjs/solid-meta"
 source_ref: "next"
 source_path: "src/index.ts"
 description: >-
-  Stylesheet adds a stylesheet link element to the document head through
-  Solid Meta.
+  Stylesheet は Solid Meta を通じてドキュメントの head に
+  スタイルシートの link 要素を追加します。
 ---
 
-`Stylesheet` is sugar for [`<Link rel="stylesheet">`](/reference/solid-meta/link).
+`Stylesheet` は [`<Link rel="stylesheet">`](/reference/solid-meta/link) の糖衣構文です。
 
-## Import
+## インポート
 
 ```tsx
 import { Stylesheet } from "@solidjs/meta";
 ```
 
-## Type
+## 型
 
 ```tsx
 const Stylesheet: Component<
@@ -36,24 +36,24 @@ const Stylesheet: Component<
 
 ## Props
 
-Accepts attributes for [`<link>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/link) except `rel`, which is fixed to `stylesheet`.
+[`<link>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/link) の属性を受け取りますが、`stylesheet` に固定されている `rel` は除きます。
 
 ### `key`
 
-- **Type:** `string`
-- **Optional:** Yes
+- **型:** `string`
+- **省略可能:** はい
 
-Overrides the default identity used for deduplication.
+重複排除に使われるデフォルトの identity を上書きします。
 
-## Behavior
+## 動作
 
-- Emitted eagerly: during SSR the stylesheet streams as soon as it registers, so styles load as early as possible.
-- Removed when its owner disposes — navigating away from a route removes its route-scoped stylesheet.
-- Dedupes by URL: registering the same `href` twice yields one element.
+- eager に出力されます: SSR ではスタイルシートは登録されるとすぐにストリームされるため、スタイルができるだけ早く読み込まれます。
+- オーナーが破棄されると削除されます — ルートから離れると、そのルートスコープのスタイルシートが削除されます。
+- URL で重複排除します: 同じ `href` を 2 回登録しても要素は 1 つになります。
 
-## Examples
+## 例
 
-### Route-scoped stylesheet
+### ルートスコープのスタイルシート
 
 ```tsx
 import { Stylesheet } from "@solidjs/meta";
@@ -63,7 +63,7 @@ export default function Dashboard() {
 }
 ```
 
-## Related
+## 関連項目
 
 - [`Link`](/reference/solid-meta/link)
 - [`Style`](/reference/solid-meta/style)
