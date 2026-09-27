@@ -3,48 +3,48 @@ title: "filesystem-routing"
 titleTemplate: ":title"
 mainNavExclude: true
 version: "2.0"
-description: "Public exports for filesystem-routing scanning, conventions, Vite delivery, and API dispatch."
+description: "filesystem-routing のスキャン、規約、Vite 配信、API ディスパッチの公開エクスポート。"
 source_repo: "solidjs/filesystem-routing"
 source_ref: "v0.2.1"
 source_path: "package.json"
 ---
 
-`filesystem-routing` scans route files into a router-neutral manifest.
-Vite delivers that manifest, while each router owns its conversion to router-specific definitions.
+`filesystem-routing` はルートファイルをスキャンして、ルーター中立のマニフェストを生成します。
+Vite がそのマニフェストを配信し、各ルーターがルーター固有の定義への変換を担います。
 
-## Package exports
+## パッケージのエクスポート
 
 ### `filesystem-routing`
 
-- [`PageFileSystemRouter`, `FlatFileSystemRouter`, and filename helpers](/reference/filesystem-routing/conventions)
-- [`BaseFileSystemRouter`, scanning utilities, module analysis, and manifest types](/reference/filesystem-routing/core)
-- [`buildRouteTree`, `stripRouteGroups`, and `RouteTreeEntry`](/reference/filesystem-routing/tree)
+- [`PageFileSystemRouter`、`FlatFileSystemRouter`、ファイル名ヘルパー](/reference/filesystem-routing/conventions)
+- [`BaseFileSystemRouter`、スキャンユーティリティ、モジュール解析、マニフェスト型](/reference/filesystem-routing/core)
+- [`buildRouteTree`、`stripRouteGroups`、`RouteTreeEntry`](/reference/filesystem-routing/tree)
 
 ### `filesystem-routing/tree`
 
-Exports the [tree-building functions and type](/reference/filesystem-routing/tree) without loading the scanner.
+スキャナーを読み込まずに、[ツリー構築の関数と型](/reference/filesystem-routing/tree)をエクスポートします。
 
 ### `filesystem-routing/vite`
 
-Exports [`fileRoutes(options?)`](/reference/filesystem-routing/vite), its option type, and lower-level Vite adapter helpers.
+[`fileRoutes(options?)`](/reference/filesystem-routing/vite)、そのオプション型、および低レベルの Vite アダプターヘルパーをエクスポートします。
 
 ### `filesystem-routing/api`
 
-Exports the [API matcher and fetch-style middleware adapter](/reference/filesystem-routing/api).
+[API マッチャーと fetch スタイルのミドルウェアアダプター](/reference/filesystem-routing/api)をエクスポートします。
 
 ### `filesystem-routing/types`
 
-Provides the ambient declaration for [`virtual:file-routes`](/reference/filesystem-routing/manifest).
+[`virtual:file-routes`](/reference/filesystem-routing/manifest) 用の ambient 宣言を提供します。
 
 ### `virtual:file-routes`
 
-The generated module exports the flat manifest as default and nested page entries as `pageRoutes`.
-See [Manifest module](/reference/filesystem-routing/manifest).
+生成されるモジュールは、フラットなマニフェストをデフォルトエクスポートし、ネストされたページエントリーを `pageRoutes` としてエクスポートします。
+[マニフェストモジュール](/reference/filesystem-routing/manifest)を参照してください。
 
-## Solid Router boundary
+## Solid Router との境界
 
-`filesystem-routing` does not export a Solid Router adapter.
-Import `fileRoutes` from `@solidjs/router/fs` to convert `pageRoutes` into Solid Router route definitions.
+`filesystem-routing` は Solid Router アダプターをエクスポートしません。
+`pageRoutes` を Solid Router のルート定義に変換するには、`@solidjs/router/fs` から `fileRoutes` をインポートします。
 
 ```tsx
 import { pageRoutes } from "virtual:file-routes";

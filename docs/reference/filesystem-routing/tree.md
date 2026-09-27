@@ -1,18 +1,18 @@
 ---
 title: "filesystem-routing/tree"
-category: "filesystem-routing"
+category: "ファイルシステムルーティング"
 order: 3
 version: "2.0"
-description: "Builds nested route trees and removes route-group segments."
+description: "ネストされたルートツリーを構築し、ルートグループのセグメントを取り除きます。"
 source_repo: "solidjs/filesystem-routing"
 source_ref: "v0.2.1"
 source_path: "src/tree.ts"
 ---
 
-`filesystem-routing/tree` contains route-tree operations without Node or bundler imports.
-The same exports are available from `filesystem-routing`.
+`filesystem-routing/tree` は Node やバンドラーのインポートを含まないルートツリー操作を提供します。
+同じエクスポートは `filesystem-routing` からも利用できます。
 
-## Import
+## インポート
 
 ```ts
 import {
@@ -31,8 +31,8 @@ interface RouteTreeEntry extends RouteManifestEntry {
 }
 ```
 
-`id` records the manifest path used for nesting, including route groups.
-For a nested child, `id` and `path` are relative to its parent.
+`id` はルートグループを含む、ネストに使われるマニフェストパスを記録します。
+ネストされた子では、`id` と `path` は親に対する相対パスになります。
 
 ## `stripRouteGroups`
 
@@ -40,7 +40,7 @@ For a nested child, `id` and `path` are relative to its parent.
 function stripRouteGroups(path: string): string;
 ```
 
-Removes segments matching `(name)` and collapses repeated slashes.
+`(name)` にマッチするセグメントを取り除き、連続するスラッシュを 1 つにまとめます。
 
 ```ts
 stripRouteGroups("/(app)/dashboard"); // "/dashboard"
@@ -55,11 +55,11 @@ function buildRouteTree(
 ): RouteTreeEntry[];
 ```
 
-Copies and sorts entries by path length, then nests each entry under the first existing route whose `id` is its path prefix.
-The function makes nested `path` values relative to the parent and removes group segments from URL paths.
-The function does not mutate the input.
+エントリーをコピーしてパス長でソートし、各エントリーを、そのパスプレフィックスとなる `id` を持つ最初の既存ルートの下にネストします。
+この関数はネストされた `path` の値を親に対する相対パスに変え、URL パスからグループセグメントを取り除きます。
+この関数は入力を変更しません。
 
-Pass only entries that belong in the page tree:
+ページツリーに属するエントリーだけを渡してください：
 
 ```ts
 const tree = buildRouteTree(entries.filter((entry) => entry.page));

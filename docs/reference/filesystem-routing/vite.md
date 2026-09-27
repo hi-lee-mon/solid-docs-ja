@@ -1,15 +1,15 @@
 ---
 title: "filesystem-routing/vite"
-category: "filesystem-routing"
+category: "ファイルシステムルーティング"
 order: 4
 version: "2.0"
-description: "Configures Vite delivery of a file-system route manifest."
+description: "ファイルシステムルートマニフェストの Vite 配信を設定します。"
 source_repo: "solidjs/filesystem-routing"
 source_ref: "v0.2.1"
 source_path: "src/vite/index.ts"
 ---
 
-`filesystem-routing/vite` exports the Vite delivery adapter and its lower-level building blocks.
+`filesystem-routing/vite` は Vite 配信アダプターと、その低レベルの構成要素をエクスポートします。
 
 ## `fileRoutes`
 
@@ -19,7 +19,7 @@ import { fileRoutes, type FileRoutesOptions } from "filesystem-routing/vite";
 function fileRoutes(options?: FileRoutesOptions): PluginOption[];
 ```
 
-The returned plugins scan routes, serve the virtual manifest, tree-shake picked module exports, and update the manifest during development.
+返されるプラグインは、ルートをスキャンし、仮想マニフェストを提供し、pick で選択されたモジュールエクスポートをツリーシェイクし、開発中にマニフェストを更新します。
 
 ## `FileRoutesOptions`
 
@@ -43,132 +43,132 @@ interface FileRoutesOptions {
 
 ### `dir`
 
-- **Type:** `string`
-- **Default:** `"src/routes"`
+- **型:** `string`
+- **デフォルト:** `"src/routes"`
 
-Specifies the route directory relative to the Vite root.
+Vite ルートからの相対パスでルートディレクトリを指定します。
 
 ### `extensions`
 
-- **Type:** `string[]`
-- **Default:** `["js", "jsx", "ts", "tsx"]`
+- **型:** `string[]`
+- **デフォルト:** `["js", "jsx", "ts", "tsx"]`
 
-Specifies scanned extensions without leading dots.
+スキャン対象の拡張子を先頭のドットなしで指定します。
 
 ### `components`
 
-- **Type:** `boolean`
-- **Default:** `true`
+- **型:** `boolean`
+- **デフォルト:** `true`
 
-Controls whether page entries contain `$component` refs.
-Page status and eager `route` configuration refs remain when this is `false`.
+ページエントリーが `$component` の ref を含むかどうかを制御します。
+`false` の場合でも、ページのステータスと即時の `route` 設定 ref は残ります。
 
 ### `httpMethods`
 
-- **Type:** `boolean | readonly string[]`
-- **Default:** `false`
+- **型:** `boolean | readonly string[]`
+- **デフォルト:** `false`
 
-`true` recognizes `HEAD`, `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, and `OPTIONS` exports.
-An array supplies a different recognized set.
+`true` を指定すると `HEAD`、`GET`、`POST`、`PUT`、`DELETE`、`PATCH`、`OPTIONS` のエクスポートが認識されます。
+配列を指定すると別の認識対象セットを与えられます。
 
-On a shared router, server-consumer environments receive handler refs.
-Client-consumer environments remove those refs and remove handler-only entries.
-The plugin delivers an explicit router in `routers` unchanged.
+共有ルーターでは、サーバー側コンシューマーの環境がハンドラーの ref を受け取ります。
+クライアント側コンシューマーの環境では、それらの ref が除去され、ハンドラーのみのエントリーも除去されます。
+プラグインは `routers` で明示されたルーターを変更せずに配信します。
 
 ### `toPath`
 
-Overrides the default filename-to-path function.
-Return `undefined` to skip the file.
-See [`FileSystemRouterConfig`](/reference/filesystem-routing/core#filesystemrouterconfig).
+デフォルトのファイル名からパスへの変換関数をオーバーライドします。
+`undefined` を返すとそのファイルをスキップします。
+[`FileSystemRouterConfig`](/reference/filesystem-routing/core#filesystemrouterconfig)を参照してください。
 
 ### `toRoute`
 
-Overrides module-to-manifest conversion.
-Return `undefined` to skip the file.
+モジュールからマニフェストへの変換をオーバーライドします。
+`undefined` を返すとそのファイルをスキップします。
 
 ### `router`
 
-- **Type:** `BaseFileSystemRouter`
-- **Default:** A `PageFileSystemRouter` configured from the options above
+- **型:** `BaseFileSystemRouter`
+- **デフォルト:** 上記のオプションから設定された `PageFileSystemRouter`
 
-Supplies a scanner and convention for environments without an entry in `routers`.
+`routers` にエントリーのない環境で使われるスキャナーと規約を指定します。
 
 ### `routers`
 
-- **Type:** `Record<string, BaseFileSystemRouter>`
-- **Default:** `undefined`
+- **型:** `Record<string, BaseFileSystemRouter>`
+- **デフォルト:** `undefined`
 
-Supplies routers keyed by Vite environment name.
-Use `router` as the fallback for missing environment names.
-The `client` router supplies generated literal-tuple types.
+Vite 環境名をキーとするルーターを指定します。
+存在しない環境名へのフォールバックとして `router` を使います。
+`client` ルーターが生成されるリテラルタプル型の供給元になります。
 
 ### `moduleId`
 
-- **Type:** `string`
-- **Default:** `"virtual:file-routes"`
+- **型:** `string`
+- **デフォルト:** `"virtual:file-routes"`
 
-Specifies the virtual manifest module ID.
+仮想マニフェストのモジュール ID を指定します。
 
 ### `buildInputs`
 
-- **Type:** `string | string[]`
-- **Default:** `[]`
+- **型:** `string | string[]`
+- **デフォルト:** `[]`
 
-Names Vite environments whose builds add every delivered lazy module ref as a Rollup input.
-The plugin retains existing inputs.
-Eager refs and handler refs removed from client consumers are not added.
-The option has no effect when `codeSplitting` is `false`.
+配信されるすべての遅延モジュール ref を Rollup の入力として追加するビルドを行う Vite 環境名を指定します。
+プラグインは既存の入力を保持します。
+即時 ref と、クライアントコンシューマーから除去されたハンドラー ref は追加されません。
+`codeSplitting` が `false` の場合、このオプションは効果がありません。
 
 ### `codeSplitting`
 
-- **Type:** `boolean`
-- **Default:** `true`
+- **型:** `boolean`
+- **デフォルト:** `true`
 
-Set `codeSplitting: true` to emit `$` refs as dynamic `import()` functions and separate route chunks.
-Set `codeSplitting: false` to emit static namespace imports behind `require()` functions.
-The generated module then contains no dynamic imports.
+`codeSplitting: true` を設定すると、`$` の ref が動的 `import()` 関数と個別のルートチャンクとして出力されます。
+`codeSplitting: false` を設定すると、`require()` 関数の背後にある静的な名前空間インポートとして出力されます。
+その場合、生成されるモジュールには動的インポートが含まれません。
 
-With `@solidjs/router`, eager delivery requires a release newer than `2.0.0-next.14`.
+`@solidjs/router` で即時配信を使うには、`2.0.0-next.14` より新しいリリースが必要です。
 
 ### `optimizeDepsExclude`
 
-- **Type:** `string[]`
-- **Default:** `[]`
+- **型:** `string[]`
+- **デフォルト:** `[]`
 
-Adds packages to Vite's dependency prebundle exclusion list.
-Use it for packages that import the virtual module themselves.
+Vite の依存関係プリバンドル除外リストにパッケージを追加します。
+仮想モジュールを自身でインポートするパッケージに使います。
 
 ### `types`
 
-- **Type:** `boolean | string`
-- **Default:** `false`
+- **型:** `boolean | string`
+- **デフォルト:** `false`
 
-Writes a self-contained ambient declaration whose manifests are literal tuples.
-`true` writes `file-routes.d.ts` in the Vite root.
-A string sets another output path.
+マニフェストがリテラルタプルになる、自己完結した ambient 宣言を書き込みます。
+`true` で Vite ルートに `file-routes.d.ts` を書き込みます。
+文字列を指定すると別の出力パスを設定します。
 
-Reference this generated declaration instead of `filesystem-routing/types`.
+`filesystem-routing/types` の代わりに、この生成される宣言を参照してください。
 
-## Output
+## 出力
 
-The generated module exports:
+生成されるモジュールのエクスポート：
 
 ```ts
 import routes, { pageRoutes } from "virtual:file-routes";
 ```
 
-`routes` is the flat manifest.
-`pageRoutes` contains page entries nested by manifest path with route groups removed from URL paths.
-See [Manifest module](/reference/filesystem-routing/manifest).
+`routes` はフラットなマニフェストです。
+`pageRoutes` は、マニフェストパスでネストされ、URL パスからルートグループが取り除かれたページエントリーを含みます。
+[マニフェストモジュール](/reference/filesystem-routing/manifest)を参照してください。
 
-Route source IDs use `?pick=` queries so each ref contains only selected exports.
-JavaScript and TypeScript IDs end with a `lang.<extension>` marker so extension-based Vite plugins still match them.
-Route chunk names omit that query suffix.
+ルートソース ID は `?pick=` クエリを使い、各 ref が選択されたエクスポートのみを含むようにします。
+JavaScript と TypeScript の ID は `lang.<extension>` マーカーで終わるため、拡張子ベースの Vite プラグインもそれらにマッチします。
+ルートチャンク名はこのクエリサフィックスを省略します。
 
-## Adapter-building exports
+## アダプター構築用エクスポート
 
-These low-level exports support custom delivery adapters.
-Application configurations normally use `fileRoutes()` instead.
+これらの低レベルエクスポートはカスタム配信アダプターを支えます。
+アプリケーション設定では通常、代わりに `fileRoutes()` を使います。
 
 ### `DEFAULT_EXTENSIONS`
 
@@ -188,7 +188,7 @@ const moduleId = "virtual:file-routes";
 function toPickId(src: string, pick: string[]): string;
 ```
 
-Builds a route-module ID containing one `pick` query for each selected export and a language marker for JavaScript and TypeScript extensions.
+選択された各エクスポートにつき 1 つの `pick` クエリを含み、JavaScript と TypeScript の拡張子には言語マーカーを持つルートモジュール ID を構築します。
 
 ### `sanitizeChunkFileName`
 
@@ -196,7 +196,7 @@ Builds a route-module ID containing one `pick` query for each selected export an
 function sanitizeChunkFileName(name: string): string;
 ```
 
-Removes the pick-query suffix from route chunk names, then applies Rollup-compatible invalid-character replacement.
+ルートチャンク名から pick クエリのサフィックスを取り除き、Rollup 互換の無効文字置換を適用します。
 
 ### `treeShake`
 
@@ -204,7 +204,7 @@ Removes the pick-query suffix from route chunk names, then applies Rollup-compat
 function treeShake(): Plugin;
 ```
 
-Returns the pre-transform plugin that retains selected exports, their runtime dependencies, and selected CSS imports for `?pick=` module IDs.
+`?pick=` モジュール ID に対して、選択されたエクスポート、そのランタイム依存関係、および選択された CSS インポートを保持するプリトランスフォームプラグインを返します。
 
 ### `fileSystemWatcher`
 
@@ -216,6 +216,6 @@ function fileSystemWatcher(
 ): PluginOption;
 ```
 
-Connects Vite's file watcher to per-environment routers.
-Route additions and removals reload the virtual module.
-Route content updates invalidate it and rely on the route module's hot update.
+Vite のファイルウォッチャーを環境ごとのルーターに接続します。
+ルートの追加と削除は仮想モジュールをリロードします。
+ルート内容の更新は仮想モジュールを無効化し、ルートモジュールのホット更新に委ねます。

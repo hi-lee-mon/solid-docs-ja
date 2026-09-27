@@ -1,49 +1,49 @@
 ---
-title: "Reference"
+title: "リファレンス"
 version: "2.0"
-description: "API reference for Solid: the reactive core, the web renderer, Solid Router, Solid Meta, the Vite plugin, and filesystem routing."
+description: "Solid の API リファレンス：リアクティブコア、Web レンダラー、Solid Router、Solid Meta、Vite プラグイン、ファイルシステムルーティング。"
 ---
 
-The reference documents every public export, one page per API.
-If you are learning Solid, start with the [Learn pages](/) and come here for exact signatures; if you know what you need, search for the export name.
+このリファレンスはすべての公開エクスポートを、API ごとに 1 ページで説明します。
+Solid を学習中の場合は、まず [Learn ページ](/) から始め、正確なシグネチャーが必要なときにここへ戻ってきてください。必要なものが分かっている場合は、エクスポート名で検索してください。
 
-## Packages
+## パッケージ
 
-| Package                                                | What it covers                                                                                  |
+| Package                                                | 内容                                                                                           |
 | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
-| [`solid-js`](/reference/solid-js)                      | Signals, memos, effects, stores, actions, context, and the built-in flow components             |
-| [`@solidjs/web`](/reference/solid-web)                 | Rendering to the DOM and to HTML, hydration, head tags, server functions, and the request event |
-| [`@solidjs/router`](/reference/solid-router)           | Route definitions, typed navigation, route data, and server integration                         |
-| [`@solidjs/meta`](/reference/solid-meta)               | Components for `<title>`, `<meta>`, `<link>`, and the other head tags                           |
-| [`@solidjs/vite-plugin`](/reference/vite-plugin-solid) | The JSX transform, start mode, and `"use server"` compilation                                   |
-| [`filesystem-routing`](/reference/filesystem-routing)  | Route scanning, file conventions, and the generated route manifest                              |
+| [`solid-js`](/reference/solid-js)                      | シグナル、メモ、エフェクト、ストア、アクション、コンテキスト、組み込みフローコンポーネント       |
+| [`@solidjs/web`](/reference/solid-web)                 | DOM と HTML へのレンダリング、ハイドレーション、head タグ、サーバー関数、リクエストイベント     |
+| [`@solidjs/router`](/reference/solid-router)           | ルート定義、型付きナビゲーション、ルートデータ、サーバー連携                                     |
+| [`@solidjs/meta`](/reference/solid-meta)               | `<title>`、`<meta>`、`<link>`、その他の head タグ用コンポーネント                               |
+| [`@solidjs/vite-plugin`](/reference/vite-plugin-solid) | JSX トランスフォーム、start モード、`"use server"` コンパイル                                   |
+| [`filesystem-routing`](/reference/filesystem-routing)  | ルートスキャン、ファイル規約、生成されるルートマニフェスト                                       |
 
-## How a page is organized
+## ページの構成
 
-Each generated page follows the same order, so you can jump to the part you need:
+各生成ページは同じ順序で構成されているため、必要な部分へ直接移動できます：
 
-- **Import** and **Type signature** come straight from the source at the recorded `source_path`.
-- **Parameters** or **Props** list each argument with its type. **Return value** describes what comes back.
-- **Examples** show the API in a realistic component or module.
-- **Caveats** collect the rules that are not obvious from the signature.
-- **Common problems** link to the troubleshooting sections of the Learn pages.
-- **Learn more** links to the concept page that explains the model behind the API.
-- **Related types** documents the option and return types that the page's exports use.
+- **Import** と **Type signature** は、記録された `source_path` のソースからそのまま取得されています。
+- **Parameters** または **Props** は各引数とその型を列挙します。**Return value** は戻り値を説明します。
+- **Examples** は API を実際的なコンポーネントやモジュールの中で示します。
+- **Caveats** はシグネチャーからは明らかでないルールをまとめています。
+- **Common problems** は Learn ページのトラブルシューティングセクションへリンクします。
+- **Learn more** は API の背後にあるモデルを説明する概念ページへリンクします。
+- **Related types** はそのページのエクスポートが使うオプション型と戻り値の型を説明します。
 
-Pages under **Advanced** cover owner introspection, custom boundary primitives, manual hydration, and development hooks.
-Application code rarely needs them; they exist for library and tooling authors.
+**Advanced** 配下のページは、オーナー Introspection、カスタムバウンダリプリミティブ、手動ハイドレーション、開発用フックを扱います。
+アプリケーションコードで必要になることはほとんどありません。ライブラリやツールの作者向けのものです。
 
-## Most used
+## よく使われる API
 
-- [`createSignal`](/reference/solid-js/reactivity/create-signal), [`createMemo`](/reference/solid-js/reactivity/create-memo), and [`createEffect`](/reference/solid-js/reactivity/create-effect)
-- [`createStore`](/reference/solid-js/stores/create-store) and [`reconcile`](/reference/solid-js/stores/reconcile)
-- [`Show`](/reference/solid-js/components-jsx/show), [`For`](/reference/solid-js/components-jsx/for), [`Switch` and `Match`](/reference/solid-js/components-jsx/switch-and-match)
-- [`Loading`](/reference/solid-js/components-jsx/loading) and [`Errored`](/reference/solid-js/components-jsx/errored)
-- [`action`](/reference/solid-js/lifecycle-actions/action) and [`onSettled`](/reference/solid-js/lifecycle-actions/on-settled)
-- [`render`](/reference/solid-web/rendering-ssr/render) and [`hydrate`](/reference/solid-web/rendering-ssr/hydrate)
-- [`createRouter`](/reference/solid-router/router-factory#createrouter) and [`query`](/reference/solid-router/data#query)
+- [`createSignal`](/reference/solid-js/reactivity/create-signal)、[`createMemo`](/reference/solid-js/reactivity/create-memo)、[`createEffect`](/reference/solid-js/reactivity/create-effect)
+- [`createStore`](/reference/solid-js/stores/create-store) と [`reconcile`](/reference/solid-js/stores/reconcile)
+- [`Show`](/reference/solid-js/components-jsx/show)、[`For`](/reference/solid-js/components-jsx/for)、[`Switch` と `Match`](/reference/solid-js/components-jsx/switch-and-match)
+- [`Loading`](/reference/solid-js/components-jsx/loading) と [`Errored`](/reference/solid-js/components-jsx/errored)
+- [`action`](/reference/solid-js/lifecycle-actions/action) と [`onSettled`](/reference/solid-js/lifecycle-actions/on-settled)
+- [`render`](/reference/solid-web/rendering-ssr/render) と [`hydrate`](/reference/solid-web/rendering-ssr/hydrate)
+- [`createRouter`](/reference/solid-router/router-factory#createrouter) と [`query`](/reference/solid-router/data#query)
 
-## Versions and sources
+## バージョンとソース
 
-Reference pages are generated from the Solid source at the commit recorded in each page's frontmatter (`source_repo`, `source_ref`, `source_path`).
-When a signature on this site disagrees with the type your editor shows, your installed version differs from the documented one; the frontmatter tells you which commit the page describes.
+リファレンスページは、各ページの frontmatter（`source_repo`、`source_ref`、`source_path`）に記録されたコミット時点の Solid ソースから生成されています。
+このサイトのシグネチャーがエディターに表示される型と一致しない場合、インストールされているバージョンがドキュメントのバージョンと異なっています。frontmatter を見れば、そのページがどのコミットを説明しているか分かります。

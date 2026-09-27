@@ -1,15 +1,15 @@
 ---
-title: "filesystem-routing core"
-category: "filesystem-routing"
+title: "filesystem-routing コア"
+category: "ファイルシステムルーティング"
 order: 1
 version: "2.0"
-description: "Reference for the bundler-neutral scanner, manifest types, and module analysis exports."
+description: "バンドラー非依存のスキャナー、マニフェスト型、モジュール解析のエクスポートに関するリファレンス。"
 source_repo: "solidjs/filesystem-routing"
 source_ref: "v0.2.1"
 source_path: "src/index.ts"
 ---
 
-The root import exposes the bundler-neutral scanner and manifest-building utilities.
+ルートインポートは、バンドラー非依存のスキャナーとマニフェスト構築ユーティリティを公開します。
 
 ## `BaseFileSystemRouter`
 
@@ -35,13 +35,13 @@ class BaseFileSystemRouter extends EventTarget {
 }
 ```
 
-The constructor resolves `config.dir` against the current working directory and normalizes separators.
-The base `toPath` and `toRoute` methods call configured functions and otherwise throw `"Not implemented"`.
-Subclasses provide conventions by overriding either method.
+コンストラクターは `config.dir` をカレントワーキングディレクトリに対して解決し、区切り文字を正規化します。
+基本の `toPath` と `toRoute` メソッドは設定された関数を呼び出し、設定されていない場合は `"Not implemented"` をスローします。
+サブクラスはいずれかのメソッドをオーバーライドして規約を提供します。
 
-`getRoutes()` starts one cached directory scan and returns the mutable route array.
-Add, update, and remove operations emit `reload` events.
-When an added route has the same manifest path as an existing entry, the scanner replaces the existing entry.
+`getRoutes()` はキャッシュされる 1 回のディレクトリスキャンを開始し、変更可能なルート配列を返します。
+追加・更新・削除の各操作は `reload` イベントを発行します。
+追加されたルートが既存エントリーと同じマニフェストパスを持つ場合、スキャナーは既存エントリーを置き換えます。
 
 ## `FileSystemRouterConfig`
 
@@ -60,12 +60,12 @@ interface FileSystemRouterConfig {
 }
 ```
 
-`dir` is required.
-`extensions` contains extension names without dots.
-`toPath` receives a path relative to `dir` with its extension removed.
-Either callback can return `undefined` to skip a file.
+`dir` は必須です。
+`extensions` にはドットを含まない拡張子名を指定します。
+`toPath` は `dir` からの相対パス（拡張子を除いたもの）を受け取ります。
+いずれのコールバックも `undefined` を返すことでそのファイルをスキップできます。
 
-## Manifest types
+## マニフェスト型
 
 ### `ModuleRef`
 
@@ -76,8 +76,8 @@ interface ModuleRef {
 }
 ```
 
-`src` is an absolute source path.
-`pick` names the exports selected from that module.
+`src` はソースの絶対パスです。
+`pick` はそのモジュールから選択されたエクスポート名を列挙します。
 
 ### `RouteManifestEntry`
 
@@ -91,11 +91,11 @@ interface RouteManifestEntry {
 }
 ```
 
-`path` uses `:param`, optional `:param?`, catch-all `*rest`, and retained `(group)` segments.
-Delivery adapters materialize `$`-prefixed refs lazily and `$$`-prefixed refs eagerly.
-A delivery adapter can materialize either form eagerly; consumers branch on the delivered `import()` or `require()` shape.
+`path` では `:param`、省略可能な `:param?`、キャッチオールの `*rest`、そして保持される `(group)` セグメントが使えます。
+デリバリーアダプターは `$` プレフィックス付きの ref を遅延で、`$$` プレフィックス付きの ref を即時で実体化します。
+デリバリーアダプターはどちらの形式も即時で実体化でき、利用側は配信された `import()` または `require()` の形で分岐します。
 
-## Path and scan helpers
+## パスとスキャンのヘルパー
 
 ### `cleanPath`
 
@@ -103,7 +103,7 @@ A delivery adapter can materialize either form eagerly; consumers branch on the 
 function cleanPath(src: string, config: FileSystemRouterConfig): string;
 ```
 
-Removes the configured route directory prefix and a configured extension.
+設定されたルートディレクトリのプレフィックスと設定された拡張子を取り除きます。
 
 ### `glob`
 
@@ -111,7 +111,7 @@ Removes the configured route directory prefix and a configured extension.
 const glob: (path: string) => string[];
 ```
 
-Runs a synchronous `fast-glob` scan with absolute results.
+`fast-glob` による同期スキャンを実行し、絶対パスの結果を返します。
 
 ### `normalizePath`
 
@@ -119,9 +119,9 @@ Runs a synchronous `fast-glob` scan with absolute results.
 function normalizePath(path: string): string;
 ```
 
-Converts Windows separators to forward slashes and leaves other paths unchanged.
+Windows の区切り文字をフォワードスラッシュに変換し、それ以外のパスは変更しません。
 
-## Static export analysis
+## 静的エクスポート解析
 
 ### `analyzeModule`
 
@@ -129,8 +129,8 @@ Converts Windows separators to forward slashes and leaves other paths unchanged.
 function analyzeModule(src: string): StaticExportEntry[];
 ```
 
-Parses a source file as TSX with `oxc-parser` and returns non-type static exports.
-A parse error throws `SyntaxError` with the source code frame or parser message.
+`oxc-parser` でソースファイルを TSX として解析し、型ではない静的エクスポートを返します。
+パースエラーは、ソースコードフレームまたはパーサーメッセージを含む `SyntaxError` をスローします。
 
 ### `getExportName`
 
@@ -138,7 +138,7 @@ A parse error throws `SyntaxError` with the source code frame or parser message.
 function getExportName(entry: StaticExportEntry): string;
 ```
 
-Returns the exported name and returns `"default"` for a default export.
+エクスポート名を返し、デフォルトエクスポートの場合は `"default"` を返します。
 
 ### `getLocalExportName`
 
@@ -146,8 +146,8 @@ Returns the exported name and returns `"default"` for a default export.
 function getLocalExportName(entry: StaticExportEntry): string | undefined;
 ```
 
-Returns a non-default export name only when the export refers to a same-named local or imported binding.
+エクスポートが同名のローカルまたはインポートされたバインディングを参照している場合に限り、デフォルト以外のエクスポート名を返します。
 
 ### `StaticExportEntry`
 
-The exported type comes from `oxc-parser`.
+エクスポートされる型は `oxc-parser` 由来です。
