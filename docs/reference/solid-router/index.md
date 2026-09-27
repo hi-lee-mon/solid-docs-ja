@@ -1,0 +1,29 @@
+---
+title: "@solidjs/router"
+titleTemplate: ":title"
+mainNavExclude: true
+version: "2.0"
+description: "API reference for Solid Router 2, including router creation, navigation, data, history, file routes, and server integration."
+source_repo: "solidjs/solid-router"
+source_ref: "next"
+source_path: "src/index.tsx"
+---
+
+Solid Router is published through three package entries.
+
+## Entries
+
+- `@solidjs/router` exports the router factory, route helpers, navigation primitives, history adapters, queries, actions, and public types.
+- `@solidjs/router/fs` exports the file-system manifest adapter.
+- `@solidjs/router/server` exports the server-function flight-data collector.
+
+## Reference groups
+
+- [Router factory](/reference/solid-router/router-factory): `createRouter`, `defineRoute`, and `defineRoutes`
+- [Routes and typed paths](/reference/solid-router/routes-and-paths): route definitions, path patterns, `int`, instance paths, and matching
+- [Navigation primitives](/reference/solid-router/navigation): location, navigation, matching, search, preloading, link state, and leave guards
+- [Data APIs](/reference/solid-router/data): `query`, `revalidate`, `action`, `useAction`, and `useSubmissions`
+- [History adapters](/reference/solid-router/history): browser, hash, and memory histories
+- [File-system adapter](/reference/solid-router/filesystem): `fileRoutes` and `defineFileRoute`
+- [Server integration](/reference/solid-router/server): `createFlightDataCollector`
+- [Types](/reference/solid-router/types): public application-facing types

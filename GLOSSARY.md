@@ -144,6 +144,40 @@
 | under the hood | 内部では / 内部実装では |
 | out of the box | 標準で / 最初から |
 
+## Solid 2.0 固有の概念
+
+| English | 日本語 |
+|---|---|
+| boundary / boundaries | バウンダリ（`<Reveal>`・`<Loading>`・`<Errored>` はコードのまま） |
+| read / write（非同期モデルの） | 読み取り / 書き込み |
+| live data / live query | ライブデータ / ライブクエリ |
+| single-flight | シングルフライト |
+| optimistic update / optimistic UI | 楽観的更新 / 楽観的UI |
+| optimistic store | 楽観的ストア（`createOptimistic` はコードのまま） |
+| projection | プロジェクション |
+| pending / isPending | 保留中 / `isPending` |
+| settled / onSettled | 確定 / `onSettled` |
+| server function | サーバー関数 |
+| progressive enhancement | プログレッシブエンハンスメント |
+| rendering mode | レンダリングモード |
+| resumability | リジューマビリティ（再開可能性） |
+| not-ready error | NotReady エラー（`NotReadyError` はコードのまま） |
+| wire / on the wire | 通信上 / ワイヤー上 |
+| migration / migrate | マイグレーション / 移行する |
+| async reactivity | 非同期リアクティビティ |
+| owner introspection | オーナー Introspection（オーナー内省） |
+| manual hydration | 手動ハイドレーション |
+| diagnostics | 診断 |
+| file-system routing | ファイルシステムルーティング |
+| nested routes | ネストされたルート / ネストルート |
+| route definition | ルート定義 |
+| data API | データAPI |
+| session / auth | セッション / 認証 |
+| middleware | ミドルウェア |
+| API route | APIルート |
+| environment | 環境 |
+| thinking in Solid | Thinking in Solid（「Solid 的な考え方」も可） |
+
 ## 文体ルール
 
 - です・ます調。簡潔で自然な日本語。

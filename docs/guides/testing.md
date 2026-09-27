@@ -1,552 +1,399 @@
 ---
-title: Testing
-category: Guides
-order: 6
-use_cases: >-
-  testing components, unit tests, integration tests, user interactions, test
-  coverage, quality assurance
-tags:
-  - testing
-  - vitest
-  - components
-  - unit-tests
-  - quality
-version: "1.0"
-description: >-
-  Test Solid apps with Vitest and Testing Library. Write component tests,
-  simulate user interactions, and ensure code quality effectively.
+title: "Testing"
+version: "2.0"
+description: "Write a component test that clicks a button and asserts the label, run it in jsdom or a real browser, and test fullstack server code in a separate Node project."
 ---
 
-Testing your Solid applications is important to inspiring confidence in your codebase through preventing regressions.
+The first test most people write for a Solid component clicks the counter from the Quick start and asserts the label.
+The click fires, the assertion runs on the next line, and the DOM still says `Clicks: 0`.
+Nothing is broken: Solid applies writes in a batch after the current code finishes, and the test asserted before the batch landed.
+One call fixes it, and it is the one Solid-specific thing in a component test.
 
-## Getting started
+Beyond that call, testing a Solid app is a question of picking the smallest environment that exercises the behavior under test:
 
-### Testing packages explanations
+1. Start component tests in jsdom.
+   The `basic` template uses this configuration for component DOM tests.
+2. Use [Vitest browser mode](https://vitest.dev/guide/browser/) when the test depends on browser layout, CSS, focus, selection, or browser APIs.
+   The browser-mode template runs the same component test in Chromium.
+3. Add a separate Node project for server code in a fullstack app.
+   The `fullstack` template keeps DOM component tests and request-scoped server tests in different Vitest projects.
 
-- [`vitest`](https://vitest.dev) - testing framework that includes runner, assertion engine, and mocking facilities
-- [`jsdom`](https://github.com/jsdom/jsdom) - a virtual DOM used to simulate a headless browser environment running in node
-- [`@solidjs/testing-library`](https://github.com/solidjs/solid-testing-library/blob/main/README.md) - a library to simplify testing components, directives, and primitives, with automatic cleanup
-- [`@testing-library/user-event`](https://testing-library.com/docs/user-event/intro) - used to simulate user events that are closer to reality
-- [`@testing-library/jest-dom`](https://testing-library.com/docs/ecosystem-jest-dom) - augments expect with helpful matchers
+:::tip[Assert what the user sees]
+Query by an accessible role and assert visible text or state.
+Do not inspect signal values, effect counts, or compiled output when the public behavior gives the same evidence.
+This follows the [Testing Library guiding principles](https://testing-library.com/docs/guiding-principles/).
+:::
 
-### Adding testing packages
+## Test components in jsdom
 
-The recommended testing framework for Solid applications is [vitest](https://vitest.dev).
+The `basic` template ships Vitest, jsdom, Solid Testing Library, and the jest-dom matchers.
+Add the same development dependencies to an existing Solid project:
 
-To get started with vitest, install the following development dependencies:
-
-```package-install-dev
-vitest jsdom @solidjs/testing-library @testing-library/user-event @testing-library/jest-dom
+```sh
+pnpm add -D vitest jsdom @solidjs/testing-library @testing-library/jest-dom
 ```
 
-### Testing configuration
+The template's `package.json` is the record of which versions are known to work together.
 
-In your `package.json` add a `test` script calling `vitest`:
+Add a test script to `package.json`:
 
-```json title="package.json"
-  "scripts": {
-    "test": "vitest"
-  }
+```json
+{
+	"scripts": {
+		"test": "vitest"
+	}
+}
 ```
 
-It is not necessary to add `@testing-library/jest-dom` to the testing options in `vite.config`, since `vite-plugin-solid` automatically detects and loads it if present.
+Import `defineConfig` from `vitest/config` in the Vite configuration.
+Keep the existing Solid plugin and add the `test` block:
 
-#### TypeScript configuration
-
-If using TypeScript, add `@testing-library/jest-dom` to `tsconfig.json#compilerOptions.types`:
-
-```json title="tsconfig.json"
-  "compilerOptions": {
-    // ...
-    "jsx": "preserve",
-    "jsxImportSource": "solid-js",
-    "types": ["vite/client", "@testing-library/jest-dom"]
-  }
-```
-
-#### SolidStart configuration
-
-When using [SolidStart](/solid-start/v2), create a `vitest.config.ts` file:
-
-```ts title="vitest.config.ts"
-import solid from "vite-plugin-solid";
+```ts
 import { defineConfig } from "vitest/config";
+import solid from "@solidjs/vite-plugin";
 
 export default defineConfig({
 	plugins: [solid()],
-	resolve: {
-		conditions: ["development", "browser"],
+	test: {
+		environment: "jsdom",
+		globals: false,
+		setupFiles: ["./vitest-setup.ts"],
+		// Remove this option when tests need module isolation.
+		isolate: false,
 	},
 });
 ```
 
-## Writing tests
+Register the jest-dom matchers in `vitest-setup.ts`:
 
-### Components testing
-
-Testing components involves three main things:
-
-- Rendering the component
-- Interacting with the component
-- Validating assertions
-
-To write tests for your components, create a `[name].test.tsx` file.
-The purpose of this file is to describe the intended behavior from a user's perspective in the form of unit tests:
-
-```jsx tab title="Counter.test.jsx"
-import { test, expect } from "vitest";
-import { render } from "@solidjs/testing-library";
-import userEvent from "@testing-library/user-event";
-import { Counter } from "./Counter";
-
-const user = userEvent.setup();
-
-test("increments value", async () => {
-	const { getByRole } = render(() => <Counter />);
-	const counter = getByRole("button");
-	expect(counter).toHaveTextContent("1");
-	await user.click(counter);
-	expect(counter).toHaveTextContent("2");
-});
+```ts
+import "@testing-library/jest-dom/vitest";
 ```
 
-```jsx tab title="Counter.jsx"
-export const Counter = () => {
-	const [count, setCount] = createSignal(1);
-	return <button onClick={() => setCount(count() + 1)}>{count()}</button>;
-};
-```
-
-In the `test.jsx` file, [the `render` call from `@solidjs/testing-library`](https://testing-library.com/docs/solid-testing-library/api#render) is used to render the component and supply the props and context.
-To mimic a user interaction, `@testing-library/user-event` is used.
-The [`expect` function provided by `vitest`](https://vitest.dev/api/expect.html) is extended with a [`.toHaveTextContent("content")` matcher from `@testing-library/jest-dom`](https://github.com/testing-library/jest-dom?tab=readme-ov-file#tohavetextcontent) to supply what the expected behavior is for this component.
-
-To run this test, use the following command:
-
-```package-run
-test
-```
-
-If running the command is successful, you will get the following result showing whether the tests have passed or failed:
-
-```ansi frame="none"
-[1;36m[RUN][0;36m v1.4.0[0;8m solid-app/src/components/Counter.test.tsx[0m
-
-[0;32m ✓ [0;8msrc/components/[1;1mCounter[0;8m.test.tsx (1)
-[0;32m   ✓ [0;8m[1;1m<Counter />[0;8m (1)
-[0;32m     ✓ [0;8m[1;1mincrements value[0;8m
-
- Test Files  [1;32m1 passed[0;8m (1)
-      Tests  [1;32m1 passed[0;8m (1)
-   Start at  [1;1m16:51:19[0;8m
-   Duration  [1;1m4.34s[0;8m (transform 1.01s, setup 205ms, collect 1.54s, tests 155ms,
-environment 880ms, prepare 212ms)
-
-```
-
-#### Rendering the component
-
-The `render` function from `@solidjs/testing-library` creates the testing environment within the `test.tsx` file.
-It sets up the container, rendering the component within it, and automatically registers it for clean-up after a successful test.
-Additionally, it manages wrapping the component in contexts as well as setting up a router.
-
-```tsx frame="none"
-const renderResult = render(
-	() => <MyComponent />, // @solidjs/testing-library requires a function
-	{
-		// all options are optional
-		container, // manually set up your own container, will not be handled
-		baseElement, // parent of container in case it is not supplied
-		queries, // manually set up custom queries
-		hydrate, // set to `true` to use hydration
-		wrapper, // reusable wrapper component to supply context
-		location, // sets up a router pointed to the location if provided
-	}
-);
-const {
-	asFragment, // function returning the contents of the container
-	baseElement, // the parent of the container
-	container, // the container in which the component is rendered
-	debug, // a function giving some helpful debugging output
-	unmount, // manually removing the component from the container
-	...queries // functions to select elements from the container
-} = renderResult;
-```
-
-##### Using the right queries
-
-Queries are helpers used to find elements within a page.
-
-```
-                                          ⎧ Role
-                              get ⎫  By   ⎪ DisplayValue
-                            query ⎬       ⎨ LabelText
-                             find ⎭ AllBy ⎪ Text
-                                          ⎩ ...
-```
-
-The prefixes (`get`, `query`, and `find`) and the middle portion (`By` and `AllBy`) depend on if the query should wait for an element to appear (or not), whether it should throw an error if the element cannot be found, and how it should handle multiple matches:
-
-- **getBy**: synchronous, throws if not found or more than 1 matches
-- **getAllBy**: synchronous, throws if not found, returns array of matches
-- **queryBy**: synchronous, null if not found, error if more than 1 matches
-- **queryAllBy**: synchronous, returns array of zero or more matches
-- **findBy**: asynchronous, rejected if not found within 1000ms or more than 1 matches, resolves with element if found
-- **findAllBy**: asynchronous, rejected if not found within 1000ms, resolves with array of one or more element(s)
-
-By default, queries should start with `get...`.
-If there are multiple elements matching the same query, `getAllBy...` should be used, otherwise use `getBy...`.
-
-There are two exceptions when you should **not** start with `get...`:
-
-1. If the `location` option is used or the component is based on resources, the router will be lazy-loaded; in this case, the first query after rendering needs to be `find...`
-2. When testing something that is _not_ rendered, you will need to find something that will be rendered at the same time; after that, use `queryAllBy...` to test if the result is an empty array (`[]`).
-
-The query's suffix (Role, LabelText, ...) depends on the characteristics of the element you want to select.
-If possible, try to select for accessible attributes (roughly in the following order):
-
-- **Role**: [WAI ARIA](https://www.w3.org/WAI/standards-guidelines/aria) landmark roles which are automatically set by semantic elements like `<button>` or otherwise use `role` attribute
-- **LabelText**: elements that are described by a label wrapping the element, or by an `aria-label` attribute, or is linked with `for`- or `aria-labelledby` attribute
-- **PlaceholderText**: input elements with a `placeholder` attribute
-- **Text**: searches text within all text nodes in the element, even if split over multiple nodes
-- **DisplayValue**: form elements showing the given value (e.g. select elements)
-- **AltText**: images with alt text
-- **Title**: HTML elements with the `title` attribute or SVGs with the `<title>` tag containing the given text
-- **TestId**: queries by the `data-testid` attribute; a different data attribute can be set up via `configure({testIdAttribute: 'data-my-test-attribute'})`; TestId-queries are _not accessible_, so use them only as a last resort.
-
-For more information, check the [testing-library documentation](https://testing-library.com/docs/queries/about).
-
-#### Testing through Portal
-
-Solid allows components to break through the DOM tree structure using [`<Portal>`](/reference/components/portal). This mechanism will still work in testing, so the content of the portals will break out of the testing container. In order to test this content, make sure to use the `screen` export to query the contents:
-
-```jsx tab title="Toast.test.jsx"
-import { test, expect } from "vitest";
-import { render, screen } from "@solidjs/testing-library";
-import { Toast } from "./Toast";
-
-test("increments value", async () => {
-	render(() => (
-		<Toast>
-			<p>This is a toast</p>
-		</Toast>
-	));
-	const toast = screen.getByRole("log");
-	expect(toast).toHaveTextContent("This is a toast");
-});
-```
-
-```jsx tab title="Toast.jsx"
-import { Portal } from "solid-js/web";
-
-export const Toast = (props) => {
-	return (
-		<Portal>
-			<div class="toast" role={props.role ?? "log"}>
-				{props.children}
-			</div>
-		</Portal>
-	);
-};
-```
-
-#### Testing in context
-
-If a component relies on some context, to wrap it use the `wrapper` option:
-
-```tsx title="Context.test.tsx"
-import { test, expect } from "vitest";
-import { render } from "@solidjs/testing-library";
-import { DataContext, DataConsumer } from "./Data";
-
-const wrapper = (props) => <DataContext value="test" {...props} />;
-
-test("receives data from context", () => {
-	const { getByText } = render(() => <DataConsumer />, { wrapper });
-	expect(getByText("test")).toBeInTheDocument();
-});
-```
-
-Wrappers can be re-used if they are created externally.
-For wrappers with different values, a higher-order component creating the required wrappers can make the tests more concise:
-
-```tsx
-const createWrapper = (value) => (props) => (
-	<DataContext value={value} {...props} />
-);
-```
-
-:::note[Using multiple providers]
-If using multiple providers, [solid-primitives has `<MultiProvider>`](https://primitives.solidjs.community/package/context#multiprovider) to avoid nesting multiple levels of providers
+:::caution[isolate: false shares module state between files]
+The template sets `isolate: false` as a performance setting for a small suite.
+With it, module state can survive from one test file to the next.
+Remove the setting when tests mutate module-level state, or reset that state after each test.
 :::
 
-##### Testing routes
+### Test a user-visible interaction
 
-For convenience, the `render` function supports the `location` option that wraps the rendered component in a router pointing at the given location.
-Since the `<Router>` component is lazily loaded, the first query after rendering needs to be asynchronous, i.e. `findBy...`:
+This component exposes its state through the button label:
 
 ```tsx
-const { findByText } = render(
-	() => <Route path="/article/:id" component={Article} />,
-	{ location: "/article/12345" }
-);
-expect(await findByText("Article 12345")).toBeInTheDocument();
+import { createSignal } from "solid-js";
+
+export default function Counter() {
+	const [count, setCount] = createSignal(0);
+
+	return (
+		<button type="button" onClick={() => setCount(count() + 1)}>
+			Clicks: {count()}
+		</button>
+	);
+}
 ```
 
-#### Interacting with components
+Pass a function to `render` so Solid Testing Library creates the component under a reactive owner.
+Query the button by role, interact with it, and assert the label that the user sees:
 
-Many components are not static, rather they change based on user interactions.
-To test these changes, these interactions need to be simulated.
-To simulate user interactions, `@testing-library/user-event` library can be used.
-It takes care of the usual order of events as they would occur in actual user interactions.
-For example, this means that a `click` event from the user would be accompanied by `mousemove`, `hover`, `keydown`, `focus`, `keyup`, and `keypress`.
+```tsx
+import { cleanup, fireEvent, render } from "@solidjs/testing-library";
+import { flush } from "solid-js";
+import { afterEach, describe, expect, test } from "vitest";
 
-The most convenient events to test are typically `click`, `keyboard` and `pointer` (to simulate touch events).
-To dive deeper into these events, you can learn about them in the [`user-event` documentation](https://testing-library.com/docs/user-event/intro).
+import Counter from "./Counter";
 
-##### Using timers
+afterEach(cleanup);
 
-If you require a fake timer and want to use `vi.useFakeTimers()` in your tests, it must set it up with an `advanceTimers` option:
+describe("<Counter />", () => {
+	test("increments on click", () => {
+		const { getByRole } = render(() => <Counter />);
+		const button = getByRole("button");
 
-```tsx title="user-event.test.tsx"
-import { vi } from "vitest"
-
-const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
-
-vi.useFakeTimers()
-
-describe("pre-login: sign-in", () => {
-  const { getByRole, getByLabelText } = render(() => <User />)
-  const signUp = getByRole('button', { text: 'Sign-in' })
-  // use convenience API click:
-  user.click(signUp)
-  const name = getByLabelText('Name')
-  // use complex keyboard input:
-  user.keyboard(name, "{Shift}test{Space}{Shift}user")
-  const password = getByLabelText('Password')
-  user.keyboard(name, "secret")
-  const login = getByRole('button', { text: 'Login' })
-  // use touch event
-  user.pointer([
-    { keys: "[TouchA]" target: login },
-    { keys: "[/TouchA]", target: login }
-  ])
-});
-```
-
-#### Validating assertions
-
-`vitest` comes with the `expect` function to facilitate assertions that work like:
-
-```tsx frame="none"
-expect(subject)[assertion](value);
-```
-
-The command supports assertions like `toBe` (reference comparison) and `toEqual` (value comparison) out of the box.
-For testing inside the DOM, the package `@testing-library/jest-dom` augments it with some helpful additional assertions:
-
-- [`.toBeInTheDocument()`](https://github.com/testing-library/jest-dom?tab=readme-ov-file#tobeinthedocument) - checks if the element actually exists in the DOM
-- [`.toBeVisible()`](https://github.com/testing-library/jest-dom?tab=readme-ov-file#tobevisible) - checks if there is no reason the element should be hidden
-- [`.toHaveTextContent(content)`](https://github.com/testing-library/jest-dom?tab=readme-ov-file#tohavetextcontent) - checks if the text content matches
-- [`.toHaveFocus()`](https://github.com/testing-library/jest-dom?tab=readme-ov-file#tohavefocus) - checks if this is the currently focused element
-- [`.toHaveAccessibleDescription(description)`](https://github.com/testing-library/jest-dom?tab=readme-ov-file#tohaveaccessibledescription) - checks accessible description
-- and a [lot more](https://github.com/testing-library/jest-dom?tab=readme-ov-file#custom-matchers).
-
-### Directive testing
-
-[Directives](/reference/jsx-attributes/use) are reusable behaviors for elements.
-They receive the HTML element they are bound to as their first and an accessor of the directive prop as their second argument.
-To make testing them more concise, [`@solidjs/testing-library` has a `renderDirective`](https://testing-library.com/docs/solid-testing-library/api#renderdirective) function:
-
-```ts frame="none"
-const renderResult = renderDirective(directive, {
-	initialValue, // value initially added to the argument signal
-	targetElement, // opt. node name or element used as target for the directive
-	...renderOptions, // see render options
-});
-const {
-	arg, // getter for the directive's argument
-	setArg, // setter for the directive's argument
-	...renderResults // see render results
-} = renderResult;
-```
-
-In `...renderResults`, the container will contain the `targetElement`, which defaults to a `<div>`.
-This, along with the ability to modify the `arg` signal, are helpful when testing directives.
-
-If, for example, you have a directive that handles the [Fullscreen API](https://developer.mozilla.org/en-US/docs/Web/API/Fullscreen_API), you can test it like this:
-
-```ts tab title="fullscreen.test.ts"
-import { test, expect, vi } from "vitest";
-import { renderDirective } from "@solidjs/testing-library";
-import { createFullScreen } from "./fullscreen";
-
-test("toggles fullscreen", () => {
-	const targetElement = document.createElement("div");
-	const fs = vi.spyOn(targetElement, "fullscreen");
-	const [setArg, container] = renderDirective(createFullScreen, false);
-	setArg(true);
-	expect(fs).toHaveBeenCalled();
-});
-```
-
-```ts tab title="fullscreen.ts"
-import { Accessor } from "solid-js";
-
-export const fullscreen = (ref: HTMLElement, active: Accessor<boolean>) =>
-	createEffect(() => {
-		const isActive = document.fullscreenElement === ref;
-		if (active() && !isActive) {
-			ref.requestFullScreen().catch(() => {});
-		} else if (!active() && isActive) {
-			document.exitFullScreen();
-		}
+		expect(button).toHaveTextContent("Clicks: 0");
+		fireEvent.click(button);
+		flush();
+		expect(button).toHaveTextContent("Clicks: 1");
 	});
-```
-
-### Primitive testing
-
-When the reference to an element is not needed, parts of state and logic can be put into reusable hooks or primitives.
-Since these do not require elements, there is no need for `render` to test them since it would require a component that has no other use.
-To avoid this, there is a [`renderHook` utility](https://testing-library.com/docs/solid-testing-library/api#renderhook) that simulates a component without actually rendering anything.
-
-```ts frame="none"
-const renderResult = renderHook(hook, {
-	initialProps, // an array with arguments being supplied to the hook
-	wrapper, // same as the wrapper options for `render`
-});
-const {
-	result, // return value of the hook (mutable, destructuring fixes it)
-	cleanup, // manually remove the traces of the test from the DOM
-	owner, // the owner running the hook to use with `runWithOwner()`
-} = renderResult;
-```
-
-A primitive that manages the state of a counter could be tested like this:
-
-```ts frame="none"
-import { test, expect } from "vitest";
-import { renderHook } from "@solidjs/testing-library";
-import { createCounter } from "./counter";
-
-test("increments count", () => {
-	const { result } = renderHook(createCounter);
-	expect(result.count).toBe(0);
-	result.increment();
-	expect(result.count).toBe(1);
 });
 ```
 
-### Testing effects
+Run it and the test passes.
+Remove the `flush()` line and it fails on the last assertion with the label still at `Clicks: 0`:
 
-Since effects may happen asynchronously, it can be difficult to test them.
-[`@solidjs/testing-library` comes with a `testEffect` function](https://testing-library.com/docs/solid-testing-library/api#async-methods) that takes another function that receives a `done` function to be called once tests are over and returns a promise.
-Once `done` is called, the returned promise is resolved.
-Any errors that would hit the next boundary are used to reject the returned promise.
+```tsx
+// Avoid: asserting before the staged write has landed
+fireEvent.click(button);
+expect(button).toHaveTextContent("Clicks: 1");
 
-An example test using `testEffect` may look like this:
+// Prefer: apply staged writes and run effects, then assert
+fireEvent.click(button);
+flush();
+expect(button).toHaveTextContent("Clicks: 1");
+```
 
-```ts frame="none"
-const [value, setValue] = createSignal(0);
-return testEffect((done) =>
-	createEffect((run: number = 0) => {
-		if (run === 0) {
-			expect(value()).toBe(0);
-			setValue(1);
-		} else if (run === 1) {
-			expect(value()).toBe(1);
-			done();
-		}
-		return run + 1;
-	})
+The click event stages the signal update, and ordinary reads continue to return the last committed value until the batch lands.
+[`flush()`](/reference/solid-js/reactivity/flush) commits the staged value and drains queued work so the DOM is current when the assertion runs.
+It does not wait for async work: for behavior that is asynchronous by contract, such as an async memo, use the asynchronous queries or [`resolve(fn)`](/reference/solid-js/advanced/interop-async/resolve) rather than `flush()`.
+
+Solid Testing Library tracks mounted containers and exports `cleanup`.
+It can register cleanup automatically when the test runner exposes a global `afterEach`.
+The configuration above sets `globals: false`, so the explicit `afterEach(cleanup)` keeps disposal independent of test-runner globals.
+
+## Test components in a real browser
+
+Choose browser mode when jsdom cannot provide the behavior that the test needs.
+The maintained browser-mode template uses the Playwright provider with headless Chromium.
+
+:::note[Browser mode still needs jsdom installed]
+When `test.environment` is unset, `@solidjs/vite-plugin` supplies a jsdom environment and Vitest resolves that dependency before it starts the browser pool.
+Without jsdom, the Chromium test can pass while the Vitest command exits with a missing-dependency error.
+:::
+
+For a new test setup, install the complete dependency set:
+
+```sh
+pnpm add -D vitest jsdom @solidjs/testing-library @testing-library/jest-dom @vitest/browser-playwright playwright
+pnpm exec playwright install chromium
+```
+
+Replace the jsdom environment in the `test` block:
+
+```ts
+import { playwright } from "@vitest/browser-playwright";
+import { defineConfig } from "vitest/config";
+import solid from "@solidjs/vite-plugin";
+
+export default defineConfig({
+	plugins: [solid()],
+	test: {
+		globals: false,
+		setupFiles: ["./vitest-setup.ts"],
+		browser: {
+			enabled: true,
+			provider: playwright(),
+			headless: true,
+			instances: [{ browser: "chromium" }],
+		},
+	},
+});
+```
+
+The `Counter` test above runs unchanged in this configuration.
+The component still renders through Solid Testing Library, and `flush()` still drains the staged DOM update after the click.
+The difference is the host environment: Vitest runs the test in a Chromium page instead of a simulated jsdom document.
+Run the browser suite once and exit with:
+
+```sh
+pnpm test --run
+```
+
+The templates demonstrate component tests, not browser-wide end-to-end flows.
+See the [Vitest browser-mode guide](https://vitest.dev/guide/browser/) for browser locators, interactions, and browser-mode limitations when a component test needs those APIs.
+
+## Test server code in a Node project
+
+A fullstack app needs separate client and server test environments.
+Use [Vitest projects](https://vitest.dev/guide/projects.html) to keep `*.test.tsx` component files in jsdom and `src/server/**/*.test.ts` files in Node.
+
+The fullstack template uses this project shape:
+
+```ts
+import { fileURLToPath } from "node:url";
+import { defineConfig } from "vitest/config";
+import solid from "@solidjs/vite-plugin";
+
+export default defineConfig({
+	plugins: [solid({ start: true, ssr: true })],
+	test: {
+		globals: false,
+		setupFiles: ["./vitest-setup.ts"],
+		projects: [
+			{
+				extends: true,
+				test: {
+					name: "client",
+					environment: "jsdom",
+					include: ["src/**/*.test.tsx"],
+				},
+			},
+			{
+				extends: true,
+				test: {
+					name: "server",
+					environment: "node",
+					include: ["src/server/**/*.test.ts"],
+					server: { deps: { inline: [/@solidjs[+/]web/] } },
+					alias: [
+						{
+							find: /^@solidjs\/web$/,
+							replacement: fileURLToPath(
+								new URL(
+									"./node_modules/@solidjs/web/dist/server.js",
+									import.meta.url
+								)
+							),
+						},
+						{
+							find: /^@solidjs\/web\/storage$/,
+							replacement: fileURLToPath(
+								new URL(
+									"./node_modules/@solidjs/web/storage/dist/storage.js",
+									import.meta.url
+								)
+							),
+						},
+						{
+							find: "virtual:env/server",
+							replacement: fileURLToPath(
+								new URL("./vitest-env-server-stub.ts", import.meta.url)
+							),
+						},
+					],
+				},
+			},
+		],
+	},
+});
+```
+
+The Node project compiles server code and resolves the server runtime.
+The fullstack template also inlines and aliases its `@solidjs/web` entries so the request helper and request-event storage use the same server-build instance.
+Keep the server include pattern separate from the client pattern so a server test does not run under jsdom.
+
+### Stub the server environment module
+
+The fullstack template imports session secrets from `virtual:env/server`.
+Vitest runs the session test outside the start mode server, so the template aliases that virtual module to this test stub:
+
+```ts
+export const env: Record<string, unknown> = new Proxy(
+	{},
+	{
+		get: (_, key) => {
+			if (typeof key !== "string") return undefined;
+			const value = process.env[key];
+			if (key === "SESSION_SECRET") {
+				return value?.split(",").map((secret) => secret.trim());
+			}
+			return value;
+		},
+	}
 );
 ```
 
-### Benchmarks
+The proxy reads `process.env` when code accesses a property and reproduces the schema's parsed output for the signing-key list.
+This behavior lets a test set `process.env.SESSION_SECRET` before it imports the session module.
+The stub only supplies the module contract needed by the template test.
+It does not validate key length or run the start mode server boot process, so use a realistic test key that satisfies the production schema.
 
-While Solid offers performance simplified, it is good to validate if that promise can be kept.
-Vitest offers an experimental `bench` function to run benchmarks and compare the results inside the same `describe` block;
-for example if you had a `<List>` flow component similar to `<For>`, you could benchmark it like this:
+### Exercise a session across requests
 
-```jsx title="list.bench.jsx"
-describe("list rendering", () => {
-	const ITEMS = 1000;
-	const renderedFor = new Set();
-	const listFor = Array.from({ length: ITEMS }, (_, i) => i);
-	bench(
-		"For",
-		() =>
-			new Promise((resolve) => {
-				const ItemFor = (props) => {
-					onMount(() => {
-						renderedFor.add(props.number);
-						if (renderedFor.size === ITEMS) {
-							resolve();
-						}
-					});
-					return <span>{props.number}</span>;
-				};
-				render(() => (
-					<For each={listFor}>{(item) => <ItemFor number={item} />}</For>
-				));
-			})
+Test request-scoped helpers through the server runtime instead of replacing the request event with a plain object.
+This concise version of the fullstack template pattern creates an event, provides it to the handler, commits the outgoing response, and carries the response cookie into the next request:
+
+```ts
+import { commitEventResponse, createRequestEvent } from "@solidjs/web";
+import { provideRequestEvent } from "@solidjs/web/storage";
+import { afterEach, expect, test, vi } from "vitest";
+
+type SessionModule = typeof import("./session");
+
+async function loadSession(secret: string): Promise<SessionModule> {
+	process.env.SESSION_SECRET = secret;
+	vi.resetModules();
+	return import("./session");
+}
+
+async function runRequest<T>(
+	request: Request,
+	handler: () => Promise<T>
+): Promise<{ result: T; response: Response }> {
+	const event = createRequestEvent(request);
+
+	return provideRequestEvent(event, async () => {
+		const result = await handler();
+		const response = commitEventResponse(new Response("ok"), event);
+		return { result, response };
+	});
+}
+
+afterEach(() => {
+	delete process.env.SESSION_SECRET;
+});
+
+test("reads a session on the next request", async () => {
+	const session = await loadSession(
+		"test-session-key-with-at-least-32-characters"
+	);
+	const login = await runRequest(new Request("http://localhost/login"), () =>
+		session.setSession({ userId: "user_1" })
+	);
+	const cookie = login.response.headers
+		.getSetCookie()
+		.find((value) => value.startsWith("session="))
+		?.split(";")[0];
+
+	expect(cookie).toBeDefined();
+
+	const current = await runRequest(
+		new Request("http://localhost/me", {
+			headers: { cookie: cookie! },
+		}),
+		() => session.getSession()
 	);
 
-	const renderedList = new Set();
-	const listList = Array.from({ length: ITEMS }, (_, i) => i);
-	bench(
-		"List",
-		() =>
-			new Promise((resolve) => {
-				const ItemList = (props) => {
-					onMount(() => {
-						renderedList.add(props.number);
-						if (renderedList.size === ITEMS) {
-							resolve();
-						}
-					});
-					return <span>{props.number}</span>;
-				};
-				render(() => (
-					<List each={listList}>{(item) => <ItemList number={item} />}</List>
-				));
-			})
-	);
+	expect(current.result).toEqual({ userId: "user_1" });
 });
 ```
 
-Running `[npm|pnpm|yarn] test bench` will then execute the benchmark function:
+Run it and the second request returns `{ userId: "user_1" }` from the cookie the first request set.
+The test asserts the public request-to-response contract: one request writes a cookie, and the next request reads the session.
+Reset modules before importing code that captures environment values at module initialization.
+Restore fake timers and mocks, delete changed environment variables, and dispose any other process-wide state in `afterEach`.
 
-```ansi frame="none"
-[1;36m[RUN][0;36m v1.4.0[0;8m solid-app/src/components/[0m
+## Common problems
 
-[0;32m ✓ [0;8msrc/components/list.bench.jsx [0;31m(2)[0;8m 1364ms
-[0;32m   ✓ [0;8mbenchmark[0;31m (2)[0;8m 1360ms
-[1;37m     name       hz      min      max     mean      p75      p99     p995     p999      rme  samples
-[1;32m   · [0;37mFor   [0;36m60.5492  11.2355  47.9164  16.5155  15.4180  47.9164  47.9164  47.9164  [0;37m±13.60%       31   [0;32mfastest
-[1;32m   · [0;37mList  [0;36m49.7725  16.5441  69.3559  20.0914  18.0349  69.3559  69.3559  69.3559  [0;37m±21.37%       25
+### The assertion after `fireEvent` sees the old DOM
 
-[1;36m[BENCH][0;36m Summary
+The write is staged and the batch has not landed when the next line runs.
+Call `flush()` after the event and before the assertion.
+For an async source, `flush()` does not help; await `resolve(() => value())` or use an asynchronous query.
 
-[0;37mFor - src/components/list.bench.tsx > benchmark
-[0;32m    1.22x[0;8m faster than[0;37m List
-```
+### The Chromium test passes but Vitest exits with a missing-dependency error
 
-Please keep in mind that it is very difficult to create meaningful benchmarks.
-The numbers should always be taken with a grain of salt, but can still indicate performance degradations if compared between versions.
+jsdom is not installed.
+`@solidjs/vite-plugin` supplies a jsdom environment when `test.environment` is unset, and Vitest resolves that dependency before starting the browser pool.
+Keep `jsdom` in the development dependencies alongside the browser provider.
 
-### Test coverage
+### A server test runs under jsdom
 
-While coverage numbers can be misleading, they are used by many projects as a rough measurement of code quality.
-Vitest supports coverage collection. To use it, it needs an extra package:
+The server file matches the client project's `include` pattern.
+Keep `src/server/**/*.test.ts` and `src/**/*.test.tsx` as separate patterns so each file lands in one project.
 
-```package-install-dev
-@vitest/coverage-v8
-```
+### The session module ignores the `SESSION_SECRET` set in the test
 
-Also, you need to [set up vitest's coverage feature](https://vitest.dev/guide/coverage.html).
+The module captured the environment at import time, before the test set the variable.
+Set `process.env.SESSION_SECRET`, call `vi.resetModules()`, and import the module after both, as `loadSession` above does.
 
-### Integration/E2E testing
+### State leaks from one test file into the next
 
-Some issues can only be found once the code is running in the environment it is supposed to run in.
-Since integration and end-to-end tests are agnostic to frameworks, all proven approaches will work equally for Solid.
+`isolate: false` lets module state survive between files.
+Remove the setting, or reset the module-level state in `afterEach`.
+
+## Recap
+
+- Test in the smallest environment that exercises the behavior: jsdom for component DOM, browser mode for layout and browser APIs, a Node project for server code.
+- Pass a function to `render` so the component has a reactive owner, and query by role.
+- Call `flush()` after `fireEvent` and before the assertion; it lands the staged write and does not wait for async work.
+- Register `afterEach(cleanup)` when `globals` is off.
+- Keep jsdom installed in browser mode; the plugin resolves it before the browser pool starts.
+- Give client and server tests separate `include` patterns in separate Vitest projects.
+- Set environment variables and reset modules before importing code that reads them at import time, and undo both in `afterEach`.
+
+## Next steps
+
+- [Debugging reactivity](/guides/debugging-reactivity#the-test-sees-the-old-dom): `flush()` in full, `resolve` for async values, and the one place `flush()` is not allowed.
+- [Sessions and auth](/building-apps/sessions-and-auth): the session module the server test above exercises.
+- [Environment](/building-apps/environment): why server code that reads `virtual:env/server` needs the module reset the last section describes.

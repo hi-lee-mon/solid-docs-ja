@@ -1,529 +1,305 @@
 ---
-title: Stores
-category: Concepts
-order: 6
-use_cases: >-
-  complex state, nested objects, arrays, shared state, fine-grained updates,
-  state trees, global state
-tags:
-  - stores
-  - state
-  - objects
-  - arrays
-  - nested
-  - produce
-  - reconcile
-version: "1.0"
-description: >-
-  Manage complex nested state efficiently with stores that provide fine-grained
-  reactivity for objects and arrays in Solid.
+title: "Stores"
+version: "2.0"
+description: "Hold a cart, a form, or any nested object in a store: update one property through a draft, derive filtered views with a projection, and load server data into the same proxy."
 ---
 
-Stores are a state management primitive that provide a centralized way to handle shared data and reduce redundancy.
-Unlike [signals](/concepts/signals), which track a single value and trigger a full re-render when updated, stores maintain fine-grained reactivity by updating only the properties that change.
-They can produce a collection of reactive signals, each linked to an individual property, making them well-suited for managing complex state efficiently.
+The cart on the [Components and JSX](/concepts/components-and-jsx) page held its items in a signal.
+That works until the user edits a quantity.
+To change one number you must build a new array with one new object in it, and `For` sees a new object where the old row was: the row is torn down and rebuilt, and if the user was typing in that row's input, the input they were typing in is gone.
 
-## Creating a store
+A store fixes this by tracking each property on its own.
+Change `items[1].quantity` and the one text node that reads it updates.
+Nothing is copied, no row is rebuilt, and the input keeps focus.
 
-Stores can manage many data types, including: objects, arrays, strings, and numbers.
+Use a signal when a value is read and replaced as one unit: a count, a selected id, a string.
+Use a store when readers need separate parts of an object or array, which describes most application state.
 
-Using JavaScript's [proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy) mechanism, reactivity extends beyond just the top-level objects or arrays.
-With stores, you can now target nested properties and elements within these structures to create a dynamic tree of reactive data.
+## Create nested state
 
-```jsx
-import { createStore } from "solid-js/store";
+[`createStore`](/reference/solid-js/stores/create-store) takes an object or array and returns a read-only proxy and a setter:
 
-// Initialize store
-const [store, setStore] = createStore({
-	userCount: 3,
-	users: [
-		{
-			id: 0,
-			username: "felix909",
-			location: "England",
-			loggedIn: false,
-		},
-		{
-			id: 1,
-			username: "tracy634",
-			location: "Canada",
-			loggedIn: true,
-		},
-		{
-			id: 2,
-			username: "johny123",
-			location: "India",
-			loggedIn: true,
-		},
-	],
-});
-```
+```tsx
+import { For, createStore } from "solid-js";
 
-### Top-level array stores
-
-While the examples above show a store as an object with properties, stores can also be arrays directly.
-When creating a top-level array store, the setter syntax differs slightly since you target indices directly rather than navigating through property keys first.
-
-```jsx
-import { createStore } from "solid-js/store";
-
-// Store as a top-level array
-const [users, setUsers] = createStore([
-	{ id: 0, username: "felix909", location: "England", loggedIn: false },
-	{ id: 1, username: "tracy634", location: "Canada", loggedIn: true },
-	{ id: 2, username: "johny123", location: "India", loggedIn: true },
-]);
-```
-
-To append a new item to a top-level array store, use the array's length as the index:
-
-```jsx
-setUsers(users.length, {
-	id: 3,
-	username: "michael584",
-	location: "Nigeria",
-	loggedIn: false,
-});
-```
-
-To modify an existing item by index:
-
-```jsx
-// Update username of the first user
-setUsers(0, "username", "felix_updated");
-
-// Update multiple properties at once
-setUsers(1, { location: "USA", loggedIn: false });
-```
-
-You can also use filtering functions to update items based on conditions:
-
-```jsx
-// Log out all users from Canada
-setUsers((user) => user.location === "Canada", "loggedIn", false);
-```
-
-## Accessing store values
-
-Store properties can be accessed directly from the state proxy through directly referencing the targeted property:
-
-```jsx
-console.log(store.userCount); // Outputs: 3
-```
-
-Accessing stores within a tracking scope follows a similar pattern to signals.
-While signals are created using the [`createSignal`](/reference/basic-reactivity/create-signal) function and require calling the signal function to access their values, store values can be directly accessed without a function call.
-This provides access to the store's value directly within a tracking scope:
-
-```jsx
-const App = () => {
-	const [mySignal, setMySignal] = createSignal("This is a signal.");
-	const [store, setStore] = createStore({
-		userCount: 3,
-		users: [
-			{
-				id: 0,
-				username: "felix909",
-				location: "England",
-				loggedIn: false,
-			},
-			{
-				id: 1,
-				username: "tracy634",
-				location: "Canada",
-				loggedIn: true,
-			},
-			{
-				id: 2,
-				username: "johny123",
-				location: "India",
-				loggedIn: true,
-			},
-		],
-	});
-	return (
-		<div>
-			<h1>Hello, {store.users[0].username}</h1> {/* Accessing a store value */}
-			<span>{mySignal()}</span> {/* Accessing a signal */}
-		</div>
-	);
+type CartItem = {
+	id: string;
+	name: string;
+	price: number;
+	quantity: number;
+	savedForLater?: boolean;
 };
-```
 
-When a store is created, it starts with the initial state but does _not_ immediately set up signals to track changes.
-These signals are created **lazily**, meaning they are only formed when accessed within a tracking scope.
-
-Once data is used within a tracking scope, such as within the return statement of a component function, computed property, or an effect, a signal is created and dependencies are established.
-
-For example, if you wanted to print out every new user, adding the console log below will not work because it is not within a tracked scope.
-
-```tsx ins={9}
-const App = () => {
-	const [store, setStore] = createStore({
-		userCount: 3,
-		users: [ ... ],
-	})
-
-	const addUser = () => { ... }
-
-	console.log(store.users.at(-1)) // This won't work
+export function Cart() {
+	const [cart, setCart] = createStore({
+		items: [
+			{ id: "mug", name: "Mug", price: 12, quantity: 1 },
+			{ id: "tee", name: "T-shirt", price: 20, quantity: 2 },
+		] as CartItem[],
+		coupon: "",
+	});
 
 	return (
-		<div>
-			<h1>Hello, {store.users[0].username}</h1>
-			<p>User count: {store.userCount}</p>
-      <button onClick={addUser}>Add user</button>
-		</div>
-	)
+		<>
+			<ul>
+				<For each={cart.items}>
+					{(item) => (
+						<li>
+							{item.name}
+							<input
+								type="number"
+								min="1"
+								value={item.quantity}
+								onInput={(event) =>
+									setCart((draft) => {
+										const target = draft.items.find((i) => i.id === item.id);
+										if (target)
+											target.quantity = event.currentTarget.valueAsNumber || 1;
+									})
+								}
+							/>
+						</li>
+					)}
+				</For>
+			</ul>
+			<p>{cart.items.length} lines</p>
+		</>
+	);
 }
 ```
 
-Rather, this would need to be in a tracking scope, like inside a [`createEffect`](/reference/basic-reactivity/create-effect), so that a dependency is established.
+Change the T-shirt quantity to 3.
+The `value` of that one input updates and nothing else on the page is touched: the Mug row, the line count, and the `<li>` around the input all stay as they were.
 
-```tsx del={9} ins={10-12}
-const App = () => {
-	const [store, setStore] = createStore({
-		userCount: 3,
-		users: [ ... ],
-	})
+Each property read inside a tracking scope subscribes that scope to that property, including reads through nested objects and array indexes.
+`item.quantity` subscribed the input to one number; `cart.items.length` subscribed the paragraph to the array's length.
+A write to `cart.coupon` would update neither.
 
-	const addUser = () => { ... }
+Store properties are values, not accessors.
+Read `cart.coupon`, not `cart.coupon()`.
+The same rule as for signals applies to where you read: inside JSX, a memo, or an effect's compute function when the reader should update, and a read in the component body is a one-time snapshot.
 
-	console.log(store.users.at(-1))
-	createEffect(() => {
-		console.log(store.users.at(-1))
-	})
-
-	return (
-		<div>
-			<h1>Hello, {store.users[0].username}</h1>
-			<p>User count: {store.userCount}</p>
-      <button onClick={addUser}>Add user</button>
-		</div>
-	)
-}
-```
-
-## Modifying store values
-
-Updating values within a store is best accomplished using a setter provided by the `createStore` initialization.
-This setter allows for the modification of a specific key and its associated value, following the format `setStore(key, newValue)`:
-
-```jsx "setStore"
-const [store, setStore] = createStore({
-	userCount: 3,
-	users: [ ... ],
-})
-
-setStore("users", (currentUsers) => [
-	...currentUsers,
-	{
-		id: 3,
-		username: "michael584",
-		location: "Nigeria",
-		loggedIn: false,
-	},
-])
-```
-
-The value of `userCount` could also be automatically updated whenever a new user is added to keep it synced with the users array:
-
-```tsx ins={11}
-const App = () => {
-	const [store, setStore] = createStore({
-		userCount: 3,
-		users: [ ... ],
-	})
-
-	const addUser = () => { ... }
-
-	createEffect(() => {
-		console.log(store.users.at(-1))
-		setStore("userCount", store.users.length)
-	})
-
-	return (
-		<div>
-			<h1>Hello, {store.users[0].username}</h1>
-			<p>User count: {store.userCount}</p>
-      <button onClick={addUser}>Add user</button>
-		</div>
-	)
-}
-```
-
-:::note
-Separating the read and write capabilities of a store provides a valuable debugging advantage.
-
-This separation facilitates the tracking and control of the components that are accessing or changing the values.
-:::
-:::advanced
-A little hidden feature of stores is that you can also create nested stores to help with setting nested properties.
-
-```jsx
-  const [store, setStore] = createStore({
-    userCount: 3,
-    users: [ ... ],
-  })
-
-  const [users, setUsers] = createStore(store.users)
-
-  setUsers((currentUsers) => [
-    ...currentUsers,
-    {
-      id: 3,
-      username: "michael584",
-      location: "Nigeria",
-      loggedIn: false,
-    },
-  ])
-
-```
-
-Changes made through `setUsers` will update the `store.users` property and reading `users` from this derived store will also be in sync with the values from `store.users`.
-
-Note that the above relies on `store.users` to be set already in the existing store.
-
+:::deep-dive[How a store tracks one property at a time]
+The proxy does not create a signal for every property up front.
+It creates a tracking node the first time a tracked consumer reads a property, and only for the properties that were read.
+Nested objects and arrays are wrapped in their own proxies when they are first reached, so a store with a thousand rows costs nothing for the rows nothing has read.
+This is why reading `cart.items[0].quantity` and reading `cart.items.length` produce two independent subscriptions: they are two different nodes.
 :::
 
-## Path syntax flexibility
+## Update with a draft
 
-Modifying a store using this method is referred to as "path syntax."
-In this approach, the initial arguments are used to specify the keys that lead to the target value you want to modify, while the last argument provides the new value.
+The setter receives a draft.
+Mutate it with normal property assignments and array methods, and Solid applies the changes to the store when the callback returns:
 
-String keys are used to precisely target particular values with path syntax.
-By specifying these exact key names, you can directly retrieve the targeted information.
-However, path syntax goes beyond string keys and offers more versatility when accessing targeted values.
+```ts
+setCart((draft) => {
+	draft.coupon = "SAVE10";
 
-Instead of employing the use of just string keys, there is the option of using an array of keys.
-This method grants you the ability to select multiple properties within the store, facilitating access to nested structures.
-Alternatively, you can use filtering functions to access keys based on dynamic conditions or specific rules.
+	const mug = draft.items.find((item) => item.id === "mug");
+	if (mug) mug.quantity += 1;
 
-<EraserLink
-	href="https://app.eraser.io/workspace/maDvFw5OryuPJOwSLyK9?elements=M6Y55ScNFDD_2HmRd4OJkQ"
-	preview="https://app.eraser.io/workspace/maDvFw5OryuPJOwSLyK9/preview?elements=M6Y55ScNFDD_2HmRd4OJkQ&type=embed"
-/>
-
-The flexibility in path syntax makes for efficient navigation, retrieval, and modification of data in your store, regardless of the store's complexity or the requirement for dynamic access scenarios within your application.
-
-## Modifying values in arrays
-
-Path syntax provides a convenient way to modify arrays, making it easier to access and update their elements.
-Instead of relying on discovering individual indices, path syntax introduces several powerful techniques for array manipulation.
-
-### Appending new values
-
-To append values to an array in a store, use the setter function with the spread operator (`...`) or the path syntax. Both methods add an element to the array but differ in how they modify it and their reactivity behavior.
-
-The spread operator creates a new array by copying the existing elements and adding the new one, effectively replacing the entire `store.users` array.
-This replacement triggers reactivity for all effects that depend on the array or its properties.
-
-```jsx
-setStore("users", (otherUsers) => [
-	...otherUsers,
-	{
-		id: 3,
-		username: "michael584",
-		location: "Nigeria",
-		loggedIn: false,
-	},
-]);
-```
-
-The path syntax adds the new element by assigning it to the index equal to `store.users.length`, directly modifying the existing array.
-This triggers reactivity only for effects that depend on the new index or properties like `store.users.length`, making updates more efficient and targeted.
-
-```jsx
-setStore("users", store.users.length, {
-	id: 3,
-	username: "michael584",
-	location: "Nigeria",
-	loggedIn: false,
+	draft.items.push({ id: "cap", name: "Cap", price: 15, quantity: 1 });
 });
 ```
 
-### Modifying multiple elements
+Three properties changed, and three subscriptions are notified: the coupon reader, the Mug quantity input, and the `length` reader.
+The T-shirt row is not touched.
 
-With path syntax, you can target a subset of elements of an array,
-or properties of an object, by specifying an array or range of indices.
+The habit from immutable state is to rebuild the collection.
+That habit undoes what the store gives you:
 
-The most general form is to specify an array of values.
-For example, if `store.users` is an array of objects,
-you can set the `loggedIn` property of several indices at once like so:
-
-```jsx
-setStore("users", [2, 7, 10], "loggedIn", false);
-// equivalent to (but more efficient than):
-setStore("users", 2, "loggedIn", false);
-setStore("users", 7, "loggedIn", false);
-setStore("users", 10, "loggedIn", false);
-```
-
-This array syntax also works for object property names.
-For example, if `store.users` is an object mapping usernames to objects,
-you can set the `loggedIn` property of several users at once like so:
-
-```jsx
-setStore("users", ["me", "you"], "loggedIn", false);
-// equivalent to (but more efficient than):
-setStore("users", ["me"], "loggedIn", false);
-setStore("users", ["you"], "loggedIn", false);
-```
-
-For arrays specifically, you can specify a range of indices via an object
-with `from` and `to` keys (both of which are inclusive).
-For example, assuming `store.users` is an array again,
-you can set the `loggedIn` state for all users except index 0 as follows:
-
-```jsx
-setStore("users", { from: 1, to: store.users.length - 1 }, "loggedIn", false);
-// equivalent to (but more efficient than):
-for (let i = 1; i <= store.users.length - 1; i++) {
-	setStore("users", i, "loggedIn", false);
-}
-```
-
-You can also include a `by` key in a range object to specify a step size,
-and thereby update a regular subset of elements.
-For example, you can set the `loggedIn` state for even-indexed users like so:
-
-```jsx
-setStore(
-	"users",
-	{ from: 0, to: store.users.length - 1, by: 2 },
-	"loggedIn",
-	false
-);
-// equivalent to (but more efficient than):
-for (let i = 1; i <= store.users.length - 1; i += 2) {
-	setStore("users", i, "loggedIn", false);
-}
-```
-
-Multi-setter syntax differs from the "equivalent" code in one key way:
-a single store setter call automatically gets wrapped in a
-[`batch`](/reference/reactive-utilities/batch), so all the elements update
-at once before any downstream effects are triggered.
-
-### Dynamic value assignment
-
-Path syntax also provides a way to set values within an array using functions instead of static values.
-These functions receive the old value as an argument, allowing you to compute the new value based on the existing one.
-This dynamic approach is particularly useful for complex transformations.
-
-```jsx
-setStore("users", 3, "loggedIn", (loggedIn) => !loggedIn);
-```
-
-### Filtering values
-
-To update elements in an array based on specific conditions, you can pass a function as an argument.
-This function acts as a filter, receiving the old value and index, and gives you the flexibility to apply logic that targets specific cases.
-This might include using methods like `.startsWith()`, `includes()`, or other comparison techniques to determine which elements should be updated.
-
-```jsx
-// update users with username that starts with "t"
-setStore("users", (user) => user.username.startsWith("t"), "loggedIn", false);
-
-// update users with location "Canada"
-setStore("users", (user) => user.location == "Canada", "loggedIn", false);
-
-// update users with id 1, 2 or 3
-let ids = [1, 2, 3];
-setStore("users", (user) => ids.includes(user.id), "loggedIn", false);
-```
-
-## Modifying objects
-
-When using store setters to modify objects, if a new value is an object, it will be shallow merged with the existing value.
-What this refers to is that the properties of the existing object will be combined with the properties of the "new" object you are setting, updating any overlapping properties with the values from the new object.
-
-What this means, is that you can directly make the change to the store _without_ spreading out properties of the existing user object.
-
-```jsx
-setStore("users", 0, {
-	id: 109,
+```ts
+// Avoid: a new object for the changed item, so For rebuilds that row
+setCart((draft) => {
+	draft.items = draft.items.map((item) =>
+		item.id === id ? { ...item, quantity } : item
+	);
 });
 
-// is equivalent to
-
-setStore("users", 0, (user) => ({
-	...user,
-	id: 109,
-}));
+// Prefer: change the one property on the draft
+setCart((draft) => {
+	const item = draft.items.find((item) => item.id === id);
+	if (item) item.quantity = quantity;
+});
 ```
 
-## Store utilities
+Run the `Avoid` version while the cursor is in that row's input and the input loses focus, because the row was torn down and a new one created.
+The `Prefer` version updates the one `value` binding.
 
-### Store updates with `produce`
+:::pitfall[Writing to the store outside the setter does nothing]
+The store proxy is read-only.
+An assignment such as `cart.items[0].quantity = 2` outside a setter is ignored: it does not throw, it does not warn, and the value does not change.
+If a write seems to vanish, look for a write that skipped `setCart`.
+Every change goes through the setter's draft, including changes from event handlers and from inside actions.
+:::
 
-Rather than directly modifying a store with setters, Solid has the `produce` utility.
-This utility provides a way to work with data as if it were a [mutable](https://developer.mozilla.org/en-US/docs/Glossary/Mutable) JavaScript object.
-`produce` also provides a way to make changes to multiple properties at the same time which eliminates the need for multiple setter calls.
+The callback may return a replacement value instead of mutating.
+For an array, Solid writes the returned entries by index and adjusts the length.
+For an object, Solid writes the keys that are present and deletes the keys that are missing:
 
-```jsx
-import { produce } from "solid-js/store";
+```ts
+setCart((draft) => {
+	draft.items = draft.items.filter((item) => item.quantity > 0);
+});
+```
 
-// without produce
-setStore("users", 0, "username", "newUsername");
-setStore("users", 0, "location", "newLocation");
+A returned or assigned collection replaces the array by index, and the items that survive are the same objects, so their proxies and their rows are kept.
+When the new array holds new objects, such as a fresh server response, nothing matches them to the old ones; reconcile that inside a [projection](#derive-a-store-with-a-projection) with a key, or with `reconcile`.
 
-// with produce
-setStore(
-	"users",
-	0,
-	produce((user) => {
-		user.username = "newUsername";
-		user.location = "newLocation";
-	})
+Store writes are staged and applied in the same batch as signal writes, so a read on the next line sees the previous value until the batch lands.
+[When updates land](/concepts/reactivity#when-updates-land) explains the batch and when to call `flush()`.
+
+:::note[Path setters from Solid 1]
+[`storePath`](/reference/solid-js/advanced/store-advanced/store-path) accepts the path-and-value form Solid 1 used, `setCart(storePath("coupon", "SAVE10"))`, for code that has not moved yet.
+New code uses the draft.
+:::
+
+## Derive a store with a projection
+
+A projection is a store whose value is computed from other reactive values.
+Where a memo derives one value, a projection derives an object or array whose properties are tracked separately, and whose items keep their identity from one computation to the next.
+
+[`createProjection`](/reference/solid-js/stores/create-projection) takes a function and a seed.
+The function receives a draft of the seed and may mutate it or return a replacement; a returned array is reconciled into the store by `id`:
+
+```tsx
+import { For, createProjection, createSignal, createStore } from "solid-js";
+
+function Cart() {
+	const [cart] = createStore({ items: [] as CartItem[] });
+	const [showSaved, setShowSaved] = createSignal(false);
+
+	const visible = createProjection(
+		() => cart.items.filter((item) => showSaved() || !item.savedForLater),
+		[] as CartItem[]
+	);
+
+	return (
+		<>
+			<label>
+				<input
+					type="checkbox"
+					checked={showSaved()}
+					onInput={(event) => setShowSaved(event.currentTarget.checked)}
+				/>
+				Show saved for later
+			</label>
+			<ul>
+				<For each={visible}>{(item) => <li>{item.name}</li>}</For>
+			</ul>
+		</>
+	);
+}
+```
+
+Check the box and the saved items appear.
+The rows that were already visible are the same DOM nodes as before: the projection matched them by `id`, so `For` kept their proxies and did not rebuild them.
+
+Pass a key name when the data uses a different identity field, or `null` to match by position.
+The seed is the backing object the results reconcile into, so the root proxy keeps its identity across recomputations too.
+
+Use a projection for a derived collection or object.
+For a derived number or string, such as the cart total, use a memo:
+
+```ts
+const total = createMemo(() =>
+	cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0)
 );
 ```
 
-`produce` and `setStore` do have distinct functionalities.
-While both can be used to modify the state, the key distinction lies in how they handle data.
-`produce` allows you to work with a temporary draft of the state, apply the changes, then produce a new [immutable](https://developer.mozilla.org/en-US/docs/Glossary/Immutable) version of the store.
-Comparatively, `setStore` provides a more straightforward way to update the store directly, without creating a new version.
+### Fetch into a store
 
-It's important to note, however, `produce` is specifically designed to work with **arrays** and **objects**.
-Other collection types, such as JavaScript [Sets](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set) and [Maps](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map), are not compatible with this utility.
+The projection function may return a promise.
+The function form of `createStore` is a projection with a setter, and it is the normal way to load server data into a store:
 
-### Data integration with `reconcile`
-
-When new information needs to be merged into an existing store `reconcile` can be useful.
-`reconcile` will determine the differences between new and existing data and initiate updates only when there are _changed_ values, thereby avoiding unnecessary updates.
-
-```jsx
-import { createStore, reconcile } from "solid-js/store";
-
-const [data, setData] = createStore({
-	animals: ["cat", "dog", "bird", "gorilla"],
+```ts
+const [cart, setCart] = createStore(async () => api.cart(), {
+	items: [] as CartItem[],
 });
-
-const newData = getNewData(); // eg. contains ['cat', 'dog', 'bird', 'gorilla', 'koala']
-setData("animals", reconcile(newData));
 ```
 
-In this example, the store will look for the differences between the existing and incoming data sets.
-Consequently, only `'koala'` - the new edition - will cause an update.
+The request starts when the store is created, and again whenever a reactive value the function read changes.
+Each response reconciles into the same proxy by `id`, so items the server did not change keep their identity and their DOM.
+A [`Loading`](/concepts/boundaries) boundary shows a fallback before the first response, [`isPending(() => cart.items)`](/reference/solid-js/reactivity/is-pending) reports a refetch, and [`refresh(cart)`](/reference/solid-js/lifecycle-actions/refresh) asks the server again.
 
-### Extracting raw data with `unwrap`
+With an async function, the seed is not shown as a first answer by default; readers wait for the first response the same way they wait for an async memo.
+[Async reactivity](/concepts/async-reactivity) explains that wait, and the `seedLoadingValue` option that makes the seed an acceptable first answer.
 
-When there is a need for dealing with data outside of a tracking scope, the `unwrap` utility offers a way to transform a store to a standard [object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object).
-This conversion serves several important purposes.
+Split the request into its own memo only when a second reader shapes the same response differently:
 
-Firstly, it provides a snapshot of the current state without the processing overhead associated with reactivity.
-This can be useful in situations where an unaltered, non-reactive view of the data is needed.
-Additionally, `unwrap` provides a means to interface with third-party libraries or tools that anticipate regular JavaScript objects.
-This utility acts as a bridge to facilitate smooth integrations with external components and simplifies the incorporation of stores into various applications and workflows.
-
-```jsx
-import { createStore, unwrap } from "solid-js/store";
-
-const [data, setData] = createStore({
-	animals: ["cat", "dog", "bird", "gorilla"],
-});
-
-const rawData = unwrap(data);
+```ts
+const response = createMemo(() => api.cart());
+const [cart] = createStore(() => response(), { items: [] as CartItem[] });
+const itemCount = createMemo(() => response().items.length);
 ```
 
-To learn more about how to use Stores in practice, visit the [guide on complex state management](/guides/complex-state-management).
+Without that second reader, the one-line form is the right one.
+
+## Optimistic stores
+
+[`createOptimisticStore`](/reference/solid-js/stores/create-optimistic-store) has the same draft setter, with one difference: a write made inside an [`action`](/reference/solid-js/lifecycle-actions/action) is tentative.
+It shows immediately, and when the action settles Solid removes it and shows the value the store derives from its source:
+
+```ts
+import { action, createOptimisticStore, refresh } from "solid-js";
+
+const [cart, setCart] = createOptimisticStore(async () => api.cart(), {
+	items: [] as CartItem[],
+});
+
+const setQuantity = action(function* (id: string, quantity: number) {
+	setCart((draft) => {
+		const item = draft.items.find((item) => item.id === id);
+		if (item) item.quantity = quantity;
+	});
+	yield api.setQuantity(id, quantity);
+	refresh(cart);
+});
+```
+
+Call `setQuantity("mug", 3)` and the input shows 3 at once.
+When the request completes, the refreshed cart from the server replaces the tentative value; if the server agreed, nothing visible changes, and if the request failed, the quantity returns to what the server has.
+
+The [Mutations](/concepts/mutations) page builds this up from the client-only cart above, one change at a time.
+
+## Common problems
+
+### A store write did nothing
+
+The write went to the proxy instead of the setter's draft: `cart.coupon = "SAVE10"` rather than `setCart((draft) => { draft.coupon = "SAVE10"; })`.
+Writes outside the setter are ignored without an error.
+
+### Every row rebuilds when one item changes
+
+The setter replaced the item objects, usually with `map` and a spread.
+`For` keys rows by object identity, so a new object is a new row.
+Change the property on the draft instead, or if the data arrives as a fresh array from the server, load it through a [projection](#derive-a-store-with-a-projection) so items are matched by `id`.
+
+### `cart.items.length` renders once and never updates
+
+The read happened in the component body, outside a tracking scope.
+Store reads follow the same rule as signal reads: put the read in the JSX, a memo, or an effect's compute function.
+Development prints `[STRICT_READ_UNTRACKED]` with the component name.
+
+### A `Map`, `Date`, or class instance inside the store does not track
+
+Plain objects, arrays, and class instances are wrapped in proxies; platform objects such as `Map`, `Set`, and `Date` are stored as they are.
+Reassign the property to a new instance through the setter to notify readers, or keep the data in plain objects and arrays.
+
+## Recap
+
+- Use a store for an object or array whose parts are read separately; use a signal for a value replaced as a unit.
+- Read store properties as values, `cart.coupon`, inside a tracking scope.
+- Change state on the setter's draft; a write to the proxy itself is ignored.
+- Assign the one property that changed rather than rebuilding the collection, so rows keep their identity.
+- Derive a collection with `createProjection`, which reconciles results by `id`; derive a scalar with `createMemo`.
+- Load server data with `createStore(async () => ..., seed)`; each response reconciles into the same proxy.
+- Make optimistic writes inside an `action` on a `createOptimisticStore`, and `refresh` the source when the request settles.
+
+## Next steps
+
+- [Async reactivity](/concepts/async-reactivity): what readers see while `createStore(async () => ...)` is waiting, and why the current cart stays on screen during a refetch.
+- [Mutations](/concepts/mutations): the cart's `add`, `remove`, and `setQuantity` as actions against a server, with the optimistic overlay and the refresh.
+- [Lists](/guides/lists): editing, filtering, selection, and keeping row identity across server refetches, with the store patterns from this page.
+- [Avoid unnecessary effects](/guides/avoid-unnecessary-effects): when a derived store should be a projection instead of an effect that copies into a second store.
+- [Performance](/guides/performance#stores-at-scale): keyed reconciliation and projections over a store with thousands of rows.
