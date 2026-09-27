@@ -1,18 +1,18 @@
 ---
 title: "Thinking in Solid"
 version: "2.0"
-description: "Build the storefront's product search end to end, and at each step see what a React or Vue developer would reach for and what Solid does instead."
+description: "ストアフロントの商品検索をエンドツーエンドで構築しながら、各ステップで React や Vue の開発者なら何に手を伸ばすか、そして Solid では代わりに何をするかを見ていきます。"
 ---
 
-The storefront needs a search page: a text box, a category filter, a list of matching products from the server, and an **Add to cart** button on each row that updates the cart badge in the header.
-If you have built this in React or Vue, you already have a plan: state for the query, a memoized filter, an effect that fetches, a loading flag, and a state update after the request succeeds.
+ストアフロントには検索ページが必要です。テキストボックス、カテゴリーフィルター、サーバーから取得した一致する商品のリスト、そしてヘッダーのカートバッジを更新する各行の **Add to cart** ボタンです。
+React や Vue でこれを作ったことがあれば、すでに頭の中に設計があります。クエリ用の状態、メモ化したフィルター、フェッチを行うエフェクト、ローディングフラグ、そしてリクエスト成功後の状態更新です。
 
-This guide builds the same page in Solid and stops at each step to say which part of that plan does not carry over.
-The [Quick start](/getting-started/quick-start) showed the one rule everything here follows: a component runs once, and a read inside JSX, a memo, or an effect's compute function is what updates.
+このガイドでは同じページを Solid で構築し、各ステップでその設計のどの部分が持ち越せないかを説明します。
+[クイックスタート](/getting-started/quick-start)では、ここでのすべてが従う唯一のルールを示しました。コンポーネントは 1 回だけ実行され、更新されるのは JSX・メモ・エフェクトの計算関数の内部で行われた読み取りです。
 
-## Start from the markup
+## マークアップから始める
 
-Begin with a static list:
+まず静的なリストから始めます。
 
 ```tsx
 // src/routes/search.tsx
@@ -50,18 +50,18 @@ export default function Search() {
 }
 ```
 
-Load the page and three rows render.
-`Search` has now run for the only time it will run; nothing on this page causes it to run again.
+ページを読み込むと 3 行がレンダーされます。
+`Search` はこのとき唯一の 1 回の実行を終えています。このページ上のどの要素もそれを再実行させません。
 
-In React the component function is the render, and every state change runs it again from the top.
-In Vue the `setup` function runs once but the template re-renders when reactive state it reads changes.
-In Solid there is no second run to plan for: the function sets up the page, returns the JSX, and each expression inside that JSX keeps itself current from then on.
-[Components and JSX](/concepts/components-and-jsx#how-jsx-executes) explains what the compiler does with the JSX to make that work.
+React ではコンポーネント関数がそのままレンダーであり、状態が変わるたびに先頭から再実行されます。
+Vue では `setup` 関数は 1 回だけ実行されますが、読み取ったリアクティブな状態が変わるとテンプレートが再レンダーされます。
+Solid では 2 回目の実行を想定する必要はありません。関数はページをセットアップして JSX を返し、それ以降はその JSX 内の各式が自分自身を最新の状態に保ちます。
+これを実現するためにコンパイラが JSX をどう処理するかは [コンポーネントと JSX](/concepts/components-and-jsx#how-jsx-executes) で説明しています。
 
-## Add the state that changes
+## 変化する状態を追加する
 
-The query is a string the user replaces on every keystroke.
-The filter is an object with two fields that different parts of the page read:
+クエリは、ユーザーがキー入力のたびに置き換える文字列です。
+フィルターは、ページの異なる部分が読み取る 2 つのフィールドを持つオブジェクトです。
 
 ```tsx
 import { For, createSignal, createStore } from "solid-js";
@@ -111,26 +111,26 @@ export default function Search() {
 }
 ```
 
-Type `m` and the sentence under the controls changes; pick **Apparel** and the same sentence changes again.
-The two expressions that read the changed value updated, and nothing else on the page was touched.
-Check **In stock only** and nothing visible changes yet, because nothing on the page reads `filter.inStockOnly` apart from the checkbox itself.
+`m` と入力するとコントロール下の文が変わります。**Apparel** を選ぶと同じ文が再び変わります。
+変更された値を読み取っている 2 つの式だけが更新され、ページの他の部分には一切触れられません。
+**In stock only** にチェックを入れても、まだ見た目は何も変わりません。チェックボックス自身以外に `filter.inStockOnly` を読み取るものがページ上にないからです。
 
-The choice between the two primitives is about how the value is read.
-`createSignal` holds a value that is read and replaced as one unit, and its getter is called: `query()`.
-`createStore` holds an object or array whose parts are read separately, and its properties are read as values: `filter.category`.
-React has one primitive, `useState`, and the object-or-string question is about how much to copy on each update; Vue has `ref` and `reactive`, which map closely to signal and store.
-[Stores](/concepts/stores) covers the draft setter and per-property tracking in depth.
+2 つのプリミティブの使い分けは、値がどう読み取られるかで決まります。
+`createSignal` は 1 つの単位として読み取られ・置き換えられる値を保持し、そのゲッターは呼び出して使います（`query()`）。
+`createStore` は部分ごとに読み取られるオブジェクトや配列を保持し、そのプロパティは値として読み取ります（`filter.category`）。
+React のプリミティブは `useState` の 1 つだけで、オブジェクトか文字列かの問題は各更新でどれだけコピーするかという話になります。Vue には `ref` と `reactive` があり、それぞれシグナルとストアにほぼ対応します。
+ドラフトセッターとプロパティ単位の追跡については [ストア](/concepts/stores) で詳しく説明しています。
 
-:::note[Where the read happens is the whole model]
-`query()` inside the JSX subscribes that one text node to the signal.
-The same call in the component body would run once, during setup, and the sentence would never change; development prints `[STRICT_READ_UNTRACKED]` when that happens.
-[Reactivity](/concepts/reactivity#signals) explains tracking scopes, which is the one concept a React or Vue developer has to add.
+:::note[読み取りがどこで起きるかがモデルのすべてです]
+JSX 内の `query()` は、そのテキストノードだけをシグナルに購読させます。
+同じ呼び出しをコンポーネント本体で行うとセットアップ時に 1 回だけ実行され、文は二度と変わりません。そのような場合、開発ビルドは `[STRICT_READ_UNTRACKED]` を出力します。
+追跡スコープについては [リアクティビティ](/concepts/reactivity#signals) で説明しています。これは React や Vue の開発者が新たに身につける必要のある唯一の概念です。
 :::
 
-## Derive everything else
+## それ以外はすべて派生させる
 
-The list should show the products that match the query and the filter, and the heading should show how many.
-The plan from other frameworks is a second piece of state kept in step with the first:
+リストにはクエリとフィルターに一致する商品を表示し、見出しにはその件数を表示したいとします。
+他のフレームワークでの定石は、1 つ目の状態と同期を保つ 2 つ目の状態を持つことです。
 
 ```tsx
 import { createEffect, createMemo, createSignal } from "solid-js";
@@ -159,25 +159,25 @@ const filtered = createMemo(() =>
 const count = () => filtered().length;
 ```
 
-Run the `Avoid` version and type a letter.
-The sentence under the controls updates in the flush the keystroke caused; the effect runs after that flush and writes `filtered`, which updates in the next one, so for one frame the page shows the new query above the old list.
-With attribution enabled, development names the pattern `[EFFECT_RELAY_TEAR]`; [Avoid unnecessary effects](/guides/avoid-unnecessary-effects#calculate-values-when-they-are-read) shows the report and the other shapes it takes.
+`Avoid` 版を実行して 1 文字入力してみます。
+コントロール下の文はキー入力が引き起こしたフラッシュで更新されます。エフェクトはそのフラッシュの後に実行されて `filtered` に書き込むため、リストは次のフラッシュで更新されます。その結果、1 フレームの間、ページには新しいクエリと古いリストが並んで表示されます。
+attribution を有効にすると、開発ビルドはこのパターンを `[EFFECT_RELAY_TEAR]` と名付けます。そのレポートと、同じ問題が取る他の形については [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects#calculate-values-when-they-are-read) を参照してください。
 
-In the `Prefer` version there is no second copy.
-`createMemo` runs its function in a tracking scope, so the reads of `query()`, `filter.category`, and `filter.inStockOnly` inside `matches` are its dependency list; there is no array to write and nothing to keep in step.
-React's `useMemo` needs `[query, filter]` spelled out and recomputes when the component re-renders with a changed entry; Vue's `computed` is the closest match to what the memo does here.
+`Prefer` 版には 2 つ目のコピーはありません。
+`createMemo` は関数を追跡スコープ内で実行するため、`matches` 内で行われる `query()`・`filter.category`・`filter.inStockOnly` の読み取りがそのまま依存関係リストになります。書くべき配列はなく、同期を保つべきものもありません。
+React の `useMemo` では `[query, filter]` を明示する必要があり、変わった項目を伴ってコンポーネントが再レンダーされたときに再計算されます。Vue の `computed` が、ここでのメモの動作に最も近い対応物です。
 
-`count` is a plain function rather than a memo.
-It has one reader, so it costs nothing to recompute where it is read; a memo costs a node and an equality check and earns it when several readers share the result.
-[Derived values](/concepts/reactivity#derived-values) covers that choice.
+`count` はメモではなく素の関数です。
+読み取り側が 1 つだけなので、読み取り場所で再計算してもコストはかかりません。メモにはノードと等値チェックのコストがかかり、複数の読み取り側が結果を共有するときにそのコストが報われます。
+この使い分けについては [派生値](/concepts/reactivity#derived-values) で説明しています。
 
-The memo returns the same product objects the catalog holds, filtered.
-`For` keys rows by object identity, so a product that stays in the results keeps its `<li>`; when the derived collection is built from new objects on each run, use a [projection](/concepts/stores#derive-a-store-with-a-projection) instead so rows are matched by `id`.
+このメモは、カタログが保持しているのと同じ商品オブジェクトをフィルタリングして返します。
+`For` はオブジェクトの同一性で行をキー付けするため、結果に残った商品は同じ `<li>` を保ちます。派生したコレクションが実行のたびに新しいオブジェクトから構築される場合は、代わりに [プロジェクション](/concepts/stores#derive-a-store-with-a-projection) を使って `id` で行を照合します。
 
-## Read from the server
+## サーバーから読み取る
 
-The catalog lives in a database.
-Move the search there with a server function, and call it from the memo:
+カタログはデータベースに置かれています。
+サーバー関数で検索をそちらに移し、メモから呼び出します。
 
 ```ts
 // src/data/products.ts
@@ -240,31 +240,31 @@ export default function Search() {
 }
 ```
 
-Type `mug`.
-Three requests start, one per keystroke; the list shows the answer to `mug` and nothing else, and while each answer is on its way the previous list stays on screen with the `stale` class.
-The first time the memo returns a promise, the `Loading` boundary shows **Searching…** in place of the list; after that first answer, the fallback does not come back.
+`mug` と入力します。
+キーストロークごとに 1 つ、合計 3 つのリクエストが開始されます。リストには `mug` に対する答えだけが表示され、各答えが届くまでの間、前のリストが `stale` クラス付きで画面に残ります。
+メモが初めて Promise を返したとき、`Loading` バウンダリがリストの代わりに **Searching…** を表示します。最初の答えが返った後、フォールバックが再び現れることはありません。
 
-The memo returned a promise, and that is the whole change.
-Readers of `results()` see a `Product[]`, not a `Promise` and not `undefined`; an expression that reads a value that is not ready yet waits, and the nearest `Loading` boundary decides what renders in the meantime.
-An answer to a superseded run is dropped, so there is no request counter and no `AbortController`.
-[Async reactivity](/concepts/async-reactivity) covers what happens between the keystroke and the answer, including `latest` for a controlled input whose `value` should show the new text while the old list is held.
+メモが Promise を返す。変更はそれだけです。
+`results()` の読み取り側が見るのは `Promise` でも `undefined` でもなく `Product[]` です。まだ準備できていない値を読み取った式は待機し、その間に何をレンダーするかは最も近い `Loading` バウンダリが決めます。
+古くなった実行への答えは破棄されるため、リクエストカウンターも `AbortController` も必要ありません。
+キーストロークから答えが届くまでの間に何が起きるかは [非同期リアクティビティ](/concepts/async-reactivity) で説明しています。古いリストを保持したまま `value` に新しいテキストを表示する制御付き入力向けの `latest` もそこで扱っています。
 
-In React this section is a `useEffect` with a fetch, a results state, a loading state, and an ignore flag for stale responses, or a data-fetching library that hides those four things.
-In Vue it is a `watch` on the query with the same set of refs.
-In Solid the request is the derived value, and the loading and stale states are questions asked of it: `isPending(results)` here, a `Loading` boundary for the first answer.
+React ではこの節は、フェッチ・結果の状態・ローディング状態・古いレスポンスを無視するフラグを持つ `useEffect` か、それら 4 つを隠すデータフェッチングライブラリになります。
+Vue では同じ組の ref を伴う、クエリへの `watch` になります。
+Solid ではリクエスト自体が派生値であり、ローディング状態と stale 状態はそれに対する問い合わせです。ここでは `isPending(results)`、最初の答えには `Loading` バウンダリです。
 
-:::tip[Empty query, no request]
-`if (!text) return []` returns a settled value synchronously, so an empty box never shows the fallback and never asks the server.
-Put the guard after every reactive input has been read and before the call; [Read every input before the first await](/concepts/async-reactivity#read-every-input-before-the-first-await) explains why the order matters when the function itself is `async`.
+:::tip[クエリが空ならリクエストもなし]
+`if (!text) return []` は確定済みの値を同期的に返すため、ボックスが空ならフォールバックが表示されることも、サーバーへの問い合わせもありません。
+ガードは、すべてのリアクティブな入力を読み取った後・呼び出しの前に置きます。関数自体が `async` のときに順序が重要になる理由は [最初の await の前にすべての入力を読み取る](/concepts/async-reactivity#read-every-input-before-the-first-await) で説明しています。
 :::
 
-During server rendering the same `searchProducts(text, current)` call runs in the current process, with no HTTP request; in the browser it becomes a `POST` to the server-function endpoint.
-[Server functions](/building-apps/server-functions) covers the transport and what a caller can send.
+サーバーレンダリング中は、同じ `searchProducts(text, current)` 呼び出しが HTTP リクエストなしで現在のプロセス内で実行されます。ブラウザではサーバー関数エンドポイントへの `POST` になります。
+転送の仕組みと呼び出し側が送れるものについては [サーバー関数](/building-apps/server-functions) で説明しています。
 
-## Write back
+## 書き戻す
 
-Each row gets an **Add to cart** button, and the header badge should count the items.
-The count is server data, and the click should show at once:
+各行に **Add to cart** ボタンを付け、ヘッダーのバッジが商品数を数えるようにします。
+カウントはサーバーのデータですが、クリックは即座に表示に反映したいとします。
 
 ```ts
 // src/data/cart.ts
@@ -321,78 +321,78 @@ export default function Search() {
 }
 ```
 
-Click **Add to cart** and the badge goes from 2 to 3 at once.
-When `addToCart` resolves, `refresh(cartCount)` asks the server again and the badge shows what the server has; if the two agree, nothing visible changes.
-If the request rejects, the badge returns to 2 with no code written for that case.
+**Add to cart** をクリックすると、バッジが即座に 2 から 3 になります。
+`addToCart` が解決すると `refresh(cartCount)` がサーバーへ再問い合わせし、バッジはサーバーが持つ値を表示します。両者が一致していれば、見た目は何も変わりません。
+リクエストが拒否された場合、バッジは 2 に戻ります。そのためのコードを書く必要はありません。
 
-The write before the `yield` is tentative because it happens inside an [`action`](/reference/solid-js/lifecycle-actions/action) on a [`createOptimistic`](/reference/solid-js/reactivity/create-optimistic) value: it shows immediately, and Solid discards it when the action settles.
-The generator body is what keeps the write and the refresh in one transaction across the round trip.
-[Mutations](/concepts/mutations) builds this up for a whole cart with `createOptimisticStore`, and explains why a plain `await` inside the action would leave the transaction.
+`yield` の前の書き込みが暫定的なのは、[`createOptimistic`](/reference/solid-js/reactivity/create-optimistic) の値に対する [`action`](/reference/solid-js/lifecycle-actions/action) 内で行われるからです。即座に表示され、アクションが確定すると Solid がそれを破棄します。
+ジェネレーターの本体が、往復をまたいで書き込みと再取得を 1 つのトランザクションに保つ仕組みです。
+[ミューテーション](/concepts/mutations) では `createOptimisticStore` を使ってカート全体にこの仕組みを組み立て、アクション内の素の `await` がなぜトランザクションから外れてしまうかを説明しています。
 
-In React this is a state update, a request, and a second state update or a rollback in the `catch`, or `useOptimistic` inside a transition.
-In Vue it is the same sequence written by hand.
-In Solid the synchronous write already describes the expected result, and the action decides how long it stays.
+React ではこれは、状態更新・リクエスト・そして 2 回目の状態更新または `catch` でのロールバック、あるいはトランジション内の `useOptimistic` です。
+Vue では同じ手順を手で書くことになります。
+Solid では、同期的な書き込みがすでに期待される結果を表しており、アクションがそれをどれだけ長く保つかを決めます。
 
-:::caution[The count belongs to the cart, not to the search page]
-`cartCount` and `add` are created inside `Search`, so they are disposed when the user leaves the page and re-created on the next visit.
-The header shows the same count on every page, so the value should be created once, higher in the tree, and shared through context.
-[State management](/guides/state-management) moves it there.
+:::caution[カウントは検索ページではなくカートのものです]
+`cartCount` と `add` は `Search` 内で作成されるため、ユーザーがページを離れると破棄され、次の訪問で再作成されます。
+ヘッダーはすべてのページで同じカウントを表示するため、この値はツリーのより上位で 1 回だけ作成し、コンテキストを通じて共有すべきです。
+[状態管理](/guides/state-management) でその移動を行います。
 :::
 
-## What did not happen
+## 起きなかったこと
 
-- No dependency arrays were written.
-  The memo's tracked reads are its dependencies, and they were correct on the first try because they are the reads themselves.
-- Nothing was wrapped to prevent a re-render.
-  `Search` ran once; there was no render to skip, so there was no `React.memo`, `useCallback`, or key trick.
-- No effect kept a derived value in step.
-  The filtered list and the count are derivations, and the one effect on this page was the `Avoid` version.
-- No loading flag, request counter, or abort controller was declared.
-  The request is the memo's value; `Loading` and `isPending` read its status.
-- No rollback code was written.
-  The optimistic write is discarded when the action settles, whether the request succeeded or failed.
-- No component re-ran when state changed.
-  Each JSX expression that read a changed value updated on its own.
+- 依存配列は 1 つも書かれませんでした。
+  メモの追跡対象の読み取りがそのまま依存関係であり、読み取りそのものなので最初から正しいものでした。
+- 再レンダーを防ぐためのラップは何もされませんでした。
+  `Search` は 1 回だけ実行され、スキップすべきレンダーがそもそも存在しないため、`React.memo` も `useCallback` もキーの工夫もありませんでした。
+- 派生値の同期を保つエフェクトはありませんでした。
+  フィルター済みリストとカウントは派生であり、このページで唯一のエフェクトは `Avoid` 版のものでした。
+- ローディングフラグ・リクエストカウンター・abort コントローラーは宣言されませんでした。
+  リクエストがメモの値そのものであり、`Loading` と `isPending` がその状態を読み取ります。
+- ロールバックのコードは書かれませんでした。
+  楽観的な書き込みは、リクエストが成功しても失敗しても、アクションが確定した時点で破棄されます。
+- 状態が変わっても再実行されたコンポーネントはありませんでした。
+  変更された値を読み取る各 JSX 式が、それぞれ個別に更新されました。
 
-The one habit to add is the one the [Quick start](/getting-started/quick-start#make-a-change) demonstrated: read reactive values inside JSX, a memo, or an effect's compute function, and call a signal when you read it.
+追加すべき習慣は [クイックスタート](/getting-started/quick-start#make-a-change) で示した 1 つだけです。リアクティブな値は JSX・メモ・エフェクトの計算関数の中で読み取り、シグナルは読み取るときに呼び出します。
 
-## Common problems
+## よくある問題
 
-### A row shows the first product and never changes
+### 行が最初の商品を表示したまま変わらない
 
-The row component destructured its props: `function Row({ product })`.
-Destructuring reads each prop once, in the component body, so the row is frozen at the values it was created with.
-Keep `props` whole and read `props.product.name` inside the JSX; [Props](/concepts/components-and-jsx#props) shows the compiled getter that makes this work.
+行コンポーネントが props を分割代入しています（`function Row({ product })`）。
+分割代入は各 prop をコンポーネント本体で 1 回だけ読み取るため、その行は作成時の値で凍結されます。
+`props` は分割せずに保持し、JSX 内で `props.product.name` を読み取ります。これを可能にするコンパイル済みゲッターについては [Props](/concepts/components-and-jsx#props) を参照してください。
 
 ### `props.query is not a function`
 
-The parent passed `query={query()}`, so the child receives a string and reads it as `props.query`.
-A dynamic prop compiles to a getter that runs the parent's expression when the child reads it, so the child does not call it.
-Pass the accessor itself, `query={query}`, when the child should receive a function, and then call `props.query()`.
+親が `query={query()}` を渡したため、子は文字列を受け取り、それを `props.query` として読み取っています。
+動的な prop は、子が読み取ったときに親の式を実行するゲッターにコンパイルされるため、子はそれを呼び出しません。
+子が関数を受け取るべき場合はアクセサー自体を渡します（`query={query}`）。その場合は `props.query()` と呼び出します。
 
-### The page shows `() => ` or `function` where a value should be
+### 値があるべき場所に `() => ` や `function` と表示される
 
-The signal was placed in the JSX without being called, or concatenated into a string.
-Write `{query()}`, not `{query}`; [Reactivity](/concepts/reactivity#the-page-shows-the-words-function-or---instead-of-the-value) covers the variants.
+シグナルが呼び出されないまま JSX に置かれたか、文字列に連結されています。
+`{query}` ではなく `{query()}` と書きます。バリエーションについては [リアクティビティ](/concepts/reactivity#the-page-shows-the-words-function-or---instead-of-the-value) を参照してください。
 
-### The list is one keystroke behind the sentence above it
+### リストが上の文より 1 キーストローク遅れる
 
-An effect is copying a derived value into a signal, as in the `Avoid` version above.
-Delete the signal and the effect and make the list a memo; [Avoid unnecessary effects](/guides/avoid-unnecessary-effects#the-copied-value-is-one-step-behind-the-source) walks through the diagnostic.
+上の `Avoid` 版のように、エフェクトが派生値をシグナルにコピーしています。
+そのシグナルとエフェクトを削除し、リストをメモにします。診断手順は [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects#the-copied-value-is-one-step-behind-the-source) で説明しています。
 
-## Recap
+## まとめ
 
-- A component runs once; plan for the JSX expressions to update, not for the function to run again.
-- Hold a value that is replaced whole in a signal and call it, `query()`; hold an object read in parts in a store and read its properties, `filter.category`.
-- Derive the filtered list and the count where they are read; a signal plus an effect that fills it is the same state one flush late.
-- Return the server function's promise from a memo and read the result as a plain array; `Loading` handles the first answer and `isPending` reports the ones after.
-- Read every reactive input at the top of an async memo, before the request.
-- Make the optimistic write inside an `action` on a `createOptimistic` value, `yield` the request, then `refresh` the source.
-- Keep `props` whole and read `props.name` inside the JSX.
+- コンポーネントは 1 回だけ実行されます。関数の再実行ではなく、JSX の式が更新されることを前提に設計します。
+- 全体が置き換えられる値はシグナルに保持して呼び出します（`query()`）。部分ごとに読み取るオブジェクトはストアに保持してプロパティを読み取ります（`filter.category`）。
+- フィルター済みリストとカウントは読み取られる場所で派生させます。シグナルとそれを埋めるエフェクトの組み合わせは、同じ状態が 1 フラッシュ遅れたものです。
+- サーバー関数の Promise はメモから返し、結果は素の配列として読み取ります。`Loading` が最初の答えを処理し、`isPending` がそれ以降を報告します。
+- 非同期メモでは、すべてのリアクティブな入力をリクエストの前・先頭で読み取ります。
+- 楽観的な書き込みは `createOptimistic` の値に対する `action` 内で行い、リクエストを `yield` してからソースを `refresh` します。
+- `props` は分割せずに保持し、JSX 内で `props.name` を読み取ります。
 
-## Next steps
+## 次のステップ
 
-- [State management](/guides/state-management): where the cart count, the signed-in user, and the current filter should live, and how to share them without module-scope state.
-- [Data fetching patterns](/guides/data-fetching-patterns): the search box with a controlled input, several requests per page, pagination, and refresh.
-- [Avoid unnecessary effects](/guides/avoid-unnecessary-effects): every place an effect gets written where a derivation belongs, and the two cases where an effect is right.
-- [Migrate from React](/migration/from-react): a hook-by-hook translation for an existing codebase.
+- [状態管理](/guides/state-management): カートのカウント・サインイン中のユーザー・現在のフィルターをどこに置くべきか、そしてモジュールスコープの状態を使わずに共有する方法。
+- [データフェッチングパターン](/guides/data-fetching-patterns): 制御付き入力を使った検索ボックス、ページあたり複数のリクエスト、ページネーション、再取得。
+- [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects): 派生が属する場所にエフェクトが書かれがちなすべての箇所と、エフェクトが適切な 2 つのケース。
+- [React からの移行](/migration/from-react): 既存のコードベース向けのフック単位の対応表。
