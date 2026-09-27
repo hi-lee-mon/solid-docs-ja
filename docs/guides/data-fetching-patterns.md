@@ -1,19 +1,19 @@
 ---
-title: "Data fetching patterns"
+title: "データフェッチのパターン"
 version: "2.0"
-description: "Load data for search, detail pages, pagination, shared state, and dashboards without loading flags, request counters, or abort controllers, and decide where each request and each boundary goes."
+description: "検索・詳細ページ・ページネーション・共有状態・ダッシュボードのために、ローディングフラグ・リクエストカウンター・AbortController なしでデータを読み込み、各リクエストと各バウンダリをどこに置くかを決めます。"
 ---
 
-The product page on the [Async reactivity](/concepts/async-reactivity) page loaded one product with one memo.
-A storefront makes more requests than that: a search box that fires on every keystroke, a product page that also needs reviews and related items, an order history with pages, a cart badge that several components read, a dashboard that should stay current without a reload.
-Each of those is usually written with a loading flag, a request counter, or an `AbortController`; in Solid each is a computation, because a computation that returns a promise is a value.
+[非同期リアクティビティ](/concepts/async-reactivity)のページにある商品ページは、1 つのメモで 1 つの商品を読み込んでいました。
+ストアフロントではそれ以上のリクエストが発生します。キー入力のたびに発火する検索ボックス、レビューと関連商品も必要な商品ページ、ページをまたぐ注文履歴、複数のコンポーネントが読み取るカートバッジ、リロードなしで最新の状態を保つべきダッシュボードです。
+これらは通常、ローディングフラグ・リクエストカウンター・`AbortController` で書かれます。Solid ではそれぞれが 1 つの計算です。Promise を返す計算は値だからです。
 
-This guide goes through those requests one at a time and shows the Solid shape for each, including the choices that are yours to make.
-Each `api.*` call is a function that returns a promise; a `"use server"` function, a `fetch` wrapper, or a client SDK all work the same way.
+このガイドではこれらのリクエストを 1 つずつ見ていき、それぞれに対応する Solid らしい形と、判断が必要な選択肢を示します。
+各 `api.*` 呼び出しは Promise を返す関数です。`"use server"` 関数・`fetch` ラッパー・クライアント SDK のいずれも同じように動作します。
 
-## Load one thing
+## 1 つだけ読み込む
 
-The baseline everything else builds on:
+ほかのすべての土台になる基本形です:
 
 ```tsx
 import { Loading, createMemo } from "solid-js";
@@ -30,11 +30,11 @@ function ProductPage(props: { id: string }) {
 }
 ```
 
-`product()` is a `Product`.
-When `props.id` changes, the request starts again, the current product stays on screen, and the new one replaces it when it arrives.
-If the page should show the skeleton again for a different product, add `on={props.id}` to the boundary.
+`product()` は `Product` です。
+`props.id` が変わるとリクエストが再開され、現在の商品は画面に残ったまま、新しい商品が届き次第置き換わります。
+別の商品ではスケルトンを再表示したい場合は、バウンダリに `on={props.id}` を追加します。
 
-When the data is a list or a tree whose items need identity across updates, load it into a store instead:
+データが、更新をまたいでアイテムの同一性が必要なリストやツリーの場合は、代わりにストアへ読み込みます:
 
 ```tsx
 const [orders] = createStore(
@@ -43,12 +43,12 @@ const [orders] = createStore(
 );
 ```
 
-The response reconciles into the same proxy by `id`, so a row that did not change keeps its DOM.
-[Stores](/concepts/stores#fetch-into-a-store) covers when that matters.
+レスポンスは `id` に基づいて同じプロキシへ突き合わせられるため、変化のなかった行はその DOM を保持します。
+どんなときにそれが重要になるかは [ストア](/concepts/stores#fetch-into-a-store) で説明しています。
 
-## Search as you type
+## 入力しながら検索する
 
-An input writes a signal, and a memo turns the signal into results:
+入力欄がシグナルに書き込み、メモがそのシグナルを検索結果に変えます:
 
 ```tsx
 import { For, createMemo, createSignal, isPending, latest } from "solid-js";
@@ -76,35 +76,35 @@ function ProductSearch() {
 }
 ```
 
-Type `mug` and three requests start, one per keystroke; the list shows the results for `mug` and nothing else.
-Three things this code does not do, because Solid does them:
+`mug` と入力するとキーストロークごとに 3 つのリクエストが始まりますが、リストには `mug` の結果だけが表示されます。
+このコードが行わないことが 3 つあります。Solid が行うからです:
 
-- It does not discard stale responses by hand.
-  Only the answer to the current question is used; if the response for `mu` arrives after the one for `mug`, it is dropped.
-  There is no request counter and no `AbortController`.
-- It does not blank the list between keystrokes.
-  The previous results stay visible with the `stale` class until the new ones land.
-- It does not show a spinner for an empty query.
-  Returning `[]` synchronously is a settled answer, so the memo never becomes pending for it.
+- 古いレスポンスを手動で破棄しません。
+  現在の問いへの回答だけが使われ、`mug` のレスポンスより後に `mu` のレスポンスが届いても捨てられます。
+  リクエストカウンターも `AbortController` もありません。
+- キーストロークの合間にリストを空にしません。
+  新しい結果が届くまで、前の結果は `stale` クラス付きで表示されたままです。
+- 空のクエリにスピナーを表示しません。
+  `[]` を同期的に返すことは確定済みの回答なので、メモはそのために保留中になりません。
 
-The input binds `value={latest(query)}` rather than `value={query()}`.
-The write to `query` is held while results load, and `latest` reads the value the update is moving toward, so a controlled input reflects what the user typed.
-An uncontrolled input, with no `value` binding, needs nothing.
+この入力欄は `value={query()}` ではなく `value={latest(query)}` をバインドしています。
+結果の読み込み中は `query` への書き込みが保留されます。`latest` は更新が向かっている先の値を読み取るため、制御された入力でもユーザーが打ち込んだ内容が反映されます。
+`value` バインドのない制御されない入力なら何も不要です。
 
-:::tip[Debounce at the event, not in the graph]
-One line in the handler keeps the graph as it is; [Custom primitives](/guides/custom-primitives) packages the same idea as `createDebouncedSignal`:
+:::tip[デバウンスはグラフではなくイベントで]
+ハンドラー側の 1 行でグラフはそのまま保てます。[カスタムプリミティブ](/guides/custom-primitives)では同じ考え方を `createDebouncedSignal` としてパッケージ化しています:
 
 ```tsx
 onInput={debounce((event) => setQuery(event.currentTarget.value), 150)}
 ```
 
-A debounce written as an effect that copies one signal into another after a delay is the relay pattern [Avoid unnecessary effects](/guides/avoid-unnecessary-effects#calculate-values-when-they-are-read) shows the cost of.
+遅延後にシグナルを別のシグナルへコピーするエフェクトとして書くデバウンスは、[不要なエフェクトを避ける](/guides/avoid-unnecessary-effects#calculate-values-when-they-are-read)でコストを示しているリレーパターンです。
 :::
 
-## Load several things for one page
+## 1 ページ分の複数のものを読み込む
 
-A product page needs the product, its reviews, and related items.
-Create all three where the page is created, and they start together:
+商品ページには商品・そのレビュー・関連商品が必要です。
+ページが作られる場所で 3 つすべてを作成すれば、同時に開始されます:
 
 ```tsx
 function ProductPage(props: { id: string }) {
@@ -128,29 +128,29 @@ function ProductPage(props: { id: string }) {
 }
 ```
 
-Each boundary reveals when its own data is ready, so the header can appear before the reviews.
-If the page should not reveal out of order, wrap the boundaries in [`Reveal`](/reference/solid-js/components-jsx/reveal): `order="sequential"` shows them top to bottom, `order="together"` waits for all three.
+各バウンダリは自分のデータがそろった時点で開くため、ヘッダーをレビューより先に表示できます。
+順不同で表示したくない場合は、バウンダリを [`Reveal`](/reference/solid-js/components-jsx/reveal) で囲みます。`order="sequential"` は上から順に表示し、`order="together"` は 3 つすべてがそろうまで待ちます。
 
-When `props.id` changes, all three requests start again and the update is held until all three have answered; the page then swaps as one.
-That is usually what you want for a detail page, where the header and the reviews must describe the same product.
-If a slow section should not delay the others on a subject change, give it `on={props.id}`: it stops holding the update, so the page swaps as soon as the other two have answered, and the slow section shows its skeleton from that swap until its own data lands.
-Give all three `on` and the page swaps on the click itself, each section on its skeleton until its data arrives.
-The [Async reactivity](/concepts/async-reactivity#show-a-placeholder-again-loading-on) page explains why `on` only helps when nothing outside its boundary is waiting on the same change.
+`props.id` が変わると 3 つのリクエストすべてが再開され、3 つすべてが回答するまで更新は保留されます。その後ページは一体として切り替わります。
+ヘッダーとレビューが同じ商品を説明しなければならない詳細ページでは、通常それが望ましい動作です。
+対象の切り替え時に遅いセクションがほかを遅らせないようにしたい場合は、そのセクションに `on={props.id}` を付けます。更新の保留が外れるため、ほかの 2 つが回答した時点でページは切り替わり、遅いセクションはその切り替え時点から自分のデータが届くまでスケルトンを表示します。
+3 つすべてに `on` を付けると、クリックした瞬間にページが切り替わり、各セクションはそれぞれのデータが届くまでスケルトンを表示します。
+`on` が役立つのはバウンダリの外で同じ変更を待っているものがないときだけだという理由は、[非同期リアクティビティ](/concepts/async-reactivity#show-a-placeholder-again-loading-on)のページで説明しています。
 
-## Dependent requests
+## 依存するリクエスト
 
-A request that needs a value from another response has to wait for it:
+別のレスポンスの値を必要とするリクエストは、それを待たなければなりません:
 
 ```tsx
 const product = createMemo(() => api.product(props.id));
 const brand = createMemo(() => api.brand(product().brandId));
 ```
 
-`brand` reads `product().brandId`, so it cannot start until `product` resolves.
-The dependency is visible in the code, and that is the right shape when the data is sequential.
+`brand` は `product().brandId` を読み取るため、`product` が解決するまで開始できません。
+依存関係がコード上に見える形になっており、データが本質的に逐次である場合はこれが正しい形です。
 
-The trap is a chain the data does not need.
-A product page that also shows the brand's other products can be written as three steps or as two independent requests:
+落とし穴は、データが必要としない連鎖を作ってしまうことです。
+ブランドのほかの商品も表示する商品ページは、3 段階の連鎖としても、独立した 2 つのリクエストとしても書けます:
 
 ```tsx
 // Avoid: each request waits for the one before it, and only the first dependency is real
@@ -164,28 +164,28 @@ const brand = createMemo(() => api.brand(product().brandId));
 const catalog = createMemo(() => api.brandProducts(product().brandId));
 ```
 
-Run the `Avoid` version and the catalog request does not start until the brand has arrived, although `brandId` was known as soon as the product was.
-The page waits for the sum of the three requests instead of the product request plus the longer of the other two.
-With attribution enabled, and the memos named through their `name` option, development reports a chain of three or more sequential requests:
+`Avoid` の版を実行すると、`brandId` は商品が届いた時点で分かっているのに、カタログのリクエストはブランドが届くまで開始されません。
+ページは、商品リクエストと残り 2 つのうち長い方の合計ではなく、3 つのリクエストの合計時間を待つことになります。
+アトリビューションを有効にし、メモに `name` オプションで名前を付けておくと、開発環境では 3 つ以上の連続したリクエストの連鎖が報告されます:
 
 ```text
 [ASYNC_WATERFALL] 3 sequential async flights — "product" (120ms) → "brand" (80ms) → "catalog" (95ms) — 295ms serialized: each began only after the previous resolved (as far as this graph can see). If a later request doesn't need the earlier response, derive both from the same inputs so they start together; if the dependency is intrinsic, preload the dependent data or join the requests server-side.
 ```
 
-A chain of two is recorded at `info` severity and does not reach the console, because two steps can be a real data dependency; three or more is a warning.
-Requests shorter than 50ms do not count as a step.
-[Something updates too often](/guides/debugging-reactivity#something-updates-too-often) explains how to enable attribution and read its reports.
+2 段の連鎖は `info` の重要度で記録されコンソールには出ません。2 段は実際のデータ依存の可能性があるからです。3 つ以上は警告になります。
+50ms 未満のリクエストは 1 段として数えられません。
+アトリビューションの有効化とレポートの読み方は [更新が多すぎる場合](/guides/debugging-reactivity#something-updates-too-often) で説明しています。
 
-When the dependency is real, remove it from the client rather than working around it:
+依存関係が本物である場合は、回避策を講じるのではなくクライアントから取り除きます:
 
-- Pass the input you already have.
-  If the route knows `brandId`, read it from `props` and both requests start together.
-- Join on the server.
-  One server function that returns the product with its brand replaces two round trips with one.
+- すでに持っている入力を渡します。
+  ルートが `brandId` を知っているなら `props` から読み取れば、両方のリクエストが同時に開始されます。
+- サーバーで結合します。
+  商品とそのブランドをまとめて返す 1 つのサーバー関数が、2 回の往復を 1 回に置き換えます。
 
-## Paginate
+## ページネーションする
 
-A page number is an input like any other:
+ページ番号もほかと同じ入力です:
 
 ```tsx
 function OrderHistory() {
@@ -206,14 +206,14 @@ function OrderHistory() {
 }
 ```
 
-Clicking to page 2 keeps page 1 visible and dimmed until page 2 arrives, and the pager shows page 2 as selected at once because it reads `latest(page)`.
-Rows that appear on both pages keep their DOM.
+ページ 2 をクリックすると、ページ 2 が届くまでページ 1 が薄く表示されたまま残り、`latest(page)` を読むページャーは即座にページ 2 を選択済みとして表示します。
+両方のページに現れる行は DOM を保持します。
 
-If the table should show a skeleton for each new page instead, move the choice to the boundary: `<Loading on={page()} fallback={<TableSkeleton />}>`.
+新しいページごとにスケルトンを表示したい場合は、その選択をバウンダリに移します: `<Loading on={page()} fallback={<TableSkeleton />}>`。
 
-### Infinite scroll
+### 無限スクロール
 
-Accumulate pages with the memo's previous value:
+メモの前回の値を使ってページを累積させます:
 
 ```tsx
 const [page, setPage] = createSignal(1);
@@ -223,14 +223,14 @@ const orders = createMemo(async (previous: Order[] = []) => {
 });
 ```
 
-Each run receives the last committed list and returns the longer one.
-To reset the list when a filter changes, read the filter inside the memo and start over when it differs from the previous run's filter, or keep the accumulated list in a store keyed by filter.
-The simplest version is often a `Show` keyed on the filter around the whole list, so a filter change remounts it with `page` back at 1.
+各実行は最後に確定したリストを受け取り、より長いリストを返します。
+フィルター変更時にリストをリセットするには、メモの内側でフィルターを読み取り、前回実行時のフィルターと異なる場合にやり直すか、フィルターをキーにしたストアに累積リストを保持します。
+最も簡単な方法は多くの場合、リスト全体をフィルターをキーにした `Show` で囲むことです。フィルターが変わると `page` が 1 に戻った状態で再マウントされます。
 
-## Share one request across components
+## 1 つのリクエストをコンポーネント間で共有する
 
-Two components that create the same memo make two requests.
-Create the request once and pass the value down, or make it available through context:
+同じメモを作成する 2 つのコンポーネントは、2 つのリクエストを発行します。
+リクエストは 1 回だけ作成して値を下へ渡すか、コンテキスト経由で利用可能にします:
 
 ```tsx
 function StorefrontLayout(props: ParentProps) {
@@ -244,18 +244,18 @@ function CartBadge() {
 }
 ```
 
-Render `CartBadge` in the header and a second reader in the cart drawer, and the network tab shows one cart request.
-Passing an accessor through context keeps the read lazy: nothing waits on the cart until a component reads `cart()`, and only that component's boundary is involved.
+`CartBadge` をヘッダーに、2 つ目の読み取り側をカートドロワーにレンダーしても、ネットワークタブにはカートのリクエストが 1 つだけ表示されます。
+コンテキスト経由でアクセサーを渡すと読み取りは遅延のままです。コンポーネントが `cart()` を読むまで何もカートを待たず、そのコンポーネントのバウンダリだけが関係します。
 
-:::note[Sharing across routes]
-For requests shared across routes, or for deduplication and caching by argument, use [`query`](/routing/solid-router/data#cache-reads-with-query) from Solid Router.
-It returns the same in-flight promise to every caller with the same arguments, keeps a result for a few minutes after the last reader leaves, and refetches when an action [revalidates](/routing/solid-router/data#revalidate) its key.
+:::note[ルート間での共有]
+ルートをまたいで共有するリクエストや、引数による重複排除とキャッシュには、Solid Router の [`query`](/routing/solid-router/data#cache-reads-with-query) を使います。
+同じ引数を持つすべての呼び出し元に同じ実行中の Promise を返し、最後の読み取り側が離れた後も数分間結果を保持し、アクションがそのキーを[再検証](/routing/solid-router/data#revalidate)すると再取得します。
 :::
 
-## Keep data fresh
+## データを最新に保つ
 
-A memo answers its question once and keeps the answer until an input changes.
-When the world changes without an input changing, ask again:
+メモは問いに一度だけ答え、入力が変わるまでその答えを保持します。
+入力が変わらないまま外部が変化したときは、もう一度問い合わせます:
 
 ```tsx
 import { onSettled, refresh } from "solid-js";
@@ -268,24 +268,24 @@ onSettled(() => {
 });
 ```
 
-Every thirty seconds the numbers update in place; nothing dims and no skeleton shows.
-[`refresh(source)`](/reference/solid-js/lifecycle-actions/refresh) re-runs the computation with the same inputs and returns a promise for the settled result.
-A bare `refresh` is quiet: the current answer still fits the question, so `isPending` stays `false` and the new value replaces the old one without a pending phase.
-When the reload should be visible, declare it: call [`affects(stats)`](/reference/solid-js/lifecycle-actions/affects) inside an action before the `refresh`, and readers report pending until it lands.
+30 秒ごとに数値がその場で更新されます。何も薄くならず、スケルトンも表示されません。
+[`refresh(source)`](/reference/solid-js/lifecycle-actions/refresh) は同じ入力で計算を再実行し、確定した結果の Promise を返します。
+単体の `refresh` は静かです。現在の答えはまだ問いに合っているため、`isPending` は `false` のまま、保留中のフェーズなしで新しい値が古い値に置き換わります。
+再読み込みを見せたいときは宣言します。`refresh` の前にアクション内で [`affects(stats)`](/reference/solid-js/lifecycle-actions/affects) を呼ぶと、それが届くまで読み取り側が保留中を報告します。
 
-:::deep-dive[Why a refresh is quiet and a changed input is not]
-`isPending` answers the question "is a different answer on the way for a changed input?".
-When `page` goes from 1 to 2, the committed value answers a question that is no longer being asked, so readers of the held update report pending.
-A `refresh` asks the same question again; the committed value is still a valid answer to it, so nothing is pending and the new value lands as a plain update.
-`affects(source)` marks the source as pending for as long as the surrounding action is in flight, which is how a refetch inside an action is made visible.
+:::deep-dive[refresh が静かで、入力の変更は静かでない理由]
+`isPending` は「変更された入力に対して別の答えが来ている途中か？」という問いに答えます。
+`page` が 1 から 2 に変わると、確定済みの値はもう聞かれていない問いへの答えになるため、保留された更新を読む側は保留中を報告します。
+`refresh` は同じ問いをもう一度尋ねます。確定済みの値はまだその問いへの有効な答えなので、何も保留中にならず、新しい値は通常の更新として届きます。
+`affects(source)` は、囲んでいるアクションが実行中のあいだソースを保留中としてマークします。アクション内の再取得を可視化する仕組みです。
 :::
 
-Polling is the fallback when the server cannot push.
-When it can, a [`live()` server function](/building-apps/server-functions/reads-and-live-data#declare-a-live-source) returns an async iterable that a memo consumes like any other async source, and each yielded value becomes the next answer.
+ポーリングは、サーバーがプッシュできない場合のフォールバックです。
+プッシュできる場合、[`live()` サーバー関数](/building-apps/server-functions/reads-and-live-data#declare-a-live-source)は非同期イテラブルを返し、メモはほかの非同期ソースと同じようにそれを消費して、yield された各値が次の答えになります。
 
-## Mutate, then refetch
+## ミューテーションしてから再取得する
 
-A write goes through an [`action`](/reference/solid-js/lifecycle-actions/action) so the request and the refetch belong to one update:
+書き込みは [`action`](/reference/solid-js/lifecycle-actions/action) を通します。リクエストと再取得が 1 つの更新に属するようになるためです:
 
 ```tsx
 const addReview = action(function* (productId: string, text: string) {
@@ -294,15 +294,15 @@ const addReview = action(function* (productId: string, text: string) {
 });
 ```
 
-The reviews list does not flicker: the refetch runs inside the action, and the list updates once when the fresh data lands.
-To show the new review before the server confirms it, hold the list in a `createOptimisticStore` and write to it before the `yield`; [Mutations](/concepts/mutations) walks through that version.
+レビューリストはちらつきません。再取得はアクション内で実行され、新しいデータが届いたときにリストは一度だけ更新されます。
+サーバーの確認前に新しいレビューを表示するには、リストを `createOptimisticStore` に保持して `yield` の前に書き込みます。その版は [ミューテーション](/concepts/mutations) で説明しています。
 
-With Solid Router, `action` from `@solidjs/router` adds submissions and automatic revalidation of `query` reads; the [Forms guide](/guides/forms) uses it.
+Solid Router では `@solidjs/router` の `action` がサブミッションと `query` 読み取りの自動再検証を追加します。[フォームのガイド](/guides/forms)で使っています。
 
-## Handle failures
+## 失敗を扱う
 
-A rejected promise travels through the graph like a value and stops at the nearest [`Errored`](/reference/solid-js/components-jsx/errored) boundary.
-Place boundaries where a failure should be contained:
+拒否された Promise は値と同じようにグラフを伝わり、最も近い [`Errored`](/reference/solid-js/components-jsx/errored) バウンダリで止まります。
+失敗を閉じ込めたい場所にバウンダリを配置します:
 
 ```tsx
 <article>
@@ -319,53 +319,53 @@ Place boundaries where a failure should be contained:
 </article>
 ```
 
-A failed reviews request shows the retry panel and leaves the header alone.
-`reset` retries the sources the boundary collected, and a boundary also recovers on its own when an input changes or a `refresh` lands.
+レビューのリクエストが失敗するとリトライパネルが表示され、ヘッダーには影響しません。
+`reset` はバウンダリが収集したソースを再試行します。入力が変わったときや `refresh` が届いたときにも、バウンダリは自力で回復します。
 
-Throw from the request when the response is not usable, rather than returning a `{ success: false }` object and checking it at every read.
-On the server, [`markSafeError`](/reference/solid-web/request-response/safe-errors) marks a message that is intended for the client; unmarked errors are replaced with a generic message in production.
+レスポンスが使えない場合は、`{ success: false }` オブジェクトを返して読み取りのたびに確認するのではなく、リクエストからスローします。
+サーバーでは [`markSafeError`](/reference/solid-web/request-response/safe-errors) がクライアントへ送る意図のあるメッセージをマークします。マークのないエラーは本番環境では汎用メッセージに置き換えられます。
 
-## Common problems
+## よくある問題
 
-### The search box lags behind what I typed
+### 検索ボックスが入力内容に遅れてしまう
 
-The input is bound with `value={query()}`, and the write to `query` is held while the results load, so the input shows the previous value until the request lands.
-Bind `value={latest(query)}`, or leave the input uncontrolled.
+入力が `value={query()}` でバインドされており、結果の読み込み中は `query` への書き込みが保留されるため、リクエストが届くまで入力欄には前の値が表示されます。
+`value={latest(query)}` をバインドするか、入力を制御しないままにします。
 
-### Opening another product keeps showing the old one
+### 別の商品を開いても前の商品が表示され続ける
 
-That is the default after a first answer: the current product stays on screen while the new one loads.
-Add `on={props.id}` to the `Loading` boundary when a changed subject should show the skeleton again, and pass the value rather than the accessor.
+最初の回答の後はそれがデフォルトです。新しい商品が読み込まれるあいだ、現在の商品が画面に残ります。
+対象が変わったときにスケルトンを再表示したい場合は `Loading` バウンダリに `on={props.id}` を追加し、アクセサーではなく値を渡します。
 
-### Two components make the same request
+### 2 つのコンポーネントが同じリクエストを発行する
 
-Each component created its own memo, and each memo is its own request.
-Create the memo once in a common ancestor and pass the accessor down or through context, or use Solid Router's `query` when the callers are on different routes.
+各コンポーネントが自分のメモを作成しており、各メモがそれぞれ独自のリクエストです。
+共通の祖先で一度だけメモを作成してアクセサーを下へ渡すかコンテキスト経由にするか、呼び出し元が別のルートにある場合は Solid Router の `query` を使います。
 
-### `refresh` runs but nothing shows as loading
+### `refresh` は実行されるがローディング表示にならない
 
-A bare `refresh` re-asks the same question, so `isPending` stays `false` and the new value lands quietly.
-Call `affects(source)` inside an action before the `refresh` when the reload should show as pending.
+単体の `refresh` は同じ問いをもう一度尋ねるだけなので、`isPending` は `false` のまま、新しい値は静かに届きます。
+再読み込みを保留中として表示したい場合は、`refresh` の前にアクション内で `affects(source)` を呼びます。
 
-### One request waits for another that it does not need
+### あるリクエストが必要のない別のリクエストを待ってしまう
 
-A memo reads a value from another memo's response when the same value was available from props or the route.
-Read the input directly so both requests start together; with attribution enabled, a chain of three or more is reported as `[ASYNC_WATERFALL]`.
+props やルートから取得できる同じ値を、メモが別のメモのレスポンスから読み取っている状態です。
+入力を直接読み取れば両方のリクエストが同時に開始されます。アトリビューションを有効にしていれば、3 つ以上の連鎖は `[ASYNC_WATERFALL]` として報告されます。
 
-## Recap
+## まとめ
 
-- Make each request a memo or a store created where the data is needed, or higher when it should start earlier.
-- Create requests that do not depend on each other in the same scope so they run in parallel; derive from inputs you already have rather than from another response.
-- Wrap the smallest region each `Loading` fallback should replace, and set `on` where a changed subject should show the fallback again.
-- Read `latest` in controls whose writes feed a request, and mark waiting content with `isPending`.
-- Leave stale responses, loading flags, and abort controllers to Solid; returning a synchronous value is a settled answer.
-- Reload with `refresh`, and add `affects` inside an action when the reload should show as pending.
-- Throw from a request that fails and cover each region that should fail on its own with `Errored`.
+- 各リクエストは、データが必要な場所で作成したメモまたはストアにします。より早く開始すべきなら上位で作成します。
+- 互いに依存しないリクエストは同じスコープで作成して並列に実行します。別のレスポンスではなく、すでに持っている入力から派生させます。
+- 各 `Loading` フォールバックが置き換えるべき最小の領域を囲み、対象が変わったときにフォールバックを再表示すべき場所に `on` を設定します。
+- 書き込みがリクエストにつながるコントロールでは `latest` を読み、待機中のコンテンツは `isPending` でマークします。
+- 古いレスポンス・ローディングフラグ・アボートコントローラーは Solid に任せます。同期的な値を返すことは確定済みの回答です。
+- `refresh` で再読み込みし、再読み込みを保留中として表示したいときはアクション内で `affects` を加えます。
+- 失敗したリクエストからはスローし、個別に失敗すべき各領域を `Errored` で覆います。
 
-## Next steps
+## 次のステップ
 
-- [Async reactivity](/concepts/async-reactivity): the model these patterns rest on, including held updates and optimistic writes.
-- [Server functions](/building-apps/server-functions): `GET` reads, `live` sources, and what a `"use server"` function does on the wire.
-- [Data loading and mutations](/routing/solid-router/data): `query`, `preload`, and router actions.
-- [Performance](/guides/performance#waterfalls): measuring a page whose first paint waits on sequential requests.
-- [Data fetching from Solid 1](/migration/data-fetching-from-solid-1): the same patterns from the other direction, for code that already exists.
+- [非同期リアクティビティ](/concepts/async-reactivity): これらのパターンの土台となるモデル。保留される更新と楽観的書き込みを含みます。
+- [サーバー関数](/building-apps/server-functions): `GET` の読み取り、`live` ソース、`"use server"` 関数がワイヤー上で行うこと。
+- [データの読み込みとミューテーション](/routing/solid-router/data): `query`、`preload`、ルーターのアクション。
+- [パフォーマンス](/guides/performance#waterfalls): ファーストペイントが逐次リクエストを待つページの計測。
+- [Solid 1 からのデータフェッチ](/migration/data-fetching-from-solid-1): 同じパターンを反対方向から見たもの。既存コード向け。
