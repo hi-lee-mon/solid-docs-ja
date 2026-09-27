@@ -1,24 +1,24 @@
 ---
-title: "Mutations and responses"
+title: "ミューテーションとレスポンス"
 version: "2.0"
-description: "Return a value, a redirect, a reload, or a 400 from a cart or account mutation, and control what a thrown error reveals in production."
+description: "カートやアカウントのミューテーションから値・リダイレクト・リロード・400 を返し、スローされたエラーが本番環境で何を開示するかを制御します。"
 ---
 
-The Add to cart form on the product page posts to `addToCart`.
-When the write succeeds, the browser should land on the cart with the new line in it.
-When the quantity is not a whole number, the caller should get a 400 and a message it can show next to the field.
-When the database is down, the caller should get an error, and that error must not contain the failing query.
+商品ページの「カートに追加」フォームは `addToCart` に POST されます。
+書き込みが成功したら、ブラウザは新しい明細が入ったカートに着地する必要があります。
+数量が整数でないときは、呼び出し元は 400 と、フィールドの横に表示できるメッセージを受け取る必要があります。
+データベースが落ちているときは、呼び出し元はエラーを受け取る必要があり、そのエラーには失敗したクエリを含めてはいけません。
 
-A return value can carry the cart line.
-It cannot carry a status, a `Location`, or the instruction to refresh the cart, so those go through the response helpers in `@solidjs/web`.
-Most applications need [`redirect()`](#redirect-the-caller), [`reload()`](#request-revalidation), and `throw respond(...)` from [Handle thrown errors](#handle-thrown-errors); the envelope internals are for integrators.
+戻り値はカート明細を運べます。
+しかしステータスや `Location`、カートを再読み込みする指示は運べないため、それらは `@solidjs/web` のレスポンスヘルパーを介して行います。
+ほとんどのアプリケーションで必要なのは [`redirect()`](#redirect-the-caller)、[`reload()`](#request-revalidation)、そして[スローされたエラーの処理](#handle-thrown-errors)にある `throw respond(...)` です。エンベロープの内部はインテグレーター向けです。
 
-Mutations stay on the default `POST` transport, which is origin-checked.
-Declare `GET()` only for reads.
+ミューテーションはデフォルトの `POST` トランスポートを使い続け、これはオリジンが検証されます。
+`GET()` を宣言するのは読み取りだけにしてください。
 
-## Return a value with response metadata
+## レスポンスメタデータ付きで値を返す
 
-`respond()` pairs a value with a status and headers:
+`respond()` は値とステータス・ヘッダーを組み合わせます:
 
 ```ts
 // src/data/admin.ts
@@ -40,19 +40,19 @@ export async function createProduct(input: CreateProductInput) {
 }
 ```
 
-Call `createProduct(input)` from the admin page and the promise resolves to `product`, not to the envelope.
-The transport applies the 201 and the header to the HTTP response, and a plain HTTP caller such as `curl` receives a JSON body with the same product in it.
+管理ページから `createProduct(input)` を呼び出すと、Promise はエンベロープではなく `product` に解決されます。
+トランスポートは 201 とヘッダーを HTTP レスポンスに適用し、`curl` のような素の HTTP 呼び出し元は同じ product が入った JSON ボディを受け取ります。
 
-:::deep-dive[The envelope on the wire]
-`respond()` returns a `ResponseEnvelope`, an object holding the `Response` that carries the metadata and the `value` the caller should see.
-The server-function handler forwards the response's status and headers and encodes the value as the body.
-Integration code that has to recognize an envelope, such as a router applying revalidation, uses [`isResponseEnvelope()`](/reference/solid-web/request-response/respond); the check is a registered symbol, so it works when a bundle contains two copies of the runtime.
-Application code never touches the envelope directly.
+:::deep-dive[ワイヤー上のエンベロープ]
+`respond()` は `ResponseEnvelope` を返します。これはメタデータを運ぶ `Response` と、呼び出し元が受け取るべき `value` を保持するオブジェクトです。
+サーバー関数ハンドラーはそのレスポンスのステータスとヘッダーを引き継ぎ、値をボディとしてエンコードします。
+再検証を適用するルーターのようにエンベロープを認識する必要があるインテグレーションコードは、[`isResponseEnvelope()`](/reference/solid-web/request-response/respond) を使います。このチェックは登録済みシンボルなので、バンドルにランタイムのコピーが2つ含まれていても機能します。
+アプリケーションコードがエンベロープに直接触れることはありません。
 :::
 
-## Redirect the caller
+## 呼び出し元をリダイレクトする
 
-`redirect()` returns a `Response` with a `Location` header:
+`redirect()` は `Location` ヘッダー付きの `Response` を返します:
 
 ```ts
 // src/data/account.ts
@@ -70,20 +70,20 @@ export async function deleteAccount() {
 }
 ```
 
-Return a redirect when it is the successful outcome, and throw it when it is an early exit, as in the sign-in check above.
-Both reach the caller the same way.
+リダイレクトが成功結果であるときは return し、上記のサインイン確認のように早期終了であるときは throw します。
+どちらも同じように呼び出し元に届きます。
 
-What the browser does next depends on who made the call.
-A Solid Router `action()` navigates to `/goodbye` without a page load.
-An HTML form post without JavaScript is answered with the redirect itself, 302 by default, and the browser follows it.
-Plain code that called `deleteAccount()` directly receives the `Response` object as the resolved value, because the transport hands navigation metadata back whole for the caller to apply.
+その後ブラウザが何をするかは、誰が呼び出したかによって決まります。
+Solid Router の `action()` はページロードなしで `/goodbye` に遷移します。
+JavaScript なしの HTML フォーム POST にはリダイレクトそのもの（デフォルトでは 302）が返され、ブラウザはそれに従います。
+`deleteAccount()` を直接呼び出した素のコードは、解決値として `Response` オブジェクトを受け取ります。トランスポートは遷移メタデータをそのまま呼び出し元に返し、呼び出し元に適用させるためです。
 
-The target can be a string or an `Href` produced by a router's typed paths helper; a branded `Href` redirects to its logical path.
-Any other object throws `redirect() expects a string URL or an Href-branded value`.
+ターゲットは文字列、またはルーターの型付きパスヘルパーが生成する `Href` を指定できます。ブランド付きの `Href` はその論理パスへリダイレクトします。
+それ以外のオブジェクトは `redirect() expects a string URL or an Href-branded value` をスローします。
 
-## Request revalidation
+## 再検証を要求する
 
-`reload()` returns a response that tells an integration which cached reads are stale:
+`reload()` は、どのキャッシュされた読み取りが古くなったかをインテグレーションに伝えるレスポンスを返します:
 
 ```ts
 // src/data/cart.ts
@@ -97,17 +97,17 @@ export async function addToCart(productId: string, quantity: number) {
 }
 ```
 
-Call `addToCart("mug", 1)` through a router action and the cart query refetches when the call settles; nothing else on the page is touched.
-Omit `revalidate` to ask for every cached read to refresh.
+ルーターアクション経由で `addToCart("mug", 1)` を呼び出すと、呼び出しが確定したときにカートクエリが再取得されます。ページ上の他のものは一切触れられません。
+`revalidate` を省略すると、すべてのキャッシュされた読み取りの再取得を要求します。
 
-Core carries the keys in an `X-Revalidate` header and does not define a cache.
-Solid Router reads the header against its query cache; [What revalidates after a mutation](/routing/solid-router/data#what-revalidates-after-a-mutation) explains the matching.
-`respond()` and `redirect()` accept the same `revalidate` option, for a mutation that also returns a value or changes location.
+コアはキーを `X-Revalidate` ヘッダーで運び、キャッシュ自体は定義しません。
+Solid Router はこのヘッダーを読み取って自身のクエリキャッシュと照合します。マッチングの仕組みは[ミューテーション後に何が再検証されるか](/routing/solid-router/data#what-revalidates-after-a-mutation)で説明しています。
+`respond()` と `redirect()` も同じ `revalidate` オプションを受け付けます。値も返すミューテーションや、遷移も行うミューテーション向けです。
 
-## Handle thrown errors
+## スローされたエラーを処理する
 
-A returned or thrown `Response` or envelope is control flow, and the handler preserves its status, headers, and value.
-A plain thrown value is treated as an accident:
+return または throw された `Response` やエンベロープは制御フローであり、ハンドラーはそのステータス・ヘッダー・値を保持します。
+プレーンな throw 値は事故として扱われます:
 
 ```ts
 // Avoid: a plain Error carries whatever message the failure had
@@ -134,14 +134,14 @@ export async function addToCart(productId: string, quantity: number) {
 }
 ```
 
-In development the `Avoid` version rejects with the message as written.
-In production the same call rejects with `Error("Internal Server Error")`: the handler replaces every unbranded thrown value before serializing it, so a database driver's failing query or connection string cannot reach the browser, and the quantity message goes with it.
-The `Prefer` version rejects with `{ field, message }` and status 400 in every environment.
+開発環境では `Avoid` 版は書かれたメッセージのまま reject します。
+本番環境では同じ呼び出しが `Error("Internal Server Error")` で reject します。ハンドラーはシリアライズする前にブランドのない throw 値をすべて置き換えるため、データベースドライバーの失敗したクエリや接続文字列はブラウザに届かず、数量メッセージも一緒に失われます。
+`Prefer` 版はすべての環境で `{ field, message }` とステータス 400 で reject します。
 
-The line between the two behaviors is the build, not `NODE_ENV`.
-`@solidjs/web` ships a development copy of the server-function handler behind the `development` export condition, which Vite's dev server resolves; every other resolution, including a production build and a plain Node process, sanitizes.
+2つの動作の境界を決めるのは `NODE_ENV` ではなくビルドです。
+`@solidjs/web` は `development` エクスポート条件の背後にサーバー関数ハンドラーの開発用コピーを同梱しており、これは Vite の dev サーバーが解決します。本番ビルドや素の Node プロセスを含むその他の解決では、すべてサニタイズされます。
 
-When the failure is an `Error` whose message is meant for the user, brand it instead of wrapping it:
+失敗が、ユーザーに見せることを意図したメッセージを持つ `Error` であるときは、ラップする代わりにブランドを付けます:
 
 ```ts
 import { markSafeError } from "@solidjs/web";
@@ -149,12 +149,12 @@ import { markSafeError } from "@solidjs/web";
 throw markSafeError(new Error("This coupon has expired"));
 ```
 
-The brand lets the message and own properties cross the boundary in production.
-Do not brand an error you did not construct: an error from a driver or a third-party client can carry anything in its properties.
-Integration code can test the brand with [`isSafeError()`](/reference/solid-web/request-response/safe-errors).
+ブランドによって、メッセージと自身のプロパティが本番環境で境界を越えられるようになります。
+自分で作成していないエラーにブランドを付けてはいけません。ドライバーやサードパーティクライアント由来のエラーは、プロパティに何が入っているかわかりません。
+インテグレーションコードは [`isSafeError()`](/reference/solid-web/request-response/safe-errors) でブランドを検査できます。
 
-:::pitfall[Returning a 400 makes the call succeed]
-Only a thrown outcome rejects the caller.
+:::pitfall[400 を return すると呼び出しが成功になる]
+呼び出し元を reject させるのは throw された結果だけです。
 
 ```ts
 // Avoid: returned, so the caller's promise resolves with the issues
@@ -164,13 +164,13 @@ return respond({ issues }, { status: 400 });
 throw respond({ issues }, { status: 400 });
 ```
 
-With the `Avoid` version the HTTP response is a 400, and the promise in the browser resolves as if the write had worked; a router action records it as a successful submission with `{ issues }` as its result.
-The status on a returned envelope is for HTTP callers; the throw is what tells the caller something failed.
+`Avoid` 版では HTTP レスポンスは 400 ですが、ブラウザ内の Promise は書き込みが成功したかのように解決します。ルーターアクションはこれを `{ issues }` を結果とする成功サブミッションとして記録します。
+return されたエンベロープのステータスは HTTP 呼び出し元向けです。呼び出し元に失敗を伝えるのは throw の役目です。
 :::
 
-## Add router submissions
+## ルーターのサブミッションを追加する
 
-Solid Router's `action()` turns a server function into something a form can post to and the router can track:
+Solid Router の `action()` はサーバー関数を、フォームが POST できてルーターが追跡できるものに変えます:
 
 ```ts
 // src/data/cart.ts
@@ -196,56 +196,56 @@ export async function addToCart(form: FormData) {
 export const addToCartAction = action(addToCart);
 ```
 
-Render `<form method="post" action={addToCartAction}>` and the form posts to the function's URL before JavaScript loads; after hydration the router intercepts the submit, calls the function over the transport, and applies the `reload`.
-The router marks the form `aria-busy` while it runs and, once it settles, records a submission whose `error` is the thrown envelope's value, which the [Forms guide](/guides/forms) reads to show messages next to the fields.
+`<form method="post" action={addToCartAction}>` をレンダーすると、フォームは JavaScript が読み込まれる前からその関数の URL に POST されます。ハイドレーション後はルーターが submit をインターセプトし、トランスポート越しに関数を呼び出して `reload` を適用します。
+ルーターは実行中のフォームに `aria-busy` を付け、確定するとサブミッションを記録します。その `error` は throw されたエンベロープの値であり、[フォームガイド](/guides/forms)がこれを読み取ってフィールドの横にメッセージを表示します。
 
-Keep the server function a named export and wrap it separately, as above, so a test or an API route can call `addToCart` without the form.
-When the function exists only for the form, write the body inline, `action(async (form: FormData) => { "use server"; ... })`; the [Data loading and mutations](/routing/solid-router/data#mutate-with-actions) page uses that shape throughout, and the two behave the same.
+上記のようにサーバー関数は名前付きエクスポートのままにして別途ラップしてください。そうすれば、テストや API ルートがフォームなしで `addToCart` を呼び出せます。
+フォーム専用の関数であれば、本体をインラインで `action(async (form: FormData) => { "use server"; ... })` と書けます。[データロードとミューテーション](/routing/solid-router/data#mutate-with-actions)ページではこの形を一貫して使っており、どちらも同じように動作します。
 
-:::note[Which action]
-`action` here is from `@solidjs/router`.
-`solid-js` also exports an [`action`](/reference/solid-js/lifecycle-actions/action), which runs a generator as a reactive transaction and has no URL; [Mutations](/concepts/mutations) covers it.
-A form needs the router's.
+:::note[どちらの action か]
+ここでの `action` は `@solidjs/router` のものです。
+`solid-js` にも [`action`](/reference/solid-js/lifecycle-actions/action) があり、こちらはジェネレーターをリアクティブなトランザクションとして実行するもので URL を持ちません。[ミューテーション](/concepts/mutations)で説明しています。
+フォームに必要なのはルーターのほうです。
 :::
 
-When the router registers its single-flight integration, the mutation response can carry refreshed route data alongside the result; the server-function runtime treats that payload as opaque.
+ルーターがシングルフライトのインテグレーションを登録しているとき、ミューテーションレスポンスは結果と一緒に再取得したルートデータを運べます。サーバー関数ランタイムはそのペイロードを不透明なものとして扱います。
 
-## Common problems
+## よくある問題
 
-### The message is right in development and `Internal Server Error` in production
+### 開発環境ではメッセージが正しいのに本番では `Internal Server Error` になる
 
-The function threw a plain `Error`, a string, or an object.
-Production sanitizes every unbranded thrown value.
-Throw `respond(value, { status })` for a structured failure, or `markSafeError(new Error(message))` for a message meant for the user.
+関数がプレーンな `Error`、文字列、またはオブジェクトを throw しています。
+本番環境ではブランドのない throw 値はすべてサニタイズされます。
+構造化された失敗には `respond(value, { status })` を throw し、ユーザーに見せるメッセージには `markSafeError(new Error(message))` を使ってください。
 
-### The 400 arrives as a successful result
+### 400 が成功結果として届く
 
-The envelope was returned instead of thrown.
-A returned envelope resolves the caller with its value whatever the status; `throw respond(...)` is what rejects.
+エンベロープが throw ではなく return されています。
+return されたエンベロープはステータスに関係なく呼び出し元をその値で解決します。reject させるのは `throw respond(...)` です。
 
-### The redirect comes back as a `Response` object
+### リダイレクトが `Response` オブジェクトとして返ってくる
 
-The function was called directly rather than through a router action, and the transport hands responses that carry a `Location` or `X-Revalidate` header back whole.
-Call the function through `action()`, or return a value and navigate in the caller.
+関数がルーターアクション経由ではなく直接呼び出されており、トランスポートは `Location` や `X-Revalidate` ヘッダーを持つレスポンスをそのまま呼び出し元に返します。
+`action()` 経由で関数を呼び出すか、値を返して呼び出し元側で遷移してください。
 
-### `redirect()` throws a `TypeError` about an Href-branded value
+### `redirect()` が Href ブランド値についての `TypeError` をスローする
 
-The first argument was an object that is not a string and not a router `Href`.
-Pass a string path, or the value a router's typed paths helper returns.
+第1引数が文字列でもルーターの `Href` でもないオブジェクトでした。
+文字列のパス、またはルーターの型付きパスヘルパーが返す値を渡してください。
 
-## Recap
+## まとめ
 
-- Return a plain value when the caller needs data and nothing else; use `respond()` to add a status or headers to it.
-- Return or throw `redirect(path)`; a router action navigates, a form post follows the redirect, and direct code receives the `Response`.
-- Return `reload({ revalidate })` after a write so the router refetches the named reads.
-- Throw `respond(value, { status })` for a failure the caller should see; a returned envelope resolves the caller whatever its status.
-- A plain thrown value becomes `Internal Server Error` in production; `markSafeError()` opts one `Error` out of that.
-- The development build is selected by the `development` export condition, not by `NODE_ENV`.
-- Wrap a named server function with the router's `action()` for forms and submissions; write it inline only when nothing else calls it.
+- 呼び出し元がデータだけを必要とするときはプレーンな値を返します。ステータスやヘッダーを付けるには `respond()` を使います。
+- `redirect(path)` は return でも throw でも構いません。ルーターアクションなら遷移し、フォーム POST ならリダイレクトに従い、直接のコードは `Response` を受け取ります。
+- 書き込み後に `reload({ revalidate })` を返すと、ルーターが指定した読み取りを再取得します。
+- 呼び出し元に見せる失敗には `respond(value, { status })` を throw します。return されたエンベロープはステータスに関係なく呼び出し元を解決します。
+- プレーンな throw 値は本番環境で `Internal Server Error` になります。`markSafeError()` で1つの `Error` だけをそれから除外できます。
+- 開発用ビルドが選ばれるのは `NODE_ENV` ではなく `development` エクスポート条件です。
+- フォームとサブミッション向けには、名前付きサーバー関数をルーターの `action()` でラップします。他から呼ばれない場合だけインラインで書きます。
 
-## Next steps
+## 次のステップ
 
-- [Progressive enhancement](/building-apps/server-functions/progressive-enhancement): the same Add to cart form submitted before JavaScript loads, and what the runtime does with the 303.
-- [Forms](/guides/forms): the checkout address form, with the thrown 400 shown as inline field messages.
-- [Metadata and transport](/building-apps/server-functions/metadata-and-transport): attaching a header to every call and cancelling a call in flight.
-- [Mutations](/concepts/mutations): the client side of a mutation, with optimistic state and the reactive `action` from `solid-js`.
+- [プログレッシブエンハンスメント](/building-apps/server-functions/progressive-enhancement): JavaScript が読み込まれる前に送信される同じ「カートに追加」フォームと、ランタイムが 303 に対して行うこと。
+- [フォーム](/guides/forms): チェックアウトの住所フォーム。throw された 400 をインラインのフィールドメッセージとして表示します。
+- [メタデータとトランスポート](/building-apps/server-functions/metadata-and-transport): すべての呼び出しにヘッダーを付ける方法と、実行中の呼び出しをキャンセルする方法。
+- [ミューテーション](/concepts/mutations): ミューテーションのクライアント側。楽観的な状態と `solid-js` のリアクティブな `action` を扱います。
