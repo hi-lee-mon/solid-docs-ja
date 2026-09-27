@@ -1,23 +1,23 @@
 ---
-title: "Debugging reactivity"
+title: "リアクティビティのデバッグ"
 version: "2.0"
-description: "Find out why a value does not update, why it updates too often, and how to read Solid's development diagnostics."
+description: "値が更新されない理由、逆に更新されすぎる理由、そして Solid の開発用診断の読み方を説明します。"
 ---
 
-A quantity input in the cart changes and the subtotal next to it does not.
-Or the subtotal changes, and so does every row in the list, on every keystroke.
-Those are the two shapes a reactivity bug takes: something does not update when it should, or something updates far more often than it should.
-Solid's development build reports the first kind as it happens and can explain the second kind on request.
-This guide shows how to read those reports and what to change.
+カート内の数量入力を変更したのに、隣の小計が変わりません。
+あるいは小計は変わるのに、キー入力のたびにリストの全行まで変わってしまいます。
+リアクティビティのバグにはこの2つの形があります。更新されるべきものが更新されないか、必要以上に頻繁に更新されるかです。
+Solid の開発ビルドは前者を発生と同時に報告し、後者は要求に応じて説明できます。
+このガイドでは、それらの報告の読み方と、何を直すべきかを説明します。
 
-:::note[Development build only]
-Everything on this page needs the development build.
-Production builds strip the diagnostics and the `DEV` export is `undefined`.
+:::note[開発ビルドのみ]
+このページの内容はすべて開発ビルドが必要です。
+プロダクションビルドでは診断は取り除かれ、`DEV` エクスポートは `undefined` になります。
 :::
 
-## Read a diagnostic
+## 診断を読む
 
-Development builds print one console entry per finding, with a code in square brackets and a line naming where it happened:
+開発ビルドは検出事項ごとに1件のコンソールエントリを出力します。角括弧付きのコードと、発生箇所を示す行が付きます:
 
 ```text
 [STRICT_READ_UNTRACKED] Reactive value read directly in <LineItem> will not update.
@@ -25,53 +25,53 @@ Move it into a tracking scope (JSX, a memo, or an effect's compute function).
   in <App> › <Cart> › <LineItem>
 ```
 
-The code is stable across releases; the sentence after it says what the runtime observed and what to change.
-The `in` line is the chain of owners from the root down to the scope that produced the finding: components as `<Name>`, computations by the `name` option you gave them or `effect`/`computed` by default.
-When the finding is about a JSX binding (an attribute, class, style, or inserted text), the console entry also carries the DOM element it writes as a second argument, so hovering it in the browser's console highlights the element on the page and clicking it jumps to the Elements panel.
+コードはリリース間で安定しています。続く文は、ランタイムが観測した内容と何を直すべきかを示しています。
+`in` の行は、ルートから検出を出したスコープまでのオーナーのチェーンです。コンポーネントは `<Name>`、計算は指定した `name` オプション、指定がなければデフォルトで `effect`/`computed` と表示されます。
+検出が JSX バインディング（属性・class・style・挿入テキスト）に関するものの場合、コンソールエントリは書き込み先の DOM 要素を第2引数として持ちます。ブラウザーのコンソールでそれにホバーするとページ上の要素がハイライトされ、クリックすると Elements パネルにジャンプします。
 
-The first time each code appears, Solid adds a footer pointing to the repair guide that ships inside the `solid-js` package under `skills/reactivity-diagnostics/SKILL.md`, and the same file on GitHub anchored to that code.
+各コードが初めて現れたとき、Solid は `solid-js` パッケージ内の `skills/reactivity-diagnostics/SKILL.md` に同梱されている修復ガイドへのフッターと、そのコードにアンカーされた GitHub 上の同一ファイルを指すリンクを追加します。
 
-Codes fall into a few groups:
+コードはいくつかのグループに分かれます:
 
-- Reads in the wrong place: `STRICT_READ_UNTRACKED`, `PENDING_ASYNC_UNTRACKED_READ`.
-- Writes in the wrong place: `REACTIVE_WRITE_IN_OWNED_SCOPE`, `ACTION_CALLED_IN_OWNED_SCOPE`, `FLUSH_IN_ACTION`, `SERVER_WRITE`.
-- Leaks: `NO_OWNER_EFFECT`, `NO_OWNER_BOUNDARY`, `NO_OWNER_CLEANUP`.
-- Async placement: `ASYNC_OUTSIDE_LOADING_BOUNDARY`.
-- Graph size, always on: `HUGE_FAN_OUT`, `HUGE_FAN_IN`.
-- Cost, only while attribution is enabled: `HOT_SCOPE_RERUNS`, `WIDE_WRITE`, `ASYNC_WATERFALL`, `UNSTABLE_MEMO_OUTPUT`, `EFFECT_WRITES_OWN_SOURCE`, `EFFECT_RELAY_TEAR`, `IMMUTABLE_UPDATE_IN_STORE`, `UNSTABLE_LIST_IDENTITY`.
-- Responsiveness, only while attribution is enabled: `SILENT_HOLD`.
+- 誤った場所での読み取り: `STRICT_READ_UNTRACKED`、`PENDING_ASYNC_UNTRACKED_READ`
+- 誤った場所での書き込み: `REACTIVE_WRITE_IN_OWNED_SCOPE`、`ACTION_CALLED_IN_OWNED_SCOPE`、`FLUSH_IN_ACTION`、`SERVER_WRITE`
+- リーク: `NO_OWNER_EFFECT`、`NO_OWNER_BOUNDARY`、`NO_OWNER_CLEANUP`
+- 非同期の配置: `ASYNC_OUTSIDE_LOADING_BOUNDARY`
+- グラフサイズ（常時有効）: `HUGE_FAN_OUT`、`HUGE_FAN_IN`
+- コスト（アトリビューション有効時のみ）: `HOT_SCOPE_RERUNS`、`WIDE_WRITE`、`ASYNC_WATERFALL`、`UNSTABLE_MEMO_OUTPUT`、`EFFECT_WRITES_OWN_SOURCE`、`EFFECT_RELAY_TEAR`、`IMMUTABLE_UPDATE_IN_STORE`、`UNSTABLE_LIST_IDENTITY`
+- 応答性（アトリビューション有効時のみ）: `SILENT_HOLD`
 
-Each finding has one of three severities.
-An error throws and halts execution; the behavior is broken.
-A warning logs to the console; the code runs but is structurally wrong or expensive.
-An `info` finding does not reach the console at all; it is recorded on the structured channel that `OBSERVE.diagnostics.subscribe()` and `@solidjs/diagnostics` read, for cases where the runtime has a lead but not enough proof to interrupt you.
-Do not silence a code you do not understand; each one describes a real defect or a real cost.
+各検出には3段階の重大度のいずれかが付きます。
+error は例外を投げて実行を停止します。動作が壊れています。
+warning はコンソールに記録されます。コードは動きますが、構造的に誤っているか、コストが高い状態です。
+`info` の検出はコンソールにすら届きません。`OBSERVE.diagnostics.subscribe()` と `@solidjs/diagnostics` が読み取る構造化チャネルに記録されます。ランタイムに手がかりはあるものの、中断するほどの確証がないケース向けです。
+意味を理解していないコードを黙らせてはいけません。どれも実際の欠陥か実際のコストを表しています。
 
-## Something does not update
+## 更新されない場合
 
-Work through these in order.
-The first three account for most reports.
+以下を順に確認してください。
+最初の3つで大半の報告をカバーできます。
 
-### Is the read inside a tracking scope?
+### 読み取りは追跡スコープの内側か?
 
-Look for `[STRICT_READ_UNTRACKED]` in the console.
-If it names the component you are looking at, a signal, memo, store property, or prop is read in the component body.
-The body runs once; JSX expressions, memo functions, effect compute functions, and the function form of `createSignal` and `createStore` are tracked.
-Move the read there, or wrap the calculation in a function and call the function from the JSX.
-The [Reactivity](/concepts/reactivity) page has the full explanation.
+コンソールで `[STRICT_READ_UNTRACKED]` を探してください。
+見ているコンポーネントが名指しされている場合、シグナル・メモ・ストアのプロパティ・prop のいずれかがコンポーネント本体で読み取られています。
+本体は一度だけ実行されます。追跡されるのは JSX 式・メモの関数・エフェクトの計算関数・`createSignal` と `createStore` の関数形式です。
+読み取りをそこへ移すか、計算を関数で包んで JSX からその関数を呼んでください。
+詳しい説明は [リアクティビティ](/concepts/reactivity) のページにあります。
 
-Destructured props produce the same warning and the same fix.
+props を分割代入した場合も同じ警告が出て、直し方も同じです。
 
-### Is the signal being called?
+### シグナルは呼び出されているか?
 
-A signal is a function.
-`{quantity}` in JSX is a type error, because a function is not a valid DOM child; `"Qty: " + quantity` type-checks but renders the text of the function.
-Search the component for the signal's name without `()` behind it.
+シグナルは関数です。
+JSX 中の `{quantity}` は型エラーです。関数は有効な DOM の子ではないからです。`"Qty: " + quantity` は型チェックを通りますが、関数の文字列表現がレンダーされてしまいます。
+コンポーネント内で、後ろに `()` のないシグナル名を検索してください。
 
-### Did the write reach a reactive value?
+### 書き込みはリアクティブな値に届いているか?
 
-A store is tracked per property.
-Writes must go through the setter:
+ストアはプロパティごとに追跡されます。
+書き込みはセッター経由で行う必要があります:
 
 ```ts
 const [cart, setCart] = createStore({ items: [] as Item[] });
@@ -85,16 +85,16 @@ setCart((draft) => {
 });
 ```
 
-Run the `Avoid` version and nothing happens: no error, no warning, and the list does not change.
+`Avoid` の版を実行しても何も起きません。エラーも警告もなく、リストも変わりません。
 
-Objects held in a plain signal have the opposite failure.
-`items().push(item)` does mutate the array, but no one is notified because the signal's value is the same array; `setItems((current) => [...current, item])` gives the signal a new value to report.
-The [Stores](/concepts/stores) page covers nested updates.
+素のシグナルに保持されたオブジェクトでは逆の失敗になります。
+`items().push(item)` は配列を実際に変更しますが、シグナルの値は同じ配列のままなので誰にも通知されません。`setItems((current) => [...current, item])` なら、シグナルに報告すべき新しい値を渡せます。
+ネストされた更新については [ストア](/concepts/stores) のページを参照してください。
 
-### Is the effect reading in the wrong phase?
+### エフェクトが誤ったフェーズで読み取っていないか?
 
-`createEffect` tracks its first function only.
-A signal read in the second function does not re-run the effect:
+`createEffect` が追跡するのは最初の関数だけです。
+2番目の関数で読み取ったシグナルは、エフェクトを再実行させません:
 
 ```ts
 // Avoid: price() is read in the untracked effect function
@@ -114,20 +114,20 @@ createEffect(
 );
 ```
 
-Run the `Avoid` version and change the price: the title keeps the old price until the quantity also changes.
+`Avoid` の版を実行して価格を変更すると、数量も変わるまでタイトルは古い価格のままです。
 
-### Is the value not ready yet?
+### 値がまだ準備できていないのでは?
 
-A memo that returned a promise has no value until the promise settles.
-Reading it in JSX inside a `Loading` boundary shows the fallback; reading it in a component body throws `[PENDING_ASYNC_UNTRACKED_READ]`.
-If the console shows `[ASYNC_OUTSIDE_LOADING_BOUNDARY]`, the read is tracked but nothing catches the pending state, and the whole root waits.
-Add a boundary above the read.
-See [Boundaries](/concepts/boundaries).
+Promise を返したメモは、その Promise が確定するまで値を持ちません。
+`Loading` バウンダリ内の JSX で読み取ればフォールバックが表示されますが、コンポーネント本体で読み取ると `[PENDING_ASYNC_UNTRACKED_READ]` が投げられます。
+コンソールに `[ASYNC_OUTSIDE_LOADING_BOUNDARY]` が表示される場合、読み取りは追跡されていますが保留中状態を受け止めるものがなく、ルート全体が待たされます。
+読み取りの上にバウンダリを追加してください。
+[バウンダリ](/concepts/boundaries) を参照してください。
 
-## Something updates too often
+## 更新が多すぎる場合
 
-The tool for this is attribution: a recording of every scope that re-ran, what changed to cause it, and how long it took.
-Give the scopes you care about names, enable attribution, reproduce the behavior, then ask why a scope ran:
+ここで使う道具はアトリビューションです。再実行されたすべてのスコープ、原因となった変更、かかった時間を記録します。
+調べたいスコープに名前を付け、アトリビューションを有効にして、動作を再現させてから、そのスコープがなぜ実行されたかを問い合わせます:
 
 ```ts
 import { createMemo, createStore } from "solid-js";
@@ -144,55 +144,55 @@ for (const event of why(total)) {
 }
 ```
 
-`solid-js/attribution` resolves to the recording engine in the development and observe builds and to an inert twin with the same exports in production, so the import can stay in the code.
+`solid-js/attribution` は開発ビルドと observe ビルドでは記録エンジンに解決され、プロダクションでは同じエクスポートを持つ無効化された双子に解決されるため、import はコードに残したままで構いません。
 
-Each entry names the write that started the update, the dependency that changed, and the time the recompute took.
-While attribution is enabled the same chains print to the console as collapsed `[why-run]` groups, one per re-run, with the cause chain and dependency changes inside.
-`costs()` ranks scopes by self time, including time spent on runs whose result did not change, and ranks writes by how much downstream work each one caused.
-`why`, `costs`, `feedback`, and `subscriptions` are separate exports of `solid-js/attribution`, so a build that only records ships none of them; the `attribution` object itself carries `enable()`, `subscribe()`, `history()`, `waterfalls()`, `holds()`, `interactions()`, and `navigations()`.
+各エントリには、更新を始めた書き込み、変更された依存関係、再計算にかかった時間が示されます。
+アトリビューション有効中は、同じチェーンが折りたたまれた `[why-run]` グループとしてコンソールにも出力されます。再実行ごとに1つずつ、原因チェーンと依存関係の変更が内側に入ります。
+`costs()` はスコープを自己時間でランク付けします（結果が変わらなかった実行に費やした時間も含みます）。また書き込みを、それぞれが引き起こした下流の作業量でランク付けします。
+`why`・`costs`・`feedback`・`subscriptions` は `solid-js/attribution` の別々のエクスポートなので、記録だけを行うビルドにはそれらは含まれません。`attribution` オブジェクト自体は `enable()`・`subscribe()`・`history()`・`waterfalls()`・`holds()`・`interactions()`・`navigations()` を持ちます。
 
-A chain ends at whatever made the root write, not only at the signal's name.
-Writes made inside a compiled event handler are stamped with the interaction (`click on button#add "Add"`), so `event.interaction` on a re-run names the click it traces back to, however many effects relayed it in between.
-Writes made from an effect or an action are stamped with that effect or action; writes from a timer or module scope read as `external`.
+チェーンはシグナル名で終わるのではなく、根本の書き込みを行ったものまで遡ります。
+コンパイルされたイベントハンドラー内で行われた書き込みにはインタラクションのスタンプ（`click on button#add "Add"`）が付きます。そのため、再実行時の `event.interaction` は、途中でいくつのエフェクトが中継したとしても、遡った先のクリックを名指します。
+エフェクトやアクションからの書き込みにはそのエフェクトやアクションのスタンプが付き、タイマーやモジュールスコープからの書き込みは `external` と表示されます。
 
-While attribution is enabled, Solid also warns about the patterns below on its own.
-Each warning names the scope and the cause, so you usually do not need to query `why` for them.
+アトリビューション有効中、Solid は以下のパターンも自動的に警告します。
+各警告にはスコープと原因が示されるため、通常は `why` に問い合わせる必要はありません。
 
-:::tip[Name the scopes before you record]
-Every report and every `why` chain refers to nodes by their `name` option, and an unnamed memo prints as `computed`, an unnamed effect as `effect`, and an unnamed signal as `signal`.
-Give the scopes you are investigating names first; a chain of anonymous nodes is hard to follow.
+:::tip[記録する前にスコープに名前を付ける]
+すべてのレポートと `why` チェーンは、ノードを `name` オプションで参照します。名前のないメモは `computed`、名前のないエフェクトは `effect`、名前のないシグナルは `signal` と表示されます。
+調査対象のスコープには先に名前を付けてください。匿名ノードのチェーンは追いにくいです。
 :::
 
-The usual causes and their fixes:
+よくある原因とその直し方:
 
-### A memo depends on more than it uses
+### メモが使う以上のものに依存している
 
-A memo that reads a whole store object, or spreads it, depends on every property.
-Read the properties the calculation needs, inside the memo, and nothing else.
-`subscriptions(total)` lists the current dependencies of a scope so you can compare them to what the calculation uses.
+ストアオブジェクト全体を読み取るメモや、それをスプレッドするメモは、すべてのプロパティに依存します。
+メモの内側で、計算に必要なプロパティだけを読み取り、それ以外は読まないでください。
+`subscriptions(total)` はスコープの現在の依存関係を列挙するので、計算が実際に使っているものと比較できます。
 
-### A chain recomputes because an early link has no equality boundary
+### 序盤のリンクに等価バウンダリがないためにチェーンが再計算される
 
-A plain derived function recomputes for every reader every time an input changes, and passes the recompute downstream even when its result is the same.
-Turn the link into a `createMemo` when its result is often unchanged, when several readers share it, or when the work downstream is expensive.
-The memo compares its result to the previous one and does not notify readers when the two are equal.
+素の派生関数は、入力が変わるたびに読み手ごとに再計算し、結果が同じでも下流へ再計算を伝えます。
+結果が変わらないことが多い場合、複数の読み手が共有する場合、下流の処理が重い場合は、そのリンクを `createMemo` にしてください。
+メモは結果を前回と比較し、等しければ読み手に通知しません。
 
-Do not memoize everything.
-A memo costs a node in the graph and a comparison on every run; for a cheap expression with one reader, a function is smaller and faster.
+何でもメモ化してはいけません。
+メモはグラフ内のノードと実行ごとの比較のコストがかかります。読み手が1つだけの安い式なら、関数のほうが小さく速いです。
 
-### A memo returns a new object that is equal to the last one
+### メモが前回と同じ内容の新しいオブジェクトを返している
 
-`[UNSTABLE_MEMO_OUTPUT]` fires when a memo returns a fresh array or object whose contents match the previous result several runs in a row.
-The memo's equality check compares by reference, so it never absorbs the recompute and every reader runs for nothing.
-Return the same reference when nothing changed, keep the data in a store, or pass an `equals` option that compares by content.
+`[UNSTABLE_MEMO_OUTPUT]` は、メモが何回も連続して前回と同じ内容の新しい配列やオブジェクトを返したときに発生します。
+メモの等価チェックは参照で比較するため、再計算を吸収できず、すべての読み手が無駄に実行されます。
+変化がないときは同じ参照を返すか、データをストアに保持するか、内容で比較する `equals` オプションを渡してください。
 
-### A write replaces an object that did not change
+### 書き込みが変わっていないオブジェクトを置き換えている
 
-`setItems(await fetchItems())` replaces every item with a new object, so every row that reads an item is recreated.
-Use a store with `reconcile` to merge the new data into the existing objects, so only the properties that changed notify their readers.
-See [Stores](/concepts/stores).
+`setItems(await fetchItems())` は全アイテムを新しいオブジェクトに置き換えるため、アイテムを読んでいるすべての行が作り直されます。
+`reconcile` を使うストアで新しいデータを既存オブジェクトにマージすれば、変更されたプロパティだけが読み手に通知します。
+[ストア](/concepts/stores) を参照してください。
 
-The store version of the same mistake is a spread copy:
+同じ失敗のストア版はスプレッドによるコピーです:
 
 ```ts
 // Avoid: a fresh array to add one item, so every reader of items re-runs
@@ -206,40 +206,40 @@ setCart((draft) => {
 });
 ```
 
-Run the `Avoid` version and every reader of the `items` path re-runs for one added item; attribution reports `[IMMUTABLE_UPDATE_IN_STORE]`.
-It fires when a store path is replaced with a container whose leaves are mostly the same values as before.
-The store already tracks each leaf; a new container makes every reader of the path re-run for the one leaf that moved.
-Mutate the draft, or pass `reconcile()` for data that arrives as a fresh tree from the server.
+`Avoid` の版を実行すると、アイテム1つの追加のために `items` パスの全読み手が再実行されます。アトリビューションはこれを `[IMMUTABLE_UPDATE_IN_STORE]` と報告します。
+これは、ストアのパスが、葉の値がほとんど以前と同じコンテナで置き換えられたときに発生します。
+ストアは各葉をすでに追跡しています。新しいコンテナは、動いた1枚の葉のためにパスの全読み手を再実行させます。
+ドラフトを変更するか、サーバーから新しいツリーとして届くデータには `reconcile()` を渡してください。
 
-### A list rebuilds rows for the same records
+### リストが同じレコードの行を作り直している
 
-`[UNSTABLE_LIST_IDENTITY]` fires when a `For` or `mapArray` update disposes and recreates rows whose items are equal field-for-field to the ones they replaced.
-The list is keyed by object identity and a refetch handed it new objects for the same records, so every row's DOM and state were thrown away and rebuilt.
-Key the list on the record id, reconcile the data into a store so the objects keep their identity, or cache by id upstream.
-When the list already has a key function and the warning still fires, the message blames the key function instead: it returns something new on every call, such as an index or an object.
-The [Lists guide](/guides/lists#keep-row-identity-across-updates) shows both fixes.
+`[UNSTABLE_LIST_IDENTITY]` は、`For` や `mapArray` の更新が、置き換え前とフィールド単位で同じアイテムを持つ行を破棄して作り直したときに発生します。
+リストはオブジェクトの同一性でキー付けされており、再取得が同じレコードに新しいオブジェクトを渡したため、すべての行の DOM と状態が捨てられて作り直されました。
+レコードの id でリストにキーを付けるか、データをストアに reconcile してオブジェクトの同一性を保つか、上流で id によりキャッシュしてください。
+リストにすでにキー関数があるのに警告が出る場合、メッセージは代わりにキー関数を指します。呼び出しごとに新しいもの（インデックスやオブジェクトなど）を返しているのです。
+[リストのガイド](/guides/lists#keep-row-identity-across-updates) に両方の直し方があります。
 
-### An effect writes a signal that another scope derives from
+### エフェクトが別スコープの派生元となるシグナルに書き込んでいる
 
-Every write in an effect schedules a second update after the first one has already landed, so readers of the copied value run twice per change and see an intermediate state in between.
-Attribution proves this from the graph and reports it as `[EFFECT_RELAY_TEAR]`: the reader ran twice for one root change, once in the flush where the source changed and again after the effect relayed it, and the frame in between showed the new source with the stale copy.
-When the effect copies its input unchanged and nothing else writes the target signal, the value is derived state kept one flush late; make it a memo and delete the effect.
-When the write reads something outside the graph, such as layout or the clock, the message says so: the tear is the cost of measuring, and the effect stays.
-[Avoid unnecessary effects](/guides/avoid-unnecessary-effects#let-external-observations-become-new-inputs) shows that case written with `onSettled` and works through the derivable ones.
+エフェクト内の書き込みはすべて、最初の更新が反映された後に2回目の更新をスケジュールするため、コピーされた値の読み手は変更ごとに2回実行され、その間に中間状態を見ることになります。
+アトリビューションはこれをグラフから証明し、`[EFFECT_RELAY_TEAR]` と報告します。読み手は1つの根本的変更に対して2回実行されました。1回目はソースが変わったフラッシュで、2回目はエフェクトが中継した後です。その間のフレームは、新しいソースと古いコピーが並んだ画面を見せました。
+エフェクトが入力をそのままコピーし、対象シグナルに書き込むものが他にない場合、その値は1フラッシュ遅れで維持される派生状態です。メモにして、エフェクトは削除してください。
+書き込みがレイアウトや時計のようなグラフ外のものを読んでいる場合、メッセージはその旨を伝えます。この場合の tear は計測のコストであり、エフェクトは残します。
+[不要なエフェクトを避ける](/guides/avoid-unnecessary-effects#let-external-observations-become-new-inputs) では、このケースを `onSettled` で書いた例と、派生に置き換えられる例を順に説明しています。
 
-### An effect re-runs because of its own write
+### エフェクトが自分の書き込みで再実行されている
 
-`[EFFECT_WRITES_OWN_SOURCE]` fires when an effect writes a signal or store that feeds back into the effect's own inputs, directly or through any number of memos.
-The runtime settles, but every change costs an extra flush and the screen shows the pre-write value in between.
-The written value is a function of what the effect reads, so it belongs in a memo, or the normalization belongs where the source is written.
-When two or more effects relay writes to each other in a ring, one report at `info` severity names the whole ring instead of blaming one effect.
+`[EFFECT_WRITES_OWN_SOURCE]` は、エフェクトが書き込んだシグナルやストアが、直接またはいくつかのメモを経由してエフェクト自身の入力に戻ってくるときに発生します。
+ランタイムは最終的に落ち着きますが、変更ごとに余分なフラッシュがかかり、その間画面には書き込み前の値が表示されます。
+書き込まれる値はエフェクトが読むものの関数なので、メモに入れるべきです。あるいは、正規化はソースが書き込まれる場所で行うべきです。
+2つ以上のエフェクトがリング状に書き込みを中継し合う場合、1つのエフェクトを責める代わりに、`info` 重大度のレポート1件でリング全体が名指しされます。
 
-## The screen looks dead after a click
+## クリック後に画面が反応しなく見える
 
-When a write lands on async work, Solid holds the write and everything derived from it until the data settles, so the page never shows a half-applied update.
-That hold is correct, but if nothing on screen acknowledges it, the interaction looks broken for as long as the request takes.
+書き込みが非同期処理に着地すると、Solid はデータが確定するまでその書き込みとそこから派生するすべてを保留します。そのため、ページに中途半端に適用された更新が表示されることはありません。
+この保留は正しい動作ですが、画面上でそれを示すものが何もなければ、リクエストが終わるまでインタラクションは壊れているように見えます。
 
-While attribution is enabled, Solid names this as `[SILENT_HOLD]`:
+アトリビューション有効中、Solid はこれを `[SILENT_HOLD]` と呼びます:
 
 ```text
 [SILENT_HOLD] click on button#next "Next →" wrote selectedId; the write was held 640ms
@@ -248,43 +248,43 @@ reader downstream, no optimistic value, no affects() mark, and no effect ran whi
 was held — the interaction was dead for 640ms.
 ```
 
-A hold is silent when none of the following is true while it is open: an `isPending()` or `latest()` read on the held graph, an optimistic value, an `affects()` declaration, or an effect that ran and painted.
-Holds under 100ms are recorded but not reported; from 100ms the finding is `info`, from 200ms it is a warning.
-Both thresholds are options to `attribution.enable({ holds: { infoMs, warnMs } })`.
+保留が開いている間、以下のいずれも成立しない場合、その保留は「silent」（音沙汰なし）です。保留中のグラフへの `isPending()` や `latest()` の読み取り、楽観的な値、`affects()` 宣言、実行されて描画されたエフェクトのいずれもない状態です。
+100ms 未満の保留は記録されますが報告されません。100ms からは `info`、200ms からは warning になります。
+両方のしきい値は `attribution.enable({ holds: { infoMs, warnMs } })` のオプションで変更できます。
 
-The repair is always to add feedback, never to remove the hold:
+直し方は常にフィードバックを追加することであり、保留を外すことではありません:
 
-- Read `isPending(source)` where the result renders and show an updating state.
-- Read `latest(source)` for the part of the UI that should move immediately, such as the selected row.
-- Write the expected result to `createOptimistic` or `createOptimisticStore` inside the action.
-- Declare `affects(source)` when the work changes data the UI is reading.
+- 結果がレンダーされる場所で `isPending(source)` を読み取り、更新中の状態を表示する。
+- 選択行のように即座に動くべき UI 部分には `latest(source)` を読み取らせる。
+- アクション内で期待される結果を `createOptimistic` や `createOptimisticStore` に書き込む。
+- その処理が UI の読んでいるデータを変更する場合は `affects(source)` を宣言する。
 
-[Async reactivity](/concepts/async-reactivity#another-answer-is-coming-ispending) explains each of these.
+それぞれの説明は [非同期リアクティビティ](/concepts/async-reactivity#another-answer-is-coming-ispending) にあります。
 
-A `Loading` boundary that has not shown content yet, or whose `on` value changed, is a different situation: the read shows the fallback instead of entering a hold, so there is no `SILENT_HOLD` to report.
-A boundary that has already revealed holds like everything else.
-So does a boundary with `on` when something outside it waits on the same change: the update is held regardless, the fallback never shows, and the report names the source the click waited on; look for a reader of that source outside the boundary.
-A hold that was acknowledged but still ran long is reported as `[LONG_HOLD]` from 500ms of waiting, a warning from 1000ms, with the suggestion to add a `Loading on={...}` boundary; the thresholds are `attribution.enable({ longHolds: { infoMs, warnMs } })`.
-Shorter acknowledged holds are recorded as `late` in the feedback tables so the cost is visible without blaming code that waited correctly.
+まだコンテンツを表示していない `Loading` バウンダリや、`on` の値が変わったバウンダリは別の状況です。読み取りは保留に入る代わりにフォールバックを表示するため、報告すべき `SILENT_HOLD` はありません。
+すでにコンテンツを表示したバウンダリは、他と同じように保留に入ります。
+`on` 付きのバウンダリでも、その外側の何かが同じ変更を待っている場合は同様です。更新はとにかく保留され、フォールバックは表示されず、レポートはクリックが待っていたソースを名指します。そのソースをバウンダリの外で読んでいる場所を探してください。
+フィードバックはあったものの長く続いた保留は、500ms の待機から `[LONG_HOLD]` と報告され、1000ms からは warning になり、`Loading on={...}` バウンダリの追加が提案されます。しきい値は `attribution.enable({ longHolds: { infoMs, warnMs } })` で変更できます。
+それより短い確認済みの保留は、フィードバックテーブルに `late` として記録されます。正しく待機したコードを責めずにコストを可視化するためです。
 
-:::deep-dive[Feedback tables, and how a router names its holds]
-`attribution.holds()` returns every hold from the session, reported or not.
-`feedback()` folds holds and re-runs into tables sorted worst-first:
+:::deep-dive[フィードバックテーブルと、ルーターが保留に名前を付ける仕組み]
+`attribution.holds()` はセッション中のすべての保留を返します。報告の有無に関わらず。
+`feedback()` は保留と再実行を、悪い順に並んだテーブルに集約します:
 
-- `sources`: per async source, how many holds it caused, how many were silent, and which affordance acknowledged the rest.
-- `interactions`: per user event, the re-run time it caused and the time it was held, which are the two ways an interaction feels slow.
-- `flights`: per async source, requests started, landed, and abandoned before landing; a high abandon count is the request-per-keystroke signature.
-- `fallbacks`: per `Loading` boundary, how often the fallback showed, for how long, and how many showings were under 150ms flashes.
+- `sources`: 非同期ソースごとに、引き起こした保留の数、そのうち silent だった数、残りを受け止めたフィードバック手段。
+- `interactions`: ユーザーイベントごとに、引き起こした再実行時間と保留された時間。インタラクションが遅く感じられる2つの側面です。
+- `flights`: 非同期ソースごとに、開始・着地・着地前に放棄されたリクエスト数。放棄数が多いのは、キー入力ごとにリクエストを送っている兆候です。
+- `fallbacks`: `Loading` バウンダリごとに、フォールバックが表示された頻度と時間、そのうち 150ms 未満のちらつきだった回数。
 
-A router can name the holds its navigations cause by the route pattern that matched, `/products/:id` rather than `/products/mug`, so occurrences fold together in these tables.
-It does so by wrapping its location write in `OBSERVE.attribution.withOrigin({ kind: "navigation", name, to, params }, write)`, which is router-agnostic; nothing else in attribution knows about routing.
-The [attribution reference](/reference/solid-js/advanced/diagnostics-dev-hooks/attribution#navigationref) describes the `NavigationRef` fields, including how a router whose match is not final at write time fills them in later.
+ルーターは、ナビゲーションが引き起こす保留に、マッチしたルートパターン（`/products/mug` ではなく `/products/:id`）で名前を付けられます。これにより、これらのテーブルで発生がまとめて集約されます。
+これは、ロケーションへの書き込みを `OBSERVE.attribution.withOrigin({ kind: "navigation", name, to, params }, write)` で包むことで実現します。これはルーター非依存で、アトリビューションの他の部分はルーティングを知りません。
+[attribution リファレンス](/reference/solid-js/advanced/diagnostics-dev-hooks/attribution#navigationref) には `NavigationRef` のフィールドと、書き込み時点でマッチが確定していないルーターが後からフィールドを埋める方法が説明されています。
 :::
 
-## The test sees the old DOM
+## テストが古い DOM を見る
 
-Solid applies writes in a batch after the current code finishes.
-A test that fires an event and asserts on the next line asserts before the batch lands:
+Solid は、現在のコードが終わった後で書き込みをバッチ適用します。
+イベントを発火させて次の行でアサートするテストは、バッチが適用される前にアサートしてしまいます:
 
 ```tsx
 fireEvent.click(button);
@@ -292,18 +292,18 @@ flush(); // apply staged writes and run effects now
 expect(button).toHaveTextContent("Clicks: 1");
 ```
 
-Import `flush` from `solid-js`.
-Application code does not normally call it; tests and imperative integrations do.
-The [Testing](/guides/testing) guide covers the rest of the test setup.
+`flush` は `solid-js` から import します。
+アプリケーションコードが呼ぶことは通常ありません。呼ぶのはテストや命令的な統合です。
+テスト環境の残りのセットアップは [テスト](/guides/testing) ガイドを参照してください。
 
-`flush()` drains queued writes; it does not wait for async work.
-To await one reactive expression from outside a tracking scope, such as an async memo in a test, use [`resolve(fn)`](/reference/solid-js/advanced/interop-async/resolve), which resolves with the first settled value or rejects with the expression's error:
+`flush()` はキューに溜まった書き込みを流しますが、非同期処理は待ちません。
+テスト内の非同期メモのように、追跡スコープの外から1つのリアクティブ式を await するには [`resolve(fn)`](/reference/solid-js/advanced/interop-async/resolve) を使います。最初に確定した値で resolve するか、式のエラーで reject します:
 
 ```ts
 const product = await resolve(() => productMemo());
 ```
 
-One place `flush()` does not belong is inside an action body:
+`flush()` を置いてはいけない場所の1つがアクション本体の内側です:
 
 ```text
 [FLUSH_IN_ACTION] flush() inside an action body is not allowed. An action's writes are held in its
@@ -311,51 +311,51 @@ transaction and commit when the action settles: flush() cannot reveal them, and 
 detach the writes that follow from the transaction.
 ```
 
-An action's writes are held until the action resolves, so a `flush()` in the middle has nothing to show and would split the writes after it from the transaction.
-Remove it and assert after the action's promise resolves.
-Development throws; production skips the drain and runs the callback, if any, inside the transaction.
+アクションの書き込みはアクションが resolve するまで保持されるため、途中の `flush()` には見せるものがなく、それ以降の書き込みをトランザクションから切り離してしまいます。
+`flush()` を削除し、アクションの Promise が resolve してからアサートしてください。
+開発ビルドでは例外が投げられます。プロダクションでは drain をスキップし、コールバックがあればトランザクション内で実行します。
 
-## A write on the server did nothing
+## サーバーでの書き込みが何もしなかった
 
 ```text
 [SERVER_WRITE] Writing a signal on the server is deprecated and will become an error.
 Server render is pure: state changes flow from async sources (promises, async iterables), never setters.
 ```
 
-A server render is one pass from inputs to HTML.
-A setter called during that pass lands as inert data and nothing updates, so the write is a sign the code expects a client-side update loop that does not exist on the server.
-The fix depends on what the write was for:
+サーバーレンダーは入力から HTML への1パスです。
+そのパス中に呼ばれたセッターは無効なデータとして着地し、何も更新されません。この書き込みは、サーバーには存在しないクライアント側の更新ループをコードが期待している兆候です。
+直し方は書き込みの目的によって異なります:
 
-- Bridging a subscription or a promise into a signal: make the source itself the value, `createSignal(() => source)` or `createStore(async () => ..., seed)`, so both server and client read it the same way.
-- Optimistic state: it only has meaning on the client, where it reverts when the async work settles.
-  Server output is settled state, so the write is a no-op there.
+- サブスクリプションや Promise をシグナルへ橋渡しする場合: `createSignal(() => source)` や `createStore(async () => ..., seed)` のようにソース自体を値にして、サーバーとクライアントで同じ読み方になるようにします。
+- 楽観的状態: 意味を持つのはクライアントだけで、非同期処理が確定すると元に戻ります。
+  サーバーの出力は確定済みの状態なので、そこでの書き込みは no-op です。
 
-The warning fires once per category, not on every write, so fixing the first occurrence may reveal the next.
+この警告は書き込みごとではなくカテゴリごとに1回だけ発生するため、最初の1件を直すと次の1件が現れることがあります。
 
-## Every update stopped after an error
+## エラー後にすべての更新が止まる
 
-An error thrown inside a computation that no boundary catches halts the reactive system:
+どのバウンダリにもキャッチされない計算内で投げられたエラーは、リアクティブシステムを停止させます:
 
 ```text
 [REACTIVITY_HALTED] An uncaught error halted the reactive system. No further updates will be processed.
 Handle errors with createErrorBoundary/<Errored> or treat this as a crash.
 ```
 
-Nothing on the page updates after this until a reload.
-Wrap the part of the tree that can fail in an [`Errored`](/reference/solid-js/components-jsx/errored) boundary so the failure is contained and the rest of the app keeps working.
-[Boundaries](/concepts/boundaries) explains where to place it.
+この後、リロードするまでページ上の何も更新されなくなります。
+失敗しうるツリーの部分を [`Errored`](/reference/solid-js/components-jsx/errored) バウンダリで包んでください。障害がそこに閉じ込められ、アプリの残りは動き続けます。
+配置場所は [バウンダリ](/concepts/boundaries) で説明しています。
 
-## Check for regressions in tests
+## テストでリグレッションをチェックする
 
-`@solidjs/diagnostics` records the diagnostic and attribution channels during a scenario and turns them into assertions.
-Add it as a development dependency and import its Vitest matchers from a setup file:
+`@solidjs/diagnostics` はシナリオ実行中の診断チャネルとアトリビューションチャネルを記録し、アサーションに変換します。
+開発依存として追加し、セットアップファイルから Vitest マッチャーを import します:
 
 ```ts
 // vitest-setup.ts
 import "@solidjs/diagnostics/vitest";
 ```
 
-Then capture a scenario:
+そしてシナリオをキャプチャします:
 
 ```ts
 import { captureArtifact } from "@solidjs/diagnostics";
@@ -382,34 +382,34 @@ test("adding an item recomputes the total once", async () => {
 });
 ```
 
-`toHaveNoDiagnostics` fails the test when any coded warning fires during the scenario, which turns an untracked read or a leaked effect into a red test instead of a console line nobody reads.
-`info` findings do not fail it.
-The re-run budget and waste checks catch the second kind of bug: a change that makes a scope recompute more than it did before.
-`toHaveNoSilentHolds` is the responsiveness gate: it fails when a write was held on async work and nothing on screen acknowledged the wait, and its message names the interaction, the held write, and the source it waited on.
-`toStayWithinHoldBudget(ms)` bounds every hold, acknowledged or not.
+`toHaveNoDiagnostics` は、シナリオ中にコード付きの警告が1つでも発生するとテストを失敗させます。追跡されていない読み取りやリークしたエフェクトが、誰も読まないコンソールの1行ではなく赤いテストになります。
+`info` の検出では失敗しません。
+再実行バジェットと waste のチェックは2番目の種類のバグを捉えます。スコープの再計算を以前より増やしてしまう変更です。
+`toHaveNoSilentHolds` は応答性のゲートです。書き込みが非同期処理で保留され、画面上の何も待機を示さなかった場合に失敗します。メッセージにはインタラクション、保留された書き込み、待っていたソースが示されます。
+`toStayWithinHoldBudget(ms)` は、確認の有無に関わらずすべての保留に上限を設けます。
 
-The artifact also carries `attribution.holds` and `attribution.feedback`, the same data the `holds()` and `feedback()` methods return, so a test can assert on them directly.
-Budget files accept `maxSilentHoldMs` and `maxHoldMs` next to the re-run limits.
+アーティファクトには `attribution.holds` と `attribution.feedback`（`holds()`・`feedback()` メソッドが返すのと同じデータ）も含まれるため、テストはそれらを直接アサートできます。
+バジェットファイルでは、再実行制限と並べて `maxSilentHoldMs` と `maxHoldMs` を指定できます。
 
-With `@solidjs/diagnostics` in `package.json`, the Vite plugin also serves the same capture controls at `/__solid/diagnostics` on the dev server, so a script or an agent can record a scenario against the running app.
-Set `diagnostics: false` in the plugin options to turn that off.
+`@solidjs/diagnostics` が `package.json` にあれば、Vite プラグインは同じキャプチャ機能を開発サーバーの `/__solid/diagnostics` で提供するため、スクリプトやエージェントが実行中のアプリに対してシナリオを記録できます。
+無効にするにはプラグインオプションで `diagnostics: false` を設定します。
 
-## Recap
+## まとめ
 
-- Read the bracketed code first; it is stable across releases and names the defect, and the `in` line names the scope that produced it.
-- For a value that does not update, check in order: is the read in a tracking scope, is the signal called, did the write go through the setter, is the read in the effect's compute function, is the value pending.
-- For a value that updates too often, name the scopes, enable attribution, reproduce, and ask `why(scope)`.
-- Change the one property on a store draft; a spread copy or a fresh array re-runs every reader of the path.
-- Replace an effect that copies state with a memo; keep the effect only when the write records something from outside the graph.
-- When a click looks dead, add feedback with `isPending`, `latest`, an optimistic value, or `affects`; do not remove the hold.
-- Call `flush()` in tests after firing an event, never inside an action body.
-- Put an `Errored` boundary around any subtree that can throw; an uncaught error halts every update.
+- まず角括弧のコードを読みます。リリース間で安定しており欠陥を指し、`in` の行はそれを出したスコープを指します。
+- 値が更新されない場合は順に確認します。読み取りが追跡スコープ内か、シグナルが呼ばれているか、書き込みがセッター経由か、読み取りがエフェクトの計算関数内か、値が保留中ではないか。
+- 更新が多すぎる場合は、スコープに名前を付け、アトリビューションを有効にし、再現して、`why(scope)` に問い合わせます。
+- ストアのドラフトではプロパティ1つだけを変更します。スプレッドコピーや新しい配列は、そのパスの全読み手を再実行させます。
+- 状態をコピーしているエフェクトはメモに置き換えます。エフェクトを残すのは、書き込みがグラフ外の何かを記録するときだけです。
+- クリックが反応なしに見えるときは、`isPending`・`latest`・楽観的な値・`affects` でフィードバックを追加します。保留を外してはいけません。
+- `flush()` はテストでイベント発火の後に呼びます。アクション本体の内側では決して呼びません。
+- 例外を投げうるサブツリーは `Errored` バウンダリで包みます。キャッチされないエラーはすべての更新を停止させます。
 
-## Next steps
+## 次のステップ
 
-- [Reactivity](/concepts/reactivity): the rules the diagnostics enforce.
-- [Avoid unnecessary effects](/guides/avoid-unnecessary-effects): the fix for most write-placement warnings, with the wrong version shown next to the right one.
-- [Stores](/concepts/stores): per-property tracking, `reconcile`, and why the write path matters.
-- [Performance](/guides/performance): when the extra runs are also slow, which knob each attribution table points at.
-- [Observability](/guides/observability): the same records and the error hooks in production, on the observe build.
-- [Testing](/guides/testing): the test environments the diagnostics run in.
+- [リアクティビティ](/concepts/reactivity): 診断が強制するルール。
+- [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects): ほとんどの書き込み配置警告への対処法。誤った版と正しい版を並べて示しています。
+- [ストア](/concepts/stores): プロパティごとの追跡、`reconcile`、書き込みパスが重要な理由。
+- [パフォーマンス](/guides/performance): 余分な実行が遅さにもつながる場合、各アトリビューションテーブルが指す調整ポイント。
+- [オブザーバビリティ](/guides/observability): プロダクションの observe ビルドで同じ記録とエラーフックを使う方法。
+- [テスト](/guides/testing): 診断が動作するテスト環境。
