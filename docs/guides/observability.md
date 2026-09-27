@@ -1,32 +1,32 @@
 ---
-title: "Observability"
+title: "オブザーバビリティ"
 version: "2.0"
-description: "Report the errors your boundaries catch in production, follow a request from the server into the browser, and see what each user interaction cost, without wrapping a component."
+description: "本番環境でバウンダリが捕捉したエラーを報告し、リクエストをサーバーからブラウザまで追跡し、各ユーザーインタラクションに何がかかったのかを、コンポーネントをラップせずに確認します。"
 ---
 
-The checkout form throws inside an `Errored` boundary in production.
-The fallback renders, the shopper reloads and tries again, and nothing tells you it happened: the browser's global error handler never saw the error, because the boundary caught it.
-Or a click on "Place order" feels slow for some shoppers, and the browser's own timing says how long the page was unresponsive but not which write waited on what.
+本番環境で、チェックアウトフォームが `Errored` バウンダリの内側で例外を投げました。
+フォールバックはレンダリングされ、買い物客はリロードして再試行しますが、起きたことを伝えるものは何もありません。ブラウザのグローバルエラーハンドラーはそのエラーを一度も見ていません。バウンダリが捕捉したからです。
+あるいは、「Place order」のクリックが一部の買い物客には遅く感じられ、ブラウザ自身のタイミング計測はページがどれくらい無応答だったかを教えてくれますが、どの書き込みが何を待っていたかは教えてくれません。
 
-Solid's runtime carries the answers to both.
-On every build, an error hook on each platform hears every failure the runtime handled, once, with the component that threw and the boundary that caught it.
-On the observe build, the runtime also publishes what it did as plain records — a `Loading` boundary that waited on the server, a server-function call and the execution it caused, a user interaction and the writes it held — and carries a request's trace into the browser on its own.
-This guide shows how to turn each of those on and what each one costs.
+Solid のランタイムは、この両方の答えを持っています。
+すべてのビルドで、各プラットフォームのエラーフックが、ランタイムが処理したすべての失敗を一度だけ、例外を投げたコンポーネントと捕捉したバウンダリとともに受け取ります。
+observe ビルドではさらに、ランタイムは自身が行ったことをプレーンなレコードとして発行します — サーバーを待った `Loading` バウンダリ、サーバー関数の呼び出しとそれが引き起こした実行、ユーザーインタラクションとそれが保持した書き込み — そしてリクエストのトレースをブラウザへ自力で運びます。
+このガイドでは、それぞれの有効化方法と、それぞれにかかるコストを示します。
 
-## Three builds
+## 3 つのビルド
 
-Solid ships three builds of every runtime package, selected by export condition.
+Solid はすべてのランタイムパッケージについて 3 つのビルドを提供しており、エクスポート条件で選択されます。
 
-| Build   | Condition     | Carries                                                                                                                                   | `OBSERVE` | `DEV`     |
+| ビルド  | 条件          | 含まれるもの                                                                                                                            | `OBSERVE` | `DEV`     |
 | ------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | --------- | --------- |
-| prod    | default       | The runtime and the error hooks.                                                                                                          | undefined | undefined |
-| observe | `observe`     | prod, plus the records channel, the diagnostics channel, the attribution slot, and the server's trace slot. No console output, no checks. | object    | undefined |
-| dev     | `development` | observe, plus the development checks and the console reporter. Unminified.                                                                | object    | object    |
+| prod    | default       | ランタイムとエラーフック。                                                                                                          | undefined | undefined |
+| observe | `observe`     | prod に加えて、レコードチャネル・診断チャネル・属性付けスロット・サーバーのトレーススロット。コンソール出力もチェックもなし。 | object    | undefined |
+| dev     | `development` | observe に加えて、開発用チェックとコンソールレポーター。未ミニファイ。                                                                | object    | object    |
 
-The builds nest: whatever works on the observe build works on the dev build.
-In Solid's size suite, the observe build's cap for a small client-rendered app is 16.80 KB against 15.25 KB for the production build (brotli), and enabling the attribution engine on top raises the cap to 27.25 KB; the engine is a separate entry, so an observe build that never imports it never ships it.
+ビルドは入れ子になっています。observe ビルドで動くものはすべて dev ビルドでも動きます。
+Solid のサイズスイートでは、小さなクライアントレンダリングアプリの上限は observe ビルドで 16.80 KB、本番ビルドで 15.25 KB（brotli）です。その上に属性付けエンジンを有効にすると上限は 27.25 KB に上がります。エンジンは別エントリーなので、それをインポートしない observe ビルドがそれを同梱することはありません。
 
-Opt into the observe build in the Vite plugin:
+observe ビルドへのオプトインは Vite プラグインで行います:
 
 ```ts title="vite.config.ts"
 import solid from "@solidjs/vite-plugin";
@@ -37,20 +37,20 @@ export default defineConfig({
 });
 ```
 
-`observe: true` adds the `observe` condition to every environment and turns on the compiler's `componentNames` option, so component labels such as `<Checkout>` survive minification and the paths below name components rather than `computed`.
-Under `vite dev` the `development` condition still wins; the dev build is a superset, so what you observe there holds in production.
-Without the plugin, set `resolve.conditions` in your bundler (or `node --conditions=observe` for an unbundled server) and the compiler option yourself.
+`observe: true` はすべての環境に `observe` 条件を追加し、コンパイラの `componentNames` オプションを有効にします。これにより `<Checkout>` のようなコンポーネントラベルがミニファイ後も残り、以下のパスは `computed` ではなくコンポーネント名を示します。
+`vite dev` では `development` 条件が依然として優先されます。dev ビルドは observe の上位集合なので、そこで観測した内容は本番でも成立します。
+プラグインを使わない場合は、バンドラーの `resolve.conditions`（バンドルしないサーバーなら `node --conditions=observe`）とコンパイラオプションを自分で設定します。
 
-:::note[Errors report on every build]
-The two error hooks are part of the runtime, not of `OBSERVE`.
-A production app with no observability tooling at all still gets them; the observe build is for the records and the traces.
+:::note[エラーはすべてのビルドで報告される]
+2 つのエラーフックは `OBSERVE` ではなくランタイムの一部です。
+オブザーバビリティツールを一切入れていない本番アプリでもフックは利用できます。observe ビルドはレコードとトレースのためのものです。
 :::
 
-## Hear the errors your boundaries catch
+## バウンダリが捕捉したエラーを受け取る
 
-In the browser, an error that reaches nothing halts the reactive system and is handed to `reportError`, which `window.onerror` and every error monitor already listen on.
-An error a boundary caught takes the other road: the fallback renders, the app keeps running, and no global handler hears about it.
-`configureClientErrors` is where the runtime reports that road:
+ブラウザでは、どこにも捕捉されなかったエラーはリアクティブシステムを停止させ、`reportError` に渡されます。`window.onerror` とすべてのエラーモニターはすでにこれをリッスンしています。
+バウンダリが捕捉したエラーは別の道を行きます。フォールバックがレンダリングされ、アプリは動き続け、どのグローバルハンドラーもそれを知りません。
+ランタイムがその道を報告する場所が `configureClientErrors` です:
 
 ```ts title="src/monitor.ts"
 import { configureClientErrors } from "solid-js";
@@ -65,17 +65,17 @@ configureClientErrors({
 });
 ```
 
-Click "Place order" with a broken price and the `Errored` fallback appears; the hook fires once, with `ownerPath` reading `<App> › <Checkout> › <OrderSummary> › computed` and `boundaryPath` reading `<App> › <Checkout> › <Errored>`.
-The two paths answer different questions: where the code broke, and what the shopper saw instead.
-A boundary's `reset()` recomputing the same failing node collects the same error object again and does not report it again.
-The paths are present where the runtime keeps owner names, which is the observe and dev builds; on the production build the hook still fires and the paths are `undefined`.
+価格が壊れた状態で「Place order」をクリックすると `Errored` のフォールバックが表示されます。フックは 1 回発火し、`ownerPath` は `<App> › <Checkout> › <OrderSummary> › computed`、`boundaryPath` は `<App> › <Checkout> › <Errored>` と読み取れます。
+2 つのパスは異なる問いに答えます。コードがどこで壊れたか、そして買い物客が代わりに何を見たかです。
+バウンダリの `reset()` が同じ失敗ノードを再計算すると同じエラーオブジェクトを再び捕捉しますが、再び報告されることはありません。
+これらのパスはランタイムがオーナー名を保持するビルド、つまり observe ビルドと dev ビルドで存在します。本番ビルドでもフックは発火しますが、パスは `undefined` です。
 
-A root can carry its own hook ahead of the ambient one: `render(App, el, { onError })` and `hydrate(App, el, { onError })` take the same function, and the nearest root wins.
+ルートには、グローバルなフックより先に独自のフックを持たせられます。`render(App, el, { onError })` と `hydrate(App, el, { onError })` は同じ関数を取り、最も近いルートが優先されます。
 
-## Hear every failure the server handles
+## サーバーが処理するすべての失敗を受け取る
 
-The server has more ways to handle a failure than the client, and a global handler sees none of them: an `Errored` fallback rendered into the stream, a `Loading` fragment that rejected and was handed to the client to re-render, a server function that threw, a hydration value that would not serialize, and the failure that fails the request.
-`configureServerErrors` hears all of them, once per error object, with the site that met it:
+サーバーはクライアントより多くの失敗処理方法を持っており、グローバルハンドラーはそのどれも見ません。ストリームにレンダリングされた `Errored` フォールバック、reject されて再レンダリングのためにクライアントへ渡された `Loading` フラグメント、例外を投げたサーバー関数、シリアライズできなかったハイドレーション値、そしてリクエスト自体を失敗させる失敗です。
+`configureServerErrors` はこれらすべてを、エラーオブジェクトごとに 1 回、その失敗に出会った箇所とともに受け取ります:
 
 ```ts title="src/instrument.ts"
 import { configureServerErrors } from "@solidjs/web";
@@ -96,27 +96,27 @@ configureServerErrors({
 });
 ```
 
-`kind` and `handling` say which road the failure took:
+`kind` と `handling` は失敗がどの道を通ったかを示します:
 
-| `kind`            | `handling`  | What happened                                                                       |
+| `kind`            | `handling`  | 起きたこと                                                                           |
 | ----------------- | ----------- | ----------------------------------------------------------------------------------- |
-| `render`          | `fallback`  | An `Errored` boundary rendered its fallback.                                        |
-| `render`          | `client`    | A `Loading` fragment rejected; the client re-renders that subtree.                  |
-| `render`          | `failed`    | Nothing contained it; the request fails.                                            |
-| `render`          | `serialize` | A value written to the hydration stream would not serialize.                        |
-| `server-function` | `thrown`    | The function threw. `direct` is `true` for an in-process call during a render.      |
-| `server-function` | `channel`   | A rejection escaped through a returned stream or iterable after the head committed. |
+| `render`          | `fallback`  | `Errored` バウンダリがフォールバックをレンダリングしました。                                        |
+| `render`          | `client`    | `Loading` フラグメントが reject されました。クライアントがそのサブツリーを再レンダリングします。                  |
+| `render`          | `failed`    | 何も受け止められませんでした。リクエストは失敗します。                                            |
+| `render`          | `serialize` | ハイドレーションストリームに書き込まれた値がシリアライズできませんでした。                        |
+| `server-function` | `thrown`    | 関数が例外を投げました。レンダリング中のインプロセス呼び出しでは `direct` が `true` になります。      |
+| `server-function` | `channel`   | head がコミットされた後、返されたストリームまたはイテラブルを通じて reject が抜け出しました。 |
 
-The hook runs inside the request scope, so `getRequestEvent()` works in it.
-`renderToStream(App, { onError })` and `renderToString(App, { onError })` take a per-request hook that wins over the ambient one for that request.
-A monitoring SDK's `init()` has to run before the modules it patches load; the plugin's [`start.instrument`](/building-apps/app-structure#loading-instrumentation-first) option is where a plugin-hosted app puts it, and the module above is the shape it takes.
+フックはリクエストスコープ内で実行されるため、その中で `getRequestEvent()` が使えます。
+`renderToStream(App, { onError })` と `renderToString(App, { onError })` はリクエスト単位のフックを取り、そのリクエストではグローバルなフックより優先されます。
+モニタリング SDK の `init()` は、パッチを当てるモジュールが読み込まれる前に実行しなければなりません。プラグインでホストされるアプリでは、プラグインの [`start.instrument`](/building-apps/app-structure#loading-instrumentation-first) オプションがその指定場所で、上のモジュールがその形になります。
 
-:::danger[The return value goes on the wire]
-The hook receives the error as thrown.
-What the client receives — the serialized error in an `Errored` fallback, the body of a failed server-function call — is the runtime's sanitized value, a generic `Error` outside the dev build.
-Return a value from the hook and that value replaces it.
-Return the error itself and its message, stack, and any secret they carry reach the browser.
-Return a reference the shopper can quote back to you, or nothing.
+:::danger[戻り値はワイヤーに乗る]
+フックは投げられたままのエラーを受け取ります。
+クライアントが受け取るもの — `Errored` フォールバック内のシリアライズされたエラーや、失敗したサーバー関数呼び出しのレスポンスボディ — はランタイムがサニタイズした値で、dev ビルド以外では汎用の `Error` です。
+フックから値を返すと、その値がクライアントに届く値を置き換えます。
+エラーそのものを返すと、そのメッセージ・スタック・そしてそれらが含むあらゆる秘密情報がブラウザに届きます。
+買い物客が問い合わせ時に提示できる参照を返すか、何も返さないでください。
 :::
 
 ```ts
@@ -129,11 +129,11 @@ configureServerErrors({
 });
 ```
 
-## Follow a request into the browser
+## リクエストをブラウザまで追跡する
 
-A request arrives with a W3C `traceparent` header, or without one.
-The server continues the trace it was given or originates one, and every `getTraceContext()` call during the request, in-process server-function calls included, reads the same context.
-Forward it from a server function to the services it calls:
+リクエストは W3C `traceparent` ヘッダー付きで、またはなしで到着します。
+サーバーは与えられたトレースを継続するか、新たに開始します。リクエスト中のすべての `getTraceContext()` 呼び出し（インプロセスのサーバー関数呼び出しを含む）は同じコンテキストを読み取ります。
+サーバー関数から、その先に呼び出すサービスへトレースを転送します:
 
 ```ts
 import { getTraceContext } from "@solidjs/web";
@@ -148,11 +148,11 @@ export async function chargeCard(orderId: string) {
 }
 ```
 
-The runtime also tells the browser which trace the page belongs to, on two carriers it already owns: a `Server-Timing` header on every response, and `<meta>` tags in an HTML shell's head, one per named entry.
-A frame stream and a server-function response have no `<head>`, so the header is what makes those joinable; no middleware rewrites the document.
-The browser is told when the incoming `traceparent` was sampled or when a provider answered; an unsampled or originated trace stays server-side, so a page with no tracing tool sees no change to its responses.
+ランタイムはまた、ページがどのトレースに属するかをブラウザに伝えます。自身がすでに持っている 2 つの担い手で、すべてのレスポンスの `Server-Timing` ヘッダーと、HTML シェルの head 内の `<meta>` タグ（名前付きエントリーごとに 1 つ）です。
+フレームストリームとサーバー関数レスポンスには `<head>` がないため、ヘッダーがそれらを結合可能にします。ドキュメントを書き換えるミドルウェアはありません。
+ブラウザに伝えられるのは、入ってきた `traceparent` がサンプリング済みだった場合か、プロバイダーが応答した場合です。サンプリングされていない、あるいはこちらで開始したトレースはサーバー側に留まるため、トレーシングツールのないページのレスポンスは変わりません。
 
-On the observe build, a tracing tool provides the trace instead of the header:
+observe ビルドでは、ヘッダー由来の導出の代わりにトレーシングツールがトレースを提供できます:
 
 ```ts
 import { OBSERVE } from "solid-js";
@@ -168,21 +168,21 @@ OBSERVE?.server.trace.provide((request) => {
 });
 ```
 
-The provider is called once per request, during the request, at the shell flush or the first `getTraceContext()` read, whichever comes first.
-The fields it returns replace the runtime's derivation; its `entries` merge by name over the runtime's `traceparent`; `undefined` leaves the derivation alone.
+プロバイダーはリクエストごとに 1 回、リクエスト中に、シェルのフラッシュ時か最初の `getTraceContext()` 読み取り時の、早い方で呼ばれます。
+返されたフィールドはランタイムの導出値を置き換えます。`entries` はランタイムの `traceparent` に名前でマージされ、`undefined` は導出をそのまま残します。
 
-## See what the runtime did
+## ランタイムが行ったことを見る
 
-`OBSERVE.records` delivers a plain record each time the runtime finishes something worth attributing, on both platforms:
+`OBSERVE.records` は、ランタイムが属性付けに値する何かを完了するたびに、両方のプラットフォームでプレーンなレコードを配送します:
 
-| Type           | Platform | One record per                                                                                       |
+| 型             | プラットフォーム | 1 レコードにつき                                                                                       |
 | -------------- | -------- | ---------------------------------------------------------------------------------------------------- |
-| `"boundary"`   | server   | A `Loading` boundary that waited during a render; one that rendered on its first pass emits nothing. |
-| `"invocation"` | server   | A server-function execution, from HTTP dispatch or an in-process call.                               |
-| `"call"`       | client   | A server-function call the page made, as the caller awaited it.                                      |
-| `"frame"`      | both     | A frame stream produced (server) or applied (client).                                                |
+| `"boundary"`   | server   | レンダリング中に待機した `Loading` バウンダリ。最初のパスでレンダリングできたものは何も発行しません。 |
+| `"invocation"` | server   | サーバー関数の実行（HTTP ディスパッチまたはインプロセス呼び出し）。                               |
+| `"call"`       | client   | ページが行い、呼び出し側が await したサーバー関数呼び出し。                                      |
+| `"frame"`      | both     | フレームストリームの生成（サーバー）または適用（クライアント）。                                                |
 
-Log the boundaries that kept a shopper waiting:
+買い物客を待たせたバウンダリをログに出します:
 
 ```ts
 import { OBSERVE } from "solid-js";
@@ -196,20 +196,20 @@ OBSERVE?.records.subscribe("boundary", (event) => {
 });
 ```
 
-Render `/orders` with a slow database and the line reads `<Loading> at <App> › <Orders> › <Loading> waited 640ms settled`.
-A record is data: ids, names, an outcome, `at` on the `performance.now()` clock, durations, counts.
-Anything live — the request, the response, the arguments, the error as thrown — travels in a second argument to the listener, never on the record, so a record can leave the process as it is.
-A client `"call"` and the server `"invocation"` it caused share an `id`; the difference between their durations is the wire.
-An invocation made during a boundary's render pass names that boundary, so a wait can be read as the calls it consisted of.
+遅いデータベースで `/orders` をレンダリングすると、その行は `<Loading> at <App> › <Orders> › <Loading> waited 640ms settled` と読み取れます。
+レコードはデータです。id、名前、結果、`performance.now()` 時計上の `at`、継続時間、回数が含まれます。
+生きているもの — リクエスト、レスポンス、引数、投げられたままのエラー — はすべてリスナーへの第 2 引数に乗り、レコードには乗りません。これによりレコードはそのままプロセスを出ることができます。
+クライアントの `"call"` とそれが引き起こしたサーバーの `"invocation"` は `id` を共有します。両者の継続時間の差がワイヤー上の時間です。
+バウンダリのレンダーパス中に行われた呼び出しはそのバウンダリを指名するため、待機をそれを構成した呼び出しとして読み解けます。
 
-Listeners run synchronously inside the runtime, the moment the record is complete.
-A listener must not write signals; one that throws is reported to the console and the others still run.
-Subscribe from a module that loads before the app; the channel exists once per process, so the subscription reaches records from every copy of the runtime a host bundles.
+リスナーはレコードが完成した瞬間に、ランタイム内で同期的に実行されます。
+リスナーはシグナルを書き込んではいけません。例外を投げたリスナーはコンソールに報告され、他のリスナーは引き続き実行されます。
+アプリより先に読み込まれるモジュールから購読してください。チャネルはプロセスごとに 1 つしか存在しないため、購読はホストがバンドルするランタイムのすべてのコピーからのレコードに届きます。
 
-## What each interaction cost
+## 各インタラクションに何がかかったか
 
-The attribution engine answers the second question from the opening: a click felt slow, and on what did it wait.
-It is the same engine [Debugging reactivity](/guides/debugging-reactivity#something-updates-too-often) uses in development, and on the observe build it runs in production when you enable it:
+属性付けエンジンは冒頭の 2 つ目の問い — クリックが遅く感じられたが、それは何を待っていたのか — に答えます。
+これは[リアクティビティのデバッグ](/guides/debugging-reactivity#something-updates-too-often)が開発時に使うのと同じエンジンで、observe ビルドでは有効にすると本番でも動きます:
 
 ```ts
 import { attribution } from "solid-js/attribution";
@@ -227,25 +227,25 @@ attribution.subscribe("interaction", (event) => {
 });
 ```
 
-Click "Place order" and the line reads `click on button#place-order "Place order" took 840ms to settle: ["placeOrder held 812ms"]`.
-An interaction record carries the handler's own time, the writes it made, the re-runs and creations they caused, when the last effect that traces back to it ran (`settledMs`), and the holds and navigations it performed, each settled before the interaction is.
-A hold names what blocked the write, how long, and whether the screen acknowledged the wait with `isPending`, `latest`, or an optimistic value; a hold nothing acknowledged is what the shopper experiences as a dead click.
-A router that wraps its location write in `OBSERVE.attribution.withOrigin` gives its navigations the matched route pattern as their name, so `/orders/:id` folds together across shoppers.
+「Place order」をクリックすると、その行は `click on button#place-order "Place order" took 840ms to settle: ["placeOrder held 812ms"]` と読み取れます。
+インタラクションレコードには、ハンドラー自身の時間、それが行った書き込み、書き込みが引き起こした再実行と作成、それに遡れる最後のエフェクトが実行された時点（`settledMs`）、そしてそれが実行したホールドとナビゲーション（それぞれインタラクションより先に確定します）が含まれます。
+ホールドは、書き込みをブロックしたもの、その期間、そして画面が `isPending`・`latest`・楽観的値で待機をユーザーに示したかどうかを示します。何にも示されなかったホールドは、買い物客が「反応しないクリック」として経験するものです。
+ロケーション書き込みを `OBSERVE.attribution.withOrigin` でラップするルーターは、そのナビゲーションにマッチしたルートパターンを名前として与えます。これにより `/orders/:id` が買い物客をまたいで 1 つにまとめられます。
 
-The engine records; the tables are separate.
-`feedback()`, `costs()`, `why()`, and `subscriptions()` are their own exports of `solid-js/attribution`, so a build that only subscribes to records ships none of them.
+エンジンは記録するだけで、集計テーブルは別物です。
+`feedback()`・`costs()`・`why()`・`subscriptions()` は `solid-js/attribution` の独立したエクスポートなので、レコードの購読だけを行うビルドはそれらを一切同梱しません。
 
-## What leaves the process
+## プロセスから出ていくもの
 
-Records name things: component labels, the `name` option you gave a scope, store paths, route patterns, server-function ids.
-Beyond names, four fields carry data from the page, and a tool that ships records off the device decides what to do with each:
+レコードは名前を記録します。コンポーネントラベル、スコープに与えた `name` オプション、ストアパス、ルートパターン、サーバー関数 id です。
+名前以外に、4 つのフィールドがページからのデータを運びます。レコードをデバイスの外に送るツールは、それぞれをどう扱うかを決めます:
 
-- `target` on an interaction and on a call's origin: the element as `tag#id "text"`, with up to 30 characters of its text content.
-- `prev` and `value` on a change record and on a held write: previews of the values, strings cut at 40 characters.
-- `to`, `from`, and `params` on a navigation: the concrete URL and the bound parameters.
-- `data.error` on the server's render-error findings: the error as thrown.
+- インタラクションとコールの origin にある `target`: `tag#id "text"` 形式の要素で、テキストコンテンツは最大 30 文字。
+- 変更レコードと保持された書き込みにある `prev` と `value`: 値のプレビューで、文字列は 40 文字で切られます。
+- ナビゲーションにある `to`・`from`・`params`: 実際の URL とバインドされたパラメーター。
+- サーバーのレンダーエラー検出結果にある `data.error`: 投げられたままのエラー。
 
-A tool that renders inside the app it watches — a diagnostics panel, devtools — marks its root as its own, so its effects and stores never appear as findings about the app:
+監視対象のアプリの中でレンダリングするツール — 診断パネルや devtools — は、自身のルートを自分のものとしてマークします。これによりそのツールのエフェクトやストアがアプリについての検出結果として現れることはありません:
 
 ```ts
 import { createRoot, getOwner, OBSERVE } from "solid-js";
@@ -256,42 +256,42 @@ createRoot(() => {
 });
 ```
 
-## Common problems
+## よくある問題
 
-### `OBSERVE` is `undefined` in production
+### 本番で `OBSERVE` が `undefined` になる
 
-The production build was resolved.
-Check that the bundler applied the `observe` condition to the environment that is undefined; `solid({ observe: true })` applies it to every environment, and a custom server that runs unbundled needs `node --conditions=observe`.
+本番ビルドが解決されてしまっています。
+バンドラーが `undefined` になっている環境に `observe` 条件を適用しているか確認してください。`solid({ observe: true })` はすべての環境に適用し、バンドルしないカスタムサーバーには `node --conditions=observe` が必要です。
 
-### The paths say `computed` and `effect` but never a component
+### パスが `computed` と `effect` を示し、コンポーネント名が出ない
 
-The compiler's `componentNames` option is off, so components have no labels to record.
-`solid({ observe: true })` turns it on; with another setup, pass `componentNames: true` to the compiler.
-Under `vite dev` the labels are always present.
+コンパイラの `componentNames` オプションがオフのため、コンポーネントに記録すべきラベルがありません。
+`solid({ observe: true })` で有効になります。他のセットアップでは、コンパイラに `componentNames: true` を渡してください。
+`vite dev` ではラベルは常に存在します。
 
-### No `Server-Timing` entry and no `<meta>` on the page
+### `Server-Timing` エントリーもページの `<meta>` もない
 
-Nothing told the runtime the trace was recorded: the incoming `traceparent` had no sampled flag, or there was none and no provider answered.
-Install a provider, or send a sampled `traceparent` from the edge.
+ランタイムにトレースが記録されたことを伝えるものが何もありませんでした。入ってきた `traceparent` に sampled フラグがなかったか、`traceparent` が存在せずプロバイダーも応答しなかったかのどちらかです。
+プロバイダーをインストールするか、エッジからサンプリング済みの `traceparent` を送ってください。
 
-### My tool's own effects show up as findings
+### 自作ツールのエフェクトが検出結果として現れる
 
-Mark the tool's root with `OBSERVE.exclude(getOwner()!)` as it is created.
-Writes into the excluded subtree stay excluded wherever they come from; do not route them through `runWithOwner`, which makes them writes in an owned scope.
+ツールのルートを作成時に `OBSERVE.exclude(getOwner()!)` でマークしてください。
+除外されたサブツリーへの書き込みは、どこから来ても除外されたままです。それらを `runWithOwner` 経由で回さないでください。オーナー付きスコープでの書き込みになってしまいます。
 
-## Recap
+## まとめ
 
-- Errors report on every build through `configureClientErrors` and `configureServerErrors`, once per error object, with where the error was thrown (`ownerPath`) and where it was met (`boundaryPath`).
-- The server hook's return value is what the client receives; return a reference, not the error.
-- Records, traces, and attribution need the observe build: `solid({ observe: true })`, or the `observe` condition and `componentNames` by hand.
-- `OBSERVE.records` delivers settled, serializable records; live handles travel beside them, and a listener must not write signals.
-- The runtime carries a sampled or provided trace into the browser on `Server-Timing` and `<meta>`; no middleware.
-- `attribution.enable()` then `attribution.subscribe("interaction", …)` says what each click waited on; the fold tables are separate exports you pay for only when you import them.
-- Mark a tool's own root with `OBSERVE.exclude` so it never reports on itself.
+- エラーはすべてのビルドで `configureClientErrors` と `configureServerErrors` を通じて、エラーオブジェクトごとに 1 回、投げられた場所（`ownerPath`）と捕捉された場所（`boundaryPath`）とともに報告されます。
+- サーバーフックの戻り値がクライアントの受け取るものです。エラーではなく参照を返してください。
+- レコード・トレース・属性付けには observe ビルドが必要です。`solid({ observe: true })`、または手動で `observe` 条件と `componentNames` を設定します。
+- `OBSERVE.records` は確定済みでシリアライズ可能なレコードを配送します。生きたハンドルはレコードの横を通り、リスナーはシグナルを書き込んではいけません。
+- ランタイムはサンプリング済みまたは提供されたトレースを `Server-Timing` と `<meta>` でブラウザへ運びます。ミドルウェアは不要です。
+- `attribution.enable()` の後に `attribution.subscribe("interaction", …)` で、各クリックが何を待っていたかが分かります。集計テーブルは別エクスポートで、インポートしたときだけコストがかかります。
+- ツール自身のルートを `OBSERVE.exclude` でマークし、ツールが自分自身を報告しないようにします。
 
-## Next steps
+## 次のステップ
 
-- [Build an observability adapter](/guides/observability-adapters): the contracts a tool author relies on, for an error monitor or a tracing SDK.
-- [Debugging reactivity](/guides/debugging-reactivity): the same records read at a console in development, and the diagnostics they feed.
-- [Arguments and security](/building-apps/server-functions/arguments-and-security): what a server function can trust from the request, including the trace it forwards.
-- [Boundaries](/concepts/boundaries): what `Errored` and `Loading` do with a failure before the hook hears about it.
+- [オブザーバビリティアダプターを作る](/guides/observability-adapters): エラーモニターやトレーシング SDK のために、ツール作者が依拠する契約。
+- [リアクティビティのデバッグ](/guides/debugging-reactivity): 開発時にコンソールで読む同じレコードと、それらが供給する診断。
+- [引数とセキュリティ](/building-apps/server-functions/arguments-and-security): サーバー関数がリクエストから信頼してよいもの（転送するトレースを含む）。
+- [バウンダリ](/concepts/boundaries): フックが知る前に `Errored` と `Loading` が失敗に対して行うこと。
