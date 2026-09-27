@@ -1,39 +1,39 @@
 ---
-title: "From Solid 1.x"
+title: "Solid 1.x から"
 version: "2.0"
-description: "Migrate a Solid 1.x application to Solid 2, including package imports, reactivity, effects, stores, async data, rendering, and tests."
+description: "Solid 1.x アプリケーションを Solid 2 に移行します。パッケージのインポート、リアクティビティ、エフェクト、ストア、非同期データ、レンダリング、テストを含みます。"
 source_repo: "solidjs/solid"
 source_ref: "next"
 source_path: "documentation/solid-2.0/MIGRATION.md"
 ---
 
-Solid 2 changes the execution model as well as the API names.
-Plan the migration as an application-level upgrade, then convert one subsystem at a time.
+Solid 2 では API 名だけでなく実行モデルも変わります。
+移行はアプリケーションレベルのアップグレードとして計画し、その後でサブシステムを 1 つずつ変換してください。
 
-## Migration order and compatibility boundary
+## 移行の順序と互換性の境界
 
-Upgrade the runtime, renderer, JSX compiler, and framework integrations together.
-Solid 2 does not provide the old `solid-js/web` or `solid-js/store` package exports, and `@solidjs/web` requires Solid 2 as a peer.
-A library that imports removed paths or depends on Solid 1 effect, store, or resource behavior needs a Solid 2-compatible release.
+ランタイム、レンダラー、JSX コンパイラ、フレームワーク連携はまとめてアップグレードします。
+Solid 2 には従来の `solid-js/web` や `solid-js/store` というパッケージエクスポートがなく、`@solidjs/web` は Solid 2 を peer として要求します。
+削除されたパスをインポートしているライブラリや、Solid 1 のエフェクト・ストア・リソースの挙動に依存しているライブラリには、Solid 2 対応のリリースが必要です。
 
-Use this order:
+次の順序で進めます:
 
-1. Create a migration branch and record the passing Solid 1 test, client-build, and server-render baselines.
-2. Upgrade `solid-js`, the renderer package, the Vite plugin (`@solidjs/vite-plugin` replaces `vite-plugin-solid`), and framework adapters as one dependency set.
-3. Move imports and JSX types until TypeScript and the production build resolve the new package boundary.
-4. Convert setter timing, effects, lifecycle code, and writes inside reactive scopes.
-5. Convert stores and store utilities.
-6. Replace resources, removed transition APIs, mutations, and async boundaries.
-7. Update client rendering, server-side rendering (SSR), hydration, and host integrations.
-8. Run tests in development mode to expose Solid 2 diagnostics, then verify production client and server builds.
+1. 移行用のブランチを作成し、Solid 1 でパスしているテスト・クライアントビルド・サーバーレンダーのベースラインを記録します。
+2. `solid-js`、レンダラーパッケージ、Vite プラグイン（`vite-plugin-solid` は `@solidjs/vite-plugin` に置き換わります）、フレームワークアダプターを 1 つの依存関係セットとしてアップグレードします。
+3. TypeScript と本番ビルドが新しいパッケージ境界を解決できるようになるまで、インポートと JSX 型を移します。
+4. セッターのタイミング、エフェクト、ライフサイクルコード、リアクティブスコープ内の書き込みを変換します。
+5. ストアとストアユーティリティを変換します。
+6. リソース、削除されたトランジション API、ミューテーション、非同期バウンダリを置き換えます。
+7. クライアントレンダリング、サーバーサイドレンダリング（SSR）、ハイドレーション、ホスト連携を更新します。
+8. 開発モードでテストを実行して Solid 2 の診断を洗い出し、その後で本番のクライアントビルドとサーバービルドを検証します。
 
-Do not use a passing type check as proof that an integration is compatible.
-Compiler transforms, root event delegation, hydration IDs, and async scheduling are runtime contracts.
+型チェックが通ったことを、連携の互換性の証明として扱わないでください。
+コンパイラ変換、ルートでのイベントデリゲーション、ハイドレーション ID、非同期スケジューリングはランタイムの契約です。
 
-## Move packages and JSX ownership
+## パッケージと JSX の所有権を移す
 
-Web rendering and web JSX types moved out of `solid-js`.
-Store APIs moved in the other direction and are now exported from `solid-js`.
+Web レンダリングと Web 用の JSX 型は `solid-js` の外に移動しました。
+ストア API は逆方向に移動し、現在は `solid-js` からエクスポートされています。
 
 ```ts
 // Solid 1
@@ -45,7 +45,7 @@ import { createStore, reconcile } from "solid-js";
 import { hydrate, render } from "@solidjs/web";
 ```
 
-Update web projects to use the renderer as the JSX type owner:
+Web プロジェクトを更新し、レンダラーを JSX 型の所有者として使うようにします:
 
 ```json
 {
@@ -56,24 +56,24 @@ Update web projects to use the renderer as the JSX type owner:
 }
 ```
 
-Import DOM-specific `JSX` and `ComponentProps` types from `@solidjs/web`.
-Use renderer-neutral types such as `Component` and `Element` from `solid-js` when an API does not depend on DOM JSX.
+DOM 固有の `JSX` 型や `ComponentProps` 型は `@solidjs/web` からインポートします。
+API が DOM の JSX に依存しない場合は、`solid-js` から `Component` や `Element` のようなレンダラー中立の型を使います。
 
-The alternate renderers also moved:
+代替レンダラーも移動しています:
 
-- `solid-js/h` moved to `@solidjs/h`.
-- `solid-js/html` moved to `@solidjs/html`.
-- `solid-js/universal` moved to `@solidjs/universal`.
-- `solid-js/jsx-runtime` and `solid-js/jsx-dev-runtime` moved to renderer-owned entries such as `@solidjs/web/jsx-runtime`.
+- `solid-js/h` は `@solidjs/h` に移動しました。
+- `solid-js/html` は `@solidjs/html` に移動しました。
+- `solid-js/universal` は `@solidjs/universal` に移動しました。
+- `solid-js/jsx-runtime` と `solid-js/jsx-dev-runtime` は、`@solidjs/web/jsx-runtime` のようなレンダラー側のエントリーに移動しました。
 
-Search source files, generated code, test configuration, package export maps, and declaration files for the old paths.
+ソースファイル、生成コード、テスト設定、パッケージのエクスポートマップ、宣言ファイルを調べ、古いパスを検索してください。
 
-## Convert signals and staged writes
+## シグナルと段階的書き込みを変換する
 
-The getter and setter pair from [`createSignal`](/reference/solid-js/reactivity/create-signal) remains.
-Setter visibility changed.
-Solid 2 stages ordinary writes and commits the reactive queue on the next microtask.
-A read immediately after a setter returns the last committed value.
+[`createSignal`](/reference/solid-js/reactivity/create-signal) が返すゲッターとセッターのペアは変わりません。
+変わったのはセッターの書き込みが見えるタイミングです。
+Solid 2 では通常の書き込みはいったんステージされ、リアクティブキューは次のマイクロタスクでコミットされます。
+セッターの直後に読み取ると、最後にコミットされた値が返ります。
 
 ```ts
 const [count, setCount] = createSignal(0);
@@ -85,22 +85,22 @@ flush();
 count(); // 1
 ```
 
-Most event handlers need no explicit flush.
-Add [`flush()`](/reference/solid-js/reactivity/flush) only at an imperative boundary that must observe updated reactive state or DOM before the next microtask.
-Tests are a common example.
-`flush(fn)` runs the writes in a synchronous flush scope and drains the queue before it returns.
+ほとんどのイベントハンドラーでは明示的なフラッシュは不要です。
+[`flush()`](/reference/solid-js/reactivity/flush) を追加するのは、次のマイクロタスクより前に更新後のリアクティブな状態や DOM を監視しなければならない命令的な境界だけにしてください。
+テストは代表的な例です。
+`flush(fn)` は同期フラッシュスコープ内で書き込みを実行し、戻る前にキューを空にします。
 
-Remove `batch`.
-Consecutive writes already share the default microtask batch.
-Replacing each `batch` call with `flush` would change deferred work into synchronous work.
+`batch` は削除してください。
+連続した書き込みは、すでにデフォルトのマイクロタスクバッチを共有しています。
+各 `batch` 呼び出しを `flush` に置き換えると、遅延処理が同期処理に変わってしまいます。
 
-Development mode also rejects writes in ordinary owned scopes such as component bodies and memo computations.
-Replace write-back derivations with [`createMemo`](/reference/solid-js/reactivity/create-memo), and invoke setters from event handlers, actions, or effect effect functions.
-Reserve `ownedWrite: true` for an internal signal that intentionally accepts in-scope writes.
+開発モードでは、コンポーネント本体やメモ計算のような通常のオーナー付きスコープ内での書き込みも拒否されます。
+書き戻し型の派生は [`createMemo`](/reference/solid-js/reactivity/create-memo) に置き換え、セッターはイベントハンドラー、アクション、エフェクトのエフェクト関数から呼び出してください。
+`ownedWrite: true` は、スコープ内での書き込みを意図的に受け付ける内部シグナルに限定してください。
 
-Solid 2 warns when a component body reads a reactive value at top level because the read is outside a tracking scope.
-Keep reactive props and store properties inside JSX expressions or computations.
-Use [`untrack`](/reference/solid-js/reactivity/untrack) only for an intentional one-time read.
+コンポーネント本体がトップレベルでリアクティブな値を読み取ると、その読み取りが追跡スコープの外にあるため Solid 2 は警告します。
+リアクティブな props やストアのプロパティは、JSX 式または計算の中に保持してください。
+[`untrack`](/reference/solid-js/reactivity/untrack) は意図的な一回限りの読み取りにのみ使います。
 
 ```tsx
 // Solid 1 code that loses reactivity in Solid 2
@@ -114,12 +114,12 @@ function Heading(props: { title: string }) {
 }
 ```
 
-Function-form `createSignal(fn)` is new.
-It creates a writable derived signal and can replace a derivation that previously wrote back into another signal.
+関数形式の `createSignal(fn)` は新機能です。
+書き込み可能な派生シグナルを作成するもので、以前は別のシグナルへ書き戻していた派生を置き換えられます。
 
-## Split effects into compute and effect phases
+## エフェクトを計算フェーズとエフェクトフェーズに分割する
 
-[`createEffect`](/reference/solid-js/reactivity/create-effect) now separates dependency tracking from the side effect:
+[`createEffect`](/reference/solid-js/reactivity/create-effect) は、依存関係の追跡と副作用を分離するようになりました:
 
 ```ts
 // Solid 1
@@ -136,9 +136,9 @@ createEffect(
 );
 ```
 
-The compute function tracks reactive reads and must remain free of application writes.
-The effect function is untracked, may perform imperative work, and may return a cleanup function.
-Extract store properties in the compute phase instead of passing a store proxy through and reading it in the untracked effect phase.
+計算関数はリアクティブな読み取りを追跡し、アプリケーションの書き込みを含まない状態を保つ必要があります。
+エフェクト関数は追跡されず、命令的な処理を実行でき、クリーンアップ関数を返すことができます。
+ストアのプロキシをそのまま渡して追跡されないエフェクトフェーズで読み取るのではなく、計算フェーズでストアのプロパティを取り出してください。
 
 ```ts
 createEffect(
@@ -147,7 +147,7 @@ createEffect(
 );
 ```
 
-Return effect cleanup from the effect function:
+エフェクトのクリーンアップはエフェクト関数から返します:
 
 ```ts
 createEffect(
@@ -159,25 +159,25 @@ createEffect(
 );
 ```
 
-The Solid 1 `initialValue` argument is removed from `createEffect` and `createMemo`.
-The compute function receives `prev`, which is `undefined` on its first run.
-Use a default parameter when the computation needs a first previous value.
-The second `createMemo` argument is now its options object.
+Solid 1 の `initialValue` 引数は `createEffect` と `createMemo` から削除されました。
+計算関数は `prev` を受け取りますが、初回実行時は `undefined` です。
+計算に最初の前回値が必要な場合は、デフォルトパラメーターを使ってください。
+`createMemo` の第 2 引数は、現在はオプションオブジェクトです。
 
-Replace common lifecycle and effect helpers as follows:
+よく使うライフサイクルとエフェクトのヘルパーは、次のように置き換えます:
 
-- Replace `on(...)` with the compute function and use the effect `defer` option when needed.
-- Replace `onMount` with [`onSettled`](/reference/solid-js/lifecycle-actions/on-settled) and return cleanup from its callback.
-- Replace effect-local `onCleanup` calls with cleanup returned from the effect function.
-- Use `createTrackedEffect` only when one tracked callback is required.
-  It and `onSettled` cannot create nested primitives.
-- Replace `catchError` or `onError` with an [`Errored`](/reference/solid-js/components-jsx/errored) boundary or the effect bundle `error` callback.
+- `on(...)` は計算関数に置き換え、必要に応じてエフェクトの `defer` オプションを使います。
+- `onMount` は [`onSettled`](/reference/solid-js/lifecycle-actions/on-settled) に置き換え、そのコールバックからクリーンアップを返します。
+- エフェクト内の `onCleanup` 呼び出しは、エフェクト関数から返すクリーンアップに置き換えます。
+- `createTrackedEffect` は、追跡されるコールバックが 1 つだけ必要な場合にのみ使います。
+  これと `onSettled` はネストされたプリミティブを作成できません。
+- `catchError` や `onError` は、[`Errored`](/reference/solid-js/components-jsx/errored) バウンダリまたはエフェクトバンドルの `error` コールバックに置き換えます。
 
-## Convert stores to draft setters
+## ストアをドラフトセッターに変換する
 
-[`createStore`](/reference/solid-js/stores/create-store) still returns a read-only store and its setter.
-The setter now receives a mutable draft.
-This preserves the property-level model from Solid 1 while making draft mutation the default update form.
+[`createStore`](/reference/solid-js/stores/create-store) は引き続き、読み取り専用のストアとそのセッターを返します。
+セッターはミュータブルなドラフトを受け取るようになりました。
+これにより、Solid 1 のプロパティ単位のモデルを維持しつつ、ドラフトへの変更がデフォルトの更新形式になります。
 
 ```ts
 // Solid 1
@@ -189,20 +189,20 @@ setState((draft) => {
 });
 ```
 
-Delete `produce(...)` wrappers and pass the producer body directly to the setter.
-Replace `createMutable` and `modifyMutable` with `createStore` and explicit draft setters.
-Store writes follow the same staged-write timing as signals.
+`produce(...)` のラッパーは削除し、プロデューサーの本体をそのままセッターに渡してください。
+`createMutable` と `modifyMutable` は、`createStore` と明示的なドラフトセッターに置き換えます。
+ストアへの書き込みは、シグナルと同じ段階的書き込みのタイミングに従います。
 
-[`storePath`](/reference/solid-js/advanced/store-advanced/store-path) is a migration helper for path setters that cannot be converted at once:
+[`storePath`](/reference/solid-js/advanced/store-advanced/store-path) は、一括で変換できないパスセッター向けの移行ヘルパーです:
 
 ```ts
 setState(storePath("user", "address", "city", "Paris"));
 ```
 
-Prefer draft setters for new code.
-`storePath` also supports indexed, filtered, and ranged paths, so preserve the original path semantics when converting complex setters.
+新しいコードではドラフトセッターを優先してください。
+`storePath` はインデックス指定・フィルター指定・範囲指定のパスもサポートしているため、複雑なセッターを変換する際は元のパスセマンティクスを維持してください。
 
-`reconcile` now runs against the selected draft:
+`reconcile` は選択されたドラフトに対して実行されるようになりました:
 
 ```ts
 // Solid 1
@@ -214,21 +214,21 @@ setState((draft) => {
 });
 ```
 
-Review these utility changes:
+以下のユーティリティの変更も確認してください:
 
-- Replace `unwrap(store)` with [`snapshot(store)`](/reference/solid-js/advanced/store-advanced/snapshot) when serialization or external code needs a plain non-reactive value.
-- Replace `mergeProps` with [`merge`](/reference/solid-js/stores/merge).
-  `undefined` is an explicit overriding value in `merge`.
-- Replace `splitProps(props, ["a", "b"])` with [`omit(props, "a", "b")`](/reference/solid-js/stores/omit).
-- Replace selector-shaped state with [`createProjection`](/reference/solid-js/stores/create-projection) or function-form `createStore`.
+- シリアライズや外部コードがプレーンな非リアクティブな値を必要とする場合は、`unwrap(store)` を [`snapshot(store)`](/reference/solid-js/advanced/store-advanced/snapshot) に置き換えます。
+- `mergeProps` は [`merge`](/reference/solid-js/stores/merge) に置き換えます。
+  `merge` では `undefined` が明示的な上書き値として扱われます。
+- `splitProps(props, ["a", "b"])` は [`omit(props, "a", "b")`](/reference/solid-js/stores/omit) に置き換えます。
+- セレクター型の状態は、[`createProjection`](/reference/solid-js/stores/create-projection) または関数形式の `createStore` に置き換えます。
 
-Use [`deep(store)`](/reference/solid-js/advanced/store-advanced/deep) in an effect compute phase when the effect must subscribe to every nested property.
-Use `snapshot(store)` when the effect needs the current plain value without subscribing to the store.
+エフェクトがネストされたすべてのプロパティを購読する必要がある場合は、エフェクトの計算フェーズで [`deep(store)`](/reference/solid-js/advanced/store-advanced/deep) を使います。
+ストアを購読せずに現在のプレーンな値が必要な場合は `snapshot(store)` を使います。
 
-## Replace resources with async computations
+## リソースを非同期計算に置き換える
 
-Solid 2 computations accept promises and async iterables.
-Replace a basic `createResource` with an async memo:
+Solid 2 の計算は Promise と非同期イテラブルを受け付けます。
+基本的な `createResource` は非同期メモに置き換えます:
 
 ```ts
 // Solid 1
@@ -238,7 +238,7 @@ const [user] = createResource(userId, fetchUser);
 const user = createMemo(() => fetchUser(userId()));
 ```
 
-Place reads that can be initially unresolved under [`Loading`](/reference/solid-js/components-jsx/loading):
+初期状態で未解決になり得る読み取りは、[`Loading`](/reference/solid-js/components-jsx/loading) の下に配置します:
 
 ```tsx
 <Loading fallback={<UserSkeleton />}>
@@ -246,43 +246,43 @@ Place reads that can be initially unresolved under [`Loading`](/reference/solid-
 </Loading>
 ```
 
-This is the primary first-load model.
-The boundary owns branch readiness and renders its fallback until the required reads settle.
-After content has rendered, a later update is held and keeps the committed content visible.
+これが初回ロードの基本モデルです。
+バウンダリが分岐の準備状態を管理し、必要な読み取りが確定するまでフォールバックをレンダーします。
+コンテンツがレンダーされた後の更新は保留され、コミット済みのコンテンツが表示され続けます。
 
-:::caution[Async computations change when the screen updates]
-A write to an input of an async computation is held until that computation has its next answer, and everything else in the same update waits with it.
-Solid 1 resources and effect-based fetching never did this; each consumer updated on its own schedule.
-An application that converts all of its fetching at once inherits the new behavior everywhere, and a shared input such as a period selector then waits for the slowest fetch that reads it.
-[Data fetching from Solid 1](/migration/data-fetching-from-solid-1) shows how to keep each pattern working unchanged first, then convert one fetch at a time and choose the refetch behavior per fetch.
+:::caution[非同期計算は画面が更新されるタイミングを変えます]
+非同期計算の入力への書き込みは、その計算が次の答えを得るまで保留され、同じ更新に含まれる他のすべても一緒に待機します。
+Solid 1 のリソースやエフェクトベースのフェッチではこのようなことはなく、各コンシューマーがそれぞれのスケジュールで更新されていました。
+すべてのフェッチを一度に変換したアプリケーションはどこでも新しい動作を引き継ぎ、期間セレクターのような共有入力は、それを読み取る最も遅いフェッチを待つことになります。
+[Solid 1 からのデータフェッチ](/migration/data-fetching-from-solid-1)では、まず各パターンを変えずに動かし続ける方法を示し、その後で一度に 1 つのフェッチずつ変換し、フェッチごとにリフェッチの挙動を選択します。
 :::
 
-The properties and actions on a Solid 1 resource become separate operations:
+Solid 1 のリソースが持っていたプロパティとアクションは、個別の操作になります:
 
-- Replace `resource.loading` with a `Loading` boundary for initial readiness and [`isPending(() => resource())`](/reference/solid-js/reactivity/is-pending) for an in-flight changed answer.
-- Replace `resource.error` with an `Errored` boundary or an effect `error` callback.
-- Replace `refetch()` with [`refresh(resource)`](/reference/solid-js/lifecycle-actions/refresh).
-- Replace `mutate()` with an action and [`createOptimistic`](/reference/solid-js/reactivity/create-optimistic) or [`createOptimisticStore`](/reference/solid-js/stores/create-optimistic-store).
-- Replace `resource.latest` with [`latest(resource)`](/reference/solid-js/reactivity/latest) when imperative code must inspect an in-flight value.
+- `resource.loading` は、初期の準備状態には `Loading` バウンダリ、処理中の変更された答えには [`isPending(() => resource())`](/reference/solid-js/reactivity/is-pending) に置き換えます。
+- `resource.error` は `Errored` バウンダリまたはエフェクトの `error` コールバックに置き換えます。
+- `refetch()` は [`refresh(resource)`](/reference/solid-js/lifecycle-actions/refresh) に置き換えます。
+- `mutate()` は、アクションと [`createOptimistic`](/reference/solid-js/reactivity/create-optimistic) または [`createOptimisticStore`](/reference/solid-js/stores/create-optimistic-store) に置き換えます。
+- 命令的なコードが処理中の値を調べる必要がある場合は、`resource.latest` を [`latest(resource)`](/reference/solid-js/reactivity/latest) に置き換えます。
 
-A bare `refresh()` re-asks the same question without making `isPending` true.
-If the refresh must present as pending, call [`affects(target)`](/reference/solid-js/lifecycle-actions/affects) in the surrounding action before `refresh(target)`.
-Use a mutation-specific optimistic flag when the UI needs to show the progress of the mutation itself.
+素の `refresh()` は、`isPending` を true にせずに同じ問いを再度発行します。
+リフレッシュを保留中として表示する必要がある場合は、周囲のアクション内で `refresh(target)` の前に [`affects(target)`](/reference/solid-js/lifecycle-actions/affects) を呼び出します。
+UI がミューテーション自体の進行を表示する必要がある場合は、ミューテーション専用の楽観的フラグを使います。
 
-`loadingValue` and the store option `seedLoadingValue` declare a placeholder that answers for the source before its first result.
-Use them when provisional data should render through the same UI as the final data, or when a Solid 1 `undefined` check must stay in the JSX.
-The declared value prevents first-flight suspension and keeps `isPending` false until the first real answer arrives.
-Use `Loading` when provisional data cannot truthfully have the final value's shape.
+`loadingValue` とストアオプションの `seedLoadingValue` は、最初の結果が来る前にソースの代わりに答えるプレースホルダーを宣言します。
+暫定データを最終データと同じ UI でレンダーしたい場合や、Solid 1 の `undefined` チェックを JSX に残す必要がある場合に使います。
+宣言された値は初回のサスペンドを防ぎ、最初の本物の答えが届くまで `isPending` を false に保ちます。
+暫定データが最終値の形状をそのまま持てない場合は `Loading` を使います。
 
-## Convert mutations and remove transition APIs
+## ミューテーションを変換し、トランジション API を削除する
 
-Remove `startTransition` and `useTransition`.
-Solid 2 coordinates async computations through the graph.
-Use `Loading` for unresolved branches, `isPending` for an unrevealed changed answer, and optimistic primitives for tentative mutation state.
+`startTransition` と `useTransition` は削除します。
+Solid 2 はグラフを通じて非同期計算を調整します。
+未解決の分岐には `Loading`、公開されていない変更後の答えには `isPending`、暫定的なミューテーション状態には楽観的プリミティブを使います。
 
-[`action`](/reference/solid-js/lifecycle-actions/action) is for imperative workflows whose writes cross an async gap.
-An action is a generator or async generator and returns a promise.
-Writes to ordinary signals and stores remain held by the transaction, while optimistic writes are visible and revert to their derived or base value when the transaction settles.
+[`action`](/reference/solid-js/lifecycle-actions/action) は、書き込みが非同期の境界をまたぐ命令的なワークフロー向けです。
+アクションはジェネレーターまたは非同期ジェネレーターであり、Promise を返します。
+通常のシグナルやストアへの書き込みはトランザクションに保持されたままになりますが、楽観的な書き込みは表示され、トランザクションが確定すると派生値またはベース値に戻ります。
 
 ```ts
 const [todos, setTodos] = createOptimisticStore(fetchTodos, []);
@@ -296,97 +296,97 @@ const addTodo = action(function* (todo: Todo) {
 });
 ```
 
-Yield promises to preserve the action transaction.
-If an async generator uses `await` for a typed result, add a bare `yield` before later writes to re-enter the transaction.
-Do not call `flush()` inside an action because it drains the transaction step.
-Invoke actions from event handlers or another imperative scope, not from a component or computation body.
+アクションのトランザクションを維持するには Promise を yield してください。
+非同期ジェネレーターが型付きの結果に `await` を使う場合は、後続の書き込みの前に素の `yield` を置いてトランザクションに再入室してください。
+アクション内で `flush()` を呼び出さないでください。トランザクションのステップを空にしてしまいます。
+アクションはイベントハンドラーや他の命令的スコープから呼び出し、コンポーネントや計算の本体からは呼び出さないでください。
 
-Read more about the unified model in [Async reactivity](/concepts/async-reactivity).
+統合されたモデルの詳細は[非同期リアクティビティ](/concepts/async-reactivity)を参照してください。
 
-## Update boundaries, control flow, and JSX
+## バウンダリ、制御フロー、JSX を更新する
 
-Apply these direct UI migrations:
+以下の UI 移行を直接適用します:
 
-- Replace `Suspense` with `Loading`.
-- Replace `ErrorBoundary` with `Errored`.
-  Its function fallback receives an error accessor, so read the error with `error()`.
-- Replace `SuspenseList` with [`Reveal`](/reference/solid-js/components-jsx/reveal).
-- Replace `Index` with [`For keyed={false}`](/reference/solid-js/components-jsx/for).
-  The item is an accessor and the index is a stable number in this mode.
-- Replace `Context.Provider` with the context component: `<Theme value={value}>`.
-- Replace `<Dynamic component={source} {...props} />` with a component from [`dynamic()`](/reference/solid-web/components/dynamic): `const Comp = dynamic(() => source)`, then `<Comp {...props} />`.
-  `Dynamic` is deprecated.
-  Create the component once, outside the JSX, and render it wherever it is needed; a falsy source renders nothing, as before.
-- Replace direct `createDynamic(source, props)` calls with `dynamic(source)`.
+- `Suspense` は `Loading` に置き換えます。
+- `ErrorBoundary` は `Errored` に置き換えます。
+  その関数フォールバックはエラーのアクセサーを受け取るため、`error()` でエラーを読み取ります。
+- `SuspenseList` は [`Reveal`](/reference/solid-js/components-jsx/reveal) に置き換えます。
+- `Index` は [`For keyed={false}`](/reference/solid-js/components-jsx/for) に置き換えます。
+  このモードではアイテムはアクセサー、インデックスは安定した数値になります。
+- `Context.Provider` はコンテキストコンポーネント `<Theme value={value}>` に置き換えます。
+- `<Dynamic component={source} {...props} />` は [`dynamic()`](/reference/solid-web/components/dynamic) が返すコンポーネントに置き換えます。`const Comp = dynamic(() => source)` とし、その後 `<Comp {...props} />` とします。
+  `Dynamic` は非推奨です。
+  コンポーネントは JSX の外で一度だけ作成し、必要な場所でレンダーしてください。falsy なソースは以前と同様に何もレンダーしません。
+- `createDynamic(source, props)` の直接呼び出しは `dynamic(source)` に置き換えます。
 
-Update removed JSX forms:
+削除された JSX の形式を更新します:
 
-- Replace `classList` with the object or array form of `class`.
-- Replace `use:directive` with a `ref` callback or directive factory, and use a `ref` array to compose callbacks.
-- Replace `on:` and `oncapture:` with camel-case Solid event props.
-  Use a `ref` callback and `addEventListener` when native listener options are required.
-- Replace `attr:` and `bool:` with standard attributes and boolean presence.
-- Remove `/*@once*/`.
-  Keep values reactive, use DOM default properties such as `defaultValue` for initial state, or take a narrow JavaScript snapshot with `untrack`.
+- `classList` は `class` のオブジェクト形式または配列形式に置き換えます。
+- `use:directive` は `ref` コールバックまたはディレクティブファクトリーに置き換え、コールバックの合成には `ref` の配列を使います。
+- `on:` と `oncapture:` はキャメルケースの Solid イベント props に置き換えます。
+  ネイティブのリスナーオプションが必要な場合は `ref` コールバックと `addEventListener` を使います。
+- `attr:` と `bool:` は標準の属性と真偽値の有無に置き換えます。
+- `/*@once*/` は削除します。
+  値はリアクティブに保つか、初期状態には `defaultValue` のような DOM のデフォルトプロパティを使うか、`untrack` で限定的な JavaScript のスナップショットを取得してください。
 
-Rendering into nested roots, `ShadowRoot` instances, or portals needs integration testing.
-Solid 2 scopes delegated events to each render root and disposes those listeners with the root.
-Remove calls to the old document-global `clearDelegatedEvents` API.
+ネストされたルート、`ShadowRoot` インスタンス、ポータルへのレンダリングには結合テストが必要です。
+Solid 2 はデリゲートされたイベントを各レンダールートにスコープし、それらのリスナーをルートとともに破棄します。
+以前のドキュメントグローバルな `clearDelegatedEvents` API の呼び出しは削除してください。
 
-## Update client rendering and SSR
+## クライアントレンダリングと SSR を更新する
 
-Import [`render`](/reference/solid-web/rendering-ssr/render), [`hydrate`](/reference/solid-web/rendering-ssr/hydrate), and all server render functions from `@solidjs/web`.
-Continue to retain and call the dispose function returned by `render`.
+[`render`](/reference/solid-web/rendering-ssr/render)、[`hydrate`](/reference/solid-web/rendering-ssr/hydrate)、およびすべてのサーバーレンダー関数は `@solidjs/web` からインポートします。
+`render` が返す破棄関数は、引き続き保持して呼び出してください。
 
-Choose the SSR entry point by the required result:
+必要な結果に応じて SSR のエントリーポイントを選択します:
 
-- [`renderToString`](/reference/solid-web/rendering-ssr/render-to-string) is synchronous and renders `Loading` fallbacks for unresolved reads.
-- [`renderToStream`](/reference/solid-web/rendering-ssr/render-to-stream) emits the shell and then resolved async fragments.
-- Replace `renderToStringAsync` with `await renderToStream(() => <App />)` when a fully settled HTML string is required.
-- Use exactly one stream consumer: `pipe`, `pipeTo`, or `readable`.
-  The `readable` stream contains `Uint8Array` chunks and can be passed to a web `Response`.
+- [`renderToString`](/reference/solid-web/rendering-ssr/render-to-string) は同期で、未解決の読み取りには `Loading` のフォールバックをレンダーします。
+- [`renderToStream`](/reference/solid-web/rendering-ssr/render-to-stream) はシェルを出力し、その後で解決済みの非同期フラグメントを出力します。
+- 完全に確定した HTML 文字列が必要な場合は、`renderToStringAsync` を `await renderToStream(() => <App />)` に置き換えます。
+- ストリームのコンシューマーは `pipe`、`pipeTo`、`readable` のいずれか 1 つだけを使います。
+  `readable` ストリームは `Uint8Array` チャンクを含み、Web の `Response` に渡せます。
 
-Review the `ssrSource` and `deferStream` options on every migrated resource.
-The default `ssrSource: "server"` adopts the serialized server result without repeating the initial client computation.
-Use `"hybrid"` or `"client"` only when the computation has verified client-specific behavior.
+移行したすべてのリソースで `ssrSource` と `deferStream` オプションを確認してください。
+デフォルトの `ssrSource: "server"` は、初回のクライアント計算を繰り返さずに、シリアライズされたサーバー結果を採用します。
+`"hybrid"` や `"client"` は、計算がクライアント固有の動作を持つことが確認できた場合にのみ使います。
 
-Code that owns the HTTP exchange is an integration boundary.
-Solid 2 exposes request events, response-head helpers, server functions, and stream response utilities through `@solidjs/web`, but routing, middleware policy, sessions, and deployment adapters still need framework-specific migration work.
-Do not infer replacements for those APIs from similar names.
-Follow the integration's Solid 2 guide and verify its request, response, hydration, and serialization tests.
+HTTP 交換を管理するコードは統合境界です。
+Solid 2 は `@solidjs/web` を通じてリクエストイベント、レスポンスヘッドヘルパー、サーバー関数、ストリームレスポンスユーティリティを公開しますが、ルーティング、ミドルウェアポリシー、セッション、デプロイアダプターは依然としてフレームワーク固有の移行作業が必要です。
+これらの API の代替を類似の名前から推測しないでください。
+各連携の Solid 2 ガイドに従い、そのリクエスト、レスポンス、ハイドレーション、シリアライズのテストを検証してください。
 
-## Replace removed APIs by intent
+## 削除された API を意図に応じて置き換える
 
-The following list covers common application APIs and is not a complete export-diff table.
-Choose replacements by behavior:
+以下のリストは一般的なアプリケーション API を網羅したもので、完全なエクスポート差分表ではありません。
+動作に基づいて代替を選択してください:
 
-- `createComputed`: use `createMemo` for a derived value, split `createEffect` for a side effect, or function-form `createSignal` for writable derived state.
-- `batch`: rely on default batching; use `flush` only for synchronous observation.
-- `on`: put dependencies in the effect compute phase.
-- `onMount`: use `onSettled`.
-- `onError` and `catchError`: use `Errored` or an effect `error` callback.
-- `createResource`: use async computations and boundaries.
-- `createMutable` and `modifyMutable`: use `createStore` and draft setters.
-- `produce`: pass its draft callback directly to the store setter.
-- `createSelector`: use `createProjection` or function-form `createStore`.
-- `from` and `observable`: use async iterables for inbound streams or a split effect for outbound notifications.
-  A standard Observable adapter has no direct core replacement.
-- `createDeferred`: move the scheduling policy outside Solid.
-- `indexArray`: use `mapArray` with `{ keyed: false }`.
-- `resetErrorBoundaries`: remove it; error boundaries recover through their current graph state or explicit reset callback.
-- `enableScheduling` and `writeSignal`: remove internal or obsolete usage.
+- `createComputed`: 派生値には `createMemo`、副作用には分割した `createEffect`、書き込み可能な派生状態には関数形式の `createSignal` を使います。
+- `batch`: デフォルトのバッチ処理に任せます。`flush` は同期で観測する必要がある場合にのみ使います。
+- `on`: 依存関係はエフェクトの計算フェーズに置きます。
+- `onMount`: `onSettled` を使います。
+- `onError` と `catchError`: `Errored` またはエフェクトの `error` コールバックを使います。
+- `createResource`: 非同期計算とバウンダリを使います。
+- `createMutable` と `modifyMutable`: `createStore` とドラフトセッターを使います。
+- `produce`: そのドラフトコールバックをそのままストアのセッターに渡します。
+- `createSelector`: `createProjection` または関数形式の `createStore` を使います。
+- `from` と `observable`: 流入するストリームには非同期イテラブル、外向きの通知には分割エフェクトを使います。
+  標準の Observable アダプターに相当するコアの代替はありません。
+- `createDeferred`: スケジューリングポリシーを Solid の外に移します。
+- `indexArray`: `{ keyed: false }` を付けた `mapArray` を使います。
+- `resetErrorBoundaries`: 削除します。エラーバウンダリは現在のグラフ状態または明示的なリセットコールバックを通じて復帰します。
+- `enableScheduling` と `writeSignal`: 内部向けまたは廃止された用途なので削除します。
 
-Audit undocumented imports separately.
-An export that existed for compiler, renderer, devtools, or metaframework integration may have no application-level replacement.
-Treat those imports as host-integration work and confirm them against the owning package source.
+ドキュメントに記載のないインポートは個別に監査してください。
+コンパイラ、レンダラー、devtools、メタフレームワーク連携のために存在していたエクスポートには、アプリケーションレベルの代替がない場合があります。
+これらのインポートはホスト連携の作業として扱い、所有するパッケージのソースで確認してください。
 
-## Update tests
+## テストを更新する
 
-Update test compilation to use the renderer's JSX runtime.
-For web component tests, resolve the browser and development package conditions so tests exercise `@solidjs/web` rather than the server entry.
-Keep Testing Library cleanup or call render disposers explicitly.
+テストのコンパイルでレンダラーの JSX ランタイムを使うように更新します。
+Web コンポーネントのテストでは、テストがサーバーエントリーではなく `@solidjs/web` を実行するように、ブラウザと開発用パッケージの条件を解決します。
+Testing Library のクリーンアップを維持するか、レンダーの破棄関数を明示的に呼び出してください。
 
-Account for staged writes in unit tests:
+ユニットテストでは段階的書き込みを考慮します:
 
 ```ts
 setCount(2);
@@ -394,33 +394,33 @@ flush();
 expect(count()).toBe(2);
 ```
 
-Flush after effect creation before asserting the effect function.
-Flush after setters before asserting reactive values, effects, or DOM.
-Prefer `await user.click(...)` for user-level tests because event tooling also drains its event sequence.
+エフェクト関数をアサートする前に、エフェクトの作成後にフラッシュしてください。
+リアクティブな値、エフェクト、DOM をアサートする前に、セッターの後にフラッシュしてください。
+ユーザーレベルのテストでは `await user.click(...)` を優先してください。イベントツールもイベントシーケンスを空にします。
 
-Use [`resolve(() => value())`](/reference/solid-js/advanced/interop-async/resolve) when a test must wait for a reactive expression to settle.
-Await action calls before asserting their final committed or reverted state.
-Test the initial `Loading` fallback, the settled content, the held-update pending state, and error boundary as separate states.
+テストがリアクティブな式の確定を待つ必要がある場合は、[`resolve(() => value())`](/reference/solid-js/advanced/interop-async/resolve) を使います。
+最終的にコミットまたは復元された状態をアサートする前に、アクション呼び出しを await してください。
+初期の `Loading` フォールバック、確定したコンテンツ、保留中の更新状態、エラーバウンダリを個別の状態としてテストします。
 
-Run migration tests in development mode.
-Fix top-level reactive-read warnings, writes from owned scopes, actions called from computations, and async reads outside a `Loading` boundary instead of suppressing the diagnostics.
-Then run the same client, SSR, streaming, and hydration paths in production mode.
+移行テストは開発モードで実行してください。
+トップレベルのリアクティブ読み取りの警告、オーナー付きスコープからの書き込み、計算から呼び出されるアクション、`Loading` バウンダリ外の非同期読み取りは、診断を抑制するのではなく修正してください。
+その後、同じクライアント、SSR、ストリーミング、ハイドレーションのパスを本番モードで実行します。
 
-See the [Testing guide](/guides/testing) for the current test environment split.
+現在のテスト環境の分け方については[テストガイド](/guides/testing)を参照してください。
 
-## Final verification
+## 最終確認
 
-Before merging the migration:
+移行をマージする前に:
 
-1. Search for old package paths and removed symbols.
-2. Run TypeScript, lint, and the production client build.
-3. Run unit and component tests with explicit flush points.
-4. Exercise initial load, a changed-input update, manual refresh, successful mutation, failed mutation, and boundary recovery.
-5. Compare SSR shell output, streamed completion, hydration, and event behavior with the recorded Solid 1 baseline.
-6. Verify each third-party primitive, renderer, router, and metaframework package against an explicit Solid 2-compatible release.
+1. 古いパッケージパスと削除されたシンボルを検索します。
+2. TypeScript、lint、本番クライアントビルドを実行します。
+3. 明示的なフラッシュポイントを含むユニットテストとコンポーネントテストを実行します。
+4. 初回ロード、入力変更による更新、手動リフレッシュ、成功するミューテーション、失敗するミューテーション、バウンダリの復帰を確認します。
+5. SSR のシェル出力、ストリーミング完了、ハイドレーション、イベントの動作を、記録した Solid 1 のベースラインと比較します。
+6. 各サードパーティのプリミティブ、レンダラー、ルーター、メタフレームワークパッケージについて、明示的な Solid 2 対応リリースを確認します。
 
-## Next steps
+## 次のステップ
 
-- [Data fetching from Solid 1](/migration/data-fetching-from-solid-1): convert resource and effect-based fetching one fetch at a time and choose the refetch behavior for each.
-- [From SolidStart](/migration/from-solid-start), [From Solid Router](/migration/from-solid-router), and [From Solid Meta](/migration/from-solid-meta): the framework-level migrations that build on this one.
-- [Async reactivity](/concepts/async-reactivity): the model behind held updates, `Loading`, `isPending`, and actions.
+- [Solid 1 からのデータフェッチ](/migration/data-fetching-from-solid-1): リソースとエフェクトベースのフェッチを一度に 1 つずつ変換し、それぞれにリフェッチの挙動を選択します。
+- [SolidStart から](/migration/from-solid-start)、[Solid Router から](/migration/from-solid-router)、[Solid Meta から](/migration/from-solid-meta): このガイドを土台にするフレームワークレベルの移行です。
+- [非同期リアクティビティ](/concepts/async-reactivity): 保留される更新、`Loading`、`isPending`、アクションの背後にあるモデルです。
