@@ -3,17 +3,17 @@ title: "serverFunctions"
 category: "@solidjs/vite-plugin"
 order: 3
 version: "2.0"
-description: "Compiles use-server directives and emits server-function manifest and handler modules."
+description: "`use server` ディレクティブをコンパイルし、サーバー関数のマニフェストとハンドラーモジュールを出力します。"
 source_repo: "solidjs/solid-vite-plugin"
 source_ref: "next"
 source_path: "src/server-functions/index.ts"
 ---
 
-`serverFunctions` provides the standalone `"use server"` compiler plugins.
-The `serverFunctions` option on `solidPlugin` uses the same compiler and can also install endpoint middleware.
-See the [server functions guide](/building-apps/server-functions) for application usage and the [`@solidjs/web/server-functions` reference](/reference/solid-web/server-functions) for the generated runtime.
+`serverFunctions` はスタンドアロンの `"use server"` コンパイラプラグインを提供します。
+`solidPlugin` の `serverFunctions` オプションは同じコンパイラを使い、エンドポイントミドルウェアもインストールできます。
+アプリケーションでの使い方は[サーバー関数ガイド](/building-apps/server-functions)、生成されるランタイムは [`@solidjs/web/server-functions` リファレンス](/reference/solid-web/server-functions)を参照してください。
 
-## Import
+## インポート
 
 ```ts
 import {
@@ -23,14 +23,14 @@ import {
 } from "@solidjs/vite-plugin";
 ```
 
-## Signature
+## シグネチャ
 
 ```ts
 function serverFunctions(options?: ServerFunctionsOptions): Plugin[];
 ```
 
-The standalone export does not install development endpoint middleware.
-Use the standalone export in hosts that control plugin ordering and request dispatch.
+スタンドアロンエクスポートは開発用エンドポイントミドルウェアをインストールしません。
+プラグインの順序とリクエストディスパッチを制御するホストでは、スタンドアロンエクスポートを使用してください。
 
 ## `ServerFunctionsOptions`
 
@@ -57,68 +57,68 @@ interface ServerFunctionsFilter {
 
 ### `runtime`
 
-- **Type:** `{ server: string; client: string }`
-- **Default:** Both fields are `"@solidjs/web/server-functions"`
+- **型:** `{ server: string; client: string }`
+- **デフォルト:** 両フィールドとも `"@solidjs/web/server-functions"`
 
-Specifies the runtime imports emitted by the compiler.
-The server runtime must export `registerServerReference`, `createServerReference`, `handleServerFunctionRequest`, and `configureServerFunctionsServer`.
-The client runtime must export `registerServerReference` and `createServerReference`.
-The client runtime must also export `configureServerFunctionsClient` when the resolved endpoint differs from the default.
+コンパイラが出力するランタイムインポートを指定します。
+サーバーランタイムは `registerServerReference`、`createServerReference`、`handleServerFunctionRequest`、`configureServerFunctionsServer` をエクスポートする必要があります。
+クライアントランタイムは `registerServerReference` と `createServerReference` をエクスポートする必要があります。
+解決されたエンドポイントがデフォルトと異なる場合、クライアントランタイムは `configureServerFunctionsClient` もエクスポートする必要があります。
 
 ### `manifest`
 
-- **Type:** `string`
-- **Default:** `"virtual:solid-server-function-manifest"`
+- **型:** `string`
+- **デフォルト:** `"virtual:solid-server-function-manifest"`
 
-Specifies the virtual module that side-effect imports every module containing a compiled server function.
-Production handlers import this module so registrations survive tree shaking.
+コンパイル済みサーバー関数を含むすべてのモジュールを副作用としてインポートする仮想モジュールを指定します。
+プロダクションハンドラーは、ツリーシェイキングで登録が失われないようこのモジュールをインポートします。
 
 ### `filter`
 
-- **Type:** `ServerFunctionsFilter`
-- **Default include:** `"src/**/*.{jsx,tsx,ts,js,mjs,cjs}"`
-- **Default exclude:** `"node_modules/**/*.{jsx,tsx,ts,js,mjs,cjs}"`
+- **型:** `ServerFunctionsFilter`
+- **デフォルトの include:** `"src/**/*.{jsx,tsx,ts,js,mjs,cjs}"`
+- **デフォルトの exclude:** `"node_modules/**/*.{jsx,tsx,ts,js,mjs,cjs}"`
 
-Limits directive compilation with Vite filter patterns.
-Relative patterns resolve against the Vite root.
+ディレクティブのコンパイルを Vite のフィルターパターンで制限します。
+相対パターンは Vite ルートに対して解決されます。
 
 ### `directive`
 
-- **Type:** `string`
-- **Default:** `"use server"`
+- **型:** `string`
+- **デフォルト:** `"use server"`
 
-Specifies the directive text recognized by the compiler.
+コンパイラが認識するディレクティブの文字列を指定します。
 
 ### `endpoint`
 
-- **Type:** `string`
-- **Default:** `"/_server"`
+- **型:** `string`
+- **デフォルト:** `"/_server"`
 
-Specifies the request path.
-The plugin adds a missing leading slash, then prefixes Vite's `base`.
-When the resolved path differs from `/_server`, compiled modules configure both runtime sides with that resolved endpoint.
+リクエストパスを指定します。
+プラグインは先頭のスラッシュがなければ追加し、その後 Vite の `base` を前置します。
+解決されたパスが `/_server` と異なる場合、コンパイル済みモジュールは両側のランタイムにその解決済みエンドポイントを設定します。
 
 ### `devMiddleware`
 
-- **Type:** `boolean`
-- **Default:** `true` through `solidPlugin({ serverFunctions })`
+- **型:** `boolean`
+- **デフォルト:** `solidPlugin({ serverFunctions })` 経由では `true`
 
-Set `false` to leave development endpoint dispatch to another host.
-Compilation and both virtual modules remain enabled.
-The standalone `serverFunctions()` export never installs this middleware, regardless of the value.
+`false` に設定すると、開発用エンドポイントのディスパッチを別のホストに委ねます。
+コンパイルと両方の仮想モジュールは有効なままです。
+スタンドアロンの `serverFunctions()` エクスポートは、値に関わらずこのミドルウェアをインストールしません。
 
-When dispatch is host-owned, the host loads `virtual:solid-server-function-handler`.
-The host's server entry should also import the manifest when functions referenced only by client code must register before dispatch.
-The host can configure request scope, origin checks, invocation policy, and result handling through [`configureServerFunctionsServer()`](/reference/solid-web/server-functions/host-configuration).
+ディスパッチがホスト管理の場合、ホストは `virtual:solid-server-function-handler` をロードします。
+クライアントコードからのみ参照される関数をディスパッチ前に登録する必要がある場合、ホストのサーバーエントリーはマニフェストもインポートすべきです。
+ホストは [`configureServerFunctionsServer()`](/reference/solid-web/server-functions/host-configuration) を通じて、リクエストスコープ、オリジンチェック、呼び出しポリシー、結果の処理を設定できます。
 
 ### `configure`
 
-- **Type:** `string`
-- **Default:** `undefined`
+- **型:** `string`
+- **デフォルト:** `undefined`
 
-Specifies a server-only module to import before handler configuration and dispatch.
-Relative paths resolve against the Vite root.
-The plugin rejects a missing file during configuration.
+ハンドラーの設定とディスパッチの前にインポートするサーバー専用モジュールを指定します。
+相対パスは Vite ルートに対して解決されます。
+ファイルが存在しない場合、プラグインは設定時に拒否します。
 
 ```ts
 serverFunctions: {
@@ -128,22 +128,22 @@ serverFunctions: {
 
 ### `components`
 
-- **Type:** `boolean`
-- **Default:** `false`
-- **Status:** Experimental
+- **型:** `boolean`
+- **デフォルト:** `false`
+- **ステータス:** 実験的
 
-Enables server-function results that contain components.
-The generated handler installs the frame response transforms.
+コンポーネントを含むサーバー関数の結果を有効にします。
+生成されるハンドラーはフレームレスポンスのトランスフォームをインストールします。
 
-With generated SSR start-mode entries, the plugin also adds the document render plugin, bootstrap data, and client installation call.
-Without `start: true` and `ssr: true`, or with authored entries, application entry code supplies those document-level pieces.
+生成された SSR start モードのエントリーでは、プラグインはドキュメントレンダープラグイン、ブートストラップデータ、クライアントインストール呼び出しも追加します。
+`start: true` と `ssr: true` を使わない場合、または自作のエントリーを使う場合、それらのドキュメントレベルの要素はアプリケーションのエントリーコードが提供します。
 
-## Generated modules
+## 生成されるモジュール
 
 ### `virtual:solid-server-function-manifest`
 
-A side-effect-only module that imports discovered server-function modules.
-The client build persists its discoveries under `dist/client/.vite/solid-server-functions.json` so a separate SSR build can include functions referenced only by client code.
+検出されたサーバー関数モジュールをインポートする、副作用のみのモジュールです。
+クライアントビルドは検出結果を `dist/client/.vite/solid-server-functions.json` に保存し、別の SSR ビルドがクライアントコードからのみ参照される関数を含められるようにします。
 
 ### `virtual:solid-server-function-handler`
 
@@ -156,10 +156,10 @@ export function handleServerFunctionRequest(
 ): Promise<Response>;
 ```
 
-`virtual:solid-server-function-handler` imports the configured setup module and the production manifest.
-The handler also configures request-event scoping and dispatches through the selected runtime.
+`virtual:solid-server-function-handler` は設定されたセットアップモジュールとプロダクションマニフェストをインポートします。
+このハンドラーはリクエストイベントのスコープも設定し、選択されたランタイムを通じてディスパッチします。
 
-## Main plugin form
+## メインプラグインでの指定
 
 ```ts
 import solid from "@solidjs/vite-plugin";
@@ -176,4 +176,4 @@ export default {
 };
 ```
 
-With start mode, endpoint requests pass through `start.middleware` and share its request event.
+start モードでは、エンドポイントリクエストは `start.middleware` を通り、そのリクエストイベントを共有します。

@@ -3,35 +3,35 @@ title: "@solidjs/vite-plugin"
 titleTemplate: ":title"
 mainNavExclude: true
 version: "2.0"
-description: "Public exports and generated modules provided by @solidjs/vite-plugin 3.0 for Solid 2.0."
+description: "Solid 2.0 向けに @solidjs/vite-plugin 3.0 が提供する公開エクスポートと生成モジュールです。"
 source_repo: "solidjs/solid-vite-plugin"
 source_ref: "next"
 source_path: "src/index.ts"
 ---
 
-`@solidjs/vite-plugin` 3.0 provides the Solid JSX transform, optional start mode, and `"use server"` compilation for Solid 2.0.
+`@solidjs/vite-plugin` 3.0 は、Solid 2.0 向けに Solid の JSX トランスフォーム、オプションの start モード、`"use server"` コンパイルを提供します。
 
-## Package exports
+## パッケージエクスポート
 
 ### `@solidjs/vite-plugin`
 
-- [`default: solidPlugin(options?)`](/reference/vite-plugin-solid/options) returns the Vite plugin array.
-- [`serverFunctions(options?)`](/reference/vite-plugin-solid/server-functions) returns the standalone server-function plugin array.
-- [`devStylePatch`](/reference/vite-plugin-solid/modules) is the development style de-duplication script.
-- [`Options`, `Compiler`, `ExtensionOptions`, `RefreshOptions`, and `SolidOptions`](/reference/vite-plugin-solid/options) describe transform configuration.
-- [`StartOptions`](/reference/vite-plugin-solid/start) describes start mode.
-- [`ServerFunctionsOptions` and `ServerFunctionsFilter`](/reference/vite-plugin-solid/server-functions) describe server-function compilation and dispatch.
-- [`ViteManifest`](/reference/vite-plugin-solid/modules) describes the asset manifest consumed by server rendering.
+- [`default: solidPlugin(options?)`](/reference/vite-plugin-solid/options) は Vite プラグインの配列を返します。
+- [`serverFunctions(options?)`](/reference/vite-plugin-solid/server-functions) はスタンドアロンのサーバー関数プラグイン配列を返します。
+- [`devStylePatch`](/reference/vite-plugin-solid/modules) は開発用スタイルの重複除去スクリプトです。
+- [`Options`、`Compiler`、`ExtensionOptions`、`RefreshOptions`、`SolidOptions`](/reference/vite-plugin-solid/options) はトランスフォーム設定を記述します。
+- [`StartOptions`](/reference/vite-plugin-solid/start) は start モードを記述します。
+- [`ServerFunctionsOptions` と `ServerFunctionsFilter`](/reference/vite-plugin-solid/server-functions) はサーバー関数のコンパイルとディスパッチを記述します。
+- [`ViteManifest`](/reference/vite-plugin-solid/modules) はサーバーレンダリングが消費するアセットマニフェストを記述します。
 
 ### `@solidjs/vite-plugin/virtual-solid-manifest`
 
-Adds TypeScript declarations for the plugin's [virtual modules](/reference/vite-plugin-solid/modules).
+プラグインの[仮想モジュール](/reference/vite-plugin-solid/modules)に対する TypeScript 宣言を追加します。
 
 ### `@solidjs/vite-plugin/boundary-modules`
 
-Adds TypeScript declarations for the [`server-only` and `client-only` marker modules](/reference/vite-plugin-solid/modules#boundary-marker-modules).
+[`server-only` と `client-only` のマーカーモジュール](/reference/vite-plugin-solid/modules#boundary-marker-modules)に対する TypeScript 宣言を追加します。
 
-## Minimal configuration
+## 最小構成
 
 ```ts
 import { defineConfig } from "vite";
@@ -42,6 +42,6 @@ export default defineConfig({
 });
 ```
 
-The default export returns an array.
-Pass `solidPlugin()` directly as an item in Vite's `plugins` array.
-Vite flattens nested plugin arrays.
+デフォルトエクスポートは配列を返します。
+`solidPlugin()` は Vite の `plugins` 配列の要素として直接渡してください。
+Vite はネストされたプラグイン配列を平坦化します。

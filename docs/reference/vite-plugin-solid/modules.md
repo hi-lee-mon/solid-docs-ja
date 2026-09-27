@@ -1,15 +1,15 @@
 ---
-title: "Modules and manifest"
+title: "モジュールとマニフェスト"
 category: "@solidjs/vite-plugin"
 order: 4
 version: "2.0"
-description: "Reference for @solidjs/vite-plugin manifest types, virtual modules, and boundary marker modules."
+description: "@solidjs/vite-plugin のマニフェスト型、仮想モジュール、バウンダリマーカーモジュールのリファレンスです。"
 source_repo: "solidjs/solid-vite-plugin"
 source_ref: "next"
 source_path: "virtual-solid-manifest.d.ts"
 ---
 
-The plugin exposes one runtime helper, one manifest type, generated virtual modules, and two types-only package subpaths.
+このプラグインは、1 つのランタイムヘルパー、1 つのマニフェスト型、生成される仮想モジュール、そして 2 つの型専用パッケージサブパスを公開します。
 
 ## `@solidjs/vite-plugin`
 
@@ -19,10 +19,10 @@ The plugin exposes one runtime helper, one manifest type, generated virtual modu
 const devStylePatch: string;
 ```
 
-An inline browser script that removes duplicate SSR and Vite development style elements with the same `data-vite-dev-id`.
-Start mode handlers inject `devStylePatch` automatically.
-Custom development hosts can inject the script when they render the document themselves.
-Application code does not call this helper.
+同じ `data-vite-dev-id` を持つ重複した SSR および Vite 開発用のスタイル要素を取り除く、インラインのブラウザスクリプトです。
+start モードのハンドラーは `devStylePatch` を自動的に注入します。
+独自の開発ホストは、ドキュメントを自分でレンダーする際にこのスクリプトを注入できます。
+アプリケーションコードからこのヘルパーを呼ぶことはありません。
 
 ### `ViteManifest`
 
@@ -41,12 +41,12 @@ type ViteManifest = Record<
 };
 ```
 
-Describes the client asset manifest consumed by `virtual:solid-manifest`.
-The plugin adds `_base` and marks emitted lazy facades as dynamic entries.
+`virtual:solid-manifest` が消費するクライアントアセットのマニフェストを記述します。
+プラグインは `_base` を追加し、出力された遅延ファサードを動的エントリーとしてマークします。
 
 ## `@solidjs/vite-plugin/virtual-solid-manifest`
 
-The types-only subpath declares the following modules:
+型専用サブパスは次のモジュールを宣言します:
 
 ### `virtual:solid-manifest`
 
@@ -57,17 +57,17 @@ const manifest: ViteManifest;
 export default manifest;
 ```
 
-Development output provides a resolver-backed manifest for module JavaScript and CSS.
-Build output contains `dist/client/.vite/manifest.json` with the configured Vite base.
+開発出力は、モジュールの JavaScript と CSS 向けのリゾルバーベースのマニフェストを提供します。
+ビルド出力には、設定された Vite の base を含む `dist/client/.vite/manifest.json` が含まれます。
 
 ### `virtual:solid-server-function-manifest`
 
-A side-effect-only module that registers all discovered server functions.
+検出されたすべてのサーバー関数を登録する、副作用のみのモジュールです。
 
 ### `virtual:solid-server-function-handler`
 
-Exports `endpoint` and `handleServerFunctionRequest`.
-See [`serverFunctions`](/reference/vite-plugin-solid/server-functions#virtualsolid-server-function-handler).
+`endpoint` と `handleServerFunctionRequest` をエクスポートします。
+[`serverFunctions`](/reference/vite-plugin-solid/server-functions#virtualsolid-server-function-handler) を参照してください。
 
 ### `virtual:solid-ssr-handler`
 
@@ -83,45 +83,45 @@ export function handleRequest(
 ): Promise<Response>;
 ```
 
-`virtual:solid-ssr-handler` is the start mode server build entry.
-The module creates a request event, runs configured middleware, dispatches the server-function endpoint when enabled, and returns the page response.
-Generated HTML resolves the client entry and CSS from `virtual:solid-manifest`.
+`virtual:solid-ssr-handler` は start モードのサーバービルドエントリーです。
+このモジュールはリクエストイベントを作成し、設定されたミドルウェアを実行し、有効な場合はサーバー関数エンドポイントへディスパッチして、ページレスポンスを返します。
+生成される HTML は `virtual:solid-manifest` からクライアントエントリーと CSS を解決します。
 
-Reference the declarations from an environment declaration file:
+環境宣言ファイルから宣言を参照します:
 
 ```ts
 /// <reference types="@solidjs/vite-plugin/virtual-solid-manifest" />
 ```
 
-## Start mode environment modules
+## start モードの環境モジュール
 
-When [`start.env`](/reference/vite-plugin-solid/start#env) is enabled, generated `solid-env.d.ts` declares:
+[`start.env`](/reference/vite-plugin-solid/start#env) が有効な場合、生成される `solid-env.d.ts` は次を宣言します:
 
 ```ts
 import env, { env as namedEnv } from "virtual:env/client";
 import serverEnv from "virtual:env/server";
 ```
 
-`virtual:env/client` contains the client schema keys.
-`virtual:env/server` contains both schema maps and is server-only.
+`virtual:env/client` にはクライアントスキーマのキーが含まれます。
+`virtual:env/server` には両方のスキーママップが含まれ、サーバー専用です。
 
-## Boundary marker modules
+## バウンダリマーカーモジュール
 
-The main plugin always resolves the bare marker specifiers:
+メインプラグインは常に素のマーカー指定子を解決します:
 
 ```ts
 import "server-only";
 import "client-only";
 ```
 
-`server-only` is empty in server module graphs and fails when imported by a client graph.
-`client-only` is empty in client module graphs and fails when imported by a server graph.
-The error names the importing module.
+`server-only` はサーバーモジュールグラフでは空で、クライアントグラフからインポートされると失敗します。
+`client-only` はクライアントモジュールグラフでは空で、サーバーグラフからインポートされると失敗します。
+エラーにはインポートしたモジュール名が示されます。
 
-Add their ambient declarations with:
+アンビエント宣言を追加するには:
 
 ```ts
 /// <reference types="@solidjs/vite-plugin/boundary-modules" />
 ```
 
-The marker resolvers claim these bare specifiers even when packages with the same names are installed.
+同名のパッケージがインストールされている場合でも、マーカーリゾルバーがこれらの素の指定子の解決を受け持ちます。
