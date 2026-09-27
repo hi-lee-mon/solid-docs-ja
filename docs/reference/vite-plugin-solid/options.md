@@ -3,21 +3,21 @@ title: "solidPlugin"
 category: "@solidjs/vite-plugin"
 order: 1
 version: "2.0"
-description: "Configures Solid JSX compilation and the optional serving and server-function modes."
+description: "Solid の JSX コンパイルと、オプションのサーブモード・サーバー関数モードを設定します。"
 source_repo: "solidjs/solid-vite-plugin"
 source_ref: "next"
 source_path: "src/index.ts"
 ---
 
-`solidPlugin` configures Solid compilation and returns the Vite plugins needed by the selected modes.
+`solidPlugin` は Solid のコンパイルを設定し、選択したモードに必要な Vite プラグインを返します。
 
-## Import
+## インポート
 
 ```ts
 import solidPlugin from "@solidjs/vite-plugin";
 ```
 
-## Signature
+## シグネチャ
 
 ```ts
 function solidPlugin(options?: Partial<Options>): Plugin[];
@@ -51,64 +51,64 @@ interface Options {
 
 ### `include`
 
-- **Type:** `FilterPattern`
-- **Default:** `undefined`
+- **型:** `FilterPattern`
+- **デフォルト:** `undefined`
 
-Limits transformed files with Vite filter patterns.
-Relative patterns resolve against the Vite root.
+変換対象のファイルを Vite のフィルターパターンで制限します。
+相対パターンは Vite ルートに対して解決されます。
 
 ### `exclude`
 
-- **Type:** `FilterPattern`
-- **Default:** `undefined`
+- **型:** `FilterPattern`
+- **デフォルト:** `undefined`
 
-Excludes files with Vite filter patterns.
-Relative patterns resolve against the Vite root.
+ファイルを Vite のフィルターパターンで除外します。
+相対パターンは Vite ルートに対して解決されます。
 
 ### `dev`
 
-- **Type:** `boolean`
-- **Default:** Enabled for Vite's `serve` command
+- **型:** `boolean`
+- **デフォルト:** Vite の `serve` コマンドでは有効
 
-Selects the development exports of `solid-js` and `@solidjs/web`.
-Set `true` to select them outside `serve`, or `false` to disable that selection during `serve`.
+`solid-js` と `@solidjs/web` の開発用エクスポートを選択します。
+`serve` 以外でも選択するには `true`、`serve` 中にその選択を無効にするには `false` を設定します。
 
 ### `ssr`
 
-- **Type:** `boolean`
-- **Default:** `false`
+- **型:** `boolean`
+- **デフォルト:** `false`
 
-Enables hydratable client output and SSR output.
-With [`start`](/reference/vite-plugin-solid/start), `ssr: true` selects SSR start mode instead of client start mode.
-The plugin rejects an object value at configuration time.
+ハイドレーション可能なクライアント出力と SSR 出力を有効にします。
+[`start`](/reference/vite-plugin-solid/start) と併用する場合、`ssr: true` はクライアント start モードではなく SSR start モードを選択します。
+オブジェクト値は設定時に拒否されます。
 
 ### `start`
 
-- **Type:** `boolean | StartOptions`
-- **Default:** `undefined`
+- **型:** `boolean | StartOptions`
+- **デフォルト:** `undefined`
 
-Enables start mode.
-`true` and `{}` are equivalent.
-See [`StartOptions`](/reference/vite-plugin-solid/start).
+start モードを有効にします。
+`true` と `{}` は同等です。
+[`StartOptions`](/reference/vite-plugin-solid/start) を参照してください。
 
 ### `compiler`
 
-- **Type:** `Compiler = "babel" | "native"`
-- **Default:** `"native"`
+- **型:** `Compiler = "babel" | "native"`
+- **デフォルト:** `"native"`
 
-Selects the JSX compiler.
-Both values use `@dom-expressions/compiler` for the `lazy()` module URL, refresh, and server-function passes.
-`"babel"` uses `babel-preset-solid` for the JSX pass.
-The native compiler loader uses its WebAssembly fallback when the platform has no native binary.
+JSX コンパイラを選択します。
+どちらの値でも、`lazy()` のモジュール URL、refresh、サーバー関数の各パスには `@dom-expressions/compiler` を使います。
+`"babel"` は JSX パスに `babel-preset-solid` を使います。
+ネイティブコンパイラのローダーは、プラットフォームにネイティブバイナリがない場合 WebAssembly フォールバックを使います。
 
 ### `hot`
 
-- **Type:** `boolean`
-- **Default:** `true` during development
-- **Deprecated:** Use `refresh.disabled`
+- **型:** `boolean`
+- **デフォルト:** 開発時は `true`
+- **非推奨:** `refresh.disabled` を使用してください
 
-Set `false` to disable the refresh transform and runtime.
-Production output is unaffected.
+`false` に設定すると refresh トランスフォームとランタイムが無効になります。
+プロダクション出力には影響しません。
 
 ### `refresh`
 
@@ -119,8 +119,8 @@ interface RefreshOptions {
 }
 ```
 
-`disabled` disables the development refresh transform.
-`granular` controls component signature and dependency metadata and defaults to `true`.
+`disabled` は開発用の refresh トランスフォームを無効にします。
+`granular` はコンポーネントのシグネチャと依存関係メタデータを制御し、デフォルトは `true` です。
 
 ### `extensions`
 
@@ -130,11 +130,11 @@ interface ExtensionOptions {
 }
 ```
 
-- **Type:** `(string | [string, ExtensionOptions])[]`
-- **Default:** No additional extensions
+- **型:** `(string | [string, ExtensionOptions])[]`
+- **デフォルト:** 追加の拡張子なし
 
-Registers extensions in addition to `.jsx` and `.tsx`.
-A tuple marks an extension for TypeScript parsing.
+`.jsx` と `.tsx` に加えて拡張子を登録します。
+タプルで指定すると、その拡張子は TypeScript としてパースされます。
 
 ```ts
 solidPlugin({
@@ -144,12 +144,12 @@ solidPlugin({
 
 ### `babel`
 
-- **Type:** `babel.TransformOptions` or a synchronous or asynchronous options factory
-- **Default:** `{}`
+- **型:** `babel.TransformOptions`、または同期・非同期のオプションファクトリー
+- **デフォルト:** `{}`
 
-Merges Babel options into the transform.
-With the native JSX compiler, providing this option adds a Babel support pass before native JSX compilation.
-The factory receives the source, clean file ID, and SSR-transform flag.
+Babel オプションをトランスフォームにマージします。
+ネイティブ JSX コンパイラ使用時にこのオプションを指定すると、ネイティブ JSX コンパイルの前に Babel サポートパスが追加されます。
+ファクトリーはソース、クリーンなファイル ID、SSR トランスフォームフラグを受け取ります。
 
 ### `solid`
 
@@ -157,27 +157,27 @@ The factory receives the source, clean file ID, and SSR-transform flag.
 type SolidOptions = Omit<JsxCompilerOptions, "filename" | "sourceMap">;
 ```
 
-- **Default:** `{}`
+- **デフォルト:** `{}`
 
-Overrides DOM Expressions compiler options after the plugin defaults.
-The defaults include `moduleName: "@solidjs/web"`, Solid's built-in components, custom-element context, conditional wrapping, mode-specific `generate` and `hydratable`, and the resolved development flag.
+プラグインのデフォルトの後に適用される DOM Expressions コンパイラオプションを上書きします。
+デフォルトには `moduleName: "@solidjs/web"`、Solid の組み込みコンポーネント、カスタム要素コンテキスト、条件付きラッピング、モード別の `generate` と `hydratable`、解決済みの開発フラグが含まれます。
 
 ### `serverFunctions`
 
-- **Type:** `boolean | ServerFunctionsOptions`
-- **Default:** `undefined`
+- **型:** `boolean | ServerFunctionsOptions`
+- **デフォルト:** `undefined`
 
-Enables `"use server"` compilation.
-`true` uses all defaults.
-See [`ServerFunctionsOptions`](/reference/vite-plugin-solid/server-functions).
+`"use server"` コンパイルを有効にします。
+`true` はすべてのデフォルトを使います。
+[`ServerFunctionsOptions`](/reference/vite-plugin-solid/server-functions) を参照してください。
 
-## Transform output
+## トランスフォーム出力
 
-- Plain client builds use DOM output without hydration markers.
-- `ssr: true` uses hydratable DOM output for client transforms and hydratable SSR output for server transforms.
-- Client start mode keeps application code non-hydratable.
-  Only the document shell receives an SSR transform.
-- Vitest defaults to client conditions, DOM output, and `jsdom`.
-  A project with `test.environment: "node"` or `"edge-runtime"` receives server conditions and SSR output.
+- プレーンなクライアントビルドは、ハイドレーションマーカーなしの DOM 出力を使います。
+- `ssr: true` は、クライアントトランスフォームにハイドレーション可能な DOM 出力、サーバートランスフォームにハイドレーション可能な SSR 出力を使います。
+- クライアント start モードではアプリケーションコードは非ハイドレーションのままです。
+  SSR トランスフォームを受けるのはドキュメントシェルのみです。
+- Vitest はデフォルトでクライアント条件、DOM 出力、`jsdom` になります。
+  `test.environment: "node"` または `"edge-runtime"` のプロジェクトはサーバー条件と SSR 出力を受け取ります。
 
-The plugin always installs the `server-only` and `client-only` boundary resolvers.
+このプラグインは常に `server-only` と `client-only` のバウンダリリゾルバーをインストールします。

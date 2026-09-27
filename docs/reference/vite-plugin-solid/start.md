@@ -3,21 +3,21 @@ title: "StartOptions"
 category: "@solidjs/vite-plugin"
 order: 2
 version: "2.0"
-description: "Configures @solidjs/vite-plugin client or SSR start mode."
+description: "@solidjs/vite-plugin のクライアントまたは SSR start モードを設定します。"
 source_repo: "solidjs/solid-vite-plugin"
 source_ref: "next"
 source_path: "src/ssr/index.ts"
 ---
 
-`StartOptions` configures the serving layer enabled by `solidPlugin({ start })`.
+`StartOptions` は `solidPlugin({ start })` で有効になるサーブレイヤーを設定します。
 
-## Import
+## インポート
 
 ```ts
 import solidPlugin, { type StartOptions } from "@solidjs/vite-plugin";
 ```
 
-## Type
+## 型
 
 ```ts
 interface StartOptions {
@@ -33,26 +33,26 @@ interface StartOptions {
 }
 ```
 
-All paths resolve relative to the Vite root and must exist.
-The `app`, entry, document, middleware, setup, and environment schema paths must remain inside that root.
+すべてのパスは Vite ルートに対して相対解決され、存在する必要があります。
+`app`、エントリー、ドキュメント、ミドルウェア、セットアップ、環境スキーマの各パスはそのルート内に収まっている必要があります。
 
-## Options
+## オプション
 
 ### `app`
 
-- **Type:** `string`
-- **Default:** First match from `src/App.{tsx,jsx,ts,js}` or `src/app.{tsx,jsx,ts,js}`
+- **型:** `string`
+- **デフォルト:** `src/App.{tsx,jsx,ts,js}` または `src/app.{tsx,jsx,ts,js}` の最初の一致
 
-Specifies the default-exporting root component used by generated entries.
-The plugin requires `app` when it cannot use an authored client entry in client mode or an authored entry pair in SSR mode.
+生成されるエントリーが使う、デフォルトエクスポートされたルートコンポーネントを指定します。
+クライアントモードで自作のクライアントエントリーが使えない場合、または SSR モードで自作のエントリーペアが使えない場合、プラグインは `app` を要求します。
 
 ### `entryServer`
 
-- **Type:** `string`
-- **Default:** First existing `src/entry-server.{tsx,jsx,ts,js,mjs}`, otherwise generated
+- **型:** `string`
+- **デフォルト:** `src/entry-server.{tsx,jsx,ts,js,mjs}` が存在すればそれ、なければ生成
 
-Specifies an authored server entry for SSR start mode.
-The authored server entry must export:
+SSR start モード用の自作サーバーエントリーを指定します。
+自作サーバーエントリーは次をエクスポートする必要があります:
 
 ```ts
 function render(
@@ -61,38 +61,38 @@ function render(
 ): RenderToStreamResult | string | Response | Promise<string | Response>;
 ```
 
-The plugin ignores `entryServer` and the conventional server entry in client start mode.
+クライアント start モードでは、プラグインは `entryServer` と慣例のサーバーエントリーを無視します。
 
 ### `entryClient`
 
-- **Type:** `string`
-- **Default:** First existing `src/entry-client.{tsx,jsx,ts,js,mjs}`, otherwise generated
+- **型:** `string`
+- **デフォルト:** `src/entry-client.{tsx,jsx,ts,js,mjs}` が存在すればそれ、なければ生成
 
-Specifies the browser entry.
-In SSR mode, authored server and client entries must both exist.
-In client mode, an authored client entry can stand alone.
+ブラウザエントリーを指定します。
+SSR モードでは、自作のサーバーエントリーとクライアントエントリーの両方が存在する必要があります。
+クライアントモードでは、自作のクライアントエントリーは単独で使えます。
 
-Generated client entries call `hydrate()` in SSR mode and `render()` into `document.body` in client mode.
+生成されるクライアントエントリーは、SSR モードでは `hydrate()` を、クライアントモードでは `document.body` への `render()` を呼び出します。
 
 ### `document`
 
-- **Type:** `string`
-- **Default:** First existing `src/Document.{tsx,jsx}`, otherwise a built-in document
+- **型:** `string`
+- **デフォルト:** `src/Document.{tsx,jsx}` が存在すればそれ、なければ組み込みドキュメント
 
-Specifies the default-exporting full-document component used by generated server entries.
-The document receives the application as `props.children`.
-In SSR mode, an authored document must emit the `<html>` document and `<HydrationScript />`.
-The handler injects the client entry into `<head>`.
+生成されるサーバーエントリーが使う、デフォルトエクスポートされたドキュメント全体のコンポーネントを指定します。
+ドキュメントはアプリケーションを `props.children` として受け取ります。
+SSR モードでは、自作ドキュメントは `<html>` ドキュメントと `<HydrationScript />` を出力する必要があります。
+ハンドラーはクライアントエントリーを `<head>` に注入します。
 
-In client mode, the document renders without the application.
-The handler removes an authored hydration script from that static shell.
+クライアントモードでは、ドキュメントはアプリケーションなしでレンダーされます。
+ハンドラーは自作のハイドレーションスクリプトをその静的シェルから取り除きます。
 
 ### `middleware`
 
-- **Type:** `string`
-- **Default:** `undefined`
+- **型:** `string`
+- **デフォルト:** `undefined`
 
-Specifies a server-only module whose default export is one middleware function or an array.
+デフォルトエクスポートが単一のミドルウェア関数またはその配列であるサーバー専用モジュールを指定します。
 
 ```ts
 type Middleware = (
@@ -101,15 +101,15 @@ type Middleware = (
 ) => Response | Promise<Response>;
 ```
 
-Middleware runs in array order inside the request-event scope.
-The middleware fronts every request dispatched by the generated handler, including pages and the server-function endpoint.
+ミドルウェアはリクエストイベントスコープ内で配列の順に実行されます。
+生成されるハンドラーがディスパッチするすべてのリクエスト（ページとサーバー関数エンドポイントを含む）の前段にミドルウェアが入ります。
 
 ### `setup`
 
-- **Type:** `string`
-- **Default:** `undefined`
+- **型:** `string`
+- **デフォルト:** `undefined`
 
-Specifies a server-only module whose default export prepares the application before generated SSR begins.
+生成される SSR が始まる前にアプリケーションを準備するデフォルトエクスポートを持つサーバー専用モジュールを指定します。
 
 ```ts
 type Setup = (
@@ -118,22 +118,22 @@ type Setup = (
 ) => Component | void | Promise<Component | void>;
 ```
 
-Return a component to replace `App` for that request.
-Return nothing to keep `App`.
-The plugin ignores `setup` in client mode and rejects it when SSR uses authored entries.
-The setup function does not run for server-function endpoint dispatch.
+コンポーネントを返すと、そのリクエストでは `App` が置き換えられます。
+何も返さなければ `App` がそのまま使われます。
+クライアントモードではプラグインは `setup` を無視し、SSR が自作エントリーを使う場合は拒否します。
+サーバー関数エンドポイントのディスパッチではセットアップ関数は実行されません。
 
 ### `env`
 
-- **Type:** `boolean | string`
-- **Default:** Probe `env.ts`, then `env.js`; disable the feature when neither exists
+- **型:** `boolean | string`
+- **デフォルト:** `env.ts`、次に `env.js` を探索。どちらも存在しなければ機能を無効化
 
-Configures Standard Schema environment validation.
-`true` requires a conventional schema file, a string selects a schema file, and `false` disables probing.
+Standard Schema による環境変数バリデーションを設定します。
+`true` は慣例のスキーマファイルを要求し、文字列はスキーマファイルを選択し、`false` は探索を無効にします。
 
-The schema must default-export only `server` and `client` maps.
-Every value must implement Standard Schema's `~standard.validate`.
-Client keys must start with Vite's `envPrefix`, which defaults to `VITE_`, and a key cannot appear in both maps.
+スキーマは `server` と `client` のマップのみをデフォルトエクスポートする必要があります。
+すべての値は Standard Schema の `~standard.validate` を実装している必要があります。
+クライアントキーは Vite の `envPrefix`（デフォルト `VITE_`）で始まる必要があり、同じキーを両方のマップに入れることはできません。
 
 ```ts
 export default {
@@ -146,43 +146,43 @@ export default {
 };
 ```
 
-The plugin writes `solid-env.d.ts` next to the schema.
-`virtual:env/client` contains validated client values baked into the client bundle.
-`virtual:env/server` contains server and client values and reads server values from `process.env` at server startup.
-The plugin rejects `virtual:env/server` imports from client module graphs.
+プラグインはスキーマの隣に `solid-env.d.ts` を書き込みます。
+`virtual:env/client` には検証済みのクライアント値が含まれ、クライアントバンドルに焼き込まれます。
+`virtual:env/server` にはサーバー値とクライアント値の両方が含まれ、サーバー起動時に `process.env` からサーバー値を読み取ります。
+クライアントモジュールグラフからの `virtual:env/server` インポートは拒否されます。
 
-Client validation errors fail development and builds.
-Server validation errors fail development, warn during builds, and fail when the built server module starts.
+クライアントのバリデーションエラーは開発とビルドを失敗させます。
+サーバーのバリデーションエラーは開発を失敗させ、ビルド時は警告を出し、ビルド済みサーバーモジュールの起動時に失敗します。
 
 ### `external`
 
-- **Type:** `boolean`
-- **Default:** `false`
+- **型:** `boolean`
+- **デフォルト:** `false`
 
-Hands SSR start-mode build wiring and HTTP serving to a host integration.
-The plugin keeps generated entries, the client manifest, and `virtual:solid-ssr-handler`, but does not configure `dist/server` or its development middlewares.
-The plugin ignores `external` in client mode.
+SSR start モードのビルド配線と HTTP サーブをホスト統合に委譲します。
+プラグインは生成エントリー、クライアントマニフェスト、`virtual:solid-ssr-handler` を保持しますが、`dist/server` とその開発ミドルウェアは設定しません。
+クライアントモードでは `external` は無視されます。
 
-A host-owned, non-runnable `ssr` development environment is detected without this option.
-Use `serverFunctions.devMiddleware: false` to hand over only development endpoint dispatch.
+ホスト管理で実行不可能な `ssr` 開発環境は、このオプションなしでも検出されます。
+開発用エンドポイントのディスパッチだけを委譲するには `serverFunctions.devMiddleware: false` を使ってください。
 
 ### `node`
 
-- **Type:** `boolean`
-- **Default:** `false`
+- **型:** `boolean`
+- **デフォルト:** `false`
 
-Emits `dist/server/node.js`, a complete Node server, next to `dist/server/server.js` during `vite build`.
-`server.js`, `handleRequest`, and the default `{ fetch }` export do not change.
+`vite build` 時に `dist/server/server.js` の隣へ、完全な Node サーバーである `dist/server/node.js` を出力します。
+`server.js`、`handleRequest`、デフォルトの `{ fetch }` エクスポートは変わりません。
 
-The emitted module:
+出力されるモジュールは:
 
-- Serves the client build as static files before the handler, under a root-relative `base`.
-  Files under `build.assetsDir` carry `Cache-Control: public, max-age=31536000, immutable`; other files carry `public, max-age=0, must-revalidate` and `Last-Modified`.
-  Dot-segment paths and `..` traversal are refused.
-- Passes remaining requests to `handleRequest(request, { event: { nativeEvent: req } })` through the bridge used by `vite dev` and `vite preview`.
-  A thrown error logs to `console.error` and answers `500`.
-- In client mode with server functions, serves `dist/client/index.html` for HTML `GET` requests that match no file and dispatches the server-function endpoint.
-- Listens on `PORT` (default `3000`) and `HOST` when run directly with `node dist/server/node.js`.
+- ハンドラーより前に、ルート相対の `base` の下でクライアントビルドを静的ファイルとしてサーブします。
+  `build.assetsDir` 配下のファイルには `Cache-Control: public, max-age=31536000, immutable` が、それ以外のファイルには `public, max-age=0, must-revalidate` と `Last-Modified` が付きます。
+  ドットセグメントを含むパスと `..` によるトラバーサルは拒否されます。
+- 残りのリクエストを `vite dev` と `vite preview` が使うブリッジ経由で `handleRequest(request, { event: { nativeEvent: req } })` に渡します。
+  スローされたエラーは `console.error` にログ出力され、`500` を返します。
+- サーバー関数を使うクライアントモードでは、どのファイルにも一致しない HTML `GET` リクエストに `dist/client/index.html` をサーブし、サーバー関数エンドポイントをディスパッチします。
+- `node dist/server/node.js` で直接実行した場合、`PORT`（デフォルト `3000`）と `HOST` でリッスンします。
 
 ```ts
 // dist/server/node.js
@@ -202,50 +202,50 @@ export declare function serve(
 ): Server;
 ```
 
-`static: false` skips the file lookup and the client-mode `index.html` fallback.
-`event` returns fields merged over `{ nativeEvent: req }`.
+`static: false` はファイル検索とクライアントモードの `index.html` フォールバックをスキップします。
+`event` は `{ nativeEvent: req }` にマージされるフィールドを返します。
 
-The build emits `node.js` only in the `ssr` environment and only when that build contains `server.js`.
-The plugin warns and emits nothing with `external`, and in client mode without `serverFunctions`.
+ビルドが `node.js` を出力するのは `ssr` 環境のみで、そのビルドに `server.js` が含まれる場合だけです。
+`external` 指定時や、サーバー関数なしのクライアントモードでは、プラグインは警告を出して何も出力しません。
 
-## Valid mode combinations
+## 有効なモードの組み合わせ
 
-### Transform only
+### トランスフォームのみ
 
 ```ts
 solidPlugin();
 solidPlugin({ ssr: true });
 ```
 
-Without `start`, the plugin configures transforms only.
-`ssr: true` enables the client and server transforms, while the application supplies entries and serving.
+`start` なしでは、プラグインはトランスフォームのみを設定します。
+`ssr: true` はクライアントとサーバーのトランスフォームを有効にし、エントリーとサーブはアプリケーションが提供します。
 
-### Client start mode
+### クライアント start モード
 
 ```ts
 solidPlugin({ start: true });
 ```
 
-- Development serves the document shell for HTML `GET` requests and mounts the application with `render()`.
-- `vite build` writes the prerendered shell and client assets to `dist/client`.
-- The build removes `dist/server` unless server functions require its handler.
-- `vite preview` uses static SPA fallback and dispatches the server-function endpoint when enabled.
+- 開発時は HTML `GET` リクエストにドキュメントシェルをサーブし、`render()` でアプリケーションをマウントします。
+- `vite build` はプリレンダーされたシェルとクライアントアセットを `dist/client` に書き込みます。
+- サーバー関数がハンドラーを必要としない限り、ビルドは `dist/server` を削除します。
+- `vite preview` は静的な SPA フォールバックを使い、有効な場合はサーバー関数エンドポイントをディスパッチします。
 
-### SSR start mode
+### SSR start モード
 
 ```ts
 solidPlugin({ start: true, ssr: true });
 ```
 
-- Development streams HTML through the runnable `ssr` environment.
-- `vite build` builds the client first, writes client assets and a Vite manifest to `dist/client`, and writes `dist/server/server.js`.
-- With `node: true`, the build also writes `dist/server/node.js`.
-- The server bundle exports `handleRequest(request, options?)`.
-- `vite preview` serves client assets and sends other requests through the built handler.
+- 開発時は実行可能な `ssr` 環境を通じて HTML をストリーミングします。
+- `vite build` はまずクライアントをビルドし、クライアントアセットと Vite マニフェストを `dist/client` に、`dist/server/server.js` を書き込みます。
+- `node: true` の場合、ビルドは `dist/server/node.js` も書き込みます。
+- サーバーバンドルは `handleRequest(request, options?)` をエクスポートします。
+- `vite preview` はクライアントアセットをサーブし、それ以外のリクエストをビルド済みハンドラーに渡します。
 
-### Server functions
+### サーバー関数
 
-`serverFunctions` composes with either start mode.
-In client mode, pages remain static while `dist/server/server.js` remains available for endpoint requests.
-With `node: true`, `dist/server/node.js` serves the static pages and the endpoint from one process.
-In SSR mode, the same handler dispatches the endpoint before rendering a page.
+`serverFunctions` はどちらの start モードとも組み合わせられます。
+クライアントモードでは、ページは静的なまま、`dist/server/server.js` がエンドポイントリクエスト用に残ります。
+`node: true` では、`dist/server/node.js` が静的ページとエンドポイントを 1 つのプロセスからサーブします。
+SSR モードでは、同じハンドラーがページをレンダーする前にエンドポイントをディスパッチします。
