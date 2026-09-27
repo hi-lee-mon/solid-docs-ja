@@ -1,36 +1,36 @@
 ---
-title: "Protected routes"
+title: "保護されたルート"
 version: "2.0"
-description: "Require a signed-in customer for the account area at the data, route, and request layers, redirect a signed-out visitor to sign-in on the server and in the browser, and send them back where they were going."
+description: "データ・ルート・リクエストの各レイヤーでアカウント領域にサインイン済みの顧客を要求し、サインアウトした訪問者をサーバーとブラウザーの両方でサインインへリダイレクトさせ、元の行き先へ送り返します。"
 ---
 
-The account area from [Nested routes and layouts](/routing/solid-router/nested-routes) has three pages: `/account`, `/account/orders`, and `/account/addresses`.
-A signed-out visitor reaches them three ways: a bookmark or a shared link, which is a full page request; the **Account** link in the header, which is a client-side navigation; and a script that calls `getOrders` directly, which never renders anything.
-All three should end at `/sign-in`, and after signing in the visitor should land on the page they asked for, not on the account home.
+[ネストされたルートとレイアウト](/routing/solid-router/nested-routes)のアカウント領域には `/account`、`/account/orders`、`/account/addresses` の3つのページがあります。
+サインアウトした訪問者がそこへ辿り着く経路は3通りです: ブックマークや共有リンク（ページ全体のリクエスト）、ヘッダーの **Account** リンク（クライアントサイドナビゲーション）、そして `getOrders` を直接呼ぶスクリプト（何もレンダーしません）。
+どれも最終的に `/sign-in` に到達する必要があり、サインイン後の訪問者はアカウントホームではなく、要求したページに着地すべきです。
 
-[Sessions and auth](/building-apps/sessions-and-auth) built the cookie, `getSession()`, and the middleware that sets `event.locals.userId`.
-This guide assembles those pieces into a guard that holds at every layer and uses the account area as the running example.
+[セッションと認証](/building-apps/sessions-and-auth)では Cookie、`getSession()`、`event.locals.userId` を設定するミドルウェアを構築しました。
+このガイドでは、それらの部品をすべてのレイヤーで成立するガードへ組み立て、アカウント領域を実例として使います。
 
-## Three layers, one decision
+## 3つのレイヤー、1つの判定
 
-The decision is always the same: is there a `userId` on the request event.
-Where the decision runs determines what it protects.
+判定は常に同じです: リクエストイベントに `userId` があるかどうか。
+その判定をどこで実行するかが、何を保護するかを決めます。
 
-- A check inside each server function protects the data.
-  It runs for a page render, a router navigation, a form post without JavaScript, and a `curl` command alike, because every one of those reaches the function through the same request event.
-- A check in a route guard, a pathless route with a `preload` and a component, protects the navigation.
-  It turns a missing session into a redirect before the account pages render, on the server and in the browser.
-- A check in middleware protects the request.
-  It answers a full page request for `/account/*` with a redirect before any rendering starts.
+- 各サーバー関数内のチェックはデータを保護します。
+  ページレンダー、ルーターナビゲーション、JavaScript なしのフォーム送信、`curl` コマンドのいずれでも実行されます。これらはすべて同じリクエストイベントを経由して関数へ届くためです。
+- ルートガード（`preload` とコンポーネントを持つパスなしルート）内のチェックはナビゲーションを保護します。
+  セッションが無い場合、アカウントページがレンダーされる前にリダイレクトへ変えます。サーバーでもブラウザーでも同様です。
+- ミドルウェア内のチェックはリクエストを保護します。
+  `/account/*` へのページ全体リクエストに対し、レンダリングが始まる前にリダイレクトで応答します。
 
-Each alone is not enough.
-A route guard alone leaves `getOrders` callable by anyone who knows its URL, because a route guard decides what to render and never sees a direct call.
-The server function check alone stops the data and nothing else: in the browser the read receives a response object instead of a navigation, and the page is left without its data.
-Middleware alone never sees a client-side navigation, because a navigation inside the router makes no page request.
+どれか1つだけでは不十分です。
+ルートガードだけでは、URL を知っていれば誰でも `getOrders` を呼べたままです。ルートガードは何をレンダーするかを決めるもので、直接の呼び出しを見ることはないためです。
+サーバー関数チェックだけではデータは止まりますがそれだけです: ブラウザーでは読み取りがナビゲーションではなくレスポンスオブジェクトを受け取り、ページはデータのないまま残ります。
+ミドルウェアだけではクライアントサイドナビゲーションを見られません。ルーター内でのナビゲーションはページリクエストを発行しないためです。
 
-## Guard the data first
+## まずデータを守る
 
-Every server function under the account area reads the identity from the request event and refuses without it:
+アカウント領域の配下にあるすべてのサーバー関数は、リクエストイベントから識別情報を読み取り、それが無ければ拒否します:
 
 ```ts
 // src/data/account.ts
@@ -53,17 +53,17 @@ export const getOrders = query(async () => {
 }, "orders");
 ```
 
-Call `getOrders` from an HTTP client at the function's URL without the session cookie and the answer is a redirect with no order data in it.
-`locals.userId` was set by the `attachCustomer` middleware in [Authenticate once in middleware](/building-apps/sessions-and-auth#authenticate-once-in-middleware), and the caller cannot supply it, which is why the identity comes from the event rather than from an argument.
-[Authorize on the server](/building-apps/sessions-and-auth#authorize-on-the-server) covers the check itself; this page adds nothing to it except the rule that it goes in every function the account pages read or write.
+セッション Cookie なしで HTTP クライアントから関数の URL へ `getOrders` を呼ぶと、注文データを含まないリダイレクトが返ってきます。
+`locals.userId` は[ミドルウェアで一度だけ認証する](/building-apps/sessions-and-auth#authenticate-once-in-middleware)の `attachCustomer` ミドルウェアが設定するもので、呼び出し元が渡すことはできません。識別情報が引数ではなくイベントから来るのはこのためです。
+チェックそのものは[サーバーで認可する](/building-apps/sessions-and-auth#authorize-on-the-server)が扱っています。このページが追加するのは、アカウントページが読み書きするすべての関数にそれを入れるというルールだけです。
 
-`getCurrentUser` returns `null` rather than throwing, because a signed-out visitor is a normal state for the header to show.
-Wrapping both in `query` gives the header and the route guard below one request per render, and lets the server-rendered result hydrate without a second fetch, as [Queries render once](/routing/solid-router/server-rendering#queries-render-once) describes.
+`getCurrentUser` はスローせず `null` を返します。サインアウトした訪問者はヘッダーが表示すべき通常の状態だからです。
+両方を `query` でラップすると、ヘッダーと下記のルートガードがレンダーごとに1つのリクエストを共有し、[クエリは一度だけレンダーされる](/routing/solid-router/server-rendering#queries-render-once)で説明しているように、サーバーレンダーされた結果を2回目のフェッチなしでハイドレートできます。
 
-## Group the routes with a pathless route
+## パスなしルートでルートをまとめる
 
-The three account pages need one guard, so the route tree gets one route that owns them.
-Leave `path` off and the route adds to the match without adding to the URL:
+3つのアカウントページにはガードが1つあればよいので、ルートツリーにはそれらを所有するルートを1つ置きます。
+`path` を付けなければ、そのルートは URL に何も追加せずにマッチだけへ追加されます:
 
 ```tsx
 // src/router.ts
@@ -107,17 +107,17 @@ export default function RequireUser(props: RouteSectionProps) {
 }
 ```
 
-Visit `/account/orders` and the match is the pathless route, then `/account`, then `/orders`; the URLs do not change.
-`RequireUser` renders no frame of its own, only the matched page once the check has a user.
-`/sign-in` is a sibling of the group rather than a child of it; a sign-in page inside the guard would redirect to itself.
+`/account/orders` にアクセスすると、マッチはパスなしルート、`/account`、`/orders` の順になり、URL は変わりません。
+`RequireUser` は独自のフレームをレンダーせず、チェックがユーザーを得たあとにマッチしたページだけをレンダーします。
+`/sign-in` はグループの子ではなく兄弟です。ガードの内側にあるサインインページは自分自身へリダイレクトしてしまいます。
 
-The preload and the component read the same key, so entering the group makes one request.
-Moving from `/account` to `/account/orders` keeps the pathless route mounted, the same way the layout in [Layouts without a URL segment](/routing/solid-router/nested-routes#layouts-without-a-url-segment) stays mounted across its pages; the memo re-runs with the new path and checks again against the cached `getCurrentUser` result.
+preload とコンポーネントは同じキーを読むため、グループへの進入でリクエストは1回で済みます。
+`/account` から `/account/orders` への移動でもパスなしルートはマウントされたままです。これは[URL セグメントを持たないレイアウト](/routing/solid-router/nested-routes#layouts-without-a-url-segment)のレイアウトがページ間でマウントされ続けるのと同じ仕組みです。メモは新しいパスで再実行され、キャッシュされた `getCurrentUser` の結果に対して再度チェックします。
 
-## Redirect before render
+## レンダー前にリダイレクトする
 
-`requireUser` is the guard the preload starts and the component reads.
-It is a server function wrapped in `query` that throws a redirect when the session has no user:
+`requireUser` は preload が開始し、コンポーネントが読み取るガードです。
+これは `query` でラップされたサーバー関数で、セッションにユーザーがいなければリダイレクトをスローします:
 
 ```ts
 // src/data/account.ts
@@ -129,28 +129,28 @@ export const requireUser = query(async (next: string) => {
 }, "require-user");
 ```
 
-Open `/account/orders` signed out from a bookmark and the browser lands on `/sign-in?next=%2Faccount%2Forders`.
-Click **Account** in the header signed out and the URL becomes the same sign-in address without the account page painting first: the memo in `RequireUser` is pending, so the navigation is held, and the redirect replaces its target before anything commits.
-Sign in, and the next visit to the account area runs the check again and finds the user, because a router action's completion invalidates every cached query.
+サインアウトした状態でブックマークから `/account/orders` を開くと、ブラウザーは `/sign-in?next=%2Faccount%2Forders` に着地します。
+サインアウトした状態でヘッダーの **Account** をクリックしても、アカウントページが先にペイントされることなく URL は同じサインインアドレスになります: `RequireUser` 内のメモが保留中なのでナビゲーションは保留され、何もコミットされる前にリダイレクトが行き先を置き換えます。
+サインインすると、ルーターアクションの完了がすべてのキャッシュ済みクエリを無効化するため、アカウント領域への次の訪問ではチェックが再実行されてユーザーが見つかります。
 
-The preload is what starts the check as soon as the route matches, and on hover, before `RequireUser` exists; the memo is what holds the navigation until the check answers.
-Both call the same function.
-Its body runs on the server either way: in-process during server rendering, where it shares the request's `getCurrentUser` result with the header, and through the server-function endpoint during a navigation, where the thrown redirect travels back to the router as the response.
+チェックを開始するのは preload です。ルートがマッチした時点、さらに `RequireUser` がまだ存在しないホバー時にも開始されます。ナビゲーションをチェックの回答まで保留するのはメモです。
+どちらも同じ関数を呼びます。
+どちらの経路でも関数本体はサーバーで実行されます: サーバーレンダリング中はプロセス内で実行され、リクエストの `getCurrentUser` の結果をヘッダーと共有します。ナビゲーション中はサーバー関数エンドポイント経由で実行され、スローされたリダイレクトはレスポンスとしてルーターへ戻ります。
 
-Hovering the **Account** link runs the preload with the `"preload"` intent, which starts the request and does not act on its outcome, so a hover never redirects; the click that follows does, whether it reuses that answer or fetches a new one.
+**Account** リンクへのホバーは `"preload"` インテントで preload を実行します。これはリクエストを開始するだけで結果に対して動作しないため、ホバーがリダイレクトすることはありません。続くクリックは、その回答を再利用するか新たにフェッチするかに関わらず、リダイレクトします。
 
-:::deep-dive[What the router does with a thrown redirect]
-`query` treats a value thrown by the wrapped function the same way as a returned one.
-When the value is a redirect `Response`, whether thrown in-process or delivered by the server-function transport, the router copies its headers onto the request event's response and reads the target.
-A same-origin target becomes a call to the router's `navigate` with `replace: true`.
-On the server, `navigate` records a 302 with that `Location` on the request event, and the read resolves `undefined` so the render can finish; a `Location` set before the shell flushes turns the whole response into a redirect with no body, and one set after the flush is appended to the stream as a script that sets `window.location`, as the [streaming renderer](/concepts/rendering-and-ssr#streaming-rendering) documents.
-In the browser the read stays pending forever, because the navigation unmounts everything that was waiting on it; the account page never receives a value, `undefined` included.
-Any `X-Revalidate` keys on the redirect are invalidated before the navigation so the destination fetches fresh.
+:::deep-dive[スローされたリダイレクトをルーターがどう処理するか]
+`query` は、ラップされた関数がスローした値を返された値と同じように扱います。
+その値がリダイレクトの `Response` であれば（プロセス内でスローされた場合でも、サーバー関数トランスポート経由で届いた場合でも）、ルーターはそのヘッダーをリクエストイベントのレスポンスへコピーし、ターゲットを読み取ります。
+同一オリジンのターゲットは `replace: true` を伴うルーターの `navigate` 呼び出しになります。
+サーバーでは、`navigate` がリクエストイベントにその `Location` を伴う 302 を記録し、読み取りは `undefined` で解決されるためレンダーを完了できます。シェルがフラッシュされる前に設定された `Location` はレスポンス全体をボディのないリダイレクトに変え、フラッシュ後に設定されたものは `window.location` を設定するスクリプトとしてストリームに追記されます。これは[ストリーミングレンダラー](/concepts/rendering-and-ssr#streaming-rendering)が説明しているとおりです。
+ブラウザーでは読み取りは永久に保留中のままです。ナビゲーションがそれを待っていたすべてをアンマウントするためです。アカウントページが値を受け取ることはありません。`undefined` も含めて。
+リダイレクト上のすべての `X-Revalidate` キーはナビゲーションの前に無効化されるため、行き先は新しいデータをフェッチします。
 :::
 
-## Send them back
+## 元の場所へ送り返す
 
-The sign-in page reads `next` from the URL and hands it to the sign-in action through a hidden field:
+サインインページは URL から `next` を読み取り、隠しフィールドを通じてサインインアクションへ渡します:
 
 ```tsx
 // src/pages/SignIn.tsx
@@ -208,24 +208,24 @@ export async function signIn(form: FormData) {
 }
 ```
 
-Arrive at `/sign-in?next=%2Faccount%2Forders`, submit valid credentials, and the router navigates to `/account/orders` with the new session cookie on the response; without JavaScript the browser follows the redirect to the same address.
-`useSearchParams()` decodes the value, so `search.next` is `/account/orders`, and the hidden input carries it through the post.
-[Type search parameters](/routing/solid-router/navigation#type-search-parameters) covers the untyped and schema-typed forms of that read; [Sign in and sign out](/building-apps/sessions-and-auth#sign-in-and-sign-out) owns the credential check and the session write.
+`/sign-in?next=%2Faccount%2Forders` に到達して有効な資格情報を送信すると、ルーターは新しいセッション Cookie をレスポンスに載せて `/account/orders` へナビゲートします。JavaScript が無い場合でも、ブラウザーはリダイレクトをたどって同じアドレスへ向かいます。
+`useSearchParams()` が値をデコードするため `search.next` は `/account/orders` になり、隠し input がそれをポストを通じて運びます。
+この読み取りの型なし版とスキーマ型付き版は[検索パラメータの型付け](/routing/solid-router/navigation#type-search-parameters)が扱っています。資格情報チェックとセッション書き込みは[サインインとサインアウト](/building-apps/sessions-and-auth#sign-in-and-sign-out)の範囲です。
 
-`safeNext` accepts one shape: a path on this origin that starts with a single `/`.
-Everything else falls back to the account home.
+`safeNext` が受け入れる形は1つだけです: 単一の `/` で始まる、このオリジン上のパスです。
+それ以外はすべてアカウントホームへフォールバックします。
 
-:::danger[Validate next on the server, not only in the form]
-The hidden input is caller-controlled: anyone can post `next=//attacker.example` to `signIn`, whether or not the sign-in page put it there.
-The server-function transport resolves a redirect target against the request URL, so `//attacker.example` and `/\attacker.example` both resolve to another origin, and the router leaves the app for a target on another origin by setting `window.location.href`.
-The runtime refuses targets whose scheme is not `http` or `https`, and it does not refuse a different `http` origin.
-Run `safeNext` inside `signIn`, where the value is about to become a `Location` header, and treat the copy in the form as a convenience.
+:::danger[next はフォームだけでなくサーバーで検証する]
+隠し input は呼び出し元が制御できます: サインインページがそこに置いたかどうかに関わらず、誰でも `next=//attacker.example` を `signIn` へポストできます。
+サーバー関数トランスポートはリダイレクトターゲットをリクエスト URL に対して解決するため、`//attacker.example` と `/\attacker.example` はどちらも別オリジンへ解決されます。ルーターは別オリジンのターゲットへは `window.location.href` を設定してアプリを離れます。
+ランタイムはスキームが `http` または `https` でないターゲットは拒否しますが、異なる `http` オリジンは拒否しません。
+`safeNext` は `signIn` の内部で実行してください。そこは値が `Location` ヘッダーになろうとしている場所です。フォーム内のコピーは利便性のためのものとして扱います。
 :::
 
-## Middleware for whole sections
+## セクション全体のためのミドルウェア
 
-A full page request for `/account/orders` from a signed-out visitor can be answered before any rendering starts.
-Add a middleware after the one that reads the session:
+サインアウトした訪問者からの `/account/orders` へのページ全体リクエストは、レンダリングが始まる前に応答できます。
+セッションを読み取るミドルウェアの後に、ミドルウェアを1つ追加します:
 
 ```ts
 // src/middleware.ts
@@ -258,23 +258,23 @@ export default [
 ];
 ```
 
-Request `/account/orders` with no cookie and the server answers `302` with `Location: /sign-in?next=%2Faccount%2Forders`, and no component runs.
-`attachCustomer` is the middleware from [Sessions and auth](/building-apps/sessions-and-auth#authenticate-once-in-middleware); it has to come first in the array, because middleware order is array order.
-[Stop the chain](/building-apps/middleware-and-api-routes#stop-the-chain) covers returning a `Response` without calling `next()`.
+Cookie なしで `/account/orders` をリクエストすると、サーバーは `Location: /sign-in?next=%2Faccount%2Forders` を伴う `302` で応答し、コンポーネントは一切実行されません。
+`attachCustomer` は[セッションと認証](/building-apps/sessions-and-auth#authenticate-once-in-middleware)のミドルウェアです。ミドルウェアの順序は配列の順序なので、これは配列の先頭に来なければなりません。
+`next()` を呼ばずに `Response` を返す方法は[チェーンを止める](/building-apps/middleware-and-api-routes#stop-the-chain)が扱っています。
 
-Use this layer in addition to the route guard, not instead of it.
-What it adds is a real redirect status on full page requests: the route guard's redirect, when it lands after the shell has flushed, reaches the browser as a script at the end of the stream, after the fallback has already painted.
-What it cannot do is see a client-side navigation, which makes no page request, or a server-function call, which is a request to `/_server` rather than to `/account/*`.
+このレイヤーはルートガードの代わりではなく、併用します。
+これが追加するのは、ページ全体リクエストに対する本物のリダイレクトステータスです: ルートガードのリダイレクトは、シェルがフラッシュされた後に着地すると、フォールバックがすでにペイントされた後で、ストリーム末尾のスクリプトとしてブラウザーに届きます。
+これにできないのは、ページリクエストを発行しないクライアントサイドナビゲーションや、`/account/*` ではなく `/_server` へのリクエストであるサーバー関数呼び出しを見ることです。
 
-:::caution[A path prefix is not a permission]
-The middleware matches URLs, so it protects exactly the paths that start with `/account` and nothing else.
-The server functions the account pages call are reachable at their own URLs, and the check inside each function is what protects them.
-Adding a prefix to the middleware does not remove a check from a function.
+:::caution[パスプレフィックスは権限ではない]
+ミドルウェアは URL をマッチさせるため、`/account` で始まるパスだけを厳密に保護し、それ以外は保護しません。
+アカウントページが呼ぶサーバー関数はそれぞれ自身の URL で到達可能であり、それらを保護するのは各関数内部のチェックです。
+ミドルウェアにプレフィックスを追加しても、関数からチェックを取り除けるわけではありません。
 :::
 
-## Show the right navigation
+## 正しいナビゲーションを表示する
 
-The header shows **Sign in** or the customer's name from the same `getCurrentUser` read the guard uses:
+ヘッダーは、ガードが使うのと同じ `getCurrentUser` の読み取りから、**Sign in** または顧客名を表示します:
 
 ```tsx
 // src/components/Header.tsx
@@ -308,50 +308,50 @@ export function Header() {
 }
 ```
 
-Load the product page signed out and the header shows **Sign in** linking to `/sign-in?next=%2Fproducts%2Fmug`; the server rendered that link, and the browser adopted the serialized `current-user` result during hydration instead of fetching it again, so there is no request and no change of state on load.
-Sign in and the name appears; sign out through a router `action` that throws `redirect(paths())` and every cached query is invalidated when the action completes, so `getCurrentUser` runs again and the header shows **Sign in** without a full page load.
+サインアウトした状態で商品ページを読み込むと、ヘッダーは `/sign-in?next=%2Fproducts%2Fmug` へのリンクを持つ **Sign in** を表示します。そのリンクはサーバーがレンダーし、ブラウザーはハイドレーション中にシリアライズされた `current-user` の結果を再フェッチせずに採用するため、読み込み時にリクエストも状態変化も起こりません。
+サインインすると名前が現れます。`redirect(paths())` をスローするルーター `action` でサインアウトすると、アクション完了時にすべてのキャッシュ済みクエリが無効化されるため、`getCurrentUser` が再実行され、ページ全体の読み込みなしにヘッダーは **Sign in** を表示します。
 
-[State on the server](/guides/state-management#state-on-the-server) explains why the header holds a view of the user rather than a copy.
-`Header` renders inside the router's function child, so `useLocation()` and the `query` read both have a router to bind to.
+ヘッダーがユーザーのコピーではなくビューを保持する理由は[サーバー上の状態](/guides/state-management#state-on-the-server)が説明しています。
+`Header` はルーターの関数形式の子要素の内側でレンダーされるため、`useLocation()` と `query` の読み取りの両方にバインド先のルーターがあります。
 
-## Common problems
+## よくある問題
 
-### The redirect loops between `/sign-in` and `/account`
+### `/sign-in` と `/account` の間でリダイレクトがループする
 
-The sign-in route is a child of the pathless guard route, so the guard redirects to a page it guards.
-Move `/sign-in` beside the group.
-If the routes are right, the session cookie is not coming back on the next request; [Sessions and auth](/building-apps/sessions-and-auth#common-problems) lists the cookie attributes to compare.
-Chained client-side redirects stop after 100 with `Too many redirects` from the router.
+サインインルートがパスなしガードルートの子になっているため、ガードが自分の守るページへリダイレクトしています。
+`/sign-in` をグループの隣へ移してください。
+ルートが正しいのにループするなら、次のリクエストでセッション Cookie が返ってきていません。[セッションと認証](/building-apps/sessions-and-auth#common-problems)に比較すべき Cookie 属性の一覧があります。
+連鎖するクライアントサイドリダイレクトは 100 回で停止し、ルーターから `Too many redirects` が返ります。
 
-### The account page paints, then the sign-in page replaces it
+### アカウントページがペイントされてからサインインページに置き換わる
 
-The guard navigates after the user data has arrived, from an effect or a callback, so the page commits and the navigation follows it.
-Throw the redirect from inside the server function the `query` wraps instead; the read stays pending, the navigation is held, and the sign-in page replaces the target before anything paints.
-On a full page request, add the middleware so the server answers with a redirect status instead of rendering the shell first.
+ガードが、エフェクトやコールバックから、ユーザーデータの到着後にナビゲートしているため、ページがコミットされてからナビゲーションが続いています。
+代わりに `query` がラップするサーバー関数の内部からリダイレクトをスローしてください。読み取りは保留中のまま、ナビゲーションは保留され、何かがペイントされる前にサインインページが行き先を置き換えます。
+ページ全体リクエストでは、ミドルウェアを追加して、シェルを先にレンダーする代わりにサーバーがリダイレクトステータスで応答するようにしてください。
 
-### The server function returns orders for a signed-out caller
+### サーバー関数がサインアウトした呼び出し元に注文を返す
 
-The function has no check of its own; a route guard, a hidden link, or a middleware prefix protected the page and not the function.
-Read `getRequestEvent()?.locals.userId` inside the function and throw `redirect()` or `respond()` when it is missing, as [Authorize on the server](/building-apps/sessions-and-auth#authorize-on-the-server) shows.
+関数自身にチェックがありません。ルートガード、隠されたリンク、ミドルウェアのプレフィックスがページを守っていても関数は守っていません。
+[サーバーで認可する](/building-apps/sessions-and-auth#authorize-on-the-server)が示すように、関数内で `getRequestEvent()?.locals.userId` を読み、無ければ `redirect()` または `respond()` をスローしてください。
 
-### After signing in, the visitor lands on another site
+### サインイン後、訪問者が別サイトに着地する
 
-`next` was passed to `redirect()` without validation, and a value such as `//attacker.example` resolved to another origin.
-Accept only paths that start with a single `/` and reject `//` and `/\`; run that check inside the server function, not only in the form.
+`next` が検証なしで `redirect()` へ渡され、`//attacker.example` のような値が別オリジンへ解決されました。
+単一の `/` で始まるパスだけを受け入れ、`//` と `/\` を拒否してください。そのチェックはフォームだけでなくサーバー関数の内部で実行します。
 
-## Recap
+## まとめ
 
-- Decide once, on `locals.userId`, and run the decision in every server function, in the route guard, and in middleware; each layer covers a way in that the others do not see.
-- Put the account pages under a pathless route whose `preload` starts the check and whose component renders `props.children` behind it, and keep `/sign-in` beside the group.
-- Make the guard a server function wrapped in `query` that throws `redirect()` when the session has no user; the router navigates on it during server rendering and on client-side navigations alike.
-- Build the sign-in target with `paths["sign-in"]({ next })`; the search object encodes the path.
-- Validate `next` inside the server function: a single leading `/`, no `//`, no `/\`, and not the sign-in page itself.
-- Return a redirect from middleware for full page requests under `/account`, and keep the function checks, because middleware does not see `/_server` or client-side navigations.
-- Read `getCurrentUser()` through `query` in the header so the server result hydrates and a sign-out action refreshes it.
+- `locals.userId` で一度だけ判定し、その判定をすべてのサーバー関数、ルートガード、ミドルウェアで実行します。各レイヤーは他では見られない侵入経路をカバーします。
+- `preload` がチェックを開始し、コンポーネントがその背後で `props.children` をレンダーするパスなしルートの下にアカウントページを置き、`/sign-in` はグループの隣に保ちます。
+- ガードは、セッションにユーザーがいなければ `redirect()` をスローする `query` でラップされたサーバー関数にします。ルーターはサーバーレンダリング中もクライアントサイドナビゲーション中も同様にそれでナビゲートします。
+- サインインのターゲットは `paths["sign-in"]({ next })` で構築します。search オブジェクトがパスをエンコードします。
+- `next` はサーバー関数の内部で検証します: 先頭が単一の `/`、`//` なし、`/\` なし、サインインページ自身でもないこと。
+- `/account` 配下へのページ全体リクエストにはミドルウェアからリダイレクトを返します。関数チェックは維持します。ミドルウェアは `/_server` やクライアントサイドナビゲーションを見ないためです。
+- ヘッダーでは `getCurrentUser()` を `query` 経由で読み、サーバーの結果がハイドレートされ、サインアウトアクションがそれを更新するようにします。
 
-## Next steps
+## 次のステップ
 
-- [Sessions and auth](/building-apps/sessions-and-auth): the cookie, `getSession()`, and the middleware that puts `userId` on the event this guide reads.
-- [Middleware and API routes](/building-apps/middleware-and-api-routes): the chain the `requireAccountSession` middleware joins, and how to protect API routes the same way.
-- [Forms](/guides/forms): inline validation messages and pending state for the sign-in form.
-- [SSR-safe code](/guides/ssr-safe-code): the checklist for code such as `RequireUser` that runs on both sides.
+- [セッションと認証](/building-apps/sessions-and-auth): このガイドが読むイベントに `userId` を置く Cookie、`getSession()`、ミドルウェア。
+- [ミドルウェアと API ルート](/building-apps/middleware-and-api-routes): `requireAccountSession` ミドルウェアが参加するチェーンと、API ルートを同じ方法で守るやり方。
+- [フォーム](/guides/forms): サインインフォームのインラインバリデーションメッセージと保留中の状態。
+- [SSR セーフなコード](/guides/ssr-safe-code): `RequireUser` のように両側で実行されるコードのためのチェックリスト。
