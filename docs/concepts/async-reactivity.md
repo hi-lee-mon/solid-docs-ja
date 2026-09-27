@@ -1,25 +1,25 @@
 ---
-title: "Async reactivity"
+title: "非同期リアクティビティ"
 version: "2.0"
-description: "Read a promise like a value: how async memos hold updates, when Loading shows a fallback, and how mutations settle."
+description: "Promise を値のように読み取る: 非同期メモが更新を保持する仕組み、Loading がフォールバックを表示するタイミング、ミューテーションが確定する流れを説明します。"
 ---
 
-Take one value your UI renders today: a product, a list, a setting.
-Make it come from the server instead of a constant.
-Written by hand, that change spreads: the type becomes `Promise<Product>`, every component between the fetch and the display learns about loading, and the place you fetch and the place you show a spinner become the same place whether you want that or not.
+いま UI がレンダリングしている値を1つ考えてみてください。商品、リスト、設定です。
+それを定数ではなくサーバーから来るように変えます。
+手作業で書くと、この変更は波及します。型は `Promise<Product>` になり、fetch と表示の間にあるすべてのコンポーネントが読み込み中を意識することになり、fetch する場所とスピナーを表示する場所は、望むかどうかにかかわらず同じ場所になります。
 
-In Solid the change is one line.
-A computation that returns a promise is still a computation, and everything that reads it keeps reading a value.
+Solid では、この変更は1行です。
+Promise を返す計算も依然として計算であり、それを読み取るすべてのものは値を読み続けます。
 
-That one line also changes how writes behave.
-Once a memo is async, a write to any input it depends on is held until the memo has its next answer, and everything else in the same update waits with it.
-The page never shows a mix of old and new data.
-If you come from Solid 1 or from a pattern where every panel fetched and showed its own spinner on its own schedule, this is the part that will surprise you; the [in-flight work](#settled-view-and-in-flight-work) section shows it and the choices it gives you.
+この1行は書き込みの振る舞いも変えます。
+メモが非同期になると、それが依存する入力への書き込みは、メモが次の答えを得るまで保持され、同じ更新に含まれる他のすべても一緒に待ちます。
+ページに古いデータと新しいデータが混在することはありません。
+Solid 1 から来た場合や、各パネルが独自のスケジュールで fetch して独自のスピナーを表示するパターンから来た場合、ここが意外に感じる部分です。[処理中の処理](#settled-view-and-in-flight-work)のセクションで、その挙動とそこにある選択肢を示します。
 
-This page explains what async computations buy you and what you still have to decide.
-The examples continue the shopping cart from the [Reactivity](/concepts/reactivity) page.
+このページでは、非同期の計算がもたらすものと、自分で決める必要があるものを説明します。
+例は[リアクティビティ](/concepts/reactivity)ページのショッピングカートの続きです。
 
-## A memo that returns a promise
+## Promise を返すメモ
 
 ```tsx
 import { Loading, createMemo } from "solid-js";
@@ -46,22 +46,22 @@ function ProductDetail(props: { id: string }) {
 }
 ```
 
-`product()` has type `Product`, not `Product | undefined` and not `Promise<Product>`.
-There is no loading flag to check and no optional chaining.
-If the expression is running, the value is there.
+`product()` の型は `Product` です。`Product | undefined` でも `Promise<Product>` でもありません。
+チェックするローディングフラグも、オプショナルチェイニングもありません。
+式が実行されていれば、値はそこにあります。
 
-Until the first result arrives, a read of `product()` reports that the value is not ready, and the nearest [`Loading`](/reference/solid-js/components-jsx/loading) boundary renders its fallback in place of the content.
-When the promise resolves, the content renders.
+最初の結果が届くまで、`product()` の読み取りは値がまだ準備できていないことを報告し、最も近い [`Loading`](/reference/solid-js/components-jsx/loading) バウンダリがコンテンツの代わりにフォールバックをレンダリングします。
+Promise が解決すると、コンテンツがレンダリングされます。
 
-When `props.id` changes later, the fallback does not come back.
-The current product stays on screen while the next one loads.
-Initial readiness and a later update are different situations, and Solid treats them differently by default; the [in-flight work](#settled-view-and-in-flight-work) section explains the second one.
+その後 `props.id` が変わっても、フォールバックは戻ってきません。
+次の商品が読み込まれる間、現在の商品は画面に残ります。
+初回の準備と後からの更新は異なる状況であり、Solid はデフォルトで両者を別々に扱います。後者については[処理中の処理](#settled-view-and-in-flight-work)のセクションで説明します。
 
-## Passing is not reading
+## 渡すことは読み取りではない
 
-Components run once, so there is no component to suspend and re-run.
-Only expressions that read an async value wait for it.
-Passing the value along as a prop does not count as reading it, because a dynamic prop compiles to a getter that evaluates where the child uses it:
+コンポーネントは一度だけ実行されるため、中断して再実行されるコンポーネントは存在しません。
+非同期の値を読み取る式だけがそれを待ちます。
+値を prop として渡すことは読み取りには数えません。動的な prop は、子がそれを使う場所で評価されるゲッターにコンパイルされるからです:
 
 ```tsx
 function ProductPage(props: { id: string }) {
@@ -83,11 +83,11 @@ function ProductLayout(props: { product: Product }) {
 }
 ```
 
-`product={product()}` looks like it calls the accessor before the data exists.
-It does not; the expression is evaluated when `ProductDetail` reads `props.product.name`.
-So `ProductLayout` renders immediately, `CategoryNav` renders immediately, and only the detail pane waits.
+`product={product()}` は、データが存在する前にアクセサーを呼んでいるように見えます。
+実際は違います。この式は `ProductDetail` が `props.product.name` を読み取るときに評価されます。
+そのため `ProductLayout` はすぐにレンダリングされ、`CategoryNav` もすぐにレンダリングされ、詳細ペインだけが待ちます。
 
-Derived values behave the same way:
+派生値も同じように振る舞います:
 
 ```tsx
 function ProductDetail(props: { product: Product }) {
@@ -101,21 +101,21 @@ function ProductDetail(props: { product: Product }) {
 }
 ```
 
-`priceLabel` does not know that `product` was async.
-It reads a not-ready value, so it becomes not-ready itself, and its readers wait in turn.
-No `await` and no promise type appear anywhere between the fetch and the JSX.
+`priceLabel` は `product` が非同期だったことを知りません。
+未準備の値を読み取るため、それ自身も未準備になり、その読み取り側も順番に待つことになります。
+fetch と JSX の間のどこにも `await` も Promise 型も現れません。
 
-## Fetch high, block low
+## 高い位置で fetch し、低い位置でブロックする
 
-Because passing a value costs nothing, the two decisions that usually fight each other come apart:
+値を渡すのにコストがかからないため、通常は相反する2つの決定が分離できます:
 
-- Where to create the async value is a performance decision.
-  Higher in the tree means the request starts earlier and can run in parallel with other work.
-- Where to block is a design decision.
-  Lower in the tree means a smaller region shows a fallback.
+- 非同期の値をどこで作るかは、パフォーマンスの決定です。
+  ツリーの高い位置ほどリクエストが早く始まり、他の処理と並行して実行できます。
+- どこでブロックするかは、デザインの決定です。
+  ツリーの低い位置ほど、フォールバックを表示する領域が小さくなります。
 
-Neither decision touches the components in between.
-Lift the fetch to the top of the app and push the boundary down to the one pane that should show a skeleton:
+どちらの決定も、その間にあるコンポーネントには触れません。
+fetch をアプリのトップまで持ち上げ、バウンダリはスケルトンを表示すべき1つのペインまで押し下げます:
 
 ```tsx
 function App() {
@@ -142,12 +142,12 @@ function ProductPage(props: {
 }
 ```
 
-Do the same refactor with a hard-coded product object and the code is identical.
-The async version costs one `Loading` element placed where the design wants a skeleton.
+ハードコードされた商品オブジェクトで同じリファクタリングをしても、コードは同一です。
+非同期版でかかるコストは、デザインがスケルトンを欲する場所に置く `Loading` 要素1つだけです。
 
-## Nesting is not a waterfall
+## ネストはウォーターフォールではない
 
-A child component below JSX that reads an async value does not wait for that value unless it reads it too:
+非同期の値を読み取る JSX の下にある子コンポーネントは、自分もその値を読まない限りそれを待ちません:
 
 ```tsx
 function ProductDetail(props: { id: string }) {
@@ -170,43 +170,43 @@ function Reviews(props: { productId: string }) {
 }
 ```
 
-`Reviews` sits under `product().name` in the JSX, but the component tree mounts up front and `Reviews` reads `props.productId`, which is available immediately.
-Both requests start at the same time.
-Requests are ordered by data dependency, not by where the components sit.
+JSX 上では `Reviews` は `product().name` の下にありますが、コンポーネントツリーは最初にマウントされ、`Reviews` が読む `props.productId` はすぐに利用できます。
+2つのリクエストは同時に始まります。
+リクエストの順序はデータの依存関係で決まり、コンポーネントがどこにあるかでは決まりません。
 
-A waterfall happens when the second request depends on the first response:
+ウォーターフォールが起こるのは、2つ目のリクエストが1つ目のレスポンスに依存するときです:
 
 ```tsx
 const product = createMemo(() => fetchProduct(props.id));
 const brand = createMemo(() => fetchBrand(product().brandId));
 ```
 
-`brand` cannot start until `product` resolves, because the id comes from the response.
-That is sequential because the data is sequential, and the dependency is visible in the code.
-Development builds can flag long chains like this with the `ASYNC_WATERFALL` diagnostic when attribution is enabled; see [Debugging reactivity](/guides/debugging-reactivity).
+`brand` は `product` が解決するまで始められません。id がレスポンスから来るからです。
+これはデータが逐次的だから逐次的であり、その依存関係はコードに見えています。
+開発ビルドでは、アトリビューションを有効にしていれば、このような長いチェーンを `ASYNC_WATERFALL` 診断で指摘できます。[リアクティビティのデバッグ](/guides/debugging-reactivity)を参照してください。
 
-## Settled view and in-flight work
+## 確定済みビューと処理中の処理
 
-Once a value has settled, changing an input does not blank the screen.
-Solid separates the answer the user can see from the work that will produce the next answer:
+値が確定した後は、入力を変えても画面は真っ白になりません。
+Solid は、ユーザーに見えている答えと、次の答えを生み出す処理を分離します:
 
-![A timeline showing a Loading fallback during the first request, Answer A remaining visible during a held update, and Answer B appearing when the next request settles.](/images/diagrams/async-update-timeline.svg)
+![最初のリクエスト中に Loading フォールバックが表示され、保持された更新の間も回答 A が表示され続け、次のリクエストが確定すると回答 B が現れるタイムライン](/images/diagrams/async-update-timeline.svg)
 
-Before the first answer, there is nothing to show and the `Loading` boundary decides what renders.
-After an answer, Solid holds the committed view while the next one is prepared.
-Other writes in the same update wait with it, and everything commits together when the pending work settles, so the page never shows a mix of old and new.
+最初の答えの前には表示するものがなく、`Loading` バウンダリが何をレンダリングするかを決めます。
+答えの後は、次のものが準備される間、Solid はコミット済みのビューを保持します。
+同じ更新に含まれる他の書き込みも一緒に待ち、保留中の処理が確定したときにすべてがまとめてコミットされるため、ページに新旧が混在することはありません。
 
-This hold is automatic.
-It does not need a `Loading` boundary and it has no API to opt in; if you have wrapped updates in a transition before, this is that behavior as the default.
-The boundary controls what renders when no settled answer exists; it does not create the hold.
+この保持は自動です。
+`Loading` バウンダリは不要で、オプトインする API もありません。更新をトランジションでラップしたことがあるなら、その動作がデフォルトになったものです。
+バウンダリが制御するのは、確定済みの答えが存在しないときに何をレンダリングするかであり、保持を作り出すものではありません。
 
-### What the hold means for a shared input
+### 共有された入力に対して保持が意味すること
 
-The hold is simple to reason about for one memo and one view.
-It is worth seeing for several.
+保持は、1つのメモと1つのビューについて考えるのは簡単です。
+複数ある場合にどうなるかを見る価値があります。
 
-A dashboard has a period selector and three panels.
-Each panel fetches its own data from the selected period, and the fetches take 200 milliseconds, one second, and ten seconds:
+ダッシュボードに期間セレクターと3つのパネルがあるとします。
+各パネルは選択された期間から自分のデータを fetch し、その fetch にはそれぞれ 200 ミリ秒、1 秒、10 秒かかります:
 
 ```tsx
 function Dashboard() {
@@ -230,38 +230,38 @@ function SummaryPanel(props: { period: string }) {
 }
 ```
 
-If each panel managed its own loading flag, changing the period would make the selector flip at once and each panel replace its content when its own request landed: the summary at 200 milliseconds, the audit log ten seconds later.
-For those ten seconds the page shows the new period's summary beside the old period's audit log.
+各パネルが自分のローディングフラグを管理していたら、期間を変えたときセレクターはすぐに切り替わり、各パネルは自分のリクエストが届いた時点でコンテンツを入れ替えるでしょう。サマリーは 200 ミリ秒で、監査ログは 10 秒後です。
+その 10 秒間、ページには新しい期間のサマリーと、古い期間の監査ログが並んで表示されます。
 
-In Solid the write to `period` is held.
-The selector keeps showing the old period, every panel keeps its old content, and at ten seconds the selector and all three panels change together.
-Nothing on the page ever disagrees about which period it is showing.
-The cost is that the fast panel waits for the slow one, and if nothing on the page reacts to the click, the page looks dead for ten seconds.
+Solid では `period` への書き込みが保持されます。
+セレクターは古い期間を表示し続け、すべてのパネルは古いコンテンツを保持し、10 秒後にセレクターと3つのパネルすべてが一緒に変わります。
+ページ上のどの要素も、表示している期間について食い違うことはありません。
+代償として、速いパネルが遅いパネルを待ちます。そしてページ上の何もクリックに反応しなければ、ページは 10 秒間死んでいるように見えます。
 
-Neither behavior is right for every screen.
-A detail page, a form, or a set of totals that must add up should change together.
-A set of independent widgets should not have to.
-The question to ask is about the update, not about any one request, and it is one your designer can answer:
+どちらの振る舞いも、あらゆる画面で正しいわけではありません。
+詳細ページ、フォーム、合計が一致しなければならない一連の集計値は、一緒に変わるべきです。
+独立したウィジェットの集まりは、一緒に変わる必要はありません。
+問うべきは個々のリクエストではなく更新についてであり、これはデザイナーが答えられる質問です:
 
-**While this update is in flight, what should the user see?**
+**この更新が処理中の間、ユーザーには何が見えるべきですか？**
 
-| The user should see…                                                   | Use                                                                                           |
-| ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| Nothing change until everything that depends on the input is ready     | The default. Add [`isPending`](#another-answer-is-coming-ispending) to acknowledge the click. |
-| The control they touched reflect their input now, and the content wait | [`latest`](#show-the-input-now-latest) on the control, `isPending` to dim the content.        |
-| A placeholder in place of the content for the changed subject          | [`<Loading on={key}>`](#show-a-placeholder-again-loading-on) around that content.             |
+| ユーザーに見せるべきもの                                       | 使うもの                                                                                     |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| 入力に依存するすべてが準備できるまで何も変わらないこと         | デフォルト。[`isPending`](#another-answer-is-coming-ispending) を追加してクリックに応答する |
+| 触れたコントロールは今すぐ入力を反映し、コンテンツは待つ       | コントロールに [`latest`](#show-the-input-now-latest)、コンテンツを暗くするのに `isPending` |
+| 対象が変わったコンテンツの代わりにプレースホルダー             | そのコンテンツの周りに [`<Loading on={key}>`](#show-a-placeholder-again-loading-on)          |
 
-The first two rows are the same screen: the tab highlight moves at once, the content stays and dims, the content swaps when it is ready.
-That is the standard interaction for a held update, and the rest of this section shows the pieces.
-The third row is for content that should not stay on screen when its subject changes, such as a panel for a different account.
+最初の2行は同じ画面です。タブのハイライトはすぐに移り、コンテンツは残って暗くなり、準備できたらコンテンツが入れ替わります。
+これが保持された更新の標準的なインタラクションであり、このセクションの残りでその部品を示します。
+3行目は、対象が変わったときに画面に残すべきでないコンテンツ、例えば別のアカウントのパネル向けです。
 
-The hold applies only to updates.
-Each panel's first load still reaches the nearest `Loading` boundary, and nested boundaries let panels appear as their own first data arrives.
+保持が適用されるのは更新だけです。
+各パネルの初回読み込みは依然として最も近い `Loading` バウンダリに届き、ネストされたバウンダリによって各パネルは自分の最初のデータが届き次第表示されます。
 
-## Another answer is coming: `isPending`
+## 次の答えが来る途中: `isPending`
 
-Because the old answer stays visible, the UI needs a way to say that a new one is on the way.
-[`isPending(fn)`](/reference/solid-js/reactivity/is-pending) answers that for one expression:
+古い答えが表示されたままなので、UI には新しいものが途中であることを伝える手段が必要です。
+[`isPending(fn)`](/reference/solid-js/reactivity/is-pending)は、1つの式についてそれに答えます:
 
 ```tsx
 import { For, createMemo, createSignal, isPending } from "solid-js";
@@ -281,10 +281,10 @@ function Search() {
 }
 ```
 
-Typing changes `query`, `results` starts a new request, and the previous results stay on screen with the `stale` class until the new ones land.
+タイピングで `query` が変わり、`results` が新しいリクエストを開始し、新しい結果が届くまで以前の結果が `stale` クラス付きで画面に残ります。
 
-`isPending` is a question, not a piece of state.
-It can be asked about the async source, about a memo derived from it, about a prop several components down, or about the signal whose write started the update:
+`isPending` は状態ではなく問い合わせです。
+非同期のソースについて、そこから派生したメモについて、何段か下のコンポーネントの prop について、あるいはその書き込みが更新を開始したシグナルについて問い合わせられます:
 
 ```tsx
 function App() {
@@ -301,25 +301,25 @@ function App() {
 }
 ```
 
-Here the fetch lives inside `ProductPage`.
-`App` knows nothing about it, but `isPending(selectedId)` is `true` from the moment the write happens until everything downstream has settled, because the write is what is being held.
+ここでは fetch は `ProductPage` の中にあります。
+`App` はそれについて何も知りませんが、`isPending(selectedId)` は書き込みが起きた瞬間から下流のすべてが確定するまで `true` です。保持されているのは書き込みだからです。
 
-Notice that the list highlight does not move on click either.
-`selectedId()` holds its old value like everything else, so the highlighted row always matches the content on screen.
-When the design wants the highlight to move immediately, read the input with [`latest`](#show-the-input-now-latest), covered next.
+リストのハイライトもクリックでは動かないことに注目してください。
+`selectedId()` も他のすべてと同様に古い値を保持するため、ハイライトされた行は常に画面上のコンテンツと一致します。
+デザイン上ハイライトをすぐに動かしたい場合は、次に説明する [`latest`](#show-the-input-now-latest) で入力を読み取ります。
 
-A held update that nothing acknowledges looks like a dead click for as long as the request takes.
-With attribution enabled, development builds report that case as `SILENT_HOLD` and name the interaction, the write, and the source it waited on; [Debugging reactivity](/guides/debugging-reactivity#the-screen-looks-dead-after-a-click) covers the report and the fixes, which are the primitives on this page.
+何も反応しない保持された更新は、リクエストにかかる時間の間、死んだクリックに見えます。
+アトリビューションを有効にした開発ビルドは、そのケースを `SILENT_HOLD` として報告し、インタラクション、書き込み、待っていたソースを特定します。[リアクティビティのデバッグ](/guides/debugging-reactivity#the-screen-looks-dead-after-a-click)で、そのレポートと修正方法（このページのプリミティブです）を説明しています。
 
-If the expression has no settled answer yet, the read inside `isPending` still follows the surrounding `Loading` path; `isPending` reports on updates to a value that exists, not on the first load.
+式にまだ確定済みの答えがなければ、`isPending` の中の読み取りも周囲の `Loading` の流れに従います。`isPending` が報告するのは存在する値への更新であり、初回読み込みではありません。
 
-## Show the input now: `latest`
+## 入力を今すぐ表示する: `latest`
 
-A held update keeps the input's old value visible along with the old content.
-For the content that is the right choice.
-For the control the user has touched, it usually is not: a tab that does not highlight when clicked reads as broken, even when the content below it is correctly waiting.
+保持された更新は、入力の古い値を古いコンテンツと一緒に表示し続けます。
+コンテンツについては、それが正しい選択です。
+ユーザーが触れたコントロールについては、通常そうではありません。クリックしてもハイライトされないタブは、下のコンテンツが正しく待っていても、壊れて見えます。
 
-[`latest(fn)`](/reference/solid-js/reactivity/latest) reads the value an update is moving toward instead of the value it has committed:
+[`latest(fn)`](/reference/solid-js/reactivity/latest)は、更新がコミットした値ではなく、更新が向かっている値を読み取ります:
 
 ```tsx
 <ProductList selectedId={latest(selectedId)} onSelect={setSelectedId} />
@@ -328,25 +328,25 @@ For the control the user has touched, it usually is not: a tab that does not hig
 </main>
 ```
 
-If a new value is in flight, `latest(selectedId)` returns it before the held update commits it.
-Otherwise it returns the committed value.
-Before any value exists, the read still follows the normal `Loading` path.
+新しい値が処理中なら、`latest(selectedId)` は保持された更新がそれをコミットする前にそれを返します。
+そうでなければ、コミット済みの値を返します。
+値がまだ存在しない場合は、読み取りは通常の `Loading` の流れに従います。
 
-Read the two sides together: `latest` on the control, the plain read on the content, `isPending` between them to dim the content.
-The highlight moves at once, the old product stays visible and dims, and the new product replaces it when its data is ready.
-This is the everyday shape of a held update, not a special case.
+2つの側面を組み合わせて読みます。コントロールには `latest`、コンテンツには通常の読み取り、その間をつなぐ `isPending` でコンテンツを暗くします。
+ハイライトはすぐに移り、古い商品は表示されたまま暗くなり、データが準備できたら新しい商品がそれと入れ替わります。
+これは保持された更新の日常的な形であり、特別なケースではありません。
 
-`latest` belongs on inputs.
-Reading data through `latest` shows a result before the rest of the update has agreed on it, so a panel can show the new period's numbers while the selector still shows the old period.
-When you want the control to lead, use `latest` on the control; when you want a panel to show a placeholder, use the next section.
+`latest` は入力に使うものです。
+`latest` でデータを読むと、更新の残りがそれに同意する前に結果が表示されるため、セレクターがまだ古い期間を表示している間にパネルが新しい期間の数値を表示してしまいます。
+コントロールを先行させたいときはコントロールに `latest` を使い、パネルにプレースホルダーを表示したいときは次のセクションを使います。
 
-## Show a placeholder again: `Loading on`
+## プレースホルダーを再び表示する: `Loading on`
 
-Once a `Loading` boundary has shown content, a later update does not bring the fallback back; the content stays and the update is held.
-Some content should not stay.
-An account panel showing account 1 while account 2 loads is worse than a skeleton, and the same is true for any content whose subject changed rather than whose data refreshed.
+`Loading` バウンダリが一度コンテンツを表示すると、後の更新でフォールバックは戻りません。コンテンツは残り、更新は保持されます。
+残すべきでないコンテンツもあります。
+アカウント 2 の読み込み中にアカウント 1 を表示するアカウントパネルは、スケルトンより悪いです。データが更新されたのではなく対象が変わったコンテンツはすべて同じです。
 
-The `on` prop names the value whose change should make the boundary eligible to show its fallback again:
+`on` prop は、その変化によってバウンダリがフォールバックを再び表示できるようにすべき値を指定します:
 
 ```tsx
 <Loading on={accountId()} fallback={<AccountSkeleton />}>
@@ -354,16 +354,16 @@ The `on` prop names the value whose change should make the boundary eligible to 
 </Loading>
 ```
 
-A `Loading` boundary is the update's chance to finish without waiting for that content: the region shows its fallback and waits on its own.
-Normally the update takes that chance only on the region's first load.
-`on` extends the offer to later updates: when `accountId()` changes and the new account is not ready, the boundary is willing to go back to its skeleton if that lets the update finish earlier.
-If the panel was the only thing waiting, it does.
-Controls outside the boundary see the new id at once, the panel shows its skeleton, and the content arrives when the account does.
-Pending work caused by other values, such as a refresh of the same account, leaves the content in place as usual.
+`Loading` バウンダリは、そのコンテンツを待たずに更新を終える機会です。領域はフォールバックを表示して独自に待ちます。
+通常、更新がこの機会を使うのは領域の初回読み込みだけです。
+`on` はこの申し出を後の更新にも拡大します。`accountId()` が変わって新しいアカウントがまだ準備できていないとき、それによって更新が早く終われるなら、バウンダリはスケルトンに戻る用意があります。
+待っているのがそのパネルだけなら、そうします。
+バウンダリの外のコントロールはすぐに新しい id を見て、パネルはスケルトンを表示し、アカウントが届いたらコンテンツが届きます。
+同じアカウントの再読み込みのような、他の値による保留中の処理は、いつもどおりコンテンツをそのままにします。
 
-The update goes back to the fallback only when that helps it finish earlier.
-An update commits when everything it changed is ready, and `on` does not change that; it only lets one region stop being a reason to wait.
-When something outside the boundary is also waiting on the new account, the update cannot finish any earlier, so the region stays on its old content with everything else, and no skeleton shows:
+更新がフォールバックに戻るのは、それが更新を早く終わらせるときだけです。
+更新は、それが変えたすべてが準備できたときにコミットされ、`on` はそれを変えません。ある領域が待つ理由でなくなることを許すだけです。
+バウンダリの外にも新しいアカウントを待っているものがある場合、更新が早く終わることはないため、その領域は他のすべてと一緒に古いコンテンツのままになり、スケルトンは表示されません:
 
 ```tsx
 // account is createMemo(() => fetchAccount(accountId()))
@@ -381,30 +381,30 @@ When something outside the boundary is also waiting on the new account, the upda
 </Loading>
 ```
 
-In the `Avoid` version, picking another account looks like nothing happened until the account loads, then the heading and the details change together; the `on` had no visible effect because the heading kept the update waiting.
-So the rule for `on` is that nothing outside the boundary may be waiting on the same change.
-A page with several `Loading` boundaries, some with `on` and some without, behaves as if none had it: the boundaries without `on` have already revealed, so they hold the update, and the ones with `on` cannot help it finish earlier.
+`Avoid` のバージョンでは、別のアカウントを選んでもアカウントが読み込まれるまで何も起きなかったように見え、その後見出しと詳細が一緒に変わります。見出しが更新を待たせ続けたため、`on` は目に見える効果を持ちませんでした。
+つまり `on` のルールは、バウンダリの外で同じ変更を待っているものがあってはならないということです。
+`on` 付きと `on` なしが混在する複数の `Loading` バウンダリがあるページは、どれも `on` を持っていないかのように振る舞います。`on` なしのバウンダリはすでにコンテンツを表示しているため更新を保持し、`on` 付きのバウンダリはそれを早く終わらせられません。
 
-That leaves a choice, and it is a design choice rather than a rule about where boundaries go:
+そこに選択肢が残ります。これはバウンダリをどこに置くかのルールではなく、デザインの選択です:
 
-- One boundary with `on` around every reader of the subject.
-  The whole subject shows one skeleton and appears together.
-- A boundary with `on` around each region.
-  The update commits on the click, every region shows its own skeleton, and each appears as its own data lands.
+- 対象を読み取るすべてを囲む、`on` 付きのバウンダリが1つ。
+  対象全体が1つのスケルトンを表示し、まとめて現れます。
+- 各領域を囲む `on` 付きのバウンダリ。
+  更新はクリック時にコミットされ、各領域は自分のスケルトンを表示し、それぞれ自分のデータが届き次第現れます。
 
-When neither fits, because a breadcrumb, a title, or a sibling panel shows the same subject and should stay, drop `on` and acknowledge the wait with `isPending` and `latest` instead.
+どちらも合わないとき、例えばパンくずリスト、タイトル、兄弟パネルが同じ対象を表示していて残すべきときは、`on` を外して `isPending` と `latest` で待ち時間に応答します。
 
-`on` is a value, not an accessor.
-The boundary compares it across updates, so pass `accountId()` rather than `accountId`.
+`on` はアクセサーではなく値です。
+バウンダリは更新をまたいでそれを比較するため、`accountId` ではなく `accountId()` を渡します。
 
-The same choice decides the dashboard above.
-Give each panel its own boundary with `on={period()}` and the period write commits at once: the selector flips, every panel shows its skeleton, and each panel's content arrives as its own request lands.
-Give `on` to one panel only and the other two, reading the shared input the normal way, still hold the write; the page waits for the slowest request, and the panel with `on` shows no skeleton either.
-[Boundaries](/concepts/boundaries) covers placement and how `Reveal` orders several boundaries.
+上のダッシュボードも同じ選択で決まります。
+各パネルに `on={period()}` 付きの独自のバウンダリを与えると、期間への書き込みはすぐにコミットされます。セレクターは切り替わり、すべてのパネルがスケルトンを表示し、各パネルのコンテンツは自分のリクエストが届き次第現れます。
+`on` を1つのパネルだけに与えると、共有入力を通常どおり読み取っている他の2つは依然として書き込みを保持します。ページは最も遅いリクエストを待ち、`on` 付きのパネルもスケルトンを表示しません。
+[バウンダリ](/concepts/boundaries)で、配置と `Reveal` が複数のバウンダリをどう順序付けるかを説明しています。
 
-:::deep-dive[A skeleton on every refetch: on={data()}]
-`on` names a subject, so a refetch of the same subject leaves the content in place.
-When a region should show its skeleton for every refetch as well, key the boundary on the data itself:
+:::deep-dive[再取得のたびにスケルトンを表示: on={data()}]
+`on` が指定するのは対象なので、同じ対象の再取得はコンテンツをそのままにします。
+再取得のたびにスケルトンを表示すべき領域では、バウンダリのキーをデータそのものにします:
 
 ```tsx
 <Loading on={account()} fallback={<AccountSkeleton />}>
@@ -412,14 +412,14 @@ When a region should show its skeleton for every refetch as well, key the bounda
 </Loading>
 ```
 
-While the refetch is in flight `account()` has no settled value, which the boundary counts as a change, so `refresh(account)` or a revalidation after an action brings the skeleton back at once, even when the same value lands.
-The every-reader rule still applies: another reader of `account()` outside the boundary holds the update, and the skeleton does not show.
-This is a skeleton on every refresh; for most regions the default, old content with `isPending`, is the kinder treatment.
+再取得が処理中の間、`account()` には確定済みの値がなく、バウンダリはこれを変更として数えます。そのため `refresh(account)` やアクション後の再検証は、同じ値が届くときでも、すぐにスケルトンを呼び戻します。
+「すべての読み取り側」のルールは依然として適用されます。バウンダリの外に `account()` の別の読み取り側がいると更新は保持され、スケルトンは表示されません。
+これは更新のたびにスケルトンが出る動作です。ほとんどの領域では、デフォルト（古いコンテンツに `isPending`）のほうが親切な扱いです。
 :::
 
-:::deep-dive[A placeholder value instead of a fallback: loadingValue]
-Most first loads should reach a `Loading` boundary.
-When the placeholder renders through the same UI as the real data, such as an empty result list, the `loadingValue` option declares a value that answers for the source until the first result arrives:
+:::deep-dive[フォールバックの代わりにプレースホルダー値: loadingValue]
+ほとんどの初回読み込みは `Loading` バウンダリに届くべきです。
+プレースホルダーが空の結果リストのように実データと同じ UI でレンダリングされるとき、`loadingValue` オプションは最初の結果が届くまでソースの代わりに応答する値を宣言します:
 
 ```ts
 const results = createMemo(() => searchProducts(query()), {
@@ -427,16 +427,16 @@ const results = createMemo(() => searchProducts(query()), {
 });
 ```
 
-A source with a `loadingValue` never reaches `Loading` for its first flight, and `isPending` stays `false` until the first computed value lands.
-Later updates follow the normal held behavior.
-The store form is `seedLoadingValue: true` on `createStore(async () => ..., seed)`, which makes the seed the placeholder.
-The [`createMemo`](/reference/solid-js/reactivity/create-memo) and [`createStore`](/reference/solid-js/stores/create-store) references list the option contracts.
+`loadingValue` を持つソースは最初の処理中に `Loading` に届くことはなく、最初の計算値が届くまで `isPending` は `false` のままです。
+後の更新は通常の保持の振る舞いに従います。
+ストア版は `createStore(async () => ..., seed)` の `seedLoadingValue: true` で、シード値がプレースホルダーになります。
+[`createMemo`](/reference/solid-js/reactivity/create-memo)と [`createStore`](/reference/solid-js/stores/create-store) のリファレンスにオプションの仕様があります。
 :::
 
-## Work rejects: `Errored`
+## 処理が reject する: `Errored`
 
-If async work rejects, the error travels through the reactive graph like a value.
-An [`Errored` boundary](/reference/solid-js/components-jsx/errored) turns an unhandled error into fallback UI:
+非同期の処理が reject すると、エラーは値と同じようにリアクティブグラフを伝わります。
+[`Errored` バウンダリ](/reference/solid-js/components-jsx/errored)は、処理されなかったエラーをフォールバック UI に変えます:
 
 ```tsx
 import { Errored, Loading } from "solid-js";
@@ -455,18 +455,18 @@ import { Errored, Loading } from "solid-js";
 </Errored>;
 ```
 
-`Loading` and `Errored` handle separate states.
-A loading boundary does not consume errors, and an error boundary does not replace loading UI.
+`Loading` と `Errored` は別々の状態を扱います。
+ローディングバウンダリはエラーを消費せず、エラーバウンダリはローディング UI を置き換えません。
 
-An error is a status of that part of the graph, not a terminal state.
-When the data underneath changes, because an input signal changed or a `refresh` landed, the boundary retries and the content returns.
-`reset` retries the failed sources rather than showing the same error again.
-[Boundaries](/concepts/boundaries) covers placement and recovery in detail.
+エラーはグラフのその部分のステータスであり、終了状態ではありません。
+入力シグナルが変わったり `refresh` が届いたりして元のデータが変わると、バウンダリは再試行し、コンテンツが戻ります。
+`reset` は同じエラーを再び表示するのではなく、失敗したソースを再試行します。
+[バウンダリ](/concepts/boundaries)で配置と復帰を詳しく説明しています。
 
-## Read every input before the first `await`
+## 最初の `await` の前にすべての入力を読み取る
 
-Dependency tracking is synchronous.
-An async computation registers the reactive reads it makes before its first `await`; a read after the `await` happens outside the tracking window, so a later change to that source cannot re-run the computation.
+依存関係の追跡は同期的です。
+非同期の計算は、最初の `await` の前に行ったリアクティブな読み取りを登録します。`await` の後の読み取りは追跡ウィンドウの外で行われるため、そのソースへの後の変更では計算を再実行できません。
 
 ```ts
 // Avoid: permissions() is read after the await and is never tracked
@@ -484,30 +484,30 @@ const profile = createMemo(async () => {
 });
 ```
 
-Run the `Avoid` version and change `permissions`: the memo does not recompute and the page keeps the old `canEdit`.
+`Avoid` のバージョンを実行して `permissions` を変えると、メモは再計算せず、ページは古い `canEdit` のままです。
 
-:::pitfall[A source first read after await cannot notify you]
-The problem is worse when the late read is itself async and not ready yet.
-No dependency edge exists, so the source cannot wake the computation when it settles, and the computation would stay pending with no retry.
-Development builds turn that read into an error so it reaches `Errored` instead of hanging; production builds do not include the check.
-Read every reactive input at the top of the function, before the first `await`.
+:::pitfall[await の後に初めて読まれたソースは通知できない]
+遅れた読み取り自体が非同期でまだ準備できていない場合、問題はさらに深刻です。
+依存関係の辺が存在しないため、ソースが確定しても計算を起こせず、計算は再試行なしに保留中のままになります。
+開発ビルドはその読み取りをエラーに変えて、ハングする代わりに `Errored` に届くようにします。本番ビルドにはこのチェックは含まれません。
+すべてのリアクティブな入力を、関数の先頭で、最初の `await` の前に読み取ってください。
 :::
 
-## Recap
+## まとめ
 
-- Return a promise from a memo and read the result as a plain value; the type is `Product`, not `Promise<Product>` or `Product | undefined`.
-- Only the expression that reads an async value waits for it; passing it as a prop costs nothing.
-- Create the async value high in the tree so the request starts early, and place `Loading` low so a small region shows the fallback.
-- Requests are ordered by data dependency, not by component nesting; a waterfall exists only when one request needs another's response.
-- After a value has settled, a change to its input is held: the current screen stays visible and everything commits together when the new value lands.
-- Acknowledge a held update with `isPending` on the content and `latest` on the control the user touched.
-- Put `on={key}` on a `Loading` boundary whose subject changed and should show a placeholder instead of the old content; it takes effect only when nothing outside the boundary is waiting on the same change.
-- Read every reactive input before the first `await`.
+- メモから Promise を返し、結果はプレーンな値として読み取ります。型は `Product` であり、`Promise<Product>` や `Product | undefined` ではありません。
+- 非同期の値を読み取る式だけがそれを待ちます。prop として渡すのにコストはかかりません。
+- リクエストを早く始めるために非同期の値はツリーの高い位置で作り、`Loading` は小さい領域がフォールバックを表示するように低い位置に置きます。
+- リクエストの順序はコンポーネントのネストではなくデータの依存関係で決まります。ウォーターフォールが存在するのは、あるリクエストが別のリクエストのレスポンスを必要とするときだけです。
+- 値が確定した後、その入力への変更は保持されます。現在の画面は表示されたままになり、新しい値が届いたらすべてがまとめてコミットされます。
+- 保持された更新には、コンテンツに `isPending`、ユーザーが触れたコントロールに `latest` で応答します。
+- 対象が変わり、古いコンテンツの代わりにプレースホルダーを表示すべき `Loading` バウンダリには `on={key}` を付けます。バウンダリの外で同じ変更を待っているものがない場合にのみ効果があります。
+- すべてのリアクティブな入力を最初の `await` の前に読み取ります。
 
-## Next steps
+## 次のステップ
 
-- [Mutations](/concepts/mutations): writes that cross a round trip, with `action`, `createOptimisticStore`, and `refresh`, built up from the client-only cart.
-- [Boundaries](/concepts/boundaries): where to place `Loading` and `Errored`, how `Reveal` orders sibling regions, and how an errored region recovers.
-- [Data fetching patterns](/guides/data-fetching-patterns): search as you type, several requests per page, pagination, sharing a request, polling, and failures, each as working code.
-- [Migrate data fetching from Solid 1](/migration/data-fetching-from-solid-1): what changes when `createResource` or an effect-and-flag pattern becomes an async memo, and how to keep the old feel where you want it.
-- [Server functions](/building-apps/server-functions): a `"use server"` function returns a promise, so everything on this page applies to it unchanged; that page covers the transport, `GET` reads, and `live` streams.
+- [ミューテーション](/concepts/mutations): 往復をまたぐ書き込み。`action`、`createOptimisticStore`、`refresh` を使い、クライアントのみのカートから組み立てます。
+- [バウンダリ](/concepts/boundaries): `Loading` と `Errored` をどこに置くか、`Reveal` が兄弟領域をどう順序付けるか、エラーになった領域がどう復帰するか。
+- [データ取得パターン](/guides/data-fetching-patterns): 入力中の検索、1ページの複数リクエスト、ページネーション、リクエストの共有、ポーリング、失敗。それぞれ動作するコードで示します。
+- [Solid 1 からのデータ取得の移行](/migration/data-fetching-from-solid-1): `createResource` やエフェクト＋フラグのパターンが非同期メモになると何が変わるか、必要な場所で旧来の感覚をどう維持するか。
+- [サーバー関数](/building-apps/server-functions): `"use server"` 関数は Promise を返すため、このページのすべてがそのまま適用されます。あちらのページではトランスポート、`GET` の読み取り、`live` ストリームを扱います。
