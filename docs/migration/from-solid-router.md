@@ -1,44 +1,44 @@
 ---
-title: "From Solid Router 0.x/1.x"
+title: "Solid Router 0.x/1.x からの移行"
 version: "2.0"
-description: "Migrate JSX routes and the Solid Router 0.x/1.x data APIs to a Solid Router 2 createRouter instance."
+description: "JSX ルートと Solid Router 0.x/1.x のデータ API を、Solid Router 2 の createRouter インスタンスへ移行します。"
 source_repo: "solidjs/solid-router"
 source_ref: "next"
 source_path: "README.md"
 ---
 
-Solid Router 2 replaces the component-based router configuration with one static router instance.
-The route tree becomes the source of truth for matching, generated paths, route props, and server integration.
+Solid Router 2 では、コンポーネントベースのルーター設定が、1 つの静的なルーターインスタンスに置き換わります。
+ルートツリーが、マッチング・パス生成・ルート props・サーバー統合の信頼できる定義源になります。
 
-This guide starts with an application that uses the Router 0.x/1.x component API.
-Apply each section separately so that route matching, navigation, data, and server behavior can be checked after each change.
+このガイドは、Router 0.x/1.x のコンポーネント API を使っているアプリケーションを対象にしています。
+各セクションは個別に適用し、変更ごとにルートマッチング・ナビゲーション・データ・サーバー動作を確認できるようにしてください。
 
-## Check the compatibility boundary
+## 互換性の境界を確認する
 
-Upgrade the Solid runtime and Solid Router together.
-Solid Router 2 requires matching Solid 2 RC builds of `solid-js` and `@solidjs/web`.
-It cannot run as a compatibility layer around a Solid 1 application.
+Solid ランタイムと Solid Router は同時にアップグレードしてください。
+Solid Router 2 には、`solid-js` と `@solidjs/web` の対応する Solid 2 RC ビルドが必要です。
+Solid 1 アプリケーションを包む互換レイヤーとしては動作しません。
 
-Router 2 also supports one router instance per application.
-Do not mount a Router 2 instance inside an old `<Router>`.
-Move one complete route tree at a time, and remove the old router before mounting the new instance.
+また、Router 2 はアプリケーションごとに 1 つのルーターインスタンスのみをサポートします。
+Router 2 のインスタンスを旧 `<Router>` の内側にマウントしないでください。
+ルートツリーは一度に 1 つずつ完全に移し、新しいインスタンスをマウントする前に旧ルーターを取り除いてください。
 
-The following old exports have no component-for-component replacement:
+以下の旧エクスポートには、コンポーネント単位で対応する置き換え先がありません:
 
-- `Router`, `HashRouter`, and `MemoryRouter` as prebuilt router components
+- あらかじめ用意されたルーターコンポーネントとしての `Router`、`HashRouter`、`MemoryRouter`
 - `Route`
 - `A`
 - `Navigate`
 - `createMemoryHistory`
 
-The new entry points are a factory, route-definition helpers, plain anchors, and history adapters.
-See [Solid Router setup](/routing/solid-router/setup) for the complete installation and mount pattern.
+新しいエントリーポイントは、ファクトリー・ルート定義ヘルパー・素のリンク要素・履歴アダプターです。
+インストールとマウントパターンの全体については [Solid Router のセットアップ](/routing/solid-router/setup) を参照してください。
 
-## Create the router instance
+## ルーターインスタンスを作成する
 
-Move the route topology out of rendered JSX and into a module-level `createRouter` call.
+ルート構成を、レンダーされる JSX からモジュールレベルの `createRouter` 呼び出しへ移します。
 
-Before:
+変更前:
 
 ```tsx
 import { Route, Router } from "@solidjs/router";
@@ -54,7 +54,7 @@ export function App() {
 }
 ```
 
-After:
+変更後:
 
 ```tsx
 // src/router.tsx
@@ -72,9 +72,9 @@ export const Router = createRouter({
 export const { paths } = Router;
 ```
 
-Mount the returned instance as the provider component.
-Replace the old `root` prop with the provider's function child.
-The factory-level `preload` result is available as `props.data`.
+返されたインスタンスをプロバイダーコンポーネントとしてマウントします。
+旧 `root` prop は、プロバイダーの関数 children に置き換えます。
+ファクトリーレベルの `preload` の結果は `props.data` として参照できます。
 
 ```tsx
 // src/index.tsx
@@ -87,12 +87,12 @@ render(
 );
 ```
 
-Create the instance at module scope.
-Its `routes`, `config`, `paths`, and `match()` members describe the application and are shared across renders and server requests.
-Continue to read the current location through primitives such as `useLocation`, `useParams`, and `useNavigate`.
+インスタンスはモジュールスコープで作成してください。
+その `routes`、`config`、`paths`、`match()` メンバーはアプリケーションを記述し、レンダーとサーバーリクエストをまたいで共有されます。
+現在のロケーションは、引き続き `useLocation`、`useParams`、`useNavigate` などのプリミティブ経由で読み取ります。
 
-If route definitions live in another module, wrap the array with `defineRoutes`.
-The helper preserves literal path types that a plain extracted array would widen to `string`.
+ルート定義が別モジュールにある場合は、配列を `defineRoutes` でラップします。
+このヘルパーは、素の取り出し済み配列では `string` に広げられてしまうリテラルなパス型を保持します。
 
 ```tsx
 // src/routes.tsx
@@ -112,7 +112,7 @@ import { routes } from "./routes";
 export const Router = createRouter({ routes });
 ```
 
-Replace alternate router components with history adapters:
+代替ルーターコンポーネントは履歴アダプターに置き換えます:
 
 ```tsx
 import { createRouter, hashHistory, memoryHistory } from "@solidjs/router";
@@ -128,12 +128,12 @@ const MemoryRouter = createRouter({
 });
 ```
 
-## Convert nesting and layouts
+## ネストとレイアウトを変換する
 
-Replace nested `<Route>` elements with `children` arrays.
-Keep an index child with path `/` when the parent layout also has deeper children.
+ネストした `<Route>` 要素は `children` 配列に置き換えます。
+親レイアウトにさらに深い子ルートがある場合でも、パス `/` を持つインデックスの子は維持してください。
 
-Before:
+変更前:
 
 ```tsx
 function AccountLayout(props) {
@@ -148,7 +148,7 @@ function AccountLayout(props) {
 </Router>;
 ```
 
-After:
+変更後:
 
 ```tsx
 const Router = createRouter({
@@ -167,10 +167,10 @@ const Router = createRouter({
 <Router>{(props) => <RootLayout {...props} />}</Router>;
 ```
 
-The parent component still renders the matched child through `props.children`.
-Shared parent layouts stay mounted while navigation moves between sibling children.
+親コンポーネントは、引き続き `props.children` を通じてマッチした子をレンダーします。
+共有の親レイアウトは、兄弟の子ルート間をナビゲーションしている間もマウントされたままです。
 
-Use a route without `path` for a layout that must not add a URL segment:
+URL セグメントを追加したくないレイアウトには、`path` を持たないルートを使います:
 
 ```tsx
 const routes = defineRoutes([
@@ -184,8 +184,8 @@ const routes = defineRoutes([
 ]);
 ```
 
-Do not recreate old nested `<Routes>` boundaries with nested router instances.
-Compose arrays under one route tree or use a lazy `children` thunk for a code-split section:
+旧来のネストした `<Routes>` バウンダリを、ネストしたルーターインスタンスで再現しないでください。
+1 つのルートツリーの下で配列を合成するか、コード分割したい区間には遅延 `children` サンクを使います:
 
 ```tsx
 {
@@ -195,15 +195,15 @@ Compose arrays under one route tree or use a lazy `children` thunk for a code-sp
 }
 ```
 
-The imported module can export the route array as `default` or as `routes`.
-See [Nested routes and layouts](/routing/solid-router/nested-routes) for layout lifetime and lazy-subtree behavior.
+インポートされるモジュールは、ルート配列を `default` または `routes` としてエクスポートできます。
+レイアウトの生存期間と遅延サブツリーの動作については [ネストされたルートとレイアウト](/routing/solid-router/nested-routes) を参照してください。
 
-## Replace link and redirect components
+## リンクとリダイレクトのコンポーネントを置き換える
 
-Replace `<A>` with a plain `<a>`.
-Use the instance's `paths` proxy when the route tree has literal types.
+`<A>` は素の `<a>` に置き換えます。
+ルートツリーがリテラル型を持つ場合は、インスタンスの `paths` プロキシを使ってください。
 
-Before:
+変更前:
 
 ```tsx
 import { A } from "@solidjs/router";
@@ -218,7 +218,7 @@ import { A } from "@solidjs/router";
 </nav>;
 ```
 
-After:
+変更後:
 
 ```tsx
 import { Router } from "./router";
@@ -231,7 +231,7 @@ import { Router } from "./router";
 </nav>;
 ```
 
-The router adds state attributes to anchors that it claims:
+ルーターは、管理対象となったリンク要素に状態属性を付与します:
 
 ```css
 nav a[data-active] {
@@ -247,18 +247,18 @@ a[data-pending] {
 }
 ```
 
-Use `[data-active]` for an exact or descendant match.
-Use `[aria-current="page"]` for an exact match.
-The root path has exact-only active behavior.
+完全一致または子孫ルートとの一致には `[data-active]` を使います。
+完全一致には `[aria-current="page"]` を使います。
+ルートパスは完全一致の場合にのみアクティブになります。
 
-Move old link props onto the anchor:
+旧リンクの props はリンク要素へ移します:
 
-- `noScroll`, `replace`, `state`, and `preload` become anchor attributes, typed on `<a>` by `@solidjs/web`.
-- `activeClass` and `inactiveClass` become CSS selectors for the state attributes.
-- `end` becomes an exact-match selector with `[aria-current="page"]`.
+- `noScroll`、`replace`、`state`、`preload` はリンク要素の属性になり、`@solidjs/web` が `<a>` 上に型付けします。
+- `activeClass` と `inactiveClass` は、状態属性に対する CSS セレクターになります。
+- `end` は `[aria-current="page"]` による完全一致セレクターになります。
 
-Keep `useNavigate` for navigation caused by application logic.
-It accepts strings, history deltas, and typed path nodes.
+アプリケーションロジックによるナビゲーションには、引き続き `useNavigate` を使います。
+文字列・履歴の差分・型付きパスノードを受け取れます。
 
 ```tsx
 const navigate = useNavigate();
@@ -267,8 +267,8 @@ navigate(Router.paths.account, { replace: true });
 navigate(-1);
 ```
 
-Replace `<Navigate>` with a setup-time call to `useNavigate`, or return a redirect from a query or action.
-Import protocol response helpers from `@solidjs/web`.
+`<Navigate>` は、セットアップ時の `useNavigate` 呼び出しに置き換えるか、クエリまたはアクションからリダイレクトを返してください。
+プロトコル系のレスポンスヘルパーは `@solidjs/web` からインポートします。
 
 ```tsx
 function LoginRedirect() {
@@ -278,17 +278,17 @@ function LoginRedirect() {
 }
 ```
 
-Rename `useCurrentMatches` to `useRouteMatches`.
-Use `useLinkState` when a custom link component needs reactive `active`, `current`, or `pending` values.
-See [Navigation and typed paths](/routing/solid-router/navigation) for the remaining anchor and navigation options.
+`useCurrentMatches` は `useRouteMatches` に改名します。
+カスタムリンクコンポーネントがリアクティブな `active`、`current`、`pending` の値を必要とする場合は `useLinkState` を使います。
+その他のリンク要素とナビゲーションのオプションについては [ナビゲーションと型付きパス](/routing/solid-router/navigation) を参照してください。
 
-## Type params and search values
+## パラメーターと検索値に型を付ける
 
-`useParams()` and an untyped `useSearchParams()` keep their runtime behavior.
-Path parameters remain strings, and search values remain strings or string arrays without a schema.
+`useParams()` と型を付けない `useSearchParams()` は、ランタイムの動作が変わりません。
+パスパラメーターは文字列のままで、検索値もスキーマがなければ文字列または文字列配列のままです。
 
-Router 2 adds definition-driven types.
-Use `defineRoute` when the component or preload is declared with the route:
+Router 2 では、定義駆動の型が追加されました。
+コンポーネントや preload をルートと一緒に宣言する場合は `defineRoute` を使います:
 
 ```tsx
 import { defineRoute } from "@solidjs/router";
@@ -300,14 +300,14 @@ const userRoute = defineRoute({
 });
 ```
 
-In this example, `id` is `string` and `tab` is `string | undefined`.
-Parameters inherited from a parent remain available as `string | undefined`.
+この例では、`id` は `string`、`tab` は `string | undefined` です。
+親から継承したパラメーターは `string | undefined` として引き続き利用できます。
 
-Note the `void` in the preload.
-In Router 1.x, `load` results were often read from the component through `createAsync`; in Router 2 the preload only starts the query, and the component reads the same query through a memo, as shown under [Replace async wrappers](#replace-async-wrappers).
-`props.data` still holds whatever `preload` returns, captured once when the route matches, which makes it a poor fit for a promise that depends on `params`.
+preload 内の `void` に注目してください。
+Router 1.x では `load` の結果をコンポーネントから `createAsync` 経由で読み取ることが多くありました。Router 2 では preload はクエリを開始するだけで、コンポーネントは [非同期ラッパーを置き換える](#replace-async-wrappers) で示すようにメモ経由で同じクエリを読み取ります。
+`props.data` は `preload` が返した値を保持しますが、それはルートがマッチした時点で一度だけ取り込まれるため、`params` に依存する Promise には向きません。
 
-Use a path witness when the component is declared in another module:
+コンポーネントが別モジュールで宣言されている場合は、パスウィットネス（path witness）を使います:
 
 ```tsx
 import type { RouteComponent } from "@solidjs/router";
@@ -318,16 +318,16 @@ const User: RouteComponent<typeof Router.paths.users> = (props) => (
 );
 ```
 
-`RouteProps<typeof Router.paths.users>` provides the corresponding props-object type.
-Pass the same path node to `useParams` to narrow the known keys inside a descendant:
+`RouteProps<typeof Router.paths.users>` が対応する props オブジェクトの型を提供します。
+同じパスノードを `useParams` に渡すと、子孫コンポーネント内で既知のキーに絞り込めます:
 
 ```tsx
 const params = useParams(Router.paths.users);
 params.id;
 ```
 
-Add a synchronous [Standard Schema](https://standardschema.dev/) validator to parse and type search values.
-Without a schema, keep the existing raw-value code.
+検索値をパースして型付けするには、同期の [Standard Schema](https://standardschema.dev/) バリデーターを追加します。
+スキーマがない場合は、既存の生値を扱うコードをそのまま使います。
 
 ```tsx
 import * as v from "valibot";
@@ -355,25 +355,25 @@ setSearch({ page: search.page + 1 });
 <a href={Router.paths.search({ q: "solid", page: 2 })}>Search</a>;
 ```
 
-The validator's input type controls URL construction and setters.
-Its output type controls parsed reads.
-Asynchronous search validation is not supported.
+バリデーターの入力型は URL の構築とセッターを制御します。
+出力型はパース済みの読み取りを制御します。
+非同期の検索値バリデーションはサポートされていません。
 
-## Migrate data loading and caching
+## データロードとキャッシュを移行する
 
-Keep route `preload` functions as the place to start work before component creation.
-Move a top-level `rootPreload` to the factory's `preload` option.
-The argument still contains `params`, `location`, and `intent`.
+ルートの `preload` 関数は、コンポーネント生成前に処理を開始する場所として維持します。
+トップレベルの `rootPreload` はファクトリーの `preload` オプションへ移します。
+引数には引き続き `params`、`location`、`intent` が含まれます。
 
-Do not move every old data read into a preload.
-A preload starts work for navigation and link warming, while a component read keeps the value connected to a reactive consumer.
+すべての旧データ読み取りを preload に移す必要はありません。
+preload はナビゲーションとリンクのウォーミングのために処理を開始します。一方、コンポーネントからの読み取りは、値をリアクティブな消費側につなぎ続けます。
 
-### Replace async wrappers
+### 非同期ラッパーを置き換える
 
-Remove `createAsync` and `createAsyncStore` from `@solidjs/router`.
-Read a `query` through Solid 2 async-aware primitives.
+`@solidjs/router` の `createAsync` と `createAsyncStore` を取り除きます。
+`query` は Solid 2 の非同期対応プリミティブ経由で読み取ります。
 
-Before:
+変更前:
 
 ```tsx
 import { createAsync, query } from "@solidjs/router";
@@ -388,7 +388,7 @@ function User() {
 }
 ```
 
-After:
+変更後:
 
 ```tsx
 import { createMemo } from "solid-js";
@@ -404,33 +404,33 @@ function User() {
 }
 ```
 
-Use `createProjection` when a deeply reactive object or array is required.
-Use `createOptimistic` or `createOptimisticStore` for in-flight rendered state.
+深くリアクティブなオブジェクトや配列が必要な場合は `createProjection` を使います。
+処理中のレンダー状態には `createOptimistic` または `createOptimisticStore` を使います。
 
-Replace the deprecated `cache` alias with `query`.
-Keep stable query names and argument shapes because they form the cache key.
-Use `.key` to revalidate all argument combinations and `.keyFor(...)` for one combination.
+非推奨の `cache` エイリアスは `query` に置き換えます。
+クエリ名と引数の形はキャッシュキーを構成するため、安定させてください。
+すべての引数の組み合わせを再検証するには `.key` を、1 つの組み合わせには `.keyFor(...)` を使います。
 
 ```tsx
 revalidate(getUser.key);
 revalidate(getUser.keyFor("42"));
 ```
 
-When `query` wraps a server function that has no declared method, it obtains a GET wrapper from the server-function transport.
-A plain function passed to `query` remains a plain function and does not load or use that transport.
-The router reads the function's [declaration metadata](/reference/solid-web/server-functions/metadata) when it needs to identify the transport method.
+`query` がメソッド宣言のないサーバー関数をラップする場合、サーバー関数トランスポートから GET ラッパーを取得します。
+`query` に渡した素の関数は素の関数のままで、そのトランスポートを読み込みも使用もしません。
+ルーターはトランスポートのメソッドを識別する必要があるとき、関数の [宣言メタデータ](/reference/solid-web/server-functions/metadata) を読み取ります。
 
-### Replace pending submissions
+### 保留中サブミッションを置き換える
 
-Router 0.x/1.x submissions represented pending and completed action calls.
-Router 2 separates those concerns:
+Router 0.x/1.x のサブミッションは、保留中と完了したアクション呼び出しを表していました。
+Router 2 ではこれらの関心事が分離されています:
 
-- Use action `.onSubmit(...)` with Solid optimistic primitives for in-flight UI.
-- Use a form's `aria-busy="true"` state for form-level pending styling.
-- Use `useSubmissions()` for settled results and errors.
-- Use `.onSettled(...)` when every completion must be observed, including a void result or redirect.
+- 処理中の UI には、アクションの `.onSubmit(...)` と Solid の楽観的プリミティブを使います。
+- フォーム単位の保留中スタイルには、フォームの `aria-busy="true"` 状態を使います。
+- 確定した結果やエラーには `useSubmissions()` を使います。
+- void の結果やリダイレクトを含め、すべての完了を監視する必要がある場合は `.onSettled(...)` を使います。
 
-Before:
+変更前:
 
 ```tsx
 const submission = useSubmission(addTodo);
@@ -443,7 +443,7 @@ const submission = useSubmission(addTodo);
 </form>;
 ```
 
-After:
+変更後:
 
 ```tsx
 import { For, createOptimisticStore } from "solid-js";
@@ -494,21 +494,21 @@ form[aria-busy] button {
 }
 ```
 
-The three concerns that `submission.pending` used to cover are now split: the optimistic store shows the new row, `aria-busy` styles the form, and `useSubmissions` reports the error.
-`.onSubmit` runs inside the action's transaction, so the optimistic push reverts on its own when the action settles and `getTodos` revalidates.
-Registering it inside the component ties the hook to the component's lifetime.
+かつて `submission.pending` が担っていた 3 つの関心事は分離されました。楽観的ストアが新しい行を表示し、`aria-busy` がフォームを装飾し、`useSubmissions` がエラーを報告します。
+`.onSubmit` はアクションのトランザクション内で実行されるため、アクションが確定して `getTodos` が再検証されると、楽観的な追加は自動的に取り消されます。
+コンポーネント内で登録すると、そのフックはコンポーネントのライフタイムに紐づきます。
 
-Router 2 retains a submission only when the action produces a result or error.
-A void or metadata-only completion still reaches `.onSettled(...)`.
-Keep `method="post"` on action forms, and give a server-rendered client action a stable name.
-The rewritten [Data loading and mutations](/routing/solid-router/data#show-what-is-happening) page walks through this split with a running example.
+Router 2 は、アクションが結果またはエラーを生成した場合にのみサブミッションを保持します。
+void またはメタデータのみの完了も `.onSettled(...)` に到達します。
+アクションフォームには `method="post"` を維持し、サーバーレンダーされるクライアントアクションには安定した名前を付けてください。
+書き直された [データロードとミューテーション](/routing/solid-router/data#show-what-is-happening) のページでは、この分離を動作する例で順に説明しています。
 
-### Move response helpers
+### レスポンスヘルパーを移す
 
-Import `redirect`, `reload`, and `respond` from `@solidjs/web`.
-Replace the old router `json(data, init)` helper with `respond(data, init)`.
+`redirect`、`reload`、`respond` は `@solidjs/web` からインポートします。
+旧ルーターの `json(data, init)` ヘルパーは `respond(data, init)` に置き換えます。
 
-Before:
+変更前:
 
 ```tsx
 import { action, json, redirect } from "@solidjs/router";
@@ -519,7 +519,7 @@ const save = action(async (form: FormData) => {
 }, "save-item");
 ```
 
-After:
+変更後:
 
 ```tsx
 import { action } from "@solidjs/router";
@@ -531,17 +531,17 @@ const save = action(async (form: FormData) => {
 }, "save-item");
 ```
 
-The response metadata carries revalidation keys and redirects.
-The router applies that metadata to its query cache and navigation session.
-See [Data loading and mutations](/routing/solid-router/data) for cache lifetime, action binding, and retry behavior.
+レスポンスのメタデータは、再検証キーとリダイレクトを運びます。
+ルーターはそのメタデータをクエリキャッシュとナビゲーションセッションに適用します。
+キャッシュの生存期間・アクションのバインド・リトライ動作については [データロードとミューテーション](/routing/solid-router/data) を参照してください。
 
-## Migrate server rendering and hydration
+## サーバーレンダリングとハイドレーションを移行する
 
-Use the same module-level router instance on the client and server.
-A request event supplies the server URL when the server harness provides one.
-Pass the `url` prop only for a server render without a request event, such as static generation or a test.
+クライアントとサーバーで同じモジュールレベルのルーターインスタンスを使います。
+サーバーハーネスが提供する場合、リクエストイベントがサーバー URL を供給します。
+`url` prop は、静的生成やテストのようにリクエストイベントを伴わないサーバーレンダーでのみ渡してください。
 
-Before:
+変更前:
 
 ```tsx
 import { isServer } from "@solidjs/web";
@@ -551,7 +551,7 @@ import { isServer } from "@solidjs/web";
 </Router>;
 ```
 
-After:
+変更後:
 
 ```tsx
 import { renderToStream } from "@solidjs/web";
@@ -560,19 +560,19 @@ import { Router } from "./router";
 const html = await renderToStream(() => <Router url={request.url} />);
 ```
 
-A request event takes precedence over the `url` prop.
-Client history adapters do not select the URL for a server render.
-Use `renderToStream` when a matched route can cross a lazy `children` boundary.
+リクエストイベントは `url` prop より優先されます。
+クライアントの履歴アダプターは、サーバーレンダーの URL を選択しません。
+マッチしたルートが遅延 `children` バウンダリをまたぐ可能性がある場合は `renderToStream` を使います。
 
-During an asynchronous server render, `query` writes keyed results to Solid's hydration registry.
-The client adopts the server result when the query name and serialized arguments match.
-Keep both values stable between server and client.
+非同期サーバーレンダー中、`query` はキー付きの結果を Solid のハイドレーションレジストリに書き込みます。
+クエリ名とシリアライズされた引数が一致すれば、クライアントはサーバーの結果を引き継ぎます。
+サーバーとクライアント間で両方の値を安定させてください。
 
-Hydration adoption remains available after global hydration completes so that a lazy route module can make its first query read later.
-The client adopts that entry only while the page payload is younger than the three-minute query retention limit.
-A first read after that limit fetches current data instead.
+遅延ルートモジュールがあとから最初のクエリ読み取りを行えるよう、グローバルハイドレーション完了後もハイドレーションの引き継ぎは有効です。
+クライアントがそのエントリーを引き継げるのは、ページペイロードが 3 分のクエリ保持上限より新しい間だけです。
+その上限を超えたあとの最初の読み取りでは、代わりに現在のデータをフェッチします。
 
-Configure the optional single-flight mutation collector from the same router instance:
+オプションのシングルフライトミューテーションコレクターは、同じルーターインスタンスから設定します:
 
 ```tsx
 // src/server-config.ts
@@ -585,8 +585,8 @@ configureServerFunctionsServer({
 });
 ```
 
-Load that configuration before the first server-function request is dispatched.
-With `@solidjs/vite-plugin`, set `serverFunctions.configure` to the server-only module:
+最初のサーバー関数リクエストがディスパッチされる前に、この設定を読み込んでください。
+`@solidjs/vite-plugin` を使う場合は、`serverFunctions.configure` にサーバー専用モジュールを指定します:
 
 ```tsx
 // vite.config.ts
@@ -603,20 +603,20 @@ export default {
 };
 ```
 
-The router subscribes to single-flight mutation data by default.
-Set `singleFlight: false` in `createRouter` when the application must not subscribe.
-Without the consumer, the transport does not request route-data collection for the mutation.
+ルーターはデフォルトでシングルフライトミューテーションデータを購読します。
+アプリケーションが購読してはいけない場合は、`createRouter` に `singleFlight: false` を設定します。
+消費側がなければ、トランスポートはそのミューテーションのルートデータ収集を要求しません。
 
-Server-function action forms retain their no-JavaScript POST and redirect path.
-The core runtime detects the unscripted request, redirects back, and stores the outcome in a one-shot flash cookie.
-The router reads that outcome during the redirected server render.
-See [Server rendering and hydration](/routing/solid-router/server-rendering) for custom handler wiring.
+サーバー関数のアクションフォームは、JavaScript なしの POST とリダイレクト経路を維持します。
+コアランタイムはスクリプトなしのリクエストを検出し、リダイレクトで戻り、結果をワンショットのフラッシュ Cookie に保存します。
+ルーターはリダイレクト後のサーバーレンダーでその結果を読み取ります。
+カスタムハンドラーの配線については [サーバーレンダリングとハイドレーション](/routing/solid-router/server-rendering) を参照してください。
 
-## Migrate file-system routing
+## ファイルシステムルーティングを移行する
 
-Replace a component-like `<FileRoutes />` result with the `fileRoutes` adapter over the nested `pageRoutes` manifest.
+コンポーネント風の `<FileRoutes />` の結果を、ネストした `pageRoutes` マニフェストに対する `fileRoutes` アダプターに置き換えます。
 
-Before:
+変更前:
 
 ```tsx
 import { Router } from "@solidjs/router";
@@ -627,7 +627,7 @@ import { FileRoutes } from "@solidjs/start/router";
 </Router>;
 ```
 
-After:
+変更後:
 
 ```tsx
 import { pageRoutes } from "virtual:file-routes";
@@ -639,8 +639,8 @@ export const Router = createRouter({
 });
 ```
 
-Each route module default-exports its component.
-Move route options into a named `route` export:
+各ルートモジュールはコンポーネントをデフォルトエクスポートします。
+ルートオプションは名前付き `route` エクスポートへ移します:
 
 ```tsx
 // routes/blog/[id].tsx
@@ -660,27 +660,27 @@ export default function Post(props: RouteProps<typeof route>) {
 }
 ```
 
-The string passed to `defineFileRoute` is a TypeScript witness.
-The manifest path remains the runtime source of truth.
-Generate literal manifest types to carry file paths, filters, and search schemas into `Router.paths`.
+`defineFileRoute` に渡す文字列は TypeScript のウィットネスです。
+マニフェストのパスが、ランタイムの信頼できる定義源であり続けます。
+リテラルなマニフェスト型を生成して、ファイルパス・フィルター・検索スキーマを `Router.paths` に引き継がせます。
 
-Code-split manifest component references become Solid `lazy` components.
-When the manifest is delivered with `codeSplitting: false`, the adapter passes the eager component through without a `lazy` wrapper.
+コード分割されたマニフェストのコンポーネント参照は、Solid の `lazy` コンポーネントになります。
+マニフェストが `codeSplitting: false` で配信される場合、アダプターは `lazy` ラッパーを付けずに通常のコンポーネントをそのまま渡します。
 
-See [File-system route conversion](/routing/solid-router/route-definitions#convert-a-file-system-manifest) for the adapter contract.
+アダプターの契約については [ファイルシステムルートの変換](/routing/solid-router/route-definitions#convert-a-file-system-manifest) を参照してください。
 
-## Remove old TypeScript workarounds
+## 旧来の TypeScript ワークアラウンドを取り除く
 
-Remove broad route-array annotations that erase literal paths.
-Use an inline array, `defineRoutes`, or `as const` instead.
+リテラルなパスを消してしまう広すぎるルート配列の型注釈を取り除きます。
+代わりにインライン配列、`defineRoutes`、または `as const` を使います。
 
-Before:
+変更前:
 
 ```tsx
 const routes: RouteDefinition[] = [{ path: "/users/:id", component: User }];
 ```
 
-After:
+変更後:
 
 ```tsx
 const routes = defineRoutes([
@@ -692,36 +692,36 @@ const routes = defineRoutes([
 ]);
 ```
 
-Use the resulting types at these boundaries:
+得られた型は次の境界で使います:
 
-- Use `Router.paths` to build route URLs with checked parameters.
-- Use `defineRoute` to type local component and preload parameters.
-- Use `RouteProps` or `RouteComponent` with a path witness for an external component.
-- Use `defineFileRoute` for a file-system route module.
-- Use a route `search` schema to type search builders, setters, and parsed reads.
+- `Router.paths` で、パラメーターが検査されたルート URL を構築します。
+- `defineRoute` で、ローカルのコンポーネントと preload のパラメーターに型を付けます。
+- 外部のコンポーネントには、パスウィットネスとともに `RouteProps` または `RouteComponent` を使います。
+- ファイルシステムのルートモジュールには `defineFileRoute` を使います。
+- ルートの `search` スキーマで、検索ビルダー・セッター・パース済み読み取りに型を付けます。
 
-A typed match filter can narrow the value accepted by `Router.paths`.
-The built-in `int` filter makes a path-builder parameter a `number`, but the component still receives the URL parameter as a string.
+型付きマッチフィルターは、`Router.paths` が受け取る値を絞り込めます。
+組み込みの `int` フィルターはパスビルダーのパラメーターを `number` にしますが、コンポーネントが受け取る URL パラメーターは引き続き文字列です。
 
-See the [router factory reference](/reference/solid-router/router-factory) and [route type reference](/reference/solid-router/types) for the complete signatures.
+完全なシグネチャーは [ルーターファクトリーのリファレンス](/reference/solid-router/router-factory) と [ルート型のリファレンス](/reference/solid-router/types) を参照してください。
 
-## Removal checklist
+## 削除チェックリスト
 
-- [ ] Upgrade `solid-js`, `@solidjs/web`, and `@solidjs/router` to compatible Solid 2 versions.
-- [ ] Create one module-level router with `createRouter`.
-- [ ] Replace all JSX `<Route>` definitions with route objects.
-- [ ] Move `root` to the provider's function child and `rootPreload` to factory `preload`.
-- [ ] Convert nested routes to `children` arrays and keep layouts rendering `props.children`.
-- [ ] Replace `Router`, `HashRouter`, and `MemoryRouter` components with `createRouter` and a history adapter.
-- [ ] Replace `<A>` with `<a>` and move active styling to state-attribute selectors.
-- [ ] Replace `<Navigate>` and rename `useCurrentMatches`.
-- [ ] Replace `cache` with `query`.
-- [ ] Remove `createAsync`, `createAsyncStore`, and `useSubmission`.
-- [ ] Move pending UI to optimistic primitives or form `aria-busy`.
-- [ ] Import `redirect`, `reload`, and `respond` from `@solidjs/web`.
-- [ ] Keep query names, query arguments, and server-rendered client action names stable.
-- [ ] Render the same router instance on the server and client.
-- [ ] Register the single-flight collector before server-function dispatch when the application uses it.
-- [ ] Convert `<FileRoutes />` output through `fileRoutes(pageRoutes)`.
-- [ ] Replace widened route-array types with `defineRoutes`, `defineRoute`, and path witnesses.
-- [ ] Remove the final imports of `Route`, `A`, `Navigate`, `createAsync`, `createAsyncStore`, `useSubmission`, `cache`, and router response helpers.
+- [ ] `solid-js`、`@solidjs/web`、`@solidjs/router` を互換性のある Solid 2 バージョンにアップグレードする。
+- [ ] `createRouter` でモジュールレベルのルーターを 1 つ作成する。
+- [ ] すべての JSX `<Route>` 定義をルートオブジェクトに置き換える。
+- [ ] `root` をプロバイダーの関数 children に、`rootPreload` をファクトリーの `preload` に移す。
+- [ ] ネストしたルートを `children` 配列に変換し、レイアウトが `props.children` をレンダーする状態を維持する。
+- [ ] `Router`、`HashRouter`、`MemoryRouter` コンポーネントを `createRouter` と履歴アダプターに置き換える。
+- [ ] `<A>` を `<a>` に置き換え、アクティブ時のスタイルを状態属性セレクターに移す。
+- [ ] `<Navigate>` を置き換え、`useCurrentMatches` を改名する。
+- [ ] `cache` を `query` に置き換える。
+- [ ] `createAsync`、`createAsyncStore`、`useSubmission` を取り除く。
+- [ ] 保留中 UI を楽観的プリミティブまたはフォームの `aria-busy` に移す。
+- [ ] `redirect`、`reload`、`respond` を `@solidjs/web` からインポートする。
+- [ ] クエリ名・クエリ引数・サーバーレンダーされるクライアントアクション名を安定させる。
+- [ ] サーバーとクライアントで同じルーターインスタンスをレンダーする。
+- [ ] アプリケーションがシングルフライトを使う場合、サーバー関数のディスパッチ前にコレクターを登録する。
+- [ ] `<FileRoutes />` の出力を `fileRoutes(pageRoutes)` で変換する。
+- [ ] 広げられたルート配列の型を `defineRoutes`、`defineRoute`、パスウィットネスに置き換える。
+- [ ] `Route`、`A`、`Navigate`、`createAsync`、`createAsyncStore`、`useSubmission`、`cache`、ルーターのレスポンスヘルパーの最後のインポートを取り除く。
