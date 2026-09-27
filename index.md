@@ -1,7 +1,7 @@
 ---
 layout: home
 hero:
-  name: Solid 2.0 日本語ドキュメント
+  name: Solid 2.0 非公式日本語ドキュメント
   text: v2.solidjs.com・公式ブログ・チュートリアルの非公式日本語翻訳
   tagline: すべてのドキュメントを日本語で学習できます
   actions:

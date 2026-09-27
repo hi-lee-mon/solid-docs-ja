@@ -1,12 +1,25 @@
 import { defineConfig } from 'vitepress'
 // @ts-ignore
 import container from 'markdown-it-container'
+import { execSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const VP = path.dirname(fileURLToPath(import.meta.url))
 const REPO = path.dirname(VP)
+
+const git = (args: string, fallback = ''): string => {
+  try {
+    return execSync(`git ${args}`, { cwd: REPO }).toString().trim()
+  } catch {
+    return fallback
+  }
+}
+process.env.VITE_BUILD_SHA = (
+  process.env.GITHUB_SHA || git('rev-parse HEAD', 'dev')
+).slice(0, 7)
+process.env.VITE_BUILD_DATE = git('log -1 --format=%cs', 'unknown')
 const ORDER: Record<string, number> = JSON.parse(
   fs.readFileSync(path.join(VP, 'order.json'), 'utf8')
 )
@@ -189,7 +202,7 @@ const CONTAINER_MAP: Record<string, string> = {
 const CONTAINER_RE = /^(\s*)(:{3,4})(note|deep-dive|solution|tab|tab-group|advanced|caution|pitfall|tip|info|warning|danger)\[([^\]]*)\]/gm
 
 export default defineConfig({
-  title: 'Solid 2.0 日本語ドキュメント',
+  title: 'Solid 2.0 非公式日本語ドキュメント',
   description:
     'v2.solidjs.com・公式ブログ・チュートリアルの非公式日本語翻訳',
   lang: 'ja',
