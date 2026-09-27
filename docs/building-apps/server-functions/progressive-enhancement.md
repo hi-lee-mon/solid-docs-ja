@@ -1,23 +1,23 @@
 ---
-title: "Progressive enhancement"
+title: "プログレッシブエンハンスメント"
 version: "2.0"
-description: "Make the Add to cart form post to a server function before JavaScript loads, and know which part of that exchange core owns and which the router adds."
+description: "「カートに追加」フォームを JavaScript が読み込まれる前からサーバー関数に POST できるようにし、そのやり取りのどの部分をコアが担い、どの部分をルーターが追加するかを理解します。"
 ---
 
-A shopper on a slow connection opens the product page and clicks Add to cart before the client bundle has arrived.
-If the button's only wiring is an `onClick` handler, nothing happens, and the click is lost.
-If the button is inside a form whose `action` is a URL, the browser posts the form, the server runs the function, and the shopper lands on the cart.
+低速な接続の買い物客が商品ページを開き、クライアントバンドルが届く前に「カートに追加」をクリックします。
+ボタンの配線が `onClick` ハンドラーだけなら、何も起こらずクリックは失われます。
+ボタンが `action` が URL であるフォームの内側にあれば、ブラウザはフォームを POST し、サーバーが関数を実行し、買い物客はカートにたどり着きます。
 
-A server function has a URL, so the second version is available to every mutation on this cluster's pages.
-The server-function runtime recognizes a browser form post at that URL, decodes the body as one `FormData` argument, and answers in a way the browser can follow with no script.
+サーバー関数は URL を持つため、このクラスタのページ上のすべてのミューテーションで2番目の方式が使えます。
+サーバー関数ランタイムはその URL へのブラウザのフォーム POST を認識し、ボディを1つの `FormData` 引数としてデコードし、スクリプトなしでブラウザが従える形で応答します。
 
-Application code reaches this through a router.
-Solid Router's `action()` wraps the server function in a value that serializes to that URL, so the same `<form action={...}>` works before hydration and is taken over by the router after it.
-Most applications need only the [router action](#post-a-form-through-a-router-action) section; the rest of the page is the transport underneath, for forms outside the router and for integrations that build their own form helpers.
+アプリケーションコードはルーターを介してこれを利用します。
+Solid Router の `action()` はサーバー関数を、その URL にシリアライズされる値でラップします。そのため同じ `<form action={...}>` がハイドレーション前にも動作し、ハイドレーション後はルーターに引き継がれます。
+ほとんどのアプリケーションで必要なのは[ルーターアクション経由のフォーム POST](#post-a-form-through-a-router-action)の節だけです。残りはその下にあるトランスポートの説明で、ルーター外のフォームや、独自のフォームヘルパーを作るインテグレーション向けです。
 
-## Post a form through a router action
+## ルーターアクション経由でフォームを POST する
 
-Declare a server function that takes one `FormData` argument, and wrap it with `action` from `@solidjs/router`:
+1つの `FormData` 引数を取るサーバー関数を宣言し、`@solidjs/router` の `action` でラップします:
 
 ```ts
 // src/data/cart.ts
@@ -51,11 +51,11 @@ const addToCartAction = action(addToCart);
 </form>;
 ```
 
-Load the page with JavaScript disabled and submit.
-The browser posts to the function's URL, the server runs `addToCart`, and the redirect it answers sends the browser to `/cart`.
-With JavaScript on, the router intercepts the submit, calls the function over the transport, and navigates to `/cart` without a page load.
+JavaScript を無効にしてページを読み込み、送信します。
+ブラウザはその関数の URL に POST し、サーバーが `addToCart` を実行し、応答するリダイレクトがブラウザを `/cart` に送ります。
+JavaScript ありでは、ルーターが submit をインターセプトし、トランスポート越しに関数を呼び出し、ページロードなしで `/cart` に遷移します。
 
-The wiring that makes this work is the form, not the handler:
+これを機能させる配線はハンドラーではなくフォームです:
 
 ```tsx
 // Avoid: the mutation exists only in a click handler
@@ -67,20 +67,20 @@ The wiring that makes this work is the form, not the handler:
 </form>
 ```
 
-Before hydration, the `Avoid` version has no handler attached, so the click does nothing; the `Prefer` version posts.
+ハイドレーション前の `Avoid` 版にはハンドラーがアタッチされていないため、クリックしても何も起きません。`Prefer` 版は POST されます。
 
-Everything the hydrated page does with a submission is a layer over that post.
-Once the router is running it intercepts the submit, calls the same function over the server-function transport, sets `aria-busy` on the form while the call runs, records the result in `useSubmissions`, and runs any `.onSubmit` hook before the call is sent, which is where an [optimistic write](/routing/solid-router/data#before-the-server-confirms) goes.
-None of that changes the HTML or the server function, so a shopper whose bundle has not arrived gets the post and a fresh page, and a shopper whose bundle has arrived gets the same result painted before the server answers.
+ハイドレーション後のページがサブミッションに対して行うことはすべて、その POST の上のレイヤーです。
+ルーターが起動すると submit をインターセプトし、同じ関数をサーバー関数トランスポート越しに呼び出し、呼び出し中はフォームに `aria-busy` を設定し、結果を `useSubmissions` に記録し、呼び出しが送信される前に `.onSubmit` フックを実行します。[楽観的な書き込み](/routing/solid-router/data#before-the-server-confirms)はここに置きます。
+これらは HTML やサーバー関数を一切変えません。バンドルがまだ届いていない買い物客には POST と新しいページが、バンドルが届いた買い物客にはサーバーの応答前に描画される同じ結果が得られます。
 
-The [Forms guide](/guides/forms) builds the checkout address form on this shape, with validation messages, pending state, and an address list that updates before the server confirms.
+[フォームガイド](/guides/forms)はこの形の上にチェックアウトの住所フォームを構築し、バリデーションメッセージ、保留中の状態、サーバーが確認する前に更新される住所リストを実装しています。
 
-## Submit a GET form
+## GET フォームを送信する
 
-A GET form replaces the action URL's query string with the form's fields.
-When that query is not an encoded argument list, the handler passes it to the function as one `URLSearchParams` argument.
+GET フォームは action URL のクエリ文字列をフォームのフィールドで置き換えます。
+そのクエリがエンコードされた引数リストでないとき、ハンドラーはそれを1つの `URLSearchParams` 引数として関数に渡します。
 
-`GET()` returns a typed `ServerFunction` reference, so its `url` is available in TypeScript:
+`GET()` は型付きの `ServerFunction` 参照を返すため、その `url` は TypeScript から利用できます:
 
 ```ts
 // src/data/search.ts
@@ -99,33 +99,33 @@ export const searchProducts = GET(async (params: URLSearchParams) => {
 </form>
 ```
 
-Type "mug" and submit: the browser navigates to `/_server/<id>?q=mug`, and the function receives `params.get("q") === "mug"`.
+"mug" と入力して送信すると、ブラウザは `/_server/<id>?q=mug` に遷移し、関数は `params.get("q") === "mug"` を受け取ります。
 
-:::caution[A GET form describes a URL, not a mutation]
-A `GET()` function must be safe and idempotent, because a `GET` request is not origin-checked and is replayed by caches, prefetchers, and link checkers.
-Post mutations with `method="post"`.
+:::caution[GET フォームはミューテーションではなく URL を表す]
+`GET()` 関数は安全で冪等でなければなりません。`GET` リクエストはオリジン検証されず、キャッシュ・プリフェッチャー・リンクチェッカーによって再送されるためです。
+ミューテーションは `method="post"` で POST してください。
 :::
 
-## The reference URL
+## 参照の URL
 
-Every server-function reference carries `id` and `url` at runtime, on the client stub and on the server-side callable alike.
-`url` is the plain-HTTP address of the function, `<endpoint>/<id>`, and is what the router serializes into the form attribute.
-The client runtime's own calls go to a sibling address, `<endpoint>/data/<id>`, so a cache never serves one caller kind the other's answer.
+すべてのサーバー関数参照は実行時に `id` と `url` を持ちます。クライアントスタブでもサーバー側の呼び出し可能なものでも同様です。
+`url` は関数のプレーン HTTP アドレス `<endpoint>/<id>` であり、ルーターがフォーム属性にシリアライズするものです。
+クライアントランタイム自身の呼び出しは兄弟アドレス `<endpoint>/data/<id>` に向かうため、ある種類の呼び出し元の応答をキャッシュが別の種類に返すことはありません。
 
-Whether TypeScript knows about `url` depends on how the function was declared:
+TypeScript が `url` を認識するかどうかは、関数の宣言方法によって決まります:
 
-- References returned by `GET()` and `live()` are typed as `ServerFunction`, which declares `id` and `url`.
-- A bare `"use server"` function keeps its declared function type.
-  `url` is present at runtime and absent from the type, so `addToCart.url` is a type error.
+- `GET()` と `live()` が返す参照は `ServerFunction` 型で、`id` と `url` が宣言されています。
+- 素の `"use server"` 関数は宣言された関数型のままです。
+  `url` は実行時には存在しますが型には存在しないため、`addToCart.url` は型エラーです。
 
-For a form post, use a router action rather than the URL.
-An integration that must read the address from a bare declaration narrows it to `ServerFunction` from `@solidjs/web/server-functions` after checking `isServerFunction(fn)`.
+フォーム POST では URL ではなくルーターアクションを使ってください。
+素の宣言からアドレスを読む必要があるインテグレーションは、`isServerFunction(fn)` で確認した後に `@solidjs/web/server-functions` の `ServerFunction` に絞り込みます。
 
-## Bind leading arguments
+## 先頭の引数をバインドする
 
-The function id lives in the URL path.
-An integration can add JSON-safe bound arguments in the reserved `args` query parameter, while the submitted form remains the final `FormData` argument.
-Solid Router's `action.with(...)` does this for application code; with a `removeFromCart(productId: string, form: FormData)` action, the product id is bound and the form supplies the rest:
+関数 id は URL パスにあります。
+インテグレーションは予約済みの `args` クエリパラメータで JSON 安全なバインド引数を追加でき、送信されたフォームは最後の `FormData` 引数のままです。
+Solid Router の `action.with(...)` がアプリケーションコードのためにこれを行います。`removeFromCart(productId: string, form: FormData)` アクションでは、商品 id がバインドされ、フォームが残りを供給します:
 
 ```tsx
 <form method="post" action={removeFromCart.with(line.productId)}>
@@ -133,7 +133,7 @@ Solid Router's `action.with(...)` does this for application code; with a `remove
 </form>
 ```
 
-`serverFunctionUrl(id, boundArgs)` builds that URL for a router, form helper, or custom host:
+`serverFunctionUrl(id, boundArgs)` はルーター、フォームヘルパー、カスタムホストのためにその URL を構築します:
 
 ```ts
 import { serverFunctionUrl } from "@solidjs/web/server-functions";
@@ -141,63 +141,63 @@ import { serverFunctionUrl } from "@solidjs/web/server-functions";
 const address = serverFunctionUrl(removeFromCart.id, [line.productId]);
 ```
 
-Bound arguments must be JSON-safe, because the no-JavaScript convention has no codec.
-A `Date` or `Map` in `boundArgs` throws `Bound arguments in an action url must be JSON-safe`.
+バインド引数は JSON 安全でなければなりません。JavaScript なしの規約にはコーデックがないためです。
+`boundArgs` に `Date` や `Map` があると `Bound arguments in an action url must be JSON-safe` をスローします。
 
-## Keep the checks in the function
+## チェックは関数の中に置く
 
-A no-JavaScript submission reaches the same implementation as a scripted one, with the same `FormData`.
-Validation and authorization inside the function cover both; a check in the component covers neither, because the component did not run.
+JavaScript なしのサブミッションは、スクリプト経由のものと同じ実装に、同じ `FormData` で届きます。
+関数内のバリデーションと認可は両方をカバーします。コンポーネント内のチェックはどちらもカバーしません。コンポーネントが実行されないためです。
 
-:::deep-dive[What core owns and what the router owns]
-Core owns the transport.
-It decides by address whether a request came from the client runtime, decodes URL and form arguments, and provides the default `createNoJSHandler()` response for a browser form post: a 303 back to the page, with a non-`Response` outcome stored in a one-shot flash cookie.
-It exposes `handleNoJS` so an integration can replace that policy, and it preserves response status, headers, bodies, redirects, and revalidation metadata on every path.
+:::deep-dive[コアが担うものとルーターが担うもの]
+コアはトランスポートを担います。
+リクエストがクライアントランタイムから来たかどうかをアドレスで判別し、URL とフォームの引数をデコードし、ブラウザのフォーム POST に対するデフォルトの `createNoJSHandler()` レスポンスを提供します。ページへの 303 と、`Response` でない結果を格納する一回限りのフラッシュ Cookie です。
+`handleNoJS` を公開しているため、インテグレーションはそのポリシーを置き換えられます。また、すべての経路でレスポンスのステータス・ヘッダー・ボディ・リダイレクト・再検証メタデータを保持します。
 
-The router owns submission behavior.
-It reads and clears the flash cookie during the next server render, turns the decoded outcome into submission state, and connects revalidation metadata to its query cache.
+ルーターはサブミッションの動作を担います。
+次のサーバーレンダーでフラッシュ Cookie を読み取ってクリアし、デコードされた結果をサブミッション状態に変換し、再検証メタデータをクエリキャッシュに接続します。
 
-The core default applies when a custom host dispatches through `handleServerFunctionRequest()`.
-A host can configure `createNoJSHandler()` with a base path or supply another `handleNoJS`; [server-function progressive-enhancement APIs](/reference/solid-web/server-functions/progressive-enhancement) lists those hooks.
-[Server rendering and hydration](/routing/solid-router/server-rendering) covers the router setup.
+コアのデフォルトは、カスタムホストが `handleServerFunctionRequest()` を介してディスパッチするときに適用されます。
+ホストは `createNoJSHandler()` にベースパスを設定したり、別の `handleNoJS` を供給したりできます。[サーバー関数のプログレッシブエンハンスメント API](/reference/solid-web/server-functions/progressive-enhancement)にこれらのフックが列挙されています。
+[サーバーレンダリングとハイドレーション](/routing/solid-router/server-rendering)でルーターのセットアップを説明しています。
 :::
 
-## Common problems
+## よくある問題
 
-### `Property 'url' does not exist` on a server function
+### サーバー関数で `Property 'url' does not exist` になる
 
-The function is a bare `"use server"` declaration, whose type is the function's own.
-Pass it through the router's `action()` for a form, or, in integration code, narrow it to `ServerFunction` after `isServerFunction(fn)`.
+その関数は素の `"use server"` 宣言で、型はその関数自身のものです。
+フォームにはルーターの `action()` に通してください。インテグレーションコードでは `isServerFunction(fn)` の後に `ServerFunction` に絞り込んでください。
 
-### `Bound arguments in an action url must be JSON-safe`
+### `Bound arguments in an action url must be JSON-safe` になる
 
-A value bound with `.with()` or passed to `serverFunctionUrl()` was a `Date`, `Map`, `Set`, or another value JSON cannot carry.
-Bind a string or number and convert inside the function, or pass the value through the form body.
+`.with()` でバインドされた値、または `serverFunctionUrl()` に渡された値が `Date`、`Map`、`Set`、または JSON が運べない別の値でした。
+文字列や数値をバインドして関数内で変換するか、フォームボディ経由で値を渡してください。
 
-### The form submits but the page reloads instead of staying put
+### フォームは送信されるが、その場に留まらずページがリロードされる
 
-The router is not mounted around the form, so nothing intercepts the submit and the browser follows the `action` URL as a full-page navigation.
-The result is still correct, because the function ran and the redirect was followed; mount the form inside the `Router` to get the scripted path.
+フォームの周りにルーターがマウントされていないため、submit をインターセプトするものがなく、ブラウザは `action` URL をフルページ遷移として辿ります。
+関数は実行されリダイレクトにも従うため、結果は依然として正しいです。スクリプト経由の経路を得るには、`Router` の内側にフォームをマウントしてください。
 
-### The 400 shows nothing after a no-JavaScript submit
+### JavaScript なしの送信後に 400 が何も表示しない
 
-The outcome travelled back in the flash cookie, and something has to read it.
-Solid Router reads the cookie on the next server render and records the submission; without the router, a custom host reads it through its own `handleNoJS`.
-[Pass 3 of the Forms guide](/guides/forms#pass-3-inline-errors-and-pending-state) shows the router reading it.
+結果はフラッシュ Cookie で戻ってきており、誰かがそれを読む必要があります。
+Solid Router は次のサーバーレンダーで Cookie を読み取り、サブミッションを記録します。ルーターがない場合、カスタムホストは自身の `handleNoJS` を通じてそれを読み取ります。
+[フォームガイドのパス3](/guides/forms#pass-3-inline-errors-and-pending-state)でルーターがそれを読む様子を示しています。
 
-## Recap
+## まとめ
 
-- Put every mutation behind `<form method="post" action={...}>` so the browser can submit it before the client bundle runs.
-- Wrap the server function with the router's `action()`; it serializes to the function's plain-HTTP URL and takes over after hydration.
-- Pending state, `useSubmissions`, and `.onSubmit` optimistic writes are layers the hydrated page adds; the HTML and the server function stay the same.
-- A browser form post follows a returned redirect; any other outcome is answered with a 303 back to the page and a flash cookie, which the router turns into a submission on the next render.
-- Use `method="get"` and `fn.url` only for a `GET()` read; the function receives the fields as `URLSearchParams`.
-- `url` is on every reference at runtime and only on `GET()` and `live()` references in the type.
-- Bound arguments travel in the `args` query parameter and must be JSON-safe.
-- Validate and authorize inside the function; a no-JavaScript request never ran the component.
+- すべてのミューテーションを `<form method="post" action={...}>` の後ろに置き、クライアントバンドルが動く前でもブラウザが送信できるようにします。
+- サーバー関数はルーターの `action()` でラップします。これは関数のプレーン HTTP URL にシリアライズされ、ハイドレーション後に引き継ぎます。
+- 保留中の状態、`useSubmissions`、`.onSubmit` の楽観的書き込みは、ハイドレーション後のページが追加するレイヤーです。HTML とサーバー関数は変わりません。
+- ブラウザのフォーム POST は return されたリダイレクトに従います。その他の結果にはページへの 303 とフラッシュ Cookie で応答され、ルーターが次のレンダーでサブミッションに変換します。
+- `method="get"` と `fn.url` は `GET()` の読み取りにのみ使います。関数はフィールドを `URLSearchParams` として受け取ります。
+- `url` は実行時にはすべての参照にありますが、型では `GET()` と `live()` の参照にのみ存在します。
+- バインド引数は `args` クエリパラメータで運ばれ、JSON 安全でなければなりません。
+- バリデーションと認可は関数の中で行います。JavaScript なしのリクエストではコンポーネントが実行されないためです。
 
-## Next steps
+## 次のステップ
 
-- [Forms](/guides/forms): the checkout address form, working before hydration and adding inline messages and an optimistic address list after it.
-- [Data loading and mutations](/routing/solid-router/data): what `action()` adds on top of this transport, including `.with()`, submissions, and revalidation.
-- [Sessions and auth](/building-apps/sessions-and-auth): the sign-in form, the most common no-JavaScript submission in a storefront.
+- [フォーム](/guides/forms): チェックアウトの住所フォーム。ハイドレーション前から動作し、ハイドレーション後はインラインメッセージと楽観的な住所リストを追加します。
+- [データロードとミューテーション](/routing/solid-router/data): `.with()`、サブミッション、再検証を含め、`action()` がこのトランスポートの上に追加するもの。
+- [セッションと認証](/building-apps/sessions-and-auth): サインインフォーム。ストアフロントで最も一般的な JavaScript なしのサブミッションです。
