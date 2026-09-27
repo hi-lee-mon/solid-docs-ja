@@ -1,15 +1,15 @@
 ---
 title: "filesystem-routing/api"
-category: "filesystem-routing"
+category: "ファイルシステムルーティング"
 order: 5
 version: "2.0"
-description: "Matches manifest HTTP handlers and dispatches them as fetch-style middleware."
+description: "マニフェストの HTTP ハンドラーをマッチさせ、fetch スタイルのミドルウェアとしてディスパッチします。"
 source_repo: "solidjs/filesystem-routing"
 source_ref: "v0.2.1"
 source_path: "src/api.ts"
 ---
 
-`filesystem-routing/api` matches HTTP handler refs from the flat route manifest.
+`filesystem-routing/api` はフラットなルートマニフェストから HTTP ハンドラーの ref をマッチさせます。
 
 ## `createAPIHandler`
 
@@ -25,8 +25,8 @@ function createAPIHandler(
 ) => Promise<Response>;
 ```
 
-Returns fetch-style middleware.
-The middleware loads eager and lazy handler refs, writes matched parameters to the request event, and calls the method export.
+fetch スタイルのミドルウェアを返します。
+このミドルウェアは eager と lazy のハンドラー ref を読み込み、マッチしたパラメーターをリクエストイベントに書き込み、メソッドのエクスポートを呼び出します。
 
 ```ts
 import routes from "virtual:file-routes";
@@ -35,17 +35,17 @@ import { createAPIHandler } from "filesystem-routing/api";
 export default [createAPIHandler(routes)];
 ```
 
-Unmatched paths and methods call `next()`.
-`HEAD` uses `HEAD` when exported and otherwise uses `GET`.
+マッチしないパスとメソッドは `next()` を呼び出します。
+`HEAD` はエクスポートされていれば `HEAD` を使い、なければ `GET` を使います。
 
-The adapter converts handler results as follows:
+アダプターはハンドラーの結果を次のように変換します:
 
-- A `Response` is returned unchanged.
-- A string becomes `new Response(value)`.
-- Other defined values become `Response.json(value)`.
-- `undefined` from a non-`GET` handler throws.
-- `undefined` from a page module's `GET` calls `next()`.
-- `undefined` from a handler-only module's `GET` returns a `404` response.
+- `Response` はそのまま返されます。
+- 文字列は `new Response(value)` になります。
+- その他の定義済みの値は `Response.json(value)` になります。
+- `GET` 以外のハンドラーからの `undefined` はスローされます。
+- ページモジュールの `GET` からの `undefined` は `next()` を呼び出します。
+- ハンドラーのみのモジュールの `GET` からの `undefined` は `404` レスポンスを返します。
 
 ## `APIHandlerOptions`
 
@@ -58,18 +58,18 @@ interface APIHandlerOptions {
 
 ### `base`
 
-- **Type:** `string`
-- **Default:** `"/"`
+- **型:** `string`
+- **デフォルト:** `"/"`
 
-Specifies a leading URL path to remove before matching.
+マッチングの前に取り除く先頭の URL パスを指定します。
 
 ### `getEvent`
 
-- **Type:** `() => APIEvent`
-- **Default:** Reads the current `solid.RequestContext` store
+- **型:** `() => APIEvent`
+- **デフォルト:** 現在の `solid.RequestContext` ストアを読み取ります
 
-Supplies the event passed to handlers.
-The default throws when dispatch runs outside a request-event scope.
+ハンドラーに渡すイベントを提供します。
+デフォルトでは、ディスパッチがリクエストイベントのスコープ外で実行されるとスローされます。
 
 ## `createAPIMatcher`
 
@@ -79,11 +79,11 @@ function createAPIMatcher(
 ): (path: string, method: string) => APIMatch | undefined;
 ```
 
-Builds a radix matcher over entries with handler refs.
-The matcher removes route groups, encodes static segments, maps `*rest` catch-alls, and returns matched params.
+ハンドラー ref を持つエントリに対して radix マッチャーを構築します。
+マッチャーはルートグループを取り除き、静的セグメントをエンコードし、`*rest` キャッチオールをマップし、マッチした params を返します。
 
-The matcher rejects optional parameter paths.
-The matcher also rejects paths that become duplicates after group removal.
+マッチャーはオプションのパラメーターを含むパスを拒否します。
+また、グループ除去後に重複となるパスも拒否します。
 
 ## `stripPathBase`
 
@@ -91,10 +91,10 @@ The matcher also rejects paths that become duplicates after group removal.
 function stripPathBase(path: string, base: string): string;
 ```
 
-Removes `base` only when it equals the path or forms a complete leading segment.
-An exact match returns `/`.
+`base` がパスと一致するか、完全な先頭セグメントを形成する場合のみ `base` を取り除きます。
+完全一致の場合は `/` を返します。
 
-## Types
+## 型
 
 ```ts
 interface APIEvent {
@@ -129,4 +129,4 @@ interface APIMatch {
 }
 ```
 
-`isPage` is `true` only when the matched entry has `page: true` and a defined `$component`.
+`isPage` は、マッチしたエントリが `page: true` であり、かつ `$component` が定義されている場合のみ `true` になります。
