@@ -1,20 +1,20 @@
 ---
 title: "Solid Router"
 version: "2.0"
-description: "Build a small routed store with Solid Router: a product page that reads its id from the URL, a header that stays mounted, typed links, and route data that starts loading before the page renders."
+description: "Solid Router で小さなルーティング付きストアを作ります：URL から id を読み取る商品ページ、マウントされたままになるヘッダー、型付きリンク、そしてページがレンダーされる前に読み込みを開始するルートデータ。"
 ---
 
-The store has one page.
-It needs a product page at `/products/mug`, a header that stays put while pages change under it, links that do not reload the document, and product data that starts loading as soon as a link is clicked rather than after the page renders.
+このストアにはページが1つしかありません。
+必要なのは、`/products/mug` にある商品ページ、その下でページが切り替わってもそのまま残るヘッダー、ドキュメントを再読み込みしないリンク、そしてページがレンダーされた後ではなくリンクがクリックされた時点で読み込みを開始する商品データです。
 
-Solid Router is the router the `basic` and `fullstack` project shapes ship with, published as `@solidjs/router`.
-It is optional: a Solid application can use [another router](/routing/overview#pick-a-router) or none.
-This page builds the store above in four steps, using the parts an application touches most days; the pages after it cover each part in depth.
+Solid Router は `basic` と `fullstack` のプロジェクト形式に同梱されるルーターで、`@solidjs/router` として公開されています。
+利用は任意です。Solid アプリケーションは[別のルーター](/routing/overview#pick-a-router)を使っても、ルーターなしでも構いません。
+このページでは上記のストアを4つのステップで構築します。アプリケーションが日常的に触れる部分を使い、各パートの詳細は後続のページで扱います。
 
-## One app, three pages
+## 1つのアプリ、3つのページ
 
-A home page, a product page with a dynamic segment, and a catch-all for everything else.
-Routes are objects, and the tree is created once at module scope:
+ホームページ、動的セグメントを持つ商品ページ、そしてそれ以外すべてを受け止めるキャッチオールです。
+ルートはオブジェクトであり、そのツリーはモジュールスコープで一度だけ作られます：
 
 ```tsx
 // src/router.ts
@@ -32,17 +32,17 @@ export const Router = createRouter({
 export const { paths } = Router;
 ```
 
-`createRouter` returns a component, `Router`, with a set of static helpers on it.
-`paths` is the one that appears everywhere: `paths()` is `/`, and `paths.products("mug")` is `/products/mug`.
-Because the route tree is a literal, `paths.products()` without an argument is a type error, and so is `paths.produts`.
+`createRouter` はコンポーネント `Router` を返し、そこには静的ヘルパーが一式付いています。
+その中でも `paths` は至る所に登場します：`paths()` は `/`、`paths.products("mug")` は `/products/mug` です。
+ルートツリーはリテラルなので、引数なしの `paths.products()` は型エラーになり、`paths.produts` のようなタイポも同様です。
 
-`lazy` splits each page into its own chunk.
-The router loads a chunk when a link to it is hovered or when the route is matched, whichever comes first.
+`lazy` は各ページをそれぞれのチャンクに分割します。
+ルーターは、そのページへのリンクがホバーされるかルートがマッチするかの、早い方でチャンクを読み込みます。
 
-## Mount it and add a layout
+## マウントしてレイアウトを追加する
 
-`App` renders the router.
-The function child is the root layout; it stays mounted while pages change underneath it:
+`App` はルーターをレンダーします。
+関数の子要素がルートレイアウトで、その下でページが切り替わってもマウントされたままです：
 
 ```tsx
 // src/App.tsx
@@ -68,22 +68,22 @@ export default function App() {
 }
 ```
 
-Click **Featured**.
-The URL becomes `/products/mug`, the `<main>` contents change, and the `<header>` keeps its DOM; the document did not reload.
+**Featured** をクリックしてみましょう。
+URL は `/products/mug` に変わり、`<main>` の中身が入れ替わりますが、`<header>` は DOM を維持します。ドキュメントの再読み込みは起きません。
 
-Links are ordinary anchors.
-The router listens for clicks on same-origin anchors inside it and turns them into client-side navigations, so there is no `Link` component to import.
+リンクは普通のアンカー要素です。
+ルーターは内部にある同一オリジンのアンカーのクリックを監視し、クライアントサイドのナビゲーションに変換するので、インポートすべき `Link` コンポーネントはありません。
 
-:::note[Why the fallback shows only on the first load]
-When the user clicks a link to a page whose data is still loading, Solid keeps the current page on screen and marks the pending link instead of swapping in the fallback.
-The fallback appears only when there is no previous page to hold, such as the first load.
-[Async reactivity](/concepts/async-reactivity) explains the mechanism; [Show active and pending links](/routing/solid-router/navigation#show-active-and-pending-links) shows how to style the pending state.
+:::note[フォールバックが初回読み込み時にしか出ない理由]
+ユーザーがまだデータを読み込み中のページへのリンクをクリックしたとき、Solid はフォールバックに切り替える代わりに現在のページを画面に残し、保留中のリンクに印を付けます。
+フォールバックが現れるのは初回読み込みのように、保持できる前のページがない場合だけです。
+仕組みは[非同期リアクティビティ](/concepts/async-reactivity)で説明しています。保留中状態へのスタイル付けは[アクティブなリンクと保留中のリンクを表示する](/routing/solid-router/navigation#show-active-and-pending-links)を参照してください。
 :::
 
-## Read the URL in a page
+## ページで URL を読み取る
 
-A page component receives `params`, `location`, `data`, and `children` as props.
-Type them from the route so a typo in a param name is caught:
+ページコンポーネントは props として `params`、`location`、`data`、`children` を受け取ります。
+ルートから型を付ければ、パラメータ名のタイポを検出できます：
 
 ```tsx
 // src/pages/Product.tsx
@@ -97,10 +97,10 @@ export default function Product(
 }
 ```
 
-Navigate from `/products/mug` to `/products/bowl`.
-`Product` does not remount; the heading changes to "Product bowl" because it reads `props.params.id` inside JSX.
+`/products/mug` から `/products/bowl` に移動してみましょう。
+`Product` は再マウントされません。JSX の中で `props.params.id` を読み取っているので、見出しが「Product bowl」に変わります。
 
-The habit from other routers is to pull the id out once at the top of the component:
+他のルーターでの習慣は、コンポーネントの冒頭で id を一度だけ取り出すものです：
 
 ```tsx
 // Avoid: the body runs once, so this is the first id forever
@@ -119,14 +119,14 @@ export default function Product(
 }
 ```
 
-Run the `Avoid` version and the heading still says "Product mug" after navigating to `/products/bowl`; development prints `[STRICT_READ_UNTRACKED]` naming `Product`, which [Debugging reactivity](/guides/debugging-reactivity#is-the-read-inside-a-tracking-scope) covers.
-This is the same rule as everywhere else in Solid: read the value where you use it, and the component does not need to run again.
-The [Reactivity](/concepts/reactivity) page has the full explanation.
+`Avoid` 版を実行すると、`/products/bowl` へ移動した後も見出しは「Product mug」のままです。開発環境では `Product` を指名する `[STRICT_READ_UNTRACKED]` が出力され、これは[リアクティビティのデバッグ](/guides/debugging-reactivity#is-the-read-inside-a-tracking-scope)で扱っています。
+これは Solid のどこでも同じルールです。値を使う場所で読み取れば、コンポーネントを再実行する必要はありません。
+詳しい説明は[リアクティビティ](/concepts/reactivity)のページにあります。
 
-## Load data for a page
+## ページのデータを読み込む
 
-Route data follows the same pattern as any async value in Solid.
-Declare a cached read with `query`, start it in the route's `preload` so it begins as soon as navigation starts, and read it from the component through a memo:
+ルートのデータも、Solid の他の非同期値と同じパターンに従います。
+`query` でキャッシュされる読み取りを宣言し、ルートの `preload` で起動してナビゲーション開始と同時に動かし、コンポーネントではメモ経由で読み取ります：
 
 ```ts
 // src/data/products.ts
@@ -179,19 +179,19 @@ export default function Product(
 }
 ```
 
-Hover **Featured** and watch the network tab: the product request starts before the click.
-Click, and the page renders with the data already there.
+**Featured** にホバーしてネットワークタブを見てみましょう。商品のリクエストはクリックの前に始まります。
+クリックすると、データがすでにある状態でページがレンダーされます。
 
-`query` caches by its key and the arguments, so the preload and the memo share one request.
-While the promise is pending, the memo is pending, and the `Loading` boundary in `App` decides what the user sees.
-With the file-system adapter below, the same `preload` moves into the route module's `route` export.
+`query` はキーと引数でキャッシュするので、preload とメモは1つのリクエストを共有します。
+Promise が保留中の間メモも保留中であり、ユーザーに何を見せるかは `App` の `Loading` バウンダリが決めます。
+後述のファイルシステムアダプターでは、同じ `preload` はルートモジュールの `route` エクスポートに移ります。
 
-In a `fullstack` project the function inside `query` is usually a [server function](/building-apps/server-functions), so the fetch above becomes a direct database call that never ships to the browser.
+`fullstack` プロジェクトでは `query` の中の関数は通常[サーバー関数](/building-apps/server-functions)なので、上の fetch はブラウザに送られない直接のデータベース呼び出しになります。
 
-## Where the file-system adapter fits
+## ファイルシステムアダプターの位置づけ
 
-The CLI templates do not write the route tree by hand.
-`filesystem-routing` scans `src/routes` and `@solidjs/router/fs` converts its manifest into the same route objects shown above:
+CLI テンプレートはルートツリーを手で書きません。
+`filesystem-routing` が `src/routes` をスキャンし、`@solidjs/router/fs` がそのマニフェストを上で示したのと同じルートオブジェクトに変換します：
 
 ```ts
 // src/router.ts
@@ -204,34 +204,34 @@ export const Router = createRouter({ routes: fileRoutes(pageRoutes) });
 export const { paths } = Router;
 ```
 
-`src/routes/products/[id].tsx` becomes `/products/:id`, `src/routes/[...404].tsx` becomes the catch-all, and a `products.tsx` next to a `products/` directory becomes a layout for everything inside it.
-Everything else on these pages applies unchanged; the adapter only produces the route objects.
-[Convert a file-system manifest](/routing/solid-router/route-definitions#convert-a-file-system-manifest) shows where `preload` and the other route fields go in a route file.
+`src/routes/products/[id].tsx` は `/products/:id` に、`src/routes/[...404].tsx` はキャッチオールになり、`products/` ディレクトリの隣にある `products.tsx` はその内側すべてのレイアウトになります。
+これらのページにある他の内容はすべてそのまま適用されます。アダプターが生成するのはルートオブジェクトだけです。
+`preload` やその他のルートフィールドをルートファイルのどこに書くかは、[ファイルシステムマニフェストの変換](/routing/solid-router/route-definitions#convert-a-file-system-manifest)を参照してください。
 
-:::deep-dive[What the package entries are for]
-`@solidjs/router` contains the router factory, route and navigation primitives, history adapters, queries, and actions, and is the only entry most applications import.
-`@solidjs/router/fs` converts a `file-routes` manifest into route definitions.
-`@solidjs/router/server` provides the single-flight data collector for a server-function handler, which the [Server rendering and hydration](/routing/solid-router/server-rendering) page installs.
-The [Solid Router API reference](/reference/solid-router) has signatures and option details for all three.
+:::deep-dive[パッケージの各エントリーの役割]
+`@solidjs/router` にはルーターファクトリー、ルートとナビゲーションのプリミティブ、履歴アダプター、クエリ、アクションが含まれ、ほとんどのアプリケーションがインポートするのはこのエントリーだけです。
+`@solidjs/router/fs` は `file-routes` マニフェストをルート定義に変換します。
+`@solidjs/router/server` はサーバー関数ハンドラー向けのシングルフライトのデータコレクターを提供し、[サーバーレンダリングとハイドレーション](/routing/solid-router/server-rendering)のページでそのセットアップを行います。
+3つすべてのシグネチャとオプションの詳細は [Solid Router API リファレンス](/reference/solid-router)にあります。
 :::
 
-## Recap
+## まとめ
 
-- Create the router once at module scope with `createRouter`, and export `Router` and `paths` from `src/router.ts`.
-- Build every URL with `paths`, so a route that moves is a compile error instead of a dead link.
-- Put the app shell in the `<Router>` function child and render pages through `props.children` inside a `Loading` boundary.
-- Write links as plain `<a>` elements; the router handles same-origin anchors inside it.
-- Read `props.params` inside JSX or a memo, not once in the component body.
-- Wrap async reads in `query`, start them in the route's `preload`, and read them through a memo in the page.
-- Use the file-system adapter or a hand-written array; the route objects and every page are the same either way.
+- ルーターは `createRouter` でモジュールスコープに一度だけ作り、`Router` と `paths` を `src/router.ts` からエクスポートします。
+- URL はすべて `paths` で組み立てましょう。ルートが移動しても、デッドリンクではなくコンパイルエラーになります。
+- アプリの外枠は `<Router>` の関数の子要素に置き、`Loading` バウンダリの内側で `props.children` を通してページをレンダーします。
+- リンクは素の `<a>` 要素で書きます。内部の同一オリジンのアンカーはルーターが処理します。
+- `props.params` はコンポーネント本体で一度だけ読むのではなく、JSX やメモの中で読み取ります。
+- 非同期の読み取りは `query` でラップし、ルートの `preload` で開始して、ページではメモ経由で読み取ります。
+- ファイルシステムアダプターでも手書きの配列でも構いません。ルートオブジェクトも各ページもどちらでも同じです。
 
-## Next steps
+## 次のステップ
 
-Read these in order if you are new to Solid Router, or jump to the one you need:
+Solid Router が初めてならこの順で読み進め、必要なものがあればそこへ直接進んでください：
 
-1. [Setup](/routing/solid-router/setup): add the router to a project that does not have it, and the options for `base`, history, and preloading.
-2. [Route definitions](/routing/solid-router/route-definitions): path patterns, parameter filters, route metadata, lazy subtrees, and the file-system manifest.
-3. [Nested routes and layouts](/routing/solid-router/nested-routes): an account section with its own frame that stays mounted while its pages change.
-4. [Navigation and typed paths](/routing/solid-router/navigation): `paths`, `useNavigate`, search parameters with a schema, active and pending links, and leave guards.
-5. [Data loading and mutations](/routing/solid-router/data): `preload`, `query`, `action`, optimistic updates, and what revalidates after a mutation.
-6. [Server rendering and hydration](/routing/solid-router/server-rendering): what the server adds when the app renders there, and how a mutation returns fresh data in one round trip.
+1. [セットアップ](/routing/solid-router/setup)：ルーターをまだ持たないプロジェクトへの追加と、`base`・履歴・プリロードのオプション。
+2. [ルート定義](/routing/solid-router/route-definitions)：パスパターン、パラメータフィルター、ルートのメタデータ、遅延サブツリー、ファイルシステムマニフェスト。
+3. [ネストされたルートとレイアウト](/routing/solid-router/nested-routes)：ページが切り替わってもマウントされたままになる独自フレームを持つアカウントセクション。
+4. [ナビゲーションと型付きパス](/routing/solid-router/navigation)：`paths`、`useNavigate`、スキーマ付き検索パラメータ、アクティブ・保留中リンク、離脱ガード。
+5. [データ読み込みとミューテーション](/routing/solid-router/data)：`preload`、`query`、`action`、楽観的更新、ミューテーション後の再検証。
+6. [サーバーレンダリングとハイドレーション](/routing/solid-router/server-rendering)：アプリをサーバーでレンダーするときにサーバーが追加するものと、ミューテーションが1回の往復で新しいデータを返す仕組み。
