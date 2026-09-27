@@ -1,48 +1,48 @@
 ---
-title: "Sessions and auth"
+title: "セッションと認証"
 version: "2.0"
-description: "Build a signed cookie session on the request event, sign customers in and out from server functions, and authorize every server entry point against that session."
+description: "リクエストイベント上に署名付き Cookie セッションを構築し、サーバー関数から顧客をサインイン・サインアウトさせ、すべてのサーバーエントリーポイントをそのセッションで認可します。"
 ---
 
-The store's account area has an orders page.
-A request for it arrives with a `Cookie` header, and before the page renders or a server function returns a single order, the server has to answer two questions: who is this, and may they see this record.
+ストアのアカウントエリアには注文ページがあります。
+このページへのリクエストは `Cookie` ヘッダーを伴って届き、ページがレンダーされる前にもサーバー関数が 1 件の注文を返す前にも、サーバーは 2 つの問いに答えなければなりません: これは誰なのか、そしてこのレコードを見てもよいのか。
 
-Solid supplies the HTTP exchange those answers are built on: the incoming request, a `locals` bag, and the outgoing response headers, all on the request event.
-It does not supply a session store or an authentication framework.
-The `fullstack` template composes a signed cookie from `@remix-run/cookie` with that event, and this page builds the account area on the same shape.
+Solid が提供するのは、これらの回答の土台となる HTTP 交換です: 入力リクエスト、`locals` バッグ、出力レスポンスヘッダーであり、すべてリクエストイベント上にあります。
+セッションストアや認証フレームワークは提供しません。
+`fullstack` テンプレートは `@remix-run/cookie` の署名付き Cookie をこのイベントと組み合わせており、このページでも同じ形でアカウントエリアを構築します。
 
-Most apps need the two middle sections: the signed cookie session and the authorization check in every server function.
-The two short sections before them say what is Solid's and what is the library's, for when you choose a different library.
+ほとんどのアプリで必要なのは真ん中の 2 つのセクションです: 署名付き Cookie セッションと、すべてのサーバー関数での認可チェックです。
+その前の短い 2 つのセクションは、何が Solid の担当で何がライブラリの担当かを説明します。別のライブラリを選ぶ場合に参照してください。
 
-This page assumes a `fullstack` project with [server functions](/building-apps/server-functions) enabled, because a session is read on the server and most reads happen inside a server function or [middleware](/building-apps/middleware-and-api-routes).
+このページは[サーバー関数](/building-apps/server-functions)を有効にした `fullstack` プロジェクトを前提とします。セッションはサーバー上で読み取られ、ほとんどの読み取りはサーバー関数または[ミドルウェア](/building-apps/middleware-and-api-routes)内で行われるためです。
 
-## What the platform supplies
+## プラットフォームが提供するもの
 
-Code running under start mode reads the current request event with `getRequestEvent()` from `@solidjs/web`.
-The event exposes:
+start モードで動作するコードは、`@solidjs/web` の `getRequestEvent()` で現在のリクエストイベントを読み取ります。
+イベントは以下を公開します:
 
-- `request`, including its `Cookie`, `Authorization`, and other request headers.
-- `locals`, where middleware can place request-scoped state such as an authenticated customer.
-- `response`, whose headers collect outgoing `Set-Cookie` values before the response head commits.
+- `request`。`Cookie`、`Authorization` その他のリクエストヘッダーを含みます。
+- `locals`。ミドルウェアが認証済み顧客などのリクエストスコープの状態を置ける場所です。
+- `response`。そのヘッダーは、レスポンスヘッドが確定する前に出力側の `Set-Cookie` 値を集めます。
 
-`@solidjs/web` also exports `parseCookieHeader()` and `serializeCookie()` for unsigned cookie encoding.
-Those functions do not sign, encrypt, rotate, persist, or revoke anything.
+`@solidjs/web` は署名なし Cookie エンコード用の `parseCookieHeader()` と `serializeCookie()` もエクスポートします。
+これらの関数は署名・暗号化・ローテーション・永続化・失効のいずれも行いません。
 
-## What a session library supplies
+## セッションライブラリが提供するもの
 
-A cookie or session library defines the application-level protocol: signing or encryption, secret rotation, expiration and renewal, storage-backed session identifiers, and cookie serialization options.
+Cookie ライブラリやセッションライブラリはアプリケーションレベルのプロトコルを定義します: 署名または暗号化、シークレットローテーション、有効期限と更新、ストレージバックのセッション識別子、Cookie シリアライズオプションです。
 
-The `fullstack` template uses `@remix-run/cookie`.
-Its session cookie is signed and tamper-evident, and it is not encrypted, so the payload is readable by the browser.
+`fullstack` テンプレートは `@remix-run/cookie` を使います。
+そのセッション Cookie は署名済みで改ざん検知可能ですが、暗号化はされていないため、ペイロードはブラウザから読み取れます。
 
-:::danger[A signed cookie is not a secret]
-Anything placed in the session payload can be read by the person holding the cookie.
-Store an identifier such as `userId` and look the rest up on the server; never store a password hash, an API key, or another customer's data.
+:::danger[署名付き Cookie はシークレットではない]
+セッションペイロードに置かれたものはすべて、Cookie を持つ人に読み取れます。
+`userId` のような識別子だけを保存し、残りはサーバーで引きます。パスワードハッシュ・API キー・他の顧客のデータは絶対に保存しないでください。
 :::
 
-## A signed cookie session
+## 署名付き Cookie セッション
 
-The following module follows the template's `src/server/session.ts`:
+次のモジュールはテンプレートの `src/server/session.ts` に倣っています:
 
 ```ts
 // src/server/session.ts
@@ -102,23 +102,23 @@ export async function clearSession(): Promise<void> {
 }
 ```
 
-Call `setSession({ userId })` inside a server function and the response that leaves carries a `Set-Cookie` header.
-Call `getSession()` on the next request and it returns `{ userId }`; an absent, tampered, or expired cookie returns `null`.
+サーバー関数内で `setSession({ userId })` を呼ぶと、送出されるレスポンスは `Set-Cookie` ヘッダーを運びます。
+次のリクエストで `getSession()` を呼ぶと `{ userId }` が返ります。Cookie がない・改ざんされた・期限切れの場合は `null` を返します。
 
-Three decisions in that file are deliberate.
-The cookie attributes are set explicitly, because the library's defaults may not match the application's requirements.
-The signing secret comes from `virtual:env/server`, which [Environment](/building-apps/environment) keeps out of the browser bundle; the first secret in the list signs new cookies and every listed secret verifies existing ones, so rotation is prepending a new secret and dropping the old one after `maxAge` has passed.
-The payload carries its own `exp`, because the browser's `Max-Age` is a request to the browser and a client is free to replay an old cookie past it.
+このファイルの 3 つの決定は意図的なものです。
+Cookie の属性は明示的に設定されています。ライブラリのデフォルトがアプリケーションの要件に合わない可能性があるためです。
+署名シークレットは `virtual:env/server` から取得します。これは[環境](/building-apps/environment)によりブラウザバンドルから締め出されています。リストの先頭のシークレットが新しい Cookie に署名し、リスト内のすべてのシークレットが既存の Cookie を検証するため、ローテーションは新しいシークレットを先頭に追加し、`maxAge` 経過後に古いものを落とすことです。
+ペイロードは独自の `exp` を持ちます。ブラウザの `Max-Age` はブラウザへの要求にすぎず、クライアントは期限切れの古い Cookie を自由に再生できるためです。
 
-:::caution[A write does not change what this request read]
-`getSession()` reads the `Cookie` header that arrived with the request.
-`setSession()` appends to the outgoing response.
-Calling `setSession()` and then `getSession()` in the same request returns the old session, because the new cookie is on its way to the browser and has not come back yet.
+:::caution[書き込みはこのリクエストが読んだものを変えない]
+`getSession()` はリクエストとともに届いた `Cookie` ヘッダーを読みます。
+`setSession()` は出力レスポンスに追記します。
+同じリクエスト内で `setSession()` の後に `getSession()` を呼ぶと古いセッションが返ります。新しい Cookie はブラウザへ向かっている途中で、まだ戻ってきていないためです。
 :::
 
-## Sign in and sign out
+## サインインとサインアウト
 
-Signing in is a server function that checks the credentials, writes the session, and redirects:
+サインインは、資格情報を確認し、セッションを書き込み、リダイレクトするサーバー関数です:
 
 ```ts
 // src/data/account.ts
@@ -147,16 +147,16 @@ export async function signOut() {
 }
 ```
 
-Submit the sign-in form and the response is a redirect to `/account` with the session cookie attached.
-The cookie write and the thrown `redirect()` ride the same response; start mode folds `Set-Cookie` values from the event onto page responses, middleware responses, API responses, and server-function responses alike.
-The failed-credentials error is wrapped in `markSafeError` so its message reaches the form; a plain thrown `Error` is replaced with `Internal Server Error` in production.
-[Mutations and responses](/building-apps/server-functions/mutations-and-responses) covers `redirect()`, `reload()`, and which thrown errors reach the browser.
+サインインフォームを送信すると、レスポンスはセッション Cookie が添付された `/account` へのリダイレクトになります。
+Cookie 書き込みとスローされた `redirect()` は同じレスポンスに乗ります。start モードはイベント由来の `Set-Cookie` 値を、ページレスポンス・ミドルウェアレスポンス・API レスポンス・サーバー関数レスポンスのすべてに畳み込みます。
+資格情報失敗のエラーは `markSafeError` でラップされ、そのメッセージがフォームに届くようにします。素の `Error` をスローすると本番環境では `Internal Server Error` に置き換えられます。
+[ミューテーションとレスポンス](/building-apps/server-functions/mutations-and-responses)では `redirect()`、`reload()`、そしてどのスローされたエラーがブラウザに届くかを説明します。
 
-## Authorize on the server
+## サーバーで認可する
 
-Authentication identifies the caller.
-Authorization decides whether that caller may perform an operation.
-Both decisions belong in server code, and the caller's identity comes from the session, never from an argument:
+認証は呼び出し元を特定します。
+認可は、その呼び出し元が操作を実行してよいかを決めます。
+どちらの決定もサーバーコードに属し、呼び出し元の識別情報は引数ではなく常にセッションから取得します:
 
 ```ts
 // Avoid: the browser names the customer
@@ -174,10 +174,10 @@ export async function getOrders() {
 }
 ```
 
-A server function is an HTTP endpoint, so the `Avoid` version returns any customer's orders to any caller who puts that customer's id in the request body.
-[Arguments and security](/building-apps/server-functions/arguments-and-security) covers what a caller controls and what the request event vouches for.
+サーバー関数は HTTP エンドポイントであるため、`Avoid` 版はリクエストボディに顧客 id を入れた任意の呼び出し元に、その顧客の注文を返してしまいます。
+[引数とセキュリティ](/building-apps/server-functions/arguments-and-security)では、呼び出し元が制御できるものとリクエストイベントが保証するものを説明します。
 
-Validate the arguments the caller does control the same way, then authorize access to the specific record:
+呼び出し元が制御する引数も同様に検証し、その後で特定レコードへのアクセスを認可します:
 
 ::::tab-group[validation-library]
 
@@ -228,12 +228,12 @@ export async function renameAccount(form: FormData) {
 
 ::::
 
-Hiding the rename form from signed-out visitors does not protect `renameAccount`; the check inside the function is the gate.
-Repeat it at every protected server entry point: server functions, API route handlers, and the page render.
+サインアウト済みの訪問者から名前変更フォームを隠しても `renameAccount` は守られません。関数内部のチェックがゲートです。
+保護されたすべてのサーバーエントリーポイントでこれを繰り返します: サーバー関数、API ルートハンドラー、ページレンダーです。
 
-### Authenticate once in middleware
+### ミドルウェアで一度だけ認証する
 
-When many entry points need the same answer, a [middleware](/building-apps/middleware-and-api-routes#add-a-middleware) can read the session once and place the result on `event.locals`:
+多くのエントリーポイントが同じ回答を必要とするとき、[ミドルウェア](/building-apps/middleware-and-api-routes#add-a-middleware)でセッションを一度だけ読み、結果を `event.locals` に置けます:
 
 ```ts
 // src/middleware.ts
@@ -250,8 +250,8 @@ async function attachCustomer(
 }
 ```
 
-Server functions, API handlers, and the page render for that request read that request's event, so `locals.userId` set here is visible to all of them; a server function called during the render gets a derived event with a copy of `locals`, so what it writes stays with the call.
-Augment `RequestEventLocals` from `@solidjs/web` when the application wants a precise type for those fields:
+そのリクエストのサーバー関数・API ハンドラー・ページレンダーは同じリクエストイベントを読むため、ここで設定した `locals.userId` はすべてから見えます。レンダー中に呼ばれたサーバー関数は `locals` のコピーを持つ派生イベントを受け取るため、そこへの書き込みはその呼び出しに留まります。
+それらのフィールドに正確な型が欲しい場合は、`@solidjs/web` の `RequestEventLocals` を拡張します:
 
 ```ts
 declare module "@solidjs/web" {
@@ -261,64 +261,64 @@ declare module "@solidjs/web" {
 }
 ```
 
-## Response behavior
+## レスポンスの動作
 
-Session writes append `Set-Cookie` to the event's response stub, and start mode folds those headers onto whatever response leaves, a thrown `redirect()` included.
+セッション書き込みはイベントのレスポンススタブに `Set-Cookie` を追記し、start モードはそれらのヘッダーを、スローされた `redirect()` を含む送出されるあらゆるレスポンスに畳み込みます。
 
-Write cookies before the response head commits.
-During streaming server rendering, the head commits when the shell flushes; for a server-function call or an API route, it commits when the handler folds the event onto the outgoing response, after the function has returned.
-A header write after that point throws in development and, in production, reports the error and leaves the response unchanged.
+Cookie の書き込みはレスポンスヘッドが確定する前に行います。
+ストリーミングサーバーレンダリングでは、シェルがフラッシュされたときにヘッドが確定します。サーバー関数呼び出しや API ルートでは、関数が戻った後にハンドラーがイベントを出力レスポンスに畳み込んだ時点で確定します。
+それ以降のヘッダー書き込みは、開発時にはスローされ、本番環境ではエラーが報告されてレスポンスは変更されないままになります。
 
-:::note[Cookie-backed or storage-backed]
-A cookie-backed session keeps its payload in the browser and is limited by cookie size.
-A storage-backed session puts an opaque identifier in the cookie and keeps revocable data in a database or key-value store, which is what you want when signing out must invalidate other devices.
-Solid supplies the same request and response seam for either.
+:::note[Cookie バックかストレージバックか]
+Cookie バックのセッションはペイロードをブラウザに保持し、Cookie サイズに制限されます。
+ストレージバックのセッションは不透明な識別子を Cookie に入れ、失効可能なデータをデータベースやキーバリューストアに保持します。サインアウトで他のデバイスも無効化しなければならない場合に必要なものです。
+Solid はどちらの場合も同じリクエスト・レスポンスの継ぎ目を提供します。
 :::
 
-## Common problems
+## よくある問題
 
-### `getSession()` returns `null` right after `setSession()`
+### `setSession()` の直後に `getSession()` が `null` を返す
 
-Both calls ran in the same request.
-The read sees the `Cookie` header that arrived; the write is on the outgoing response.
-Redirect after the write, as `signIn` does, and the next request carries the new cookie.
+両方の呼び出しが同じリクエスト内で実行されました。
+読み取りは到着した `Cookie` ヘッダーを見ます。書き込みは出力レスポンス上にあります。
+`signIn` のように書き込み後にリダイレクトすれば、次のリクエストは新しい Cookie を運びます。
 
-### The cookie is set but never comes back
+### Cookie は設定されるが返ってこない
 
-Compare the `Set-Cookie` attributes in the response with the request that follows.
-A `secure` cookie is not sent over plain `http://`, a `path` that does not cover the endpoint is not sent to it, and a `domain` that does not match the host is dropped.
-Set the attributes explicitly rather than relying on library defaults.
+レスポンスの `Set-Cookie` 属性を、その後のリクエストと比較してください。
+`secure` Cookie は素の `http://` では送信されず、エンドポイントをカバーしない `path` には送信されず、ホストに一致しない `domain` は破棄されます。
+ライブラリのデフォルトに頼らず、属性を明示的に設定してください。
 
-### `/sign-in` and `/account` redirect to each other forever
+### `/sign-in` と `/account` が互いに無限にリダイレクトする
 
-The sign-in check runs on the sign-in page too, or the session cookie never comes back (see above) so every protected request redirects again.
-Guard only the routes that need a session, and confirm the cookie arrives on the request to `/account`.
+サインインチェックがサインインページでも実行されているか、セッション Cookie が返ってこないため（上記参照）、保護されたすべてのリクエストが再びリダイレクトしています。
+セッションが必要なルートだけをガードし、`/account` へのリクエストに Cookie が届いているかを確認してください。
 
 ### `Response header write dropped: headers.append("set-cookie") ran after the response head was sent`
 
-`setSession()` or `clearSession()` ran after the shell flushed, for example from a component that rendered behind a `Loading` boundary.
-Move the write into a server function or middleware, or run it before the first flush.
+`setSession()` または `clearSession()` がシェルのフラッシュ後に実行されました。例えば `Loading` バウンダリの背後でレンダーされたコンポーネントからです。
+書き込みをサーバー関数かミドルウェアに移すか、最初のフラッシュより前に実行してください。
 
 ### `Missing request event`
 
-`getRequestEvent()` returned `undefined`.
-It is defined only on the server, inside a request: not in the browser, not at module scope, and not in a test that did not provide an event.
-Call the session helpers from a server function, middleware, or the page render.
+`getRequestEvent()` が `undefined` を返しました。
+これはサーバー上のリクエスト内でのみ定義されます。ブラウザ内・モジュールスコープ・イベントを提供していないテストでは定義されません。
+セッションヘルパーはサーバー関数・ミドルウェア・ページレンダーから呼んでください。
 
-## Recap
+## まとめ
 
-- Read the request and write `Set-Cookie` through `getRequestEvent()`; the session protocol comes from a cookie library.
-- Sign the cookie with a secret from `virtual:env/server`, set `httpOnly`, `secure`, and `sameSite` explicitly, and carry an expiry in the payload.
-- A signed cookie is readable by the browser; store an id, not data.
-- `getSession()` reads the request and `setSession()` writes the response; the two do not meet in one request.
-- Take the customer's identity from the session, never from an argument, and check it in every server function and API handler.
-- Read the session once in middleware and put the result on `event.locals` when many entry points need it.
-- Write cookies before the shell flushes or the function returns; a later write is dropped and reported.
+- `getRequestEvent()` を通してリクエストを読み `Set-Cookie` を書きます。セッションプロトコルは Cookie ライブラリから得ます。
+- `virtual:env/server` のシークレットで Cookie に署名し、`httpOnly`・`secure`・`sameSite` を明示的に設定し、ペイロードに有効期限を持たせます。
+- 署名付き Cookie はブラウザから読み取れます。データではなく id を保存します。
+- `getSession()` はリクエストを読み、`setSession()` はレスポンスに書きます。両者は 1 つのリクエストでは出会いません。
+- 顧客の識別情報は引数ではなく必ずセッションから取得し、すべてのサーバー関数と API ハンドラーでチェックします。
+- 多くのエントリーポイントが必要とするときは、ミドルウェアでセッションを一度だけ読み、結果を `event.locals` に置きます。
+- Cookie の書き込みはシェルのフラッシュまたは関数のリターンの前に行います。それ以降の書き込みは破棄され報告されます。
 
-## Next steps
+## 次のステップ
 
-- [Arguments and security](/building-apps/server-functions/arguments-and-security): why the identity must come from the request event and never from a server-function argument.
-- [Mutations and responses](/building-apps/server-functions/mutations-and-responses): `redirect()` and `reload()` after a sign-in or sign-out, and which errors reach the browser.
-- [Middleware and API routes](/building-apps/middleware-and-api-routes): where the session read goes so every request sees `event.locals.userId`.
-- [Environment](/building-apps/environment): declaring `SESSION_SECRET` so the build fails if it would ship to the browser.
-- [Protected routes](/guides/protected-routes): the route guard and middleware that sit in front of the server-function checks on this page.
+- [引数とセキュリティ](/building-apps/server-functions/arguments-and-security): なぜ識別情報がリクエストイベントから来なければならず、サーバー関数の引数からは絶対に取ってはいけないのか。
+- [ミューテーションとレスポンス](/building-apps/server-functions/mutations-and-responses): サインイン・サインアウト後の `redirect()` と `reload()`、そしてどのエラーがブラウザに届くか。
+- [ミドルウェアと API ルート](/building-apps/middleware-and-api-routes): すべてのリクエストが `event.locals.userId` を見られるように、セッション読み取りをどこに置くか。
+- [環境](/building-apps/environment): ブラウザに同梱される場合にビルドが失敗するよう `SESSION_SECRET` を宣言する。
+- [保護されたルート](/guides/protected-routes): このページのサーバー関数チェックの前段に置くルートガードとミドルウェア。

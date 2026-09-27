@@ -1,23 +1,23 @@
 ---
-title: "Reads, streams, and live data"
+title: "読み取り、ストリーム、ライブデータ"
 version: "2.0"
-description: "Declare a product read that HTTP caches can store, stream order events from a server function, and keep a stock level connected when another shopper changes it."
+description: "HTTP キャッシュが保存できる商品の読み取りを宣言し、サーバー関数から注文イベントをストリームし、別の買い物客が変更しても在庫数の接続を維持します。"
 ---
 
-The product page from the [Server functions](/building-apps/server-functions) page shows "3 left in stock".
-Another shopper buys one, and the number on this page is wrong until someone reloads.
-The same page fetches the product record on every visit, and because a server function call is a `POST` by default, no cache between the browser and the server is allowed to remember the answer.
+[サーバー関数](/building-apps/server-functions)ページの商品ページは「残り 3 点」と表示しています。
+別の買い物客が 1 点購入すると、誰かがリロードするまでこのページの数値は誤ったままです。
+同じページは訪問のたびに商品レコードを取得していますが、サーバー関数呼び出しはデフォルトで `POST` であるため、ブラウザとサーバーの間にあるどのキャッシュもその回答を記憶できません。
 
-Both problems are about how a read reaches the server.
-`GET()` declares a read the transport may send as a cacheable `GET` request.
-`live()` declares a read that produces values over time and reconnects when the connection drops, so the stock level follows the other shopper's purchase.
+どちらの問題も、読み取りがサーバーへどう届くかに関するものです。
+`GET()` は、トランスポートがキャッシュ可能な `GET` リクエストとして送信してよい読み取りを宣言します。
+`live()` は、時間経過とともに値を生成し、接続が切れたときに再接続する読み取りを宣言します。これにより在庫数は別の買い物客の購入に追従します。
 
-Most applications need the [GET read](#declare-a-get-read) section, and only when a read is called outside Solid Router's `query()`, plus [live sources](#declare-a-live-source) for a value that changes under the user.
-Streams and connection status are for the parts of an app that consume events directly.
+ほとんどのアプリケーションで必要なのは [GET 読み取りの宣言](#declare-a-get-read) セクションだけで、それも読み取りが Solid Router の `query()` の外で呼ばれる場合に限られます。加えて、ユーザーの操作中に変化する値には [live ソース](#declare-a-live-source) が必要です。
+ストリームと接続ステータスは、イベントを直接消費するアプリの部分向けです。
 
-## Declare a GET read
+## GET 読み取りを宣言する
 
-Import `GET` from the server-functions entry and wrap the function:
+サーバー関数エントリから `GET` をインポートし、関数をラップします:
 
 ```ts
 // src/data/products.ts
@@ -29,16 +29,16 @@ export const getProduct = GET(async (id: string) => {
 });
 ```
 
-Load the product page and look at the network tab: the call is a `GET` to `/_server/data/<id>?args=%5B%22mug%22%5D`, with the arguments in the URL instead of a request body.
-When the encoded URL would exceed the transport's length limit, the client sends the same call as a `POST` instead; the call succeeds, and the answer is not a cache entry.
+商品ページを読み込んでネットワークタブを見ると、その呼び出しは `/_server/data/<id>?args=%5B%22mug%22%5D` への `GET` で、引数はリクエストボディではなく URL に含まれています。
+エンコード後の URL がトランスポートの長さ制限を超える場合、クライアントは代わりに同じ呼び出しを `POST` として送信します。呼び出しは成功しますが、その回答はキャッシュエントリになりません。
 
-A `GET()` declaration grants `GET` and `HEAD` dispatch and keeps the default `POST` path.
-A function that never declared `GET()` answers a `GET` request with status 405.
+`GET()` 宣言は `GET` と `HEAD` のディスパッチを許可し、デフォルトの `POST` パスも維持します。
+`GET()` を宣言していない関数は、`GET` リクエストにステータス 405 で応答します。
 
-Solid Router's `query()` makes the declaration for you: a plain `"use server"` function passed to `query()` is wrapped in `GET()` at that point, and a function you already declared passes through unchanged.
-Write `GET()` yourself when you call the read outside `query()`, or when a router other than Solid Router does not declare it.
+Solid Router の `query()` は宣言を代行します: `query()` に渡した素の `"use server"` 関数はその時点で `GET()` でラップされ、すでに宣言済みの関数はそのまま素通りします。
+読み取りを `query()` の外で呼び出す場合や、Solid Router 以外のルーターが宣言しない場合は、自分で `GET()` を書きます。
 
-The wrapper needs a server function, not a plain async function:
+ラッパーが必要とするのはサーバー関数であり、素の非同期関数ではありません:
 
 ```ts
 // Avoid: no directive, so GET receives an ordinary function
@@ -53,10 +53,10 @@ export const getProduct = GET(async (id: string) => {
 });
 ```
 
-The `Avoid` version throws `GET expects a server function reference` when the module loads, and the database import stays in the client build because nothing marked the body for extraction.
+`Avoid` 版はモジュールの読み込み時に `GET expects a server function reference` をスローし、本体を抽出対象としてマークするものがないため、データベースのインポートがクライアントビルドに残ります。
 
-:::pitfall[A secret in a GET argument ends up in a URL]
-The arguments of a `GET()` read are the query string, and the query string is written to browser history, server access logs, and cache keys.
+:::pitfall[GET 引数のシークレットは URL に残る]
+`GET()` 読み取りの引数はクエリ文字列になり、クエリ文字列はブラウザ履歴・サーバーのアクセスログ・キャッシュキーに書き込まれます。
 
 ```ts
 // Avoid: the session token travels in the URL
@@ -74,11 +74,11 @@ export const getOrders = GET(async () => {
 });
 ```
 
-The `Avoid` version leaves the token in every log line that records the request.
+`Avoid` 版では、リクエストを記録するすべてのログ行にトークンが残ります。
 :::
 
-Server-function responses leave with `Cache-Control: no-store` unless the function sets its own policy.
-Declaring `GET()` makes a cache entry possible; a header makes it happen:
+サーバー関数のレスポンスは、関数が独自のポリシーを設定しない限り `Cache-Control: no-store` で送出されます。
+`GET()` の宣言はキャッシュエントリを可能にし、ヘッダーがそれを実際に発生させます:
 
 ```ts
 import { respond } from "@solidjs/web";
@@ -93,13 +93,13 @@ export const getCatalog = GET(async () => {
 });
 ```
 
-Visit the catalog twice within a minute and the second request is answered from the browser cache without reaching the server.
-`GET` also skips the same-origin check that protects `POST` calls, because a declared read is safe to run from any origin by contract; [Same-origin protection](/building-apps/server-functions/arguments-and-security#same-origin-protection) has the details.
-Declare `GET()` only for a read that is safe and idempotent.
+1 分以内にカタログを 2 回訪れると、2 回目のリクエストはサーバーに届かずブラウザキャッシュから応答されます。
+`GET` は `POST` 呼び出しを保護する同一オリジンチェックもスキップします。宣言された読み取りは契約上どのオリジンから実行しても安全だからです。詳細は[同一オリジン保護](/building-apps/server-functions/arguments-and-security#same-origin-protection)を参照してください。
+`GET()` の宣言は、安全で冪等な読み取りに限ってください。
 
-## Return a stream
+## ストリームを返す
 
-A server function can return an async iterable, and the transport sends each yielded value over the open response as it is produced:
+サーバー関数は非同期イテラブルを返せます。トランスポートは生成された各 yield 値を、開いているレスポンス上をその都度送信します:
 
 ```ts
 // src/data/orders.ts
@@ -111,17 +111,17 @@ export async function* orderEvents(orderId: string) {
 }
 ```
 
-Consume it with `for await` in the browser and each event arrives when the server yields it.
-Ending the iteration in the browser, with `break` or `return`, aborts the request and fires the server's `request.signal`, so the producer can clean up.
+ブラウザで `for await` で消費すると、各イベントはサーバーが yield したタイミングで届きます。
+ブラウザで `break` や `return` によりイテレーションを終了すると、リクエストが中断されサーバーの `request.signal` が発火するため、プロデューサーはクリーンアップできます。
 
-A streamed call owns one connection.
-When the connection drops, the iteration ends with an error and nothing reopens it.
-Use a stream for a sequence of events the consumer accumulates, such as an order's status history, and use `live()` when each value replaces the previous one.
+ストリームされた呼び出しは 1 つの接続を占有します。
+接続が切れるとイテレーションはエラーで終了し、再接続されることはありません。
+注文のステータス履歴のように、消費者が蓄積するイベント列にはストリームを使い、各値が前の値を置き換える場合は `live()` を使います。
 
-## Declare a live source
+## live ソースを宣言する
 
-A live source is value-shaped: each yield is the current answer to one question, not an event to add to a list.
-The stock level for a product is one such question.
+live ソースは値の形をしています: 各 yield は 1 つの問いへの現在の回答であり、リストに追加するイベントではありません。
+商品の在庫数はそのような問いの 1 つです。
 
 ```ts
 // src/data/inventory.ts
@@ -138,16 +138,16 @@ export const stockLevel = live(
 );
 ```
 
-Place `live()` outside `GET()`.
-`GET()` chooses the read transport, and `live()` wraps the call behavior around it, so it must be the outermost declaration.
-`live()` does not imply `GET()`; a live source without it streams over `POST`, which is fine when a cacheable URL is of no use.
+`live()` は `GET()` の外側に置きます。
+`GET()` は読み取りのトランスポートを選択し、`live()` はその呼び出し動作を包むため、最も外側の宣言である必要があります。
+`live()` は `GET()` を意味しません。これなしの live ソースは `POST` 経由でストリームしますが、キャッシュ可能な URL が不要ならそれで問題ありません。
 
-The source yields the current count first, every time it is invoked.
-That is the contract a reconnect depends on: when the connection drops and the client calls again, the first yield replaces the stale answer, and no client-side cache is needed to fill the gap.
+このソースは呼び出されるたびに、まず現在のカウントを yield します。
+これが再接続が依存する契約です: 接続が切れてクライアントが再度呼び出したとき、最初の yield が古い回答を置き換えるため、空白を埋めるクライアント側キャッシュは不要です。
 
-## Read a live source reactively
+## live ソースをリアクティブに読み取る
 
-Pass the returned async iterable through an async computation:
+返された非同期イテラブルを非同期計算に渡します:
 
 ```tsx
 // src/pages/Product.tsx
@@ -166,14 +166,14 @@ function Stock(props: { productId: string }) {
 }
 ```
 
-Open the product in two browser windows and buy one from the first.
-The count in the second window changes without a reload.
+商品を 2 つのブラウザウィンドウで開き、最初のウィンドウで 1 点購入します。
+2 番目のウィンドウのカウントはリロードなしで変化します。
 
-The first value can suspend the computation, so a `Loading` boundary above the read decides what shows until it arrives.
-During server-side rendering, Solid renders the first value and hands subsequent work to the browser.
+最初の値は計算をサスペンドさせる可能性があるため、読み取りの上にある `Loading` バウンダリが、値が届くまで何を表示するかを決めます。
+サーバーサイドレンダリングでは、Solid は最初の値をレンダーし、以降の処理をブラウザに引き渡します。
 
-One iteration is one connection.
-When several parts of the tree show the same stock level, hoist the memo and pass the value down:
+1 つのイテレーションは 1 つの接続です。
+ツリーの複数箇所が同じ在庫数を表示する場合は、メモをホイストして値を下に渡します:
 
 ```tsx
 // Avoid: each component opens its own connection to the same source
@@ -204,11 +204,11 @@ function Product(props: { productId: string }) {
 }
 ```
 
-The `Avoid` version holds two open streams for one product, and each reconnects on its own when the network blips.
+`Avoid` 版は 1 つの商品に対して 2 つの開いたストリームを保持し、ネットワークが瞬断したときにそれぞれが個別に再接続します。
 
-## Observe connection status
+## 接続ステータスを監視する
 
-The returned iterable has an optional `onstatus` callback for the facts the reconnect loop removes from the value stream:
+返されるイテラブルには、再接続ループが値ストリームから取り除く情報を受け取る任意の `onstatus` コールバックがあります:
 
 ```tsx
 import { createMemo, createSignal } from "solid-js";
@@ -221,59 +221,59 @@ source.onstatus = (next) => setStatus(next);
 const count = createMemo(() => source);
 ```
 
-The callback receives:
+コールバックが受け取る値:
 
-- `"connected"` after each successful connection.
-- `"reconnecting"` when a connected stream fails and the client starts retrying.
-- `"closed"` when the source completes, the consumer ends iteration, or a definite rejection closes the source.
+- `"connected"`: 接続が成功するたび。
+- `"reconnecting"`: 接続済みのストリームが失敗し、クライアントがリトライを開始したとき。
+- `"closed"`: ソースが完了したとき、消費者がイテレーションを終了したとき、または確定的な拒否でソースが閉じたとき。
 
-Show "reconnecting" next to the count when the user should know the number may be behind.
-Put data freshness in the yielded value itself, such as a timestamp, when the UI needs to say how old the number is; the connection status is a transport fact and says nothing about the data.
+数値が遅れている可能性をユーザーに知らせたいときは、カウントの横に「再接続中」を表示します。
+数値がどれくらい古いかを UI が示す必要がある場合は、タイムスタンプなどのデータの鮮度を yield 値自体に入れます。接続ステータスはトランスポート上の事実であり、データについては何も語りません。
 
-:::deep-dive[What retries and what does not]
-A failure before the first connection rejects like a normal server-function call, so a wrong id or a missing session surfaces where the call was made.
-After a connection has succeeded, a failure retries with exponential backoff, and a healthy value resets the backoff.
-A 4xx response is a definite rejection: the server understood the request and refused it, so retrying would not help, and the source fires `"closed"` with the error and rejects the consumer.
-The exceptions are the statuses that ask for a retry, 408, 425, and 429, and any response carrying `Retry-After`; those reconnect like a 5xx after the named wait.
-A live source updates through its open stream, so it takes no part in router revalidation or single-flight mutation data.
+:::deep-dive[リトライするものとしないもの]
+最初の接続前の失敗は通常のサーバー関数呼び出しと同様に reject されるため、誤った id やセッション欠如は呼び出し箇所で表面化します。
+接続が一度成功した後の失敗は指数バックオフでリトライされ、正常な値がバックオフをリセットします。
+4xx レスポンスは確定的な拒否です: サーバーはリクエストを理解した上で拒否したため、リトライしても意味がなく、ソースはエラーとともに `"closed"` を発火して消費者を reject します。
+例外はリトライを求めるステータス 408・425・429 と、`Retry-After` を伴うすべてのレスポンスです。これらは指定された待機時間の後に 5xx と同様に再接続します。
+live ソースは開いているストリーム経由で更新されるため、ルーターの再検証やシングルフライトのミューテーションデータには参加しません。
 :::
 
-## Common problems
+## よくある問題
 
-### `Method not allowed for server function` in the server log, status 405
+### サーバーログに `Method not allowed for server function`、ステータス 405
 
-Something sent a `GET` or `HEAD` request to a function that was not declared with `GET()`.
-Link checkers and prefetchers do this to any URL they find.
-Declare the function with `GET()` when it is a safe read; leave the 405 in place when it is not.
+`GET()` で宣言されていない関数に `GET` または `HEAD` リクエストが送られました。
+リンクチェッカーやプリフェッチャーは、見つけたすべての URL に対してこれを行います。
+安全な読み取りなら関数を `GET()` で宣言し、そうでなければ 405 のままにします。
 
-### The read is never served from the cache
+### 読み取りがキャッシュから配信されない
 
-Three things must line up: the function is declared with `GET()`, the response sets a `Cache-Control` header other than the default `no-store`, and the encoded URL fits under the transport's length limit.
-A read with a large argument, such as a long filter object, falls back to `POST` and misses the cache without an error.
+3 つの条件が揃う必要があります: 関数が `GET()` で宣言されている、レスポンスがデフォルトの `no-store` 以外の `Cache-Control` ヘッダーを設定している、そしてエンコード後の URL がトランスポートの長さ制限に収まっている。
+長いフィルターオブジェクトのような大きな引数を持つ読み取りは `POST` にフォールバックし、エラーなしでキャッシュを外します。
 
-### The network tab shows two open streams for one product
+### ネットワークタブに 1 つの商品で 2 つの開いたストリームが表示される
 
-Two components each called `stockLevel(id)`, and every call site that invokes a live source holds its own connection and reconnects on its own.
-Hoist the memo to the nearest common parent and pass the value down, as in [Read a live source reactively](#read-a-live-source-reactively).
+2 つのコンポーネントがそれぞれ `stockLevel(id)` を呼んでいます。live ソースを呼び出すすべての呼び出し箇所は、独自の接続を保持して個別に再接続します。
+[live ソースをリアクティブに読み取る](#read-a-live-source-reactively)と同様に、メモを最も近い共通の親にホイストして値を下に渡してください。
 
-### A live source stops after a network error and never comes back
+### live ソースがネットワークエラー後に停止して戻らない
 
-The failure was a 4xx, which the client treats as a definite rejection, or it happened before the first connection ever succeeded.
-Check the server log for the status: the client retries only transient failures after a successful connection, and a refused request needs a fix on the request rather than a wait.
+その失敗はクライアントが確定的な拒否として扱う 4xx だったか、最初の接続が一度も成功する前に起きたものです。
+サーバーログでステータスを確認してください: クライアントがリトライするのは接続成功後の一時的な失敗だけであり、拒否されたリクエストには待機ではなくリクエスト側の修正が必要です。
 
-## Recap
+## まとめ
 
-- Declare a read with `GET()` when it is safe and idempotent and is called outside Solid Router's `query()`; `query()` declares it for you.
-- A `GET()` read puts its arguments in the URL; keep secrets out of them and read identity from the request event.
-- Responses leave with `Cache-Control: no-store`; return `respond(value, { headers })` to opt a read into caching.
-- Return an async iterable to stream events over one connection; ending the iteration in the browser ends the server producer.
-- Declare a value that changes over time with `live(GET(fn))`, `live()` outermost, and yield the current value first on every invocation.
-- Read a live source through one memo and pass the value down; each call site that invokes the source opens its own connection.
-- Use `onstatus` to show a reconnect; put data freshness in the yielded value.
+- 安全で冪等で、かつ Solid Router の `query()` の外で呼ばれる読み取りには `GET()` で宣言します。`query()` は宣言を代行します。
+- `GET()` 読み取りは引数を URL に入れます。シークレットは引数に入れず、リクエストイベントから識別情報を読み取ります。
+- レスポンスは `Cache-Control: no-store` で送出されます。`respond(value, { headers })` を返して読み取りをキャッシュ対象にします。
+- 非同期イテラブルを返すとイベントを 1 つの接続でストリームできます。ブラウザでイテレーションを終了するとサーバーのプロデューサーも終了します。
+- 時間とともに変化する値は `live(GET(fn))` で宣言します。`live()` を最外側にし、呼び出しのたびに最初に現在値を yield します。
+- live ソースは 1 つのメモを通して読み、値を下に渡します。ソースを呼び出す各呼び出し箇所は独自の接続を開きます。
+- 再接続の表示には `onstatus` を使い、データの鮮度は yield 値に入れます。
 
-## Next steps
+## 次のステップ
 
-- [Arguments and security](/building-apps/server-functions/arguments-and-security): what a caller can put in a read's arguments, and why the read must validate them.
-- [Async reactivity](/concepts/async-reactivity): what the product page shows while a `GET()` read or a live source has not answered yet.
-- [Data fetching patterns](/guides/data-fetching-patterns): search as you type, pagination, and keeping data fresh, with these reads underneath.
-- [Data loading and mutations](/routing/solid-router/data): wrapping reads in `query()` for caching and route preloading with Solid Router.
+- [引数とセキュリティ](/building-apps/server-functions/arguments-and-security): 呼び出し元が読み取りの引数に何を入れられるか、そしてなぜ読み取りがそれらを検証しなければならないか。
+- [非同期リアクティビティ](/concepts/async-reactivity): `GET()` 読み取りや live ソースがまだ回答していない間に商品ページが何を表示するか。
+- [データ取得パターン](/guides/data-fetching-patterns): これらの読み取りを土台にした、入力中検索・ページネーション・データの鮮度維持。
+- [データロードとミューテーション](/routing/solid-router/data): Solid Router でのキャッシュとルートプリロードのために読み取りを `query()` でラップする。
