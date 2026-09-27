@@ -1,22 +1,22 @@
 ---
-title: "Custom primitives"
+title: "カスタムプリミティブ"
 version: "2.0"
-description: "Move repeated reactive setup into a createX function that runs inside an owner, accepts accessors, returns accessors, cleans up what it starts, and stays correct during server rendering."
+description: "繰り返し登場するリアクティブなセットアップを、オーナーの内側で実行され、アクセサーを受け取り、アクセサーを返し、開始したものをクリーンアップし、サーバーレンダリング中も正しく動作する createX 関数に移す。"
 ---
 
-The catalog page debounces its search query before it calls `searchProducts`.
-The orders page switches from a table to cards below a viewport width.
-The checkout page keeps a cart draft in `localStorage` so a refresh does not lose it.
-Each of those is a signal, a timer or a listener, and a cleanup, and the same six lines now sit in three components with small differences between them.
+カタログページは `searchProducts` を呼ぶ前に検索クエリをデバウンスします。
+注文ページはビューポート幅を下回るとテーブルからカードへ切り替わります。
+チェックアウトページはカートの下書きを `localStorage` に保持し、リフレッシュしても失われないようにしています。
+これらはどれも、シグナルとタイマーまたはリスナー、そしてクリーンアップの組み合わせであり、ほぼ同じ 6 行が細かな違いだけの 3 つのコンポーネントに置かれています。
 
-A custom primitive is a function that packages those lines: it creates signals, memos, and effects, and returns what the component needs to read.
-Solid has no rules about where such a function may be called beyond the ones every primitive already follows, and this guide is about those rules.
-The [Reactivity](/concepts/reactivity) page explains tracking, effects, and ownership; this page assumes them.
+カスタムプリミティブとは、そうした行をひとまとめにする関数です。シグナル・メモ・エフェクトを作成し、コンポーネントが読み取る必要のあるものを返します。
+そのような関数をどこで呼んでもよいかについて、Solid にはすべてのプリミティブがすでに従っているルール以外の決まりはありません。このガイドはそのルールについてのものです。
+追跡・エフェクト・オーナーシップについては [リアクティビティ](/concepts/reactivity) ページで説明しています。このページはそれらを前提とします。
 
-## A primitive is a function that runs inside an owner
+## プリミティブはオーナーの内側で実行される関数
 
-Start with the debounce.
-The search box should not call the server on every keystroke, so the query signal should change only after typing pauses:
+まずデバウンスから始めます。
+検索ボックスはキーストロークごとにサーバーを呼ぶべきではないので、クエリのシグナルはタイピングが止まってからだけ変わるようにします。
 
 ```ts
 import { createSignal, onCleanup } from "solid-js";
@@ -61,16 +61,16 @@ function SearchBox() {
 }
 ```
 
-Type `mug` and one request starts, 150 milliseconds after the last keystroke; `results` never sees `m` or `mu`.
-Navigate away while a timer is pending and the timer is cleared.
+`mug` と入力すると、最後のキーストロークから 150 ミリ秒後にリクエストが 1 回開始されます。`results` が `m` や `mu` を見ることはありません。
+タイマーが保留中にページを離れると、タイマーはクリアされます。
 
-The primitive works because of where it is called.
-`SearchBox` runs once, and while it runs, Solid records the component as the current owner.
-`onCleanup` attaches to whatever owner is current, so the cleanup belongs to `SearchBox` and runs when it is disposed.
-[Ownership](/concepts/reactivity#ownership) explains the owner tree; the rule for primitives is that a `createX` function is called in a component body, or in another primitive that is, and never later.
-Within the body it is a plain function call: inside an `if`, inside a loop, or after an early return, because there is no second run whose call order has to match the first.
+このプリミティブが機能するのは、呼び出される場所のおかげです。
+`SearchBox` は一度だけ実行され、その実行中、Solid はそのコンポーネントを現在のオーナーとして記録します。
+`onCleanup` はその時点のオーナーに取り付けられるため、このクリーンアップは `SearchBox` に属し、それが破棄されるときに実行されます。
+オーナーツリーについては [オーナーシップ](/concepts/reactivity#ownership) で説明しています。プリミティブのルールは、`createX` 関数はコンポーネント本体、あるいはそこから呼ばれる別のプリミティブの中で呼び出され、それより後で呼ばれることはない、というものです。
+本体の内側では単なる関数呼び出しです。`if` の中でもループの中でも、早期リターンの後でも構いません。最初の実行と呼び出し順が一致しなければならない 2 回目の実行は存在しないからです。
 
-:::pitfall[Calling a primitive from an event handler]
+:::pitfall[イベントハンドラーからプリミティブを呼び出す]
 
 ```tsx
 // Avoid: a new signal and a new cleanup on every keystroke, owned by nothing
@@ -86,15 +86,15 @@ const [query, setQuery] = createDebouncedSignal("", 150);
 <input onInput={(event) => setQuery(event.currentTarget.value)} />;
 ```
 
-Each keystroke of the `Avoid` version creates a signal that nothing reads, and development warns `[NO_OWNER_CLEANUP] onCleanup called outside a reactive context will never be run`.
-An effect created the same way warns `[NO_OWNER_EFFECT] Effects created outside a reactive context will never be disposed`, and runs for the life of the page.
-If a primitive should start in response to an event, create it in the body and gate it on a signal the handler sets.
+`Avoid` 側ではキーストロークごとに誰も読み取らないシグナルが作られ、開発ビルドは `[NO_OWNER_CLEANUP] onCleanup called outside a reactive context will never be run` と警告します。
+同じ方法で作られたエフェクトは `[NO_OWNER_EFFECT] Effects created outside a reactive context will never be disposed` と警告され、ページの存続期間中ずっと実行され続けます。
+イベントに応じてプリミティブを開始したい場合は、本体で作成し、ハンドラーがセットするシグナルでゲートしてください。
 :::
 
-## Clean up what you start
+## 開始したものはクリーンアップする
 
-The orders page shows a table on wide screens and a card list otherwise.
-A media query listener is the kind of thing a primitive should own, because the listener has to be removed when the page goes away:
+注文ページは広い画面ではテーブルを、それ以外ではカードリストを表示します。
+メディアクエリのリスナーはプリミティブが所有すべき種類のものです。ページが離れるときにリスナーを削除しなければならないからです。
 
 ```ts
 import { createSignal, onSettled } from "solid-js";
@@ -125,27 +125,27 @@ function Orders() {
 }
 ```
 
-Resize the window across 60rem and the page switches between the table and the cards.
-Leave the page and the `change` listener is removed.
+ウィンドウを 60rem をまたいでリサイズすると、ページはテーブルとカードを切り替えます。
+ページを離れると `change` リスナーは削除されます。
 
-[`onSettled`](/reference/solid-js/lifecycle-actions/on-settled) runs its callback once, after the component's first render has settled, and the cleanup the callback returns runs when the owner is disposed.
-It is the home for setup that touches the browser, because the callback does not run during server rendering.
-`matches` starts as `false` on both sides, so the server renders the cards and the browser switches to the table after hydration if the query matches.
-The [SSR-safe code](/guides/ssr-safe-code) guide covers what to do when that first frame matters.
+[`onSettled`](/reference/solid-js/lifecycle-actions/on-settled) は、コンポーネントの最初のレンダーが確定した後にコールバックを一度だけ実行し、コールバックが返すクリーンアップはオーナーが破棄されるときに実行されます。
+ブラウザに触れるセットアップの置き場所はここです。コールバックはサーバーレンダリング中に実行されないからです。
+`matches` は両側で `false` で始まるため、サーバーはカードをレンダーし、ブラウザはクエリが一致すればハイドレーション後にテーブルへ切り替わります。
+その最初のフレームが重要な場合の対処は [SSR セーフなコード](/guides/ssr-safe-code) ガイドで扱っています。
 
-Use [`onCleanup`](/reference/solid-js/advanced/specialized-reactivity/on-cleanup) when there is nothing to set up after render and only something to release, as the debounce did with its timer.
-It registers a callback on the current owner and nothing else.
+レンダー後にセットアップするものがなく、解放するだけでよい場合は、デバウンスがタイマーに対して行ったように [`onCleanup`](/reference/solid-js/advanced/specialized-reactivity/on-cleanup) を使います。
+これは現在のオーナーにコールバックを登録するだけで、それ以外のことはしません。
 
-:::caution[Return the cleanup from onSettled; do not register one inside it]
-Inside an `onSettled` callback, `onCleanup` throws `[CLEANUP_IN_FORBIDDEN_SCOPE] Cannot use onCleanup inside createTrackedEffect or onSettled; return a cleanup function instead`.
-The same callback may not create signals, memos, or effects; development throws `[PRIMITIVE_IN_FORBIDDEN_SCOPE]`.
-Create primitives in the body of the `createX` function, and use the callback for the imperative setup and its returned teardown.
+:::caution[クリーンアップは onSettled から返す。内側で登録しない]
+`onSettled` コールバックの内側で `onCleanup` を呼ぶと `[CLEANUP_IN_FORBIDDEN_SCOPE] Cannot use onCleanup inside createTrackedEffect or onSettled; return a cleanup function instead` がスローされます。
+同じコールバック内でシグナル・メモ・エフェクトを作成することもできません。開発ビルドは `[PRIMITIVE_IN_FORBIDDEN_SCOPE]` をスローします。
+プリミティブは `createX` 関数の本体で作成し、コールバックは命令的なセットアップと、それが返すティアダウンのために使ってください。
 :::
 
-## Accept accessors or values
+## アクセサーまたは値を受け取る
 
-`createMediaQuery("(min-width: 60rem)")` takes a string, and a string is fine while the query is a constant.
-The moment the query comes from a prop or a signal, a plain parameter freezes it:
+`createMediaQuery("(min-width: 60rem)")` は文字列を受け取ります。クエリが定数である間は文字列で問題ありません。
+クエリが prop やシグナルから来るようになった瞬間、単純なパラメータはそれを固定してしまいます。
 
 ```tsx
 // Avoid: props.breakpoint is read once, when the body runs
@@ -155,10 +155,10 @@ const wide = createMediaQuery(props.breakpoint);
 const wide = createMediaQuery(() => props.breakpoint);
 ```
 
-Run the `Avoid` version and change `breakpoint` in the parent: `wide` keeps answering for the first query, and development warns `[STRICT_READ_UNTRACKED]` with the component name, because a prop read in the component body is a one-time read.
+`Avoid` 側を実行して親で `breakpoint` を変更すると、`wide` は最初のクエリに答え続け、開発ビルドはコンポーネント名とともに `[STRICT_READ_UNTRACKED]` と警告します。コンポーネント本体での prop の読み取りは一度きりの読み取りだからです。
 
-The `Prefer` version needs the primitive to accept either shape.
-The pattern is a `MaybeAccessor<T>` parameter and an `access` helper that unwraps it:
+`Prefer` 側にするには、プリミティブがどちらの形も受け取れる必要があります。
+そのパターンは、`MaybeAccessor<T>` パラメータと、それを展開する `access` ヘルパーです。
 
 ```ts
 import { createEffect, createSignal, type Accessor } from "solid-js";
@@ -188,20 +188,20 @@ export function createMediaQuery(query: MaybeAccessor<string>) {
 }
 ```
 
-Change `breakpoint` in the parent and the old listener is removed, a new `MediaQueryList` is created for the new query, and `wide` answers for it.
+親で `breakpoint` を変更すると、古いリスナーは削除され、新しいクエリ用の `MediaQueryList` が作成され、`wide` はそれに答えます。
 
-The setup moved from `onSettled` into [`createEffect`](/reference/solid-js/reactivity/create-effect) because the input can now change.
-The compute function reads the input, the effect function does the browser work and returns its cleanup, and Solid runs that cleanup before the next effect run and on disposal.
-Like `onSettled`, the effect function does not run during server rendering.
-[`Accessor<T>`](/reference/solid-js/types/reactive-types) is the type of a signal getter and of any `() => T`, so a caller can pass a signal, a memo, or an arrow function over props.
+入力が変わり得るようになったため、セットアップは `onSettled` から [`createEffect`](/reference/solid-js/reactivity/create-effect) に移りました。
+計算関数が入力を読み取り、エフェクト関数がブラウザでの処理を行ってそのクリーンアップを返します。Solid は次のエフェクト実行の前と破棄時にそのクリーンアップを実行します。
+`onSettled` と同様、エフェクト関数はサーバーレンダリング中に実行されません。
+[`Accessor<T>`](/reference/solid-js/types/reactive-types) はシグナルのゲッターや任意の `() => T` の型なので、呼び出し側はシグナル、メモ、または props を参照するアロー関数を渡せます。
 
-Take a plain `T` only for a value the primitive reads once by design, such as `initial` in `createDebouncedSignal`.
-Name such parameters so that the one-time read is visible.
+単純な `T` を受け取るのは、`createDebouncedSignal` の `initial` のように、プリミティブが設計上一度だけ読み取る値に限ってください。
+そのようなパラメータには、一度きりの読み取りであることが分かる名前を付けてください。
 
-## Return accessors, not values
+## 値ではなくアクセサーを返す
 
-The same rule applies on the way out.
-A primitive returns something the caller reads inside a tracking scope:
+同じルールが戻り値にも適用されます。
+プリミティブは、呼び出し側が追跡スコープの内側で読み取るものを返します。
 
 ```ts
 // Avoid: the boolean is read here, in the component body, once
@@ -211,17 +211,17 @@ return matches();
 return matches;
 ```
 
-The `Avoid` version returns `false` forever, and development warns `[STRICT_READ_UNTRACKED]` at the return.
-The `Prefer` version returns a function, and `wide()` in the JSX subscribes the JSX to the signal.
+`Avoid` 側は永遠に `false` を返し、開発ビルドはその return で `[STRICT_READ_UNTRACKED]` と警告します。
+`Prefer` 側は関数を返し、JSX 内の `wide()` がその JSX をシグナルに購読させます。
 
-Return a tuple, `[value, setValue] as const`, when the primitive is a signal with extra behavior, so callers destructure it the way they destructure `createSignal`.
-Return an object of accessors and functions, as `createCart` does in [Share state between components](/concepts/reactivity#share-state-between-components), when there are several values or actions.
-A store proxy is already a live view, so a primitive can return a store as it is.
+プリミティブが追加の振る舞いを持つシグナルである場合は `[value, setValue] as const` というタプルを返し、呼び出し側が `createSignal` と同じように分割代入できるようにします。
+値やアクションが複数ある場合は、[コンポーネント間で状態を共有する](/concepts/reactivity#share-state-between-components) で `createCart` が行っているように、アクセサーと関数のオブジェクトを返します。
+ストアのプロキシはすでにライブビューなので、プリミティブはストアをそのまま返すことができます。
 
-## Async inside a primitive
+## プリミティブ内の非同期
 
-A primitive may return a memo whose function returns a promise.
-The product page and the cart both need a product by id, so wrap the server function once:
+プリミティブは、関数が Promise を返すメモを返すことができます。
+商品ページもカートも id で商品を必要とするので、サーバー関数を一度だけラップします。
 
 ```ts
 import { createMemo } from "solid-js";
@@ -245,18 +245,18 @@ function ProductTitle(props: { id: string }) {
 }
 ```
 
-The first read of `product()` shows the `Loading` fallback until `getProduct` resolves.
-Change `props.id` and the current name stays on screen while the next product loads.
+最初の `product()` の読み取りは、`getProduct` が解決するまで `Loading` のフォールバックを表示します。
+`props.id` を変更しても、次の商品が読み込まれる間、現在の名前は画面に残ります。
 
-Nothing about the primitive is async-specific.
-The memo is created under the component's owner, and the caller's JSX reads it, so the nearest `Loading` boundary above that read is the one that responds.
-[Async reactivity](/concepts/async-reactivity) explains the first load, the held update, and `isPending`.
-For a list whose items should keep their identity across refetches, return the function form of `createStore` instead; [Fetch into a store](/concepts/stores#fetch-into-a-store) shows it.
+このプリミティブに非同期特有の部分はありません。
+メモはコンポーネントのオーナーの下で作成され、呼び出し側の JSX がそれを読み取るため、その読み取りの上にある最も近い `Loading` バウンダリが応答します。
+最初の読み込み・保留される更新・`isPending` については [非同期リアクティビティ](/concepts/async-reactivity) で説明しています。
+再取得をまたいで項目の同一性を保つべきリストには、代わりに `createStore` の関数形式を返してください。[ストアへのフェッチ](/concepts/stores#fetch-into-a-store) でその方法を示しています。
 
-## Sync with something outside Solid
+## Solid の外部と同期する
 
-The cart draft has to survive a refresh, so it lives in a store and in `localStorage` at the same time.
-Reading storage is setup after render; writing it is an effect at the boundary where Solid's state leaves Solid:
+カートの下書きはリフレッシュを越えて残る必要があるため、ストアと `localStorage` の両方に置きます。
+ストレージの読み取りはレンダー後のセットアップです。書き込みは、Solid の状態が Solid の外に出る境界にあるエフェクトです。
 
 ```ts
 import { createEffect, createStore, deep, onSettled } from "solid-js";
@@ -285,21 +285,21 @@ export function createCartDraft() {
 }
 ```
 
-Add a mug, refresh, and the mug is still in the cart.
+マグを追加してリフレッシュしても、マグはまだカートに残っています。
 
-`onSettled` reads storage once, after hydration, and writes the saved items into the store through the setter's draft.
-[`deep`](/reference/solid-js/advanced/store-advanced/deep) subscribes the compute function to every level of the store and returns its plain view, so any change to any item re-runs the effect.
-`defer: true` skips the effect's first run, so the empty seed is never written to storage; only changes are.
+`onSettled` はハイドレーション後にストレージを一度だけ読み取り、保存されていた項目をセッターのドラフト経由でストアに書き込みます。
+[`deep`](/reference/solid-js/advanced/store-advanced/deep) は計算関数をストアのすべての階層に購読させ、そのプレーンなビューを返すため、どの項目を変更してもエフェクトが再実行されます。
+`defer: true` はエフェクトの最初の実行をスキップするため、空のシード値がストレージに書き込まれることはなく、変更だけが書き込まれます。
 
-Neither the `onSettled` callback nor the effect function runs during server rendering.
-The server renders an empty cart, and the browser fills the draft in after hydration.
-For a check the body itself has to make, [`isServer`](/reference/solid-web/rendering-ssr/is-server) from `@solidjs/web` is a build-time constant, `true` in the server build and `false` in the browser build.
-The [SSR-safe code](/guides/ssr-safe-code) guide covers the cases where the two sides render different first frames.
+`onSettled` コールバックもエフェクト関数も、サーバーレンダリング中には実行されません。
+サーバーは空のカートをレンダーし、ブラウザはハイドレーション後に下書きを埋めます。
+本体自身が行わなければならないチェックには、`@solidjs/web` の [`isServer`](/reference/solid-web/rendering-ssr/is-server) を使います。これはビルド時定数で、サーバービルドでは `true`、ブラウザビルドでは `false` です。
+両側で最初のフレームが異なる場合については [SSR セーフなコード](/guides/ssr-safe-code) ガイドで扱っています。
 
-## Run outside a component
+## コンポーネントの外で実行する
 
-Sometimes the work a primitive starts finishes after the body has returned.
-The account page loads its analytics module on demand, and the effect that reports page views can only be created once the module has arrived, from a promise callback that has no owner:
+プリミティブが開始した処理が、本体が返った後に終わることがあります。
+アカウントページはアナリティクスモジュールをオンデマンドで読み込み、ページビューを報告するエフェクトはモジュールが到着してから、オーナーを持たない Promise コールバックの中でしか作成できません。
 
 ```ts
 import {
@@ -328,13 +328,13 @@ export function createPageViews(path: Accessor<string>) {
 }
 ```
 
-Navigate within the account area and each path is reported once the module has loaded; leave the account area before it loads and nothing is created.
+アカウント領域内を移動すると、モジュールの読み込み後に各パスが報告されます。読み込み前にアカウント領域を離れた場合は何も作成されません。
 
-[`getOwner`](/reference/solid-js/advanced/owner-introspection/get-owner) captures the component's owner while the body runs.
-[`runWithOwner`](/reference/solid-js/advanced/owner-introspection/run-with-owner) re-enters it later, so the effect created in the callback is disposed with the component.
-[`isDisposed`](/reference/solid-js/advanced/owner-introspection/is-disposed) guards the callback against a component that has already left the page.
+[`getOwner`](/reference/solid-js/advanced/owner-introspection/get-owner) は本体の実行中にコンポーネントのオーナーを捕捉します。
+[`runWithOwner`](/reference/solid-js/advanced/owner-introspection/run-with-owner) は後からそのオーナーに再入するため、コールバック内で作成されたエフェクトはコンポーネントとともに破棄されます。
+[`isDisposed`](/reference/solid-js/advanced/owner-introspection/is-disposed) は、すでにページを離れたコンポーネントに対してコールバックをガードします。
 
-When there is no component at all, [`createRoot`](/reference/solid-js/advanced/owner-introspection/create-root) creates an owner and hands back its disposer:
+コンポーネントがまったく存在しない場合、[`createRoot`](/reference/solid-js/advanced/owner-introspection/create-root) がオーナーを作成し、その破棄関数を返します。
 
 ```ts
 import { createRoot } from "solid-js";
@@ -348,47 +348,47 @@ const dispose = createRoot((dispose) => {
 dispose();
 ```
 
-Use it in a test of the primitive itself, or in an integration that hosts Solid reactivity in code that has no `render` call.
-Application code should not need it; state that several components share belongs in [context](/concepts/components-and-jsx#context), not in a root at module scope.
+これはプリミティブ自体のテストや、`render` 呼び出しのないコードに Solid のリアクティビティを組み込むインテグレーションで使います。
+アプリケーションコードで必要になることはないはずです。複数のコンポーネントが共有する状態はモジュールスコープのルートではなく [コンテキスト](/concepts/components-and-jsx#context) に置きます。
 
-## Common problems
+## よくある問題
 
-### The effect inside my primitive runs, but its cleanup never does
+### プリミティブ内のエフェクトは実行されるがクリーンアップが実行されない
 
-The primitive was called from an event handler, a promise callback, or a `ref` callback, none of which has an owner.
-Development warns `[NO_OWNER_EFFECT]` or `[NO_OWNER_CLEANUP]` at the call.
-Call the primitive in the component body, or capture the owner with `getOwner` and re-enter it with `runWithOwner`.
+プリミティブがイベントハンドラー・Promise コールバック・`ref` コールバックのいずれかから呼び出されました。これらにはオーナーがありません。
+開発ビルドは呼び出し時に `[NO_OWNER_EFFECT]` または `[NO_OWNER_CLEANUP]` と警告します。
+プリミティブはコンポーネント本体で呼び出すか、`getOwner` でオーナーを捕捉して `runWithOwner` で再入してください。
 
-### `onCleanup` throws inside `onSettled`
+### `onSettled` の内側で `onCleanup` がスローされる
 
-`onSettled` callbacks may not register cleanups or create primitives; development throws `[CLEANUP_IN_FORBIDDEN_SCOPE]` or `[PRIMITIVE_IN_FORBIDDEN_SCOPE]`.
-Return the cleanup function from the callback, and create signals and effects in the body of the primitive.
+`onSettled` コールバックはクリーンアップを登録したりプリミティブを作成したりできません。開発ビルドは `[CLEANUP_IN_FORBIDDEN_SCOPE]` または `[PRIMITIVE_IN_FORBIDDEN_SCOPE]` をスローします。
+クリーンアップ関数はコールバックから返し、シグナルとエフェクトはプリミティブの本体で作成してください。
 
-### The value the primitive returns never changes
+### プリミティブが返す値が変わらない
 
-Either the caller passed a plain value where the primitive reads it once, such as `createMediaQuery(props.breakpoint)`, or the primitive returned `matches()` instead of `matches`.
-Both read a reactive value in the component body, and development warns `[STRICT_READ_UNTRACKED]`.
-Pass `() => props.breakpoint`, and return the accessor.
+`createMediaQuery(props.breakpoint)` のように、プリミティブが一度だけ読み取る場所に呼び出し側が単純な値を渡したか、プリミティブが `matches` ではなく `matches()` を返したかのどちらかです。
+どちらもコンポーネント本体でリアクティブな値を読み取っており、開発ビルドは `[STRICT_READ_UNTRACKED]` と警告します。
+`() => props.breakpoint` を渡し、アクセサーを返してください。
 
-### The primitive works in the browser and crashes the server render
+### プリミティブはブラウザでは動くがサーバーレンダーをクラッシュさせる
 
-Setup that touches `window`, `matchMedia`, or `localStorage` is in the body of the primitive.
-Move it into an `onSettled` callback or an effect function, neither of which runs on the server, or guard it with `isServer`.
-The [SSR-safe code](/guides/ssr-safe-code) guide has the full checklist.
+`window`・`matchMedia`・`localStorage` に触れるセットアップがプリミティブの本体にあります。
+サーバーで実行されない `onSettled` コールバックかエフェクト関数に移すか、`isServer` でガードしてください。
+完全なチェックリストは [SSR セーフなコード](/guides/ssr-safe-code) ガイドにあります。
 
-## Recap
+## まとめ
 
-- Call a `createX` function in a component body or in another primitive, never in an event handler or a callback; primitives attach to the owner that is current when they run.
-- Register teardown where the setup is: `onCleanup` for something started in the body, a returned function from `onSettled` or an effect function for something started there.
-- Accept `MaybeAccessor<T>` and unwrap it inside a tracking scope; a plain parameter is a one-time read.
-- Return accessors, tuples of accessors, or a store; never the result of calling one.
-- Return an async memo as you would a sync one; the caller's `Loading` boundary handles the wait.
-- Read browser state in `onSettled`, write it in an effect function, and use `defer: true` when the first run should not write.
-- Capture the owner with `getOwner` and re-enter it with `runWithOwner` when a primitive must create something after an `await`.
+- `createX` 関数はコンポーネント本体か別のプリミティブの中で呼び出し、イベントハンドラーやコールバックでは決して呼び出さないでください。プリミティブは実行時の現在のオーナーに取り付けられます。
+- ティアダウンはセットアップがある場所に登録してください。本体で開始したものには `onCleanup` を、`onSettled` やエフェクト関数の中で開始したものにはそこから返す関数を使います。
+- `MaybeAccessor<T>` を受け取り、追跡スコープの内側で展開してください。単純なパラメータは一度きりの読み取りです。
+- アクセサー・アクセサーのタプル・ストアのいずれかを返してください。それを呼び出した結果を返してはいけません。
+- 非同期のメモも同期のものと同じように返してください。待機は呼び出し側の `Loading` バウンダリが処理します。
+- ブラウザの状態は `onSettled` で読み取り、エフェクト関数で書き込み、最初の実行で書き込むべきでない場合は `defer: true` を使ってください。
+- `await` の後で何かを作成しなければならないプリミティブでは、`getOwner` でオーナーを捕捉し、`runWithOwner` で再入してください。
 
-## Next steps
+## 次のステップ
 
-- [Avoid unnecessary effects](/guides/avoid-unnecessary-effects): which of the values a primitive returns should be memos, and when its effect is one that should not exist.
-- [Integrate non-Solid code](/guides/integrate-non-solid-code): the same owner and cleanup rules applied to charting libraries, maps, and web components.
-- [SSR-safe code](/guides/ssr-safe-code): the checklist for primitives whose first frame differs between server and browser.
-- [TypeScript](/guides/typescript): typing `Accessor`, `Setter`, and `MaybeAccessor` parameters and return values.
+- [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects): プリミティブが返す値のどれをメモにすべきか、そしてそのエフェクトが存在すべきでないものなのはどんなときか。
+- [Solid 以外のコードを統合する](/guides/integrate-non-solid-code): 同じオーナーとクリーンアップのルールを、チャートライブラリ・地図・Web コンポーネントに適用する。
+- [SSR セーフなコード](/guides/ssr-safe-code): サーバーとブラウザで最初のフレームが異なるプリミティブのためのチェックリスト。
+- [TypeScript](/guides/typescript): `Accessor`・`Setter`・`MaybeAccessor` のパラメータと戻り値の型付け。
