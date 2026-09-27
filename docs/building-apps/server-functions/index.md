@@ -1,15 +1,15 @@
 ---
-title: "Server functions"
+title: "サーバー関数"
 version: "2.0"
-description: 'Move a database query or a secret out of the browser by marking a function with "use server", and recognize what that call becomes on the wire.'
+description: '関数に "use server" を付けてデータベースクエリやシークレットをブラウザーから切り離し、その呼び出しが通信上でどう表現されるかを理解します。'
 ---
 
-The product page needs the product record.
-The record lives in a database, the database client needs a connection string, and neither the client nor the string can ship to the browser.
-The usual answer is a separate HTTP API: a route module, a fetch call, a type for the response, and two places to keep in step.
+商品ページには商品レコードが必要です。
+レコードはデータベースにあり、データベースクライアントには接続文字列が必要です。そしてクライアントも接続文字列もブラウザーに送ることはできません。
+通常の解決策は独立した HTTP API です。ルートモジュール、fetch 呼び出し、レスポンスの型、そして整合を保つべき 2 か所が必要になります。
 
-A server function is the same call without the second place.
-Add `"use server"` to the function, keep calling it from the component, and the build moves the body to the server and leaves a typed stub in the browser that makes the HTTP request for you.
+サーバー関数は、この 2 か所目をなくした同じ呼び出しです。
+関数に `"use server"` を追加し、コンポーネントからはこれまでどおり呼び出すだけで、ビルドが本体をサーバーへ移し、ブラウザーには HTTP リクエストを代行する型付きスタブを残します。
 
 ```ts
 // src/data/products.ts
@@ -38,16 +38,16 @@ export function Product(props: { id: string }) {
 }
 ```
 
-Open the network tab and load the page in the browser: the call is a `POST` to `/_server/data/<id>` whose body carries `["mug"]`, and the response carries the product as the function returned it.
-Search the client bundle for `database` and it is not there.
-The component did not change; `getProduct` returns a promise on both sides, so the [Async reactivity](/concepts/async-reactivity) rules apply to it unchanged.
+ブラウザーでページを読み込んでネットワークタブを開くと、その呼び出しは `/_server/data/<id>` への `POST` で、ボディには `["mug"]` が乗り、レスポンスには関数が返した商品がそのまま入っています。
+クライアントバンドルを `database` で検索しても、見つかりません。
+コンポーネントは変わりません。`getProduct` は両側で Promise を返すため、[非同期リアクティビティ](/concepts/async-reactivity)のルールがそのまま適用されます。
 
-Server functions work without a router.
-Solid Router's `query()` and `action()` add caching, submissions, and revalidation on top of them, and [Data loading and mutations](/routing/solid-router/data) covers that layer.
+サーバー関数はルーターなしでも動作します。
+Solid Router の `query()` と `action()` はその上にキャッシュ、送信、再検証を追加するもので、そのレイヤーは[データ読み込みとミューテーション](/routing/solid-router/data)で説明しています。
 
-## Enable server functions
+## サーバー関数を有効にする
 
-Turn on the transform with the `serverFunctions` option in start mode:
+start モードで `serverFunctions` オプションを使って変換を有効にします:
 
 ```ts
 // vite.config.ts
@@ -65,11 +65,11 @@ export default defineConfig({
 });
 ```
 
-The `solid-v2/fullstack` and `solid-v2/fullstack-tanstack` templates ship with this configuration.
+`solid-v2/fullstack` テンプレートと `solid-v2/fullstack-tanstack` テンプレートにはこの設定が同梱されています。
 
-## Declare a server function
+## サーバー関数を宣言する
 
-Add `"use server"` as the first statement of a function body:
+関数本体の最初の文として `"use server"` を追加します:
 
 ```ts
 export async function getProduct(id: string) {
@@ -78,11 +78,11 @@ export async function getProduct(id: string) {
 }
 ```
 
-The server build keeps the body and registers it under a stable id.
-The client build replaces the body with a reference that sends the arguments to the server-function endpoint and returns the decoded result.
-Imports used only inside the body, such as the database client or a validation schema, are removed from the client build along with it.
+サーバービルドは本体を保持し、安定した id で登録します。
+クライアントビルドは本体を、引数をサーバー関数エンドポイントに送ってデコード済みの結果を返す参照に置き換えます。
+データベースクライアントやバリデーションスキーマのように本体の中でだけ使われるインポートは、本体と一緒にクライアントビルドから取り除かれます。
 
-The body runs at module top level on the server, so it can use module-scope bindings and nothing in between:
+本体はサーバー上でモジュールのトップレベルとして実行されるため、使えるのはモジュールスコープのバインディングだけで、その中間にあるものにはアクセスできません:
 
 ```tsx
 // Avoid: the server function reads a variable from the component's scope
@@ -108,17 +108,17 @@ function AddToCart(props: { productId: string }) {
 }
 ```
 
-The `Avoid` version does not build.
-The compiler reports ``server functions cannot capture non-top-level variables: `productId` is declared in an enclosing function`` with the file and line, because the extracted body would read a variable that does not exist where it runs.
+`Avoid` の例はビルドに失敗します。
+コンパイラは ``server functions cannot capture non-top-level variables: `productId` is declared in an enclosing function`` というエラーをファイル名と行番号付きで報告します。抽出された本体が、実行される場所には存在しない変数を読もうとするためです。
 
-:::caution[The directive goes on a function, not a method]
-A `"use server"` string inside a class method, getter, or setter is not extracted, and the compiler rejects it with `a "use server" directive has no effect on a method`.
-Assign a function to a property, or declare the function at module level, when a class needs to call one.
+:::caution[ディレクティブはメソッドではなく関数に付ける]
+クラスのメソッド、ゲッター、セッターの中にある `"use server"` 文字列は抽出されず、コンパイラは `a "use server" directive has no effect on a method` で拒否します。
+クラスから呼び出す必要がある場合は、プロパティに関数を代入するか、モジュールレベルで関数を宣言してください。
 :::
 
-## Declare a server module
+## サーバーモジュールを宣言する
 
-Place the directive at the top of a module to make every export a server function:
+モジュールの先頭にディレクティブを置くと、すべてのエクスポートがサーバー関数になります:
 
 ```ts
 // src/data/catalog.ts
@@ -135,10 +135,10 @@ export async function countProducts() {
 }
 ```
 
-Each export must evaluate to a function.
-Named functions, default exports, aliases, and wrappers are fine; a non-function export stops the server while the module loads, with an error naming the export and stating that it `is not a function`.
+各エクスポートは関数として評価される必要があります。
+名前付き関数、default エクスポート、エイリアス、ラッパーは問題ありません。関数でないエクスポートがあると、モジュールの読み込み中にそのエクスポート名を挙げて `is not a function` と告げるエラーでサーバーが停止します。
 
-The whole module runs on the server, so closures inside it are intact and a wrapper applied at module scope becomes part of the registered implementation:
+モジュール全体がサーバーで実行されるため、その中のクロージャーはそのまま保たれ、モジュールスコープで適用されたラッパーは登録される実装の一部になります:
 
 ```ts
 // src/data/orders.ts
@@ -160,83 +160,83 @@ export const listOrders = withAccount(async (userId) => {
 });
 ```
 
-Call `listOrders()` without a session and the redirect fires, whether the call came over HTTP or from a server render.
+セッションなしで `listOrders()` を呼ぶと、その呼び出しが HTTP 経由でもサーバーレンダーからでも、リダイレクトが発火します。
 
-:::note[Two kinds of wrapper]
-A module-level wrapper such as `withAccount` runs inside the server implementation, so it applies to every call path.
-Declaration wrappers such as `GET()`, `live()`, and `withMeta()` wrap a function-level `"use server"` reference from the outside; they configure how the reference is called and never run server-side policy.
-[Arguments and security](/building-apps/server-functions/arguments-and-security#validate-caller-controlled-values) shows what that difference means for validation.
+:::note[2 種類のラッパー]
+`withAccount` のようなモジュールレベルのラッパーはサーバー側実装の内部で実行されるため、すべての呼び出し経路に適用されます。
+`GET()`、`live()`、`withMeta()` のような宣言ラッパーは、関数レベルの `"use server"` 参照を外側から包みます。これらは参照の呼び出され方を設定するもので、サーバーサイドのポリシーを実行することはありません。
+この違いがバリデーションにとって何を意味するかは、[引数とセキュリティ](/building-apps/server-functions/arguments-and-security#validate-caller-controlled-values)で説明しています。
 :::
 
-## What the call becomes
+## 呼び出しは何になるか
 
-In the browser, a call is an HTTP request to the server-function endpoint, `/_server` by default.
-The client runtime posts to `/_server/data/<id>` and reads the response through Solid's codec.
-The bare address, `/_server/<id>`, answers plain HTTP for everything that is not the client runtime: HTML form posts, and anything a person can type into a terminal.
+ブラウザーでは、呼び出しはサーバー関数エンドポイント（デフォルトでは `/_server`）への HTTP リクエストになります。
+クライアントランタイムは `/_server/data/<id>` に POST し、レスポンスを Solid のコーデックを通して読みます。
+素のアドレス `/_server/<id>` は、クライアントランタイム以外のすべて、つまり HTML フォームの POST や、ターミナルに人が打ち込めるあらゆるものに、通常の HTTP で応答します。
 
 ```bash
 curl -X POST 'https://shop.example/_server/<id>?args=%5B%22mug%22%5D' \
 	-H 'Origin: https://shop.example'
 ```
 
-That request runs `getProduct("mug")` and answers with the product as a JSON body.
-Every server function is reachable this way, which is why [Arguments and security](/building-apps/server-functions/arguments-and-security) treats every argument as untrusted.
+このリクエストは `getProduct("mug")` を実行し、商品を JSON ボディとして返します。
+すべてのサーバー関数がこの方法で到達可能です。だからこそ[引数とセキュリティ](/building-apps/server-functions/arguments-and-security)ではすべての引数を信頼できないものとして扱います。
 
-During server-side rendering, the same `getProduct(props.id)` call does not make an HTTP request.
-The implementation runs in the current server process under a request event derived from the page request, marked `serverOnly: true`, with a per-call copy of `locals`.
-The values middleware placed on `locals`, such as the signed-in user, are visible on both paths.
+サーバーサイドレンダリング中は、同じ `getProduct(props.id)` 呼び出しでも HTTP リクエストは発生しません。
+実装は現在のサーバープロセス内で、ページリクエストから派生した `serverOnly: true` のリクエストイベントのもと、呼び出しごとの `locals` のコピーとともに実行されます。
+サインイン済みユーザーなど、ミドルウェアが `locals` に置いた値は、どちらの経路でも見えます。
 
-:::deep-dive[Why there are two addresses]
-A shared cache stores one answer per URL.
-If the scripted and plain answers shared an address, a cached codec-encoded body could be replayed to a form post, or a plain JSON body to the client runtime.
-Putting the caller kind on the URL, `/data/<id>` against `/<id>`, keeps the two answer shapes in two cache entries.
-The `X-Server-Function-Instance` header the client runtime sends identifies the call for logging and the no-JavaScript convention; it does not decide the answer shape.
+:::deep-dive[アドレスが 2 つある理由]
+共有キャッシュは URL ごとに 1 つの応答を保存します。
+スクリプト経由の応答と通常の応答が同じアドレスを共有していると、キャッシュされたコーデックエンコード済みボディがフォーム POST に再生されたり、通常の JSON ボディがクライアントランタイムに返されたりする可能性があります。
+呼び出し元の種類を URL に載せること、すなわち `/data/<id>` と `/<id>` の区別で、2 つの応答形態が 2 つのキャッシュエントリに分かれます。
+クライアントランタイムが送る `X-Server-Function-Instance` ヘッダーは、ログ記録と JavaScript なし環境の規約のために呼び出しを識別するもので、応答の形態を決めるものではありません。
 :::
 
-## Common problems
+## よくある問題
 
-### The call resolves to a `Response` object instead of data
+### 呼び出しがデータではなく `Response` オブジェクトに解決される
 
-The function returned `redirect()` or `reload()`, and the caller was plain code rather than a router action.
-The client transport hands responses that carry navigation or revalidation metadata back whole, so the integration that owns navigation can apply them.
-Call the function through Solid Router's `action()`, or return a value and let the caller decide where to go; [Mutations and responses](/building-apps/server-functions/mutations-and-responses#redirect-the-caller) covers both.
+関数が `redirect()` または `reload()` を返し、呼び出し元がルーターのアクションではなく素のコードだった場合です。
+クライアントのトランスポートは、ナビゲーションや再検証のメタデータを持つレスポンスをそのまま呼び出し元に返します。ナビゲーションを所有するインテグレーションがそれを適用できるようにするためです。
+Solid Router の `action()` 経由で関数を呼び出すか、値を返して呼び出し元に行き先を決めさせてください。両方の方法を[ミューテーションとレスポンス](/building-apps/server-functions/mutations-and-responses#redirect-the-caller)で説明しています。
 
-### The build fails with `server functions cannot capture non-top-level variables`
+### ビルドが `server functions cannot capture non-top-level variables` で失敗する
 
-The function body reads a variable declared between module scope and the function, such as a component prop or a loop variable.
-Pass the value as an argument, or move the function to module scope.
+関数本体が、モジュールスコープと関数の間、たとえばコンポーネントの prop やループ変数の位置で宣言された変数を読んでいます。
+値を引数として渡すか、関数をモジュールスコープへ移してください。
 
-### The database import is in the browser bundle
+### データベースのインポートがブラウザーバンドルに含まれている
 
-The build removes an import only when nothing outside a `"use server"` body references it.
-A type import is free, but a value reference in the component, such as `database.products.count` used for a badge, keeps the whole module in the client build.
-Move that read into a server function, or put the import in a `"use server"` module so no client code can reach it.
+ビルドがインポートを取り除くのは、`"use server"` 本体の外でそれを参照するものが何もない場合だけです。
+型のインポートは問題になりませんが、バッジに使う `database.products.count` のようなコンポーネント内の値参照があると、モジュール全体がクライアントビルドに残ります。
+その読み取りをサーバー関数に移すか、インポートを `"use server"` モジュールに置いてクライアントコードから到達できないようにしてください。
 
-### The function body runs in the browser
+### 関数本体がブラウザーで実行される
 
-The `serverFunctions` option is off.
-Without the transform, `"use server"` is a string expression the engine evaluates and ignores, and the body runs wherever it is called.
-Check `vite.config.ts` against the [Enable server functions](#enable-server-functions) section.
+`serverFunctions` オプションがオフになっています。
+変換がなければ、`"use server"` はエンジンが評価して無視する文字列式にすぎず、本体は呼び出された場所でそのまま実行されます。
+`vite.config.ts` を[サーバー関数を有効にする](#enable-server-functions)の節と照らし合わせて確認してください。
 
-### `Cannot call server function outside of a request` on the server
+### サーバーで `Cannot call server function outside of a request` が出る
 
-Server code called the function with no request event in scope: a module-level call, a scheduled job, or a test that did not provide an event.
-The in-process call derives its event from the current request, so it needs one.
-Call the function from a render, a middleware, or another server function, or provide an event with [`provideRequestEvent`](/reference/solid-web/request-response/provide-request-event) in tests.
+リクエストイベントがスコープにない状態でサーバーコードが関数を呼びました。モジュールレベルの呼び出し、スケジュールされたジョブ、イベントを提供しなかったテストなどです。
+プロセス内呼び出しは現在のリクエストからイベントを派生させるため、リクエストが必要です。
+レンダー、ミドルウェア、別のサーバー関数から呼び出すか、テストでは [`provideRequestEvent`](/reference/solid-web/request-response/provide-request-event) でイベントを提供してください。
 
-## Recap
+## まとめ
 
-- Add `"use server"` as the first statement of a function, or at the top of a module to cover every export.
-- A server function may read its parameters, module-scope bindings, and globals; pass anything from a component scope as an argument.
-- Imports referenced only inside the body stay out of the client build; a reference outside the body keeps them in.
-- In the browser a call is `POST /_server/data/<id>`; the bare `/_server/<id>` answers plain HTTP for forms and scripts.
-- During server rendering the same call runs in-process under a `serverOnly` request event; no HTTP is involved.
-- Module-level wrappers run on every call path; `GET()`, `live()`, and `withMeta()` configure the reference and run no server-side policy.
-- Anyone can send a request to a server function, so validate and authorize inside the body.
+- 関数の最初の文として `"use server"` を追加するか、モジュールの先頭に置いてすべてのエクスポートを対象にします。
+- サーバー関数が読めるのは、そのパラメーター、モジュールスコープのバインディング、グローバルだけです。コンポーネントスコープの値は引数として渡してください。
+- 本体の中だけで参照されるインポートはクライアントビルドに含まれません。本体の外での参照があると残ります。
+- ブラウザーでの呼び出しは `POST /_server/data/<id>` です。素の `/_server/<id>` はフォームやスクリプトからの通常の HTTP に応答します。
+- サーバーレンダー中の同じ呼び出しは、`serverOnly` リクエストイベントのもとプロセス内で実行され、HTTP は関与しません。
+- モジュールレベルのラッパーはすべての呼び出し経路で実行されます。`GET()`、`live()`、`withMeta()` は参照を設定するだけで、サーバーサイドのポリシーは実行しません。
+- 誰でもサーバー関数にリクエストを送れるため、バリデーションと認可は本体の中で行ってください。
 
-## Next steps
+## 次のステップ
 
-- [Reads, streams, and live data](/building-apps/server-functions/reads-and-live-data): declare a read that HTTP caches can store, and keep a stock level connected when another shopper changes it.
-- [Arguments and security](/building-apps/server-functions/arguments-and-security): what a caller can send, what the transport can encode, and how to validate and authorize every request.
-- [Mutations and responses](/building-apps/server-functions/mutations-and-responses): return a redirect, a reload, or a 400 from a cart mutation, and control what a thrown error reveals.
-- [Data loading and mutations](/routing/solid-router/data): wrap the same functions in `query()` and `action()` for caching, submissions, and revalidation.
+- [読み取り・ストリーム・ライブデータ](/building-apps/server-functions/reads-and-live-data): HTTP キャッシュが保存できる読み取りを宣言し、他の買い物客が変更したときも在庫レベルとの接続を保ちます。
+- [引数とセキュリティ](/building-apps/server-functions/arguments-and-security): 呼び出し元が何を送れるか、トランスポートが何をエンコードできるか、そしてすべてのリクエストをバリデーション・認可する方法。
+- [ミューテーションとレスポンス](/building-apps/server-functions/mutations-and-responses): カートのミューテーションからリダイレクト・リロード・400 を返し、スローされたエラーが何を明かすかを制御します。
+- [データ読み込みとミューテーション](/routing/solid-router/data): 同じ関数を `query()` と `action()` で包んで、キャッシュ・送信・再検証を利用します。
