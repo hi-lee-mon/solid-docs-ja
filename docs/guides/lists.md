@@ -1,19 +1,19 @@
 ---
-title: "Lists"
+title: "リスト"
 version: "2.0"
-description: "Render, edit, filter, sort, select in, and window lists without rebuilding rows, and read the diagnostics that tell you when you are."
+description: "行を作り直さずに、リストのレンダリング・編集・フィルター・ソート・選択・ウィンドウ表示を行い、作り直しが起きているときに教えてくれる診断の読み方も学びます。"
 ---
 
-The cart on the [Stores](/concepts/stores) page has a quantity input in every row.
-Change one quantity and the row you are typing in has to stay: the input keeps focus, a row animation keeps playing, the scroll position holds.
-The first version of that list many people write rebuilds every row on every change, and the symptom is an input that loses focus after one keystroke.
+[ストア](/concepts/stores)ページのカートは、すべての行に数量 input があります。
+数量を1つ変えても、入力中の行はそのまま残らなければなりません。input はフォーカスを保ち、行のアニメーションは再生を続け、スクロール位置も維持されます。
+多くの人が最初に書くリストは、変更のたびにすべての行を作り直し、1キー打つと input がフォーカスを失うという症状が出ます。
 
-The same problem shows up in search results, order history tables, and chat threads.
-A list is where a small mistake costs the most, because a row that is rebuilt instead of updated loses its DOM, its focus, its scroll position, and its animation, and does so once per row.
+同じ問題は検索結果、注文履歴テーブル、チャットスレッドでも起きます。
+リストは小さなミスが最も大きな代償になる場所です。更新ではなく作り直された行は、その DOM・フォーカス・スクロール位置・アニメーションを失い、しかも行ごとにそれが起きるのです。
 
-This guide is organized by what you are doing with the list.
-The [Components and JSX](/concepts/components-and-jsx#rendering-lists) page introduces `For` and `Repeat`; this page is about using them well.
-The examples use the cart's line items:
+このガイドは、リストに対して何をしたいかで構成されています。
+[コンポーネントと JSX](/concepts/components-and-jsx#rendering-lists)のページでは `For` と `Repeat` を紹介しています。このページはそれらを上手に使うためのものです。
+例にはカートの明細アイテムを使います:
 
 ```ts
 type CartItem = {
@@ -25,9 +25,9 @@ type CartItem = {
 };
 ```
 
-## Render rows from an array
+## 配列から行をレンダリングする
 
-[`For`](/reference/solid-js/components-jsx/for) maps an array to rows and reuses a row when its item comes back:
+[`For`](/reference/solid-js/components-jsx/for)は配列を行にマッピングし、アイテムが戻ってきたときに行を再利用します:
 
 ```tsx
 import { For } from "solid-js";
@@ -47,25 +47,25 @@ function CartLines(props: { items: CartItem[] }) {
 }
 ```
 
-Pass three items and three rows render, numbered 1 to 3; pass an empty array and the fallback row shows.
-The callback runs once per item that `For` has not seen before, and its JSX is created once.
-`item` is the item itself.
-`index` is an accessor, because the same item can move to another position without being recreated; read `index()` where the position is displayed.
+アイテムを3つ渡せば1から3まで番号付きの3行がレンダリングされ、空配列を渡せばフォールバックの行が表示されます。
+コールバックは `For` が見たことのないアイテムごとに一度だけ実行され、その JSX も一度だけ作られます。
+`item` はアイテムそのものです。
+`index` はアクセサーです。同じアイテムが再作成されずに別の位置へ動きうるからです。位置を表示する場所で `index()` を読んでください。
 
-"Seen before" means object identity.
-If the array on the next update contains the same object, the row is kept and moved if needed; if it contains a new object, the row is disposed and a new one is created.
-Everything else on this page follows from that rule.
+「見たことがある」とはオブジェクトの同一性を意味します。
+次の更新で配列に同じオブジェクトが含まれていれば、その行は保持され、必要なら移動します。新しいオブジェクトが含まれていれば、行は破棄されて新しい行が作られます。
+このページの他のすべては、このルールから導かれます。
 
-:::deep-dive[What a rebuilt row loses]
-A row is a set of DOM nodes plus the reactive scopes that fill them.
-Disposing one removes the nodes, so focus, text selection, and an in-progress CSS animation go with them, and it disposes the scopes, so any signal the row component created starts over in the new row.
-The list itself does not know a row was rebuilt for the same record; `[UNSTABLE_LIST_IDENTITY]` exists because attribution compares the disposed and created items field by field and reports when they match.
+:::deep-dive[作り直された行が失うもの]
+行とは DOM ノードの集まりに、それを埋めるリアクティブスコープを足したものです。
+行を破棄するとノードが消えるため、フォーカス・テキスト選択・再生中の CSS アニメーションも一緒に消えます。スコープも破棄されるため、行コンポーネントが作ったシグナルはすべて新しい行でやり直しになります。
+リスト自身は、同じレコードのために行が作り直されたことを知りません。`[UNSTABLE_LIST_IDENTITY]` が存在するのは、属性付け（attribution）が破棄されたアイテムと作成されたアイテムをフィールドごとに比較し、一致したときに報告するためです。
 :::
 
-## Keep row identity across updates
+## 更新をまたいで行の同一性を保つ
 
-The identity rule bites when data comes from a server.
-A refetch returns new objects for the same records, so a list keyed by identity rebuilds every row:
+同一性ルールが問題になるのは、データがサーバーから来るときです。
+再フェッチは同じレコードに対して新しいオブジェクトを返すため、同一性でキー付けされたリストはすべての行を作り直します:
 
 ```tsx
 const items = createMemo(() => api.cartItems()); // new objects on every refetch
@@ -73,12 +73,12 @@ const items = createMemo(() => api.cartItems()); // new objects on every refetch
 <For each={items()}>{(item) => <CartLine item={item} />}</For>;
 ```
 
-Refetch after a quantity change and every row is rebuilt, including the one the user is typing in.
-Development builds report this as `[UNSTABLE_LIST_IDENTITY]` when attribution is enabled: rows were disposed and recreated for items equal field-for-field to the ones they replaced.
-Two fixes, and the second is usually the better one.
+数量を変えた後に再フェッチすると、ユーザーが入力中の行を含め、すべての行が作り直されます。
+属性付けが有効な開発ビルドでは、これは `[UNSTABLE_LIST_IDENTITY]` として報告されます。置き換えられたアイテムとフィールド単位で一致するアイテムに対して、行が破棄・再作成されたという意味です。
+修正方法は2つあり、通常は2つ目がよりよい方法です。
 
-Key by a field.
-Pass a key function, and `For` matches items by the key instead of by identity:
+フィールドでキー付けする。
+キー関数を渡せば、`For` は同一性ではなくキーでアイテムを照合します:
 
 ```tsx
 <For each={items()} keyed={(item) => item.id}>
@@ -86,11 +86,11 @@ Pass a key function, and `For` matches items by the key instead of by identity:
 </For>
 ```
 
-In this mode the callback receives accessors for both the item and the index.
-The row is kept when an item with the same `id` appears, and `item()` returns the newest object for that id, so the row's JSX updates to the new fields without being recreated.
+このモードでは、コールバックはアイテムとインデックスの両方をアクセサーとして受け取ります。
+同じ `id` を持つアイテムが現れたら行は保持され、`item()` はその id の最新のオブジェクトを返すため、行の JSX は再作成されずに新しいフィールドへ更新されます。
 
-Load into a store.
-A store reconciles each response into the same proxies by `id`, so the objects themselves keep their identity:
+ストアに読み込む。
+ストアは各レスポンスを `id` で同じプロキシにリコンサイルするため、オブジェクト自体が同一性を保ちます:
 
 ```tsx
 const [items] = createStore(async () => api.cartItems(), [] as CartItem[]);
@@ -98,14 +98,14 @@ const [items] = createStore(async () => api.cartItems(), [] as CartItem[]);
 <For each={items}>{(item) => <CartLine item={item} />}</For>;
 ```
 
-Now `item` is a store proxy, `item.quantity` is a fine-grained read, and a refetch that changes one field of one record updates one text node.
-Nothing about `For` changed; the data stopped producing new objects.
-This is the shape to reach for whenever the list is edited or refetched, which is most lists.
+こうすると `item` はストアプロキシになり、`item.quantity` は細粒度の読み取りになります。レコード1つのフィールド1つを変える再フェッチは、テキストノード1つだけを更新します。
+`For` の側は何も変わっていません。データが新しいオブジェクトを生まなくなっただけです。
+編集や再フェッチがあるリスト、つまりほとんどのリストで選ぶべき形はこれです。
 
-## Edit a row
+## 行を編集する
 
-With the list in a store, editing is a write at a path.
-The habit to unlearn from immutable state libraries is replacing the array to change one item:
+リストをストアに入れれば、編集はパスへの書き込みになります。
+イミュータブルな状態ライブラリで身についた「アイテム1つを変えるために配列を置き換える」という習慣は捨てるべきものです:
 
 ```tsx
 const [items, setItems] = createStore<CartItem[]>([]);
@@ -128,11 +128,11 @@ function saveForLater(id: string) {
 }
 ```
 
-Run the `Avoid` version while the cursor is in that row's quantity input and the input loses focus, because the row was torn down and a new one created; every reader of the old item object runs as well.
-Development builds flag it as `[IMMUTABLE_UPDATE_IN_STORE]` when a path is replaced by a container whose leaves are mostly unchanged.
-In the `Prefer` version only the readers of that item's `savedForLater` property run; the row is not recreated, the list is not diffed, and the other rows are untouched.
+`Avoid` 版を、その行の数量 input にカーソルがある状態で実行すると、input はフォーカスを失います。行が解体され新しい行が作られたからです。古いアイテムオブジェクトを読んでいるものもすべて実行されます。
+パスが、リーフのほとんどが変わっていないコンテナで置き換えられると、開発ビルドは `[IMMUTABLE_UPDATE_IN_STORE]` としてフラグを立てます。
+`Prefer` 版では、そのアイテムの `savedForLater` プロパティを読んでいるものだけが実行されます。行は再作成されず、リストは差分比較されず、他の行には触れられません。
 
-Adding and removing follow the same rule:
+追加と削除も同じルールです:
 
 ```tsx
 setItems((draft) => {
@@ -142,12 +142,12 @@ setItems((draft) => {
 setItems((draft) => draft.filter((item) => item.id !== id));
 ```
 
-Returning a new array from the setter is fine for removal; the surviving items are the same proxies, so their rows are kept.
-Use [`reconcile`](/reference/solid-js/stores/reconcile) when the whole list arrives fresh from the server and should be diffed in.
+削除でセッターから新しい配列を返すのは問題ありません。残ったアイテムは同じプロキシなので、その行は保持されます。
+リスト全体がサーバーから新しく届いて差分で取り込むべき場合は [`reconcile`](/reference/solid-js/stores/reconcile)を使います。
 
-## Filter and sort
+## フィルターとソート
 
-Derive the visible list; do not store it:
+表示するリストは導出します。ストアには入れません:
 
 ```tsx
 const [filter, setFilter] = createSignal<"all" | "active" | "saved">("all");
@@ -173,20 +173,20 @@ const visible = createMemo(() => {
 <For each={visible()}>{(item) => <CartLine item={item} />}</For>;
 ```
 
-Switch the sort to price and the rows move into their new order; no row is recreated.
-`visible()` is a new array on every change, and that is fine.
-The items inside it are the same proxies as before, so `For` keeps every row and reorders or hides them.
+ソートを価格に切り替えると行は新しい順序に移動します。どの行も再作成されません。
+`visible()` は変更のたびに新しい配列になりますが、それで問題ありません。
+中のアイテムは以前と同じプロキシなので、`For` はすべての行を保持し、並べ替えや非表示だけを行います。
 
-:::note[A derived array is not a rebuilt list]
-A derived array costs a diff; a new set of objects costs a rebuild.
-Those are different things, and only the second is a problem.
+:::note[導出された配列はリストの作り直しではない]
+導出された配列のコストは差分です。新しいオブジェクト群のコストは作り直しです。
+この2つは別物で、問題になるのは後者だけです。
 :::
 
-When the derived list is large and read by several consumers, [`createProjection`](/reference/solid-js/stores/create-projection) produces a store-shaped result instead of an array, so readers of individual rows do not subscribe to the whole list; [Stores](/concepts/stores#derive-a-store-with-a-projection) shows the shape.
+導出リストが大きく複数の読み手から読まれる場合は、[`createProjection`](/reference/solid-js/stores/create-projection)が配列の代わりにストア型の結果を生成するため、個別の行を読む側はリスト全体を購読しなくて済みます。その形は[ストア](/concepts/stores#derive-a-store-with-a-projection)で示しています。
 
-## Select a row
+## 行を選択する
 
-Highlighting the selected row in an order history table is the classic performance trap: the direct version re-runs every row when the selection changes.
+注文履歴テーブルで選択中の行をハイライトするのは、古典的なパフォーマンスの落とし穴です。素直に書くと、選択が変わるたびにすべての行が再評価されます。
 
 ```tsx
 const [selectedId, setSelectedId] = createSignal<string>();
@@ -209,11 +209,11 @@ function select(id: string) {
 </tr>;
 ```
 
-Run the `Avoid` version with a few dozen rows and nothing is wrong; with a few thousand, every click re-evaluates every row's `class` binding.
-In the `Prefer` version, when the selection moves from one row to another, exactly two rows update: the one that lost the key and the one that gained it.
-The same store handles multi-select without changes; leave the other keys in place instead of deleting them.
+`Avoid` 版は数十行なら何も問題ありません。数千行では、クリックのたびに全行の `class` バインディングが再評価されます。
+`Prefer` 版では、選択がある行から別の行へ移るときに更新されるのはちょうど2行です。キーを失った行と、キーを得た行です。
+同じストアがそのまま複数選択にも対応します。他のキーを消さずに残せばよいだけです。
 
-When the selected id already lives somewhere else, such as a route parameter, derive the store from it with [`createProjection`](/reference/solid-js/stores/create-projection) instead of writing it by hand:
+選択された id がルートパラメータなど別の場所にすでにある場合は、手書きする代わりに [`createProjection`](/reference/solid-js/stores/create-projection)でそこからストアを導出します:
 
 ```tsx
 const isSelected = createProjection<Record<string, boolean>>((draft) => {
@@ -222,12 +222,12 @@ const isSelected = createProjection<Record<string, boolean>>((draft) => {
 }, {});
 ```
 
-## Render a window over a large list
+## 大きなリストにウィンドウをレンダリングする
 
-`For` creates a row per item.
-For a list that is long enough to be a problem, such as an account's full order history, render only the rows in view.
+`For` はアイテムごとに行を作ります。
+アカウントの全注文履歴のように、長すぎて問題になるリストでは、画面に見えている行だけをレンダリングします。
 
-[`Repeat`](/reference/solid-js/components-jsx/repeat) renders a range of positions over a store, without slicing the array:
+[`Repeat`](/reference/solid-js/components-jsx/repeat)は、配列を切り出さずに、ストア上の位置の範囲をレンダリングします:
 
 ```tsx
 import { Repeat, createSignal, createStore } from "solid-js";
@@ -253,22 +253,22 @@ function OrderHistory(props: { orders: Store<Order[]> }) {
 }
 ```
 
-Scroll and the fifty rows in view are the only rows in the DOM.
-Each row reads `props.orders[index]` directly from the store, so a change to one order updates one row.
-When `from` moves, rows whose index is still in range are kept, rows that left are disposed, and rows for new indexes are created.
+スクロールしても、DOM に存在するのは表示中の50行だけです。
+各行はストアから `props.orders[index]` を直接読むため、注文1件の変更は1行だけを更新します。
+`from` が動くと、インデックスが範囲内に残る行は保持され、範囲を外れた行は破棄され、新しいインデックスの行が作られます。
 
-:::caution[Repeat is positional]
-A `Repeat` row shows whatever is at its index, so it fits logs, tables, and grids over store data.
-It does not fit lists where a row must follow its item as the list reorders; use `For` for those.
+:::caution[Repeat は位置ベース]
+`Repeat` の行はそのインデックスにあるものを何でも表示します。そのためログ・テーブル・グリッドなどのストアデータに適しています。
+リストの並び替えで行がアイテムについて回る必要がある場合は向きません。そういうものには `For` を使います。
 :::
 
-For a full virtualizer with variable heights, use a library; the pattern above is what those libraries build on.
+可変の高さを持つ本格的なバーチャライザーが必要ならライブラリを使います。上のパターンは、そうしたライブラリの土台になっているものです。
 
-## Show a loading and an empty state
+## ローディングと空の状態を表示する
 
-The two are different states and use different tools.
-`fallback` on `For` is the empty state: a settled list with no items.
-A `Loading` boundary is the not-yet state:
+この2つは別の状態で、使う道具も違います。
+`For` の `fallback` は空の状態、つまりアイテムのない確定済みリストです。
+`Loading` バウンダリは「まだ来ていない」状態です:
 
 ```tsx
 <Loading fallback={<ListSkeleton />}>
@@ -280,45 +280,45 @@ A `Loading` boundary is the not-yet state:
 </Loading>
 ```
 
-The skeleton shows until the first response; the "Your cart is empty" row shows when that response is empty.
-A refetch does not bring the skeleton back; the rows stay, and `isPending(() => items.length)` reports the wait if you want to dim them.
+最初のレスポンスが来るまではスケルトンが表示され、そのレスポンスが空なら "Your cart is empty" の行が表示されます。
+再フェッチでスケルトンは戻りません。行はそのまま残り、待機中に行を薄くしたければ `isPending(() => items.length)` が待機を報告します。
 
-## Common problems
+## よくある問題
 
-### Rows lose focus or animation when the list changes
+### リストが変わると行がフォーカスやアニメーションを失う
 
-The items are new objects on each update.
-Key by a field or load into a store; see [Keep row identity across updates](#keep-row-identity-across-updates).
+更新のたびにアイテムが新しいオブジェクトになっています。
+フィールドでキー付けするか、ストアに読み込んでください。[更新をまたいで行の同一性を保つ](#keep-row-identity-across-updates)を参照してください。
 
-### A row shows the wrong index after reordering
+### 並び替え後に行が間違ったインデックスを表示する
 
-The callback captured `index()` once instead of reading it in JSX.
-Read `index()` inside the JSX expression so it stays reactive, or use `keyed={false}` when the row should be bound to its position rather than its item.
+コールバックが `index()` を一度だけキャプチャし、JSX の中で読んでいません。
+リアクティブであり続けるよう JSX 式の中で `index()` を読むか、行をアイテムではなく位置に結び付けるべき場合は `keyed={false}` を使います。
 
-### Editing one item rebuilds the whole list
+### アイテム1つの編集でリスト全体が作り直される
 
-The list is an array of plain objects in a signal, and the edit replaced the array or the object.
-Move the list into a store and mutate the draft.
+リストがシグナル内のプレーンなオブジェクトの配列で、編集時に配列やオブジェクトが置き換えられています。
+リストをストアに移し、ドラフトを変更してください。
 
-### `items.push(item)` does nothing
+### `items.push(item)` が何もしない
 
-A store proxy drops writes made outside its setter.
-Write through `setItems((draft) => { draft.push(item); })`.
+ストアプロキシはセッターの外からの書き込みを捨てます。
+`setItems((draft) => { draft.push(item); })` を通して書き込んでください。
 
-## Recap
+## まとめ
 
-- `For` keeps a row when the same object comes back and rebuilds it when a new object appears; every other rule follows from that.
-- Load server lists into a store with `createStore(async () => ..., [])`, or pass `keyed={(item) => item.id}`, so a refetch does not rebuild rows.
-- Edit one property on the setter's draft; a `map` with a spread creates a new object and a new row.
-- Derive filtered and sorted views with a memo; a new array of the same proxies is a diff, not a rebuild.
-- Keep selection in a store keyed by id so a change touches two rows, not every row.
-- Use `Repeat` for a window over a large positional list, and `For` when rows must follow their items.
-- Use `fallback` on `For` for the empty state and a `Loading` boundary for the not-yet state.
+- `For` は同じオブジェクトが戻れば行を保持し、新しいオブジェクトが現れれば作り直します。他のすべてのルールはここから導かれます。
+- サーバーのリストは `createStore(async () => ..., [])` でストアに読み込むか、`keyed={(item) => item.id}` を渡して、再フェッチで行が作り直されないようにします。
+- 編集はセッターのドラフト上のプロパティ1つに対して行います。スプレッドを使った `map` は新しいオブジェクトと新しい行を生みます。
+- フィルターやソート済みのビューはメモで導出します。同じプロキシからなる新しい配列は差分であり、作り直しではありません。
+- 選択状態は id でキー付けしたストアに入れれば、変更は全行ではなく2行だけに及びます。
+- 大きな位置ベースのリストへのウィンドウには `Repeat` を、行がアイテムについて回る必要がある場合は `For` を使います。
+- 空の状態には `For` の `fallback` を、「まだ来ていない」状態には `Loading` バウンダリを使います。
 
-## Next steps
+## 次のステップ
 
-- [Components and JSX](/concepts/components-and-jsx#rendering-lists): the `For` and `Repeat` callback shapes.
-- [Stores](/concepts/stores): draft setters, projections, and reconciliation.
-- [Data fetching patterns](/guides/data-fetching-patterns): loading lists from a server, pagination, and infinite scroll.
-- [Debugging reactivity](/guides/debugging-reactivity#a-list-rebuilds-rows-for-the-same-records): the `UNSTABLE_LIST_IDENTITY` and `IMMUTABLE_UPDATE_IN_STORE` reports in full.
-- [Performance](/guides/performance#lists): how to measure what re-runs when one row changes.
+- [コンポーネントと JSX](/concepts/components-and-jsx#rendering-lists): `For` と `Repeat` のコールバックの形。
+- [ストア](/concepts/stores): ドラフトセッター、プロジェクション、リコンサイル。
+- [データフェッチのパターン](/guides/data-fetching-patterns): サーバーからのリスト読み込み、ページネーション、無限スクロール。
+- [リアクティビティのデバッグ](/guides/debugging-reactivity#a-list-rebuilds-rows-for-the-same-records): `UNSTABLE_LIST_IDENTITY` と `IMMUTABLE_UPDATE_IN_STORE` レポートの詳細。
+- [パフォーマンス](/guides/performance#lists): 行1つが変わったときに何が再実行されるかの測り方。

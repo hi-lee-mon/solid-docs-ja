@@ -1,21 +1,21 @@
 ---
-title: "Integrate non-Solid code"
+title: "Solid 以外のコードを統合する"
 version: "2.0"
-description: "Drive a charting library, a map, a web component, or an analytics script from Solid state: get the DOM node at the right time, create the instance once, update it in an effect, and keep browser-only imports off the server."
+description: "Solid の状態からチャートライブラリ、地図、Web コンポーネント、分析スクリプトを駆動します。適切なタイミングで DOM ノードを取得し、インスタンスを一度だけ作成し、エフェクトで更新を流し込み、ブラウザ専用のインポートをサーバーから切り離します。"
 ---
 
-The account area needs a chart of order totals, and the charting library wants a `<canvas>` and a `chart.update(data)` call.
-The store locator needs a map from a library that reads `window` the moment it is imported.
-The checkout form uses a `<date-picker>` custom element that takes an array of disabled dates, and the analytics script wants to know the current URL on every navigation.
+アカウント領域には注文合計のチャートが必要で、チャートライブラリは `<canvas>` と `chart.update(data)` の呼び出しを要求します。
+店舗検索には、インポートされた瞬間に `window` を読むライブラリの地図が必要です。
+チェックアウトフォームでは、無効化する日付の配列を受け取る `<date-picker>` カスタム要素を使い、分析スクリプトはナビゲーションのたびに現在の URL を知りたがります。
 
-None of these know about signals.
-Each one needs the same four things from Solid: a DOM node once it exists, a place to create the instance once, an effect that pushes settled values into it, and a cleanup that tears it down with the component.
-This guide goes through those four things and the two directions state can flow, from Solid into the library and from the library back into Solid.
-The [Custom primitives](/guides/custom-primitives) guide shows how to package the result once it works.
+これらはどれもシグナルを知りません。
+どれも Solid に求めるものは同じ4つです。存在した時点での DOM ノード、インスタンスを一度だけ作成する場所、確定した値をライブラリへ流し込むエフェクト、そしてコンポーネントと一緒に解体するクリーンアップです。
+このガイドでは、その4つと、状態が流れる2つの方向（Solid からライブラリへ、ライブラリから Solid へ）を順に見ていきます。
+動作するようになったら、その結果をパッケージ化する方法は[カスタムプリミティブ](/guides/custom-primitives)ガイドで説明しています。
 
-## Get a DOM node
+## DOM ノードを取得する
 
-Pass a variable or a callback to `ref` and Solid assigns the element when it creates it:
+変数またはコールバックを `ref` に渡すと、Solid は要素を作成した時点で代入します:
 
 ```tsx
 function OrderTotalsChart(props: { totals: number[] }) {
@@ -28,15 +28,15 @@ function OrderTotalsChart(props: { totals: number[] }) {
 }
 ```
 
-Run the `Avoid` version and the library throws on `undefined`, because the component body runs top to bottom and the `<canvas>` is created by the `return` statement.
-The element exists after the JSX has been evaluated; a `ref` callback runs at that moment, while the surrounding render is still being built.
+`Avoid` 版を実行するとライブラリは `undefined` で例外を投げます。コンポーネント本体は上から下へ実行され、`<canvas>` が作られるのは `return` 文の中だからです。
+要素が存在するのは JSX が評価された後です。`ref` コールバックはその瞬間、周囲のレンダーがまだ構築されている最中に実行されます。
 
-The [`ref` reference](/reference/solid-web/jsx-properties/ref) lists the accepted forms, and [Refs and directives](/concepts/components-and-jsx#refs-and-directives) shows how a directive factory owns setup for an element.
-Two facts from those pages matter for every integration on this page: a `ref` callback runs untracked and without an owner, so it is not a place to create effects or register cleanup; and setup that needs the element in the document belongs in `onSettled`, which runs after the first render has settled.
+[`ref` リファレンス](/reference/solid-web/jsx-properties/ref)に受け付ける形式の一覧があり、[ref とディレクティブ](/concepts/components-and-jsx#refs-and-directives)ではディレクティブファクトリーが要素のセットアップを引き受ける仕組みを示しています。
+このページのすべての統合に関係する事実が2つあります。`ref` コールバックは追跡されずオーナーなしで実行されるため、エフェクトを作ったりクリーンアップを登録したりする場所ではないということ。そして、要素がドキュメント内にある必要があるセットアップは、最初のレンダーが確定した後に実行される `onSettled` に置くということです。
 
-## Create the instance once, update it in an effect
+## インスタンスは一度だけ作成し、エフェクトで更新する
 
-The chart is created once, updated when the totals change, and destroyed with the component:
+チャートは一度だけ作成され、合計が変わると更新され、コンポーネントと一緒に破棄されます:
 
 ```tsx
 import { createEffect, onSettled } from "solid-js";
@@ -67,14 +67,14 @@ function OrderTotalsChart(props: { totals: number[] }) {
 }
 ```
 
-Run the `Avoid` version and the chart draws the first totals and never changes, because `onSettled` runs its callback once and does not track the reads inside it.
-In the `Prefer` version a new `totals` array re-runs the compute function, and the effect function hands the value to the library after the update has landed.
+`Avoid` 版を実行すると、チャートは最初の合計を描画してそれ以降変わりません。`onSettled` はコールバックを一度だけ実行し、その中の読み取りを追跡しないからです。
+`Prefer` 版では、新しい `totals` 配列がコンピュート関数を再実行し、更新が適用された後にエフェクト関数がその値をライブラリへ渡します。
 
-The split follows the rest of the documentation: [`onSettled`](/reference/solid-js/lifecycle-actions/on-settled) for one-time setup that returns its teardown, and the effect function of [`createEffect`](/reference/solid-js/reactivity/create-effect) for each settled value that has to leave Solid.
-Neither runs during server rendering, so the component is safe to render on the server as long as `chart-lib` can be imported there; if it cannot, see [Keep it off the server](#keep-it-off-the-server).
-[Use an effect at an imperative boundary](/guides/avoid-unnecessary-effects#use-an-effect-at-an-imperative-boundary) explains why every input belongs in the compute function.
+この分担はドキュメント全体の方針に従っています。ティアダウンを返す一回限りのセットアップには [`onSettled`](/reference/solid-js/lifecycle-actions/on-settled) を、Solid の外に出さなければならない確定値ごとの処理には [`createEffect`](/reference/solid-js/reactivity/create-effect) のエフェクト関数を使います。
+どちらもサーバーレンダリング中は実行されないので、`chart-lib` をサーバーでインポートできる限り、このコンポーネントはサーバーでレンダリングしても安全です。できない場合は[サーバーから切り離す](#keep-it-off-the-server)を参照してください。
+すべての入力をコンピュート関数に置くべき理由は[命令的バウンダリではエフェクトを使う](/guides/avoid-unnecessary-effects#use-an-effect-at-an-imperative-boundary)で説明しています。
 
-The analytics script is the same shape without a DOM node:
+分析スクリプトも同じ形ですが、DOM ノードはありません:
 
 ```tsx
 import { createEffect } from "solid-js";
@@ -92,12 +92,12 @@ function PageViews() {
 }
 ```
 
-Navigate from `/account` to `/account/orders` and `pageView` is called once with the new path; `location.pathname` is reactive, as [Read the location](/routing/solid-router/navigation#read-the-location) describes.
+`/account` から `/account/orders` へ移動すると `pageView` が新しいパスで一度呼ばれます。[ロケーションを読む](/routing/solid-router/navigation#read-the-location)で説明しているとおり、`location.pathname` はリアクティブです。
 
-## Web components
+## Web コンポーネント
 
-A custom element is a native element in JSX.
-Attributes, properties, and events each have a form:
+カスタム要素は、JSX ではネイティブ要素として書きます。
+属性・プロパティ・イベントにはそれぞれ書き方があります:
 
 ```tsx
 function DeliveryDate(props: {
@@ -115,19 +115,19 @@ function DeliveryDate(props: {
 }
 ```
 
-Pick a date and `onChange` receives it; change `holidays` in the parent and the element's `disabledDates` property is reassigned.
+日付を選ぶと `onChange` がそれを受け取ります。親で `holidays` を変えると、要素の `disabledDates` プロパティが再代入されます。
 
-On an element whose name contains a hyphen, a plain attribute is set with `setAttribute`, so `value={props.value}` becomes a string attribute, and `null` or `false` removes it.
-An array or object passed that way is stringified.
-The `prop:` namespace assigns a property instead, which is what a custom element that exposes `disabledDates` as a property expects.
-The server emits attributes into the HTML and skips `prop:` bindings; the property is assigned when the browser renders or hydrates the element.
+名前にハイフンを含む要素では、通常の属性は `setAttribute` で設定されます。そのため `value={props.value}` は文字列属性になり、`null` や `false` を渡すと属性が削除されます。
+この方法で配列やオブジェクトを渡すと文字列化されます。
+`prop:` 名前空間は代わりにプロパティへ代入します。`disabledDates` をプロパティとして公開するカスタム要素が期待するのはこちらです。
+サーバーは HTML に属性を出力しますが `prop:` バインディングはスキップします。プロパティへの代入は、ブラウザが要素をレンダリングまたはハイドレートする時点で行われます。
 
-`onDatechange` lowercases the name and adds a listener for `datechange` with `addEventListener`.
-An event name that contains uppercase letters or a hyphen cannot be written that way; use a directive that calls `addEventListener` with the exact name, following the `listen` factory in [Refs and directives](/concepts/components-and-jsx#refs-and-directives).
-The events Solid delegates, such as `onInput` and `onClick`, are handled by a listener on the render root, so a custom element that dispatches one of those names must dispatch it with `bubbles: true` for the handler to run.
+`onDatechange` は名前を小文字にして、`addEventListener` で `datechange` のリスナーを追加します。
+大文字やハイフンを含むイベント名はこの方法では書けません。[ref とディレクティブ](/concepts/components-and-jsx#refs-and-directives)にある `listen` ファクトリーにならい、正確な名前で `addEventListener` を呼ぶディレクティブを使います。
+`onInput` や `onClick` のように Solid がデリゲーションするイベントはレンダールート上のリスナーで処理されるため、そうした名前のイベントを発行するカスタム要素は、ハンドラーを実行させるには `bubbles: true` で発行しなければなりません。
 
-TypeScript does not know `<date-picker>`.
-Declare it once, with the attribute, property, and event names the element supports:
+TypeScript は `<date-picker>` を知りません。
+その要素がサポートする属性・プロパティ・イベント名をまとめて一度だけ宣言します:
 
 ```ts
 // src/types/date-picker.d.ts
@@ -144,12 +144,12 @@ declare module "@solidjs/web" {
 }
 ```
 
-## Render Solid into a foreign container
+## Solid を外部のコンテナへレンダリングする
 
-Two situations move Solid content into a DOM node Solid did not create.
+Solid のコンテンツを、Solid が作っていない DOM ノードへ移したい状況が2つあります。
 
-The first is a subtree that must escape its ancestor, such as a confirmation dialog inside the map library's container, which clips overflow.
-[`Portal`](/reference/solid-web/components/portal) renders its children into another element, `document.body` by default, while they stay in the component's reactive scope:
+1つ目は、祖先から脱出しなければならないサブツリーです。たとえば、オーバーフローをクリップする地図ライブラリのコンテナの中にある確認ダイアログです。
+[`Portal`](/reference/solid-web/components/portal)は子要素を別の要素（デフォルトでは `document.body`）へレンダリングします。子要素はコンポーネントのリアクティブスコープに留まったままです:
 
 ```tsx
 import { Show, type ParentProps } from "solid-js";
@@ -166,12 +166,12 @@ function AddedToCart(props: ParentProps<{ open: boolean }>) {
 }
 ```
 
-Open the dialog and it appears as a child of `<body>`, outside the clipped container; close it and the portal's nodes are removed with the `Show` branch.
-The server renders nothing for a portal, and its children render fresh in the browser after hydration settles, so async reads inside a portal start on the client.
-Fetch above the portal and pass the data in.
+ダイアログを開くと `<body>` の子として、クリップされたコンテナの外側に表示されます。閉じれば、ポータルのノードは `Show` のブランチと一緒に削除されます。
+サーバーはポータルに対して何もレンダリングせず、その子要素はハイドレーションが確定した後にブラウザで新たにレンダリングされます。そのためポータル内の非同期読み取りはクライアントで開始されます。
+データはポータルの上位でフェッチして渡し込んでください。
 
-The second is the reverse: a page another framework or a server template owns, with one region that should be Solid.
-[`render`](/reference/solid-web/rendering-ssr/render) mounts a tree into a node and returns a disposer:
+2つ目はその逆で、別のフレームワークやサーバーテンプレートが所有するページの中に、Solid にしたい領域が1つある場合です。
+[`render`](/reference/solid-web/rendering-ssr/render)はツリーをノードにマウントし、破棄関数（disposer）を返します:
 
 ```ts
 import { render } from "@solidjs/web";
@@ -184,13 +184,13 @@ const dispose = render(() => <MiniCart />, node);
 dispose();
 ```
 
-`dispose` disposes the reactive root, removes the delegated event listeners the root added, and empties the container.
-`render` creates the owner that every primitive inside `MiniCart` attaches to, and it renders fresh DOM; for a region the server already rendered, use [`hydrate`](/reference/solid-web/rendering-ssr/hydrate) instead.
+`dispose` はリアクティブルートを破棄し、ルートが追加したデリゲーションイベントリスナーを削除し、コンテナを空にします。
+`render` は `MiniCart` 内のすべてのプリミティブがぶら下がるオーナーを作り、DOM を新たにレンダリングします。サーバーがすでにレンダリングした領域には、代わりに [`hydrate`](/reference/solid-web/rendering-ssr/hydrate)を使います。
 
-## Feed an outside source into the graph
+## 外部ソースをグラフに流し込む
 
-A stock feed pushes the quantity on hand for a product.
-Its values enter Solid through a signal written from the subscription callback, and the subscription is tied to the effect that opened it:
+商品の在庫数をプッシュしてくる在庫フィードを考えます。
+その値は、サブスクリプションのコールバックから書き込むシグナルを通じて Solid に入ります。サブスクリプションは、それを開いたエフェクトに結び付けます:
 
 ```ts
 import { createEffect, createSignal, type Accessor } from "solid-js";
@@ -208,23 +208,23 @@ export function createStock(productId: Accessor<string>) {
 }
 ```
 
-Each push updates whatever reads `stock()`; change the product and the previous subscription's unsubscribe function, returned from the effect function, runs before the new one opens.
+プッシュのたびに `stock()` を読んでいるものすべてが更新されます。商品を変えると、前のサブスクリプションのアンサブスクライブ関数（エフェクト関数が返したもの）が、新しいサブスクリプションが開かれる前に実行されます。
 
-The write is allowed because it records an observation, not a copy of another reactive value; [Let external observations become new inputs](/guides/avoid-unnecessary-effects#let-external-observations-become-new-inputs) draws that line.
-A `Map`, class instance, or `Date` the library hands over goes in a signal as one value; a store wraps plain objects and arrays.
+この書き込みが許されるのは、別のリアクティブな値をコピーするのではなく、観測を記録しているからです。その線引きは[外部の観測を新しい入力にする](/guides/avoid-unnecessary-effects#let-external-observations-become-new-inputs)で説明しています。
+ライブラリから受け取る `Map`・クラスインスタンス・`Date` は1つの値としてシグナルに入れます。プレーンなオブジェクトや配列にはストアを使います。
 
-:::advanced[Bridging a whole reactive system]
-When the outside source is itself a reactive system, such as MobX, and its values are read directly inside Solid computations, [`enableExternalSource`](/reference/solid-js/advanced/interop-async/enable-external-source) registers an adapter once for the whole app.
-Its `factory` receives each computation's function and a `trigger`; it returns `track`, which runs the function under the external library's tracking, and `dispose`.
-Solid wraps every computation with the adapter, re-runs a computation when its `trigger` is called, and calls `dispose` when the computation is disposed.
-Several calls chain, each wrapping the previous adapter.
-For a library with a `subscribe` method, the signal above is the smaller tool.
+:::advanced[リアクティブシステム全体を橋渡しする]
+外部ソースそれ自体が MobX のようなリアクティブシステムで、その値を Solid の計算の中で直接読み取る場合は、[`enableExternalSource`](/reference/solid-js/advanced/interop-async/enable-external-source)でアプリ全体に一度だけアダプターを登録します。
+`factory` は各計算の関数と `trigger` を受け取り、外部ライブラリの追跡下でその関数を実行する `track` と `dispose` を返します。
+Solid はすべての計算をアダプターで包み、`trigger` が呼ばれたら計算を再実行し、計算が破棄されるときに `dispose` を呼びます。
+複数回呼び出した場合はチェーンになり、それぞれが前のアダプターを包みます。
+`subscribe` メソッドを持つライブラリなら、上のシグナルの方が小さな道具として適しています。
 :::
 
-## Keep it off the server
+## サーバーから切り離す
 
-The map library reads `window` when it is imported, so importing it in a component that renders on the server fails before any component code runs.
-[`clientOnly`](/reference/solid-web/rendering-ssr/client-only) takes the dynamic import and returns a component that renders only in the browser:
+地図ライブラリはインポート時に `window` を読むため、サーバーでレンダリングするコンポーネントからインポートすると、コンポーネントのコードが走る前に失敗します。
+[`clientOnly`](/reference/solid-web/rendering-ssr/client-only)は動的インポートを受け取り、ブラウザでのみレンダリングされるコンポーネントを返します:
 
 ```tsx
 import { clientOnly } from "@solidjs/web";
@@ -238,16 +238,16 @@ function StoreLocator() {
 }
 ```
 
-The server renders the fallback and does not run the import.
-The browser hydrates the fallback, waits for the module and for hydration to settle, and swaps in `StoreMap` with the props it was given.
-By default the import starts as soon as `clientOnly` is called; pass `{ lazy: true }` to start it at the component's first render.
+サーバーはフォールバックをレンダリングし、インポートは実行しません。
+ブラウザはフォールバックをハイドレートし、モジュールとハイドレーションの確定を待ってから、渡された props とともに `StoreMap` に入れ替えます。
+デフォルトでは `clientOnly` が呼ばれた時点でインポートが始まります。`{ lazy: true }` を渡すと、コンポーネントの初回レンダリング時に開始できます。
 
-:::tip[Fetch above the boundary]
-Async reads inside the imported component start in the browser, after the swap.
-Create the memo for the store list in `StoreLocator`, which renders on the server, and pass the result to `StoreMap` as a prop.
+:::tip[バウンダリの上位でフェッチする]
+インポートされたコンポーネント内の非同期読み取りは、入れ替え後にブラウザで開始されます。
+店舗リストのメモは、サーバーでレンダリングされる `StoreLocator` で作成し、結果を `StoreMap` に prop として渡してください。
 :::
 
-When only one call needs the library, a dynamic import inside `onSettled` keeps the rest of the component on the server:
+ライブラリが必要なのが1か所だけなら、`onSettled` 内で動的インポートすれば、コンポーネントの残りはサーバーに残せます:
 
 ```tsx
 import { onSettled } from "solid-js";
@@ -272,52 +272,52 @@ function StoreMap(props: { center: [number, number] }) {
 }
 ```
 
-The callback runs only in the browser, and the `disposed` flag covers the case where the component leaves the page before the import resolves.
-The [SSR-safe code](/guides/ssr-safe-code) guide covers `isServer` and the other shapes browser-only code takes.
+このコールバックはブラウザでのみ実行され、`disposed` フラグは、インポートが解決する前にコンポーネントがページから消えた場合をカバーします。
+[SSR 安全なコード](/guides/ssr-safe-code)ガイドでは、`isServer` をはじめとするブラウザ専用コードの書き方を網羅しています。
 
-## Common problems
+## よくある問題
 
-### `window is not defined` at import
+### インポート時に `window is not defined` になる
 
-A library reads `window` or `document` in its module body, and the component that imports it renders on the server.
-Wrap the component in `clientOnly`, or move the import into an `onSettled` callback.
-See [Keep it off the server](#keep-it-off-the-server).
+ライブラリがモジュール本体で `window` や `document` を読んでいて、それをインポートしたコンポーネントがサーバーでレンダリングされています。
+コンポーネントを `clientOnly` で包むか、インポートを `onSettled` コールバックの中に移してください。
+[サーバーから切り離す](#keep-it-off-the-server)を参照してください。
 
-### The chart draws once and never updates
+### チャートが一度だけ描画されて更新されない
 
-The data is read inside `onSettled` or inside the effect function, neither of which tracks.
-Read it in the compute function of `createEffect` and pass the value to the effect function, as in [Create the instance once, update it in an effect](#create-the-instance-once-update-it-in-an-effect).
+データが `onSettled` の中かエフェクト関数の中で読まれています。どちらも追跡されません。
+[インスタンスは一度だけ作成し、エフェクトで更新する](#create-the-instance-once-update-it-in-an-effect)のように、`createEffect` のコンピュート関数で読み、その値をエフェクト関数へ渡してください。
 
-### The custom element ignores an object or array prop
+### カスタム要素がオブジェクトや配列の prop を無視する
 
-The value was set as an attribute, which the browser stores as a string.
-Use the `prop:` namespace, `prop:disabledDates={holidays()}`, so Solid assigns the property.
+値が属性として設定され、ブラウザに文字列として保存されています。
+`prop:disabledDates={holidays()}` のように `prop:` 名前空間を使えば、Solid がプロパティへ代入します。
 
-### The handler for a custom event never fires
+### カスタムイベントのハンドラーが発火しない
 
-`onDateChange` listens for `datechange`; a name with uppercase letters or a hyphen never matches.
-Add the listener from a `ref` directive with the exact name.
-If the event uses a delegated name such as `input` and the element dispatches it without `bubbles: true`, the root listener never sees it either.
+`onDateChange` は `datechange` をリッスンします。大文字やハイフンを含む名前は決して一致しません。
+正確な名前で `ref` ディレクティブからリスナーを追加してください。
+イベントが `input` のようなデリゲーションされる名前で、要素が `bubbles: true` なしで発行しているなら、ルートのリスナーにも届きません。
 
-### An effect or cleanup inside a `ref` callback never runs
+### `ref` コールバック内のエフェクトやクリーンアップが実行されない
 
-Ref callbacks run without an owner.
-Move the setup into `onSettled` in the component body, or into a directive factory that returns the callback.
-See [An effect or onCleanup inside a ref callback never runs](/concepts/components-and-jsx#an-effect-or-oncleanup-inside-a-ref-callback-never-runs).
+ref コールバックはオーナーなしで実行されます。
+セットアップはコンポーネント本体の `onSettled`、あるいはコールバックを返すディレクティブファクトリーに移してください。
+[ref コールバック内のエフェクトや onCleanup が実行されない](/concepts/components-and-jsx#an-effect-or-oncleanup-inside-a-ref-callback-never-runs)を参照してください。
 
-## Recap
+## まとめ
 
-- Read a `ref` variable after the JSX has run, and do setup that needs the element in the document inside `onSettled`.
-- Create a library instance once in `onSettled` and return its teardown; push each new value with an effect whose compute function reads every input.
-- On a custom element, plain attributes are strings; use `prop:` for properties and `onXxx` for lowercase event names.
-- `Portal` moves a subtree to another node without leaving the component's scope; the server renders nothing for it.
-- `render` mounts Solid into a node another host owns and returns the disposer that unmounts it.
-- Bring outside values in by writing a signal from the subscription callback, and return the unsubscribe function from the effect function.
-- Wrap a browser-only component in `clientOnly`, or import the library inside `onSettled`.
+- `ref` の変数は JSX が評価された後に読み、要素がドキュメント内にある必要があるセットアップは `onSettled` の中で行います。
+- ライブラリのインスタンスは `onSettled` で一度だけ作り、ティアダウンを返します。新しい値のたびに、すべての入力を読むコンピュート関数を持つエフェクトで流し込みます。
+- カスタム要素では、通常の属性は文字列になります。プロパティには `prop:`、小文字のイベント名には `onXxx` を使います。
+- `Portal` はコンポーネントのスコープを離れずにサブツリーを別のノードへ移します。サーバーはポータルを何もレンダリングしません。
+- `render` は別のホストが所有するノードに Solid をマウントし、アンマウントする破棄関数を返します。
+- 外部の値は、サブスクリプションのコールバックからシグナルに書き込んで取り込み、エフェクト関数からアンサブスクライブ関数を返します。
+- ブラウザ専用のコンポーネントは `clientOnly` で包むか、`onSettled` の中でライブラリをインポートします。
 
-## Next steps
+## 次のステップ
 
-- [Custom primitives](/guides/custom-primitives): package the chart, the feed, and the map into `createX` functions with the owner and cleanup rules this page relied on.
-- [SSR-safe code](/guides/ssr-safe-code): the full checklist for code that runs on both sides, including hydration mismatches from library output.
-- [Rendering and SSR](/concepts/rendering-and-ssr): `render`, `hydrate`, and where `clientOnly` sits among the rendering functions.
-- [Avoid unnecessary effects](/guides/avoid-unnecessary-effects): the two cases where an effect is the right tool, both of which this page used.
+- [カスタムプリミティブ](/guides/custom-primitives): チャート・フィード・地図を `createX` 関数にパッケージ化します。このページが依拠したオーナーとクリーンアップのルールを使います。
+- [SSR 安全なコード](/guides/ssr-safe-code): 両側で動くコードの完全なチェックリスト。ライブラリ出力によるハイドレーションの不一致も含みます。
+- [レンダリングと SSR](/concepts/rendering-and-ssr): `render`・`hydrate`、そしてレンダリング関数の中での `clientOnly` の位置づけ。
+- [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects): エフェクトが適切な道具になる2つのケース。このページはその両方を使いました。
