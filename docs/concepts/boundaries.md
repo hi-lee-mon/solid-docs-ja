@@ -1,16 +1,16 @@
 ---
-title: "Boundaries"
+title: "バウンダリ"
 version: "2.0"
-description: "Decide which part of the page shows a spinner, which part shows an error, and in what order regions appear, by placing Loading, Errored, and Reveal around the right subtree."
+description: "Loading・Errored・Reveal を適切なサブツリーに配置して、ページのどの部分にスピナーを表示し、どの部分にエラーを表示し、各領域をどの順序で現れさせるかを決める。"
 ---
 
-A product page loads the product, its reviews, and a list of recommendations.
-With one boundary around the whole page, the first request to fail takes everything down with it, and a slow recommendations query keeps the product itself behind a spinner.
-With no boundary at all, an unhandled error halts the reactive system and nothing on the page updates again.
+商品ページは、商品・そのレビュー・レコメンデーションの一覧を読み込みます。
+ページ全体を1つのバウンダリで囲むと、最初に失敗したリクエストがすべてを道連れにし、遅いレコメンデーションのクエリが商品自体までスピナーの後ろに隠してしまいます。
+バウンダリがまったくなければ、処理されなかったエラーがリアクティブシステムを停止させ、ページ上のすべてが二度と更新されなくなります。
 
-Boundaries decide how much of the page a pending or failed read affects.
-[`Loading`](/reference/solid-js/components-jsx/loading) renders a fallback while async reads in its subtree have no value, [`Errored`](/reference/solid-js/components-jsx/errored) renders a fallback when its subtree throws, and [`Reveal`](/reference/solid-js/components-jsx/reveal) decides the order in which sibling regions appear.
-Where you put each one is the design decision this page is about.
+バウンダリは、保留中または失敗した読み取りがページのどれだけの範囲に影響するかを決めます。
+[`Loading`](/reference/solid-js/components-jsx/loading) はサブツリー内の非同期読み取りに値がない間フォールバックをレンダーし、[`Errored`](/reference/solid-js/components-jsx/errored) はサブツリーがエラーを投げたときにフォールバックをレンダーし、[`Reveal`](/reference/solid-js/components-jsx/reveal) は兄弟領域が現れる順序を決めます。
+それぞれをどこに置くかが、このページで扱う設計上の判断です。
 
 ```tsx
 import { Errored, Loading, createMemo, createSignal } from "solid-js";
@@ -48,22 +48,22 @@ function ProductPanel() {
 }
 ```
 
-On first render the panel shows "Loading product…" and the picker is usable.
-When the request resolves the product appears; when it rejects, the error message and a **Retry** button appear in the same place.
-Pick another product and the panel shows the loading text again while the picker keeps working.
+初回レンダーでは、パネルに "Loading product…" が表示され、ピッカーは操作できます。
+リクエストが解決すると商品が表示され、拒否されるとエラーメッセージと **Retry** ボタンが同じ場所に表示されます。
+別の商品を選ぶと、ピッカーが動作し続ける間、パネルは再びローディングのテキストを表示します。
 
-Three rules explain that behavior.
-A boundary handles status produced by reads in its own subtree, and the nearest matching boundary handles it.
-Loading and error status are separate, so `Loading` does not hide an error and `Errored` does not replace loading UI; both can protect the same region.
-Controls outside the boundary are outside its fallback, so the picker stays on screen in every state.
+この動作は3つのルールで説明できます。
+バウンダリは自分のサブツリー内の読み取りが生成したステータスを処理し、処理を担うのは最も近い一致するバウンダリです。
+ローディングとエラーのステータスは別物なので、`Loading` がエラーを隠すことはなく、`Errored` がローディング UI を置き換えることもありません。両方が同じ領域を守れます。
+バウンダリの外側にあるコントロールはフォールバックの外側にあるため、どの状態でもピッカーは画面に残ります。
 
-## Loading boundaries
+## `Loading` バウンダリ
 
-`Loading` renders its `fallback` while an async value read in its subtree has not produced a first answer.
-Once it has shown content, it keeps that content visible during later updates: as the [Async reactivity](/concepts/async-reactivity#settled-view-and-in-flight-work) page explains, a change to an input is held, the current screen stays, and the new content replaces it when ready.
-Use `isPending` in the content when the user should see that a refresh is in progress.
+`Loading` は、サブツリー内で読み取られた非同期の値が最初の答えを返していない間、`fallback` をレンダーします。
+一度コンテンツを表示した後は、以降の更新中もそのコンテンツを表示し続けます。[非同期リアクティビティ](/concepts/async-reactivity#settled-view-and-in-flight-work)のページで説明しているように、入力への変更は保留され、現在の画面はそのまま残り、準備ができた時点で新しいコンテンツに置き換わります。
+更新が進行中であることをユーザーに見せたい場合は、コンテンツ内で `isPending` を使います。
 
-Place a boundary around the smallest region its fallback should replace, and leave controls the user needs during the load outside it:
+フォールバックが置き換えるべき最小の領域を囲むようにバウンダリを置き、読み込み中にユーザーが必要とするコントロールはその外側に残します:
 
 ```tsx
 // Avoid: one boundary around the page, so a slow query hides everything
@@ -83,19 +83,19 @@ Place a boundary around the smallest region its fallback should replace, and lea
 </Loading>
 ```
 
-Run the `Avoid` version and the picker is gone until the slowest of the two requests lands.
-In the `Prefer` version the picker is always there, the detail pane appears when the product arrives, and the recommendations appear when they do.
+`Avoid` 版を実行すると、2つのリクエストのうち遅い方が届くまでピッカーが消えます。
+`Prefer` 版では、ピッカーは常に表示され、詳細ペインは商品が届いたときに、レコメンデーションはそれらが届いたときに表示されます。
 
-The `on` prop names the value whose change should make an initialized boundary show its fallback again.
-Without it, choosing a new product keeps the old product on screen while the new one loads; with `on={productId()}`, the boundary compares the id across updates and shows the skeleton when the subject changed.
-Pending work caused by anything else, such as a refresh of the same product, leaves the content in place.
+`on` prop は、変化したときに初期化済みのバウンダリにフォールバックを再び表示させるべき値を指定します。
+これがなければ、新しい商品を選んでも新しい商品の読み込み中は古い商品が画面に残り続けます。`on={productId()}` があれば、バウンダリは更新をまたいで id を比較し、対象が変わったときにスケルトンを表示します。
+同じ商品のリフレッシュのような、それ以外の原因による保留中の処理は、コンテンツをそのままにします。
 
-`on` lets the region stop being a reason for the update to wait; it does not make the update commit.
-When something outside the boundary also waits on the new product, such as a heading that reads the same product or a sibling region without `on`, the update stays held and the boundary shows no skeleton.
-Enclose every reader of the new subject, or give each sibling its own boundary with `on`; the [Async reactivity](/concepts/async-reactivity#show-a-placeholder-again-loading-on) page shows both cases.
+`on` は、その領域が更新を待たせる理由でなくなるようにするだけで、更新をコミットさせるものではありません。
+同じ商品を読み取る見出しや `on` のない兄弟領域のように、バウンダリの外側にも新しい商品を待つものがある場合、更新は保留されたままになり、バウンダリはスケルトンを表示しません。
+新しい対象を読み取るものをすべて囲むか、各兄弟に `on` 付きの独自のバウンダリを与えてください。[非同期リアクティビティ](/concepts/async-reactivity#show-a-placeholder-again-loading-on)のページに両方のケースがあります。
 
-:::pitfall[Passing the accessor to on instead of its value]
-`on` is compared with `!==` across updates, so pass a primitive; join several inputs into one string rather than passing an array.
+:::pitfall[on に値ではなくアクセサーを渡す]
+`on` は更新をまたいで `!==` で比較されるため、プリミティブを渡してください。配列を渡すのではなく、複数の入力を1つの文字列に結合します。
 
 ```tsx
 // Avoid: the function reference never changes, so the fallback never returns
@@ -105,47 +105,47 @@ Enclose every reader of the new subject, or give each sibling its own boundary w
 <Loading on={productId()} fallback={<DetailSkeleton />}>
 ```
 
-With the accessor, picking another product keeps the old product on screen for the whole load, which is the behavior `on` was meant to change.
+アクセサーを渡した場合、別の商品を選んでも読み込み中ずっと古い商品が画面に残ります。これは `on` が変えようとしていた動作そのものです。
 :::
 
-## Error boundaries
+## エラーバウンダリ
 
-`Errored` catches an error thrown by a read or computation in its subtree, including a rejected async source, and renders its fallback in place of the content.
-Content outside the boundary stays on screen.
+`Errored` は、拒否された非同期ソースを含め、サブツリー内の読み取りや計算が投げたエラーを捕捉し、コンテンツの代わりにフォールバックをレンダーします。
+バウンダリの外側のコンテンツは画面に残ります。
 
-Place it around the smallest region that can fail and recover as one unit.
-For the product page, that is the detail pane and the recommendations separately: a failed recommendations query should not take the product with it.
+1つの単位として失敗し回復できる最小の領域を囲むように配置してください。
+商品ページでは、詳細ペインとレコメンデーションはそれぞれ別の単位です。失敗したレコメンデーションのクエリが商品まで道連れにすべきではありません。
 
-The fallback can be an element or a function.
-The function receives an accessor for the error and a `reset` function; calling `reset` re-runs the sources that failed so the branch can render again.
+フォールバックには要素または関数を渡せます。
+関数にはエラーのアクセサーと `reset` 関数が渡されます。`reset` を呼ぶと失敗したソースが再実行され、そのブランチは再度レンダーできるようになります。
 
-### Recovery
+### 回復
 
-An errored region is not stuck until someone resets it.
-The error is the current status of that part of the graph, the same way "not ready" is a status, and it clears when the graph produces a value again:
+エラーになった領域は、誰かがリセットするまで固まったままというわけではありません。
+エラーは "not ready" と同じようにグラフのその部分の現在のステータスであり、グラフが再び値を生成すれば解消されます:
 
-- An input of the failed computation changes.
-  In the example above, picking another product after a failed request runs the fetch for the new id, and the content returns if that request succeeds.
-- A `refresh(source)` lands with a successful result.
-- A `live` server function reconnects and yields a value.
+- 失敗した計算の入力が変わる。
+  上の例では、失敗したリクエストの後に別の商品を選ぶと新しい id のフェッチが実行され、そのリクエストが成功すればコンテンツが戻ります。
+- `refresh(source)` が成功した結果を持って届く。
+- `live` のサーバー関数が再接続して値を返す。
 
-`reset` covers the case where nothing upstream will change on its own, such as a network outage.
-It re-runs the failed sources, so a retry that hits the same error shows the same fallback, and a retry that succeeds shows the content.
+`reset` は、ネットワーク障害のように上流が自力では変わらない場合をカバーします。
+失敗したソースを再実行するため、同じエラーにぶつかったリトライは同じフォールバックを表示し、成功したリトライはコンテンツを表示します。
 
-:::caution[An error in the fallback is outside the boundary]
-An error thrown while rendering an `Errored` fallback is not caught by that boundary.
-A parent `Errored` can catch it.
-With no boundary above, an unhandled error halts the reactive system, which development reports as `[REACTIVITY_HALTED]`; [Debugging reactivity](/guides/debugging-reactivity#every-update-stopped-after-an-error) covers that report.
+:::caution[フォールバック内のエラーはバウンダリの外側]
+`Errored` のフォールバックをレンダーしている最中に投げられたエラーは、そのバウンダリでは捕捉されません。
+親の `Errored` がそれを捕捉できます。
+上にバウンダリがなければ、処理されなかったエラーはリアクティブシステムを停止させます。開発環境では `[REACTIVITY_HALTED]` として報告されます。その報告については[リアクティビティのデバッグ](/guides/debugging-reactivity#every-update-stopped-after-an-error)で説明しています。
 :::
 
-## Reveal order
+## Reveal の順序
 
-Independent loading regions appear in the order their data arrives.
-On a product page with a detail pane, reviews, and recommendations, a fast recommendations query pops in below the detail skeleton and the layout shifts as each region lands.
-Server rendering has the same problem in the HTML stream, where fragments arrive out of order.
+独立したローディング領域は、データが届いた順に現れます。
+詳細ペイン・レビュー・レコメンデーションを持つ商品ページでは、速いレコメンデーションのクエリが詳細スケルトンの下に飛び込み、各領域が届くたびにレイアウトがずれます。
+サーバーレンダリングでも同じ問題が HTML ストリーム内で起き、フラグメントは順不同で届きます。
 
-`Reveal` coordinates the `Loading` boundaries created directly within it.
-It does not fetch data, create loading state, or delay the network; content still arrives as soon as it is ready and `Reveal` controls when it is shown:
+`Reveal` は、その内側に直接作られた `Loading` バウンダリを協調させます。
+データをフェッチしたり、ローディング状態を作ったり、ネットワークを遅らせたりはしません。コンテンツは準備ができ次第届き、`Reveal` はそれをいつ表示するかを制御します:
 
 ```tsx
 import { Loading, Reveal } from "solid-js";
@@ -163,15 +163,15 @@ import { Loading, Reveal } from "solid-js";
 </Reveal>;
 ```
 
-The recommendations can finish first and still wait their turn behind the detail pane and the reviews.
-`collapsed` keeps the skeletons after the current one from stacking below it, so only one skeleton is visible at a time.
+レコメンデーションが最初に終わっても、詳細ペインとレビューの後ろで順番を待ちます。
+`collapsed` は現在のスケルトンより後のスケルトンがその下に積み重なるのを防ぐため、一度に見えるスケルトンは1つだけです。
 
-The three orders:
+3つの順序は次のとおりです:
 
-- `sequential`, the default, reveals slots in registration order; a later slot stays on its fallback until every earlier slot is ready.
-- `together` holds every direct slot until all are ready, then releases them as a group.
-- `natural` lets each slot reveal when its own data resolves.
-  At the top level this is the same as no `Reveal`; its purpose is nesting, where the natural group takes one position in an outer order.
+- `sequential`（デフォルト）はスロットを登録順に公開します。後のスロットは、前のスロットがすべて準備できるまでフォールバックのままです。
+- `together` は直接のスロットをすべて準備ができるまで保持し、まとめて解放します。
+- `natural` は各スロットを自分のデータが解決したときに公開させます。
+  トップレベルでは `Reveal` がないのと同じです。その目的はネストであり、natural グループは外側の順序の中で1つの位置を占めます。
 
 ```tsx
 function ProductPage() {
@@ -196,30 +196,30 @@ function ProductPage() {
 }
 ```
 
-The detail pane appears first.
-Then reviews and recommendations appear independently, in whichever order they land.
-The related products wait until both of those are shown.
+詳細ペインが最初に現れます。
+次にレビューとレコメンデーションが、届いた順にそれぞれ独立して現れます。
+関連商品はその両方が表示されるまで待ちます。
 
-:::deep-dive[Which boundaries join a reveal group]
-A `Loading` boundary joins the nearest `Reveal` present when the boundary is created.
-A nested `Loading` or `Errored` starts a separate boundary scope for its subtree, so loading boundaries nested inside another `Loading` are not additional slots in the outer group, and a loading boundary wrapped by `Errored` does not delay an ancestor group.
+:::deep-dive[どのバウンダリが Reveal グループに参加するか]
+`Loading` バウンダリは、バウンダリが作られた時点で存在する最も近い `Reveal` に参加します。
+ネストされた `Loading` や `Errored` はそのサブツリーに別のバウンダリスコープを開始するため、別の `Loading` の内側にネストされたローディングバウンダリは外側のグループの追加スロットにはならず、`Errored` に包まれたローディングバウンダリは祖先のグループを遅らせません。
 
-A nested `Reveal` is different: it registers itself as one composite slot with the parent group.
-An outer hold propagates through it, keeping its descendant loading boundaries on their fallbacks until the parent releases the slot, and the inner group then follows its own order.
+ネストされた `Reveal` は異なります。親グループに対して1つの複合スロットとして自分自身を登録します。
+外側の保持はそれを通じて伝播し、親がスロットを解放するまで子孫のローディングバウンダリはフォールバックのままになり、その後内側のグループは自分の順序に従います。
 
-Membership is structural.
-Wrapping a descendant in another loading boundary does not let it escape an outer hold; move the region outside the outer `Reveal` when it must reveal on its own.
+参加は構造的です。
+子孫を別のローディングバウンダリで包んでも外側の保持からは逃れられません。独自に公開する必要がある場合は、その領域を外側の `Reveal` の外に移してください。
 :::
 
-## Primitive forms
+## プリミティブ形式
 
-The components above are built from three primitives.
-Application code does not need them; they exist for custom boundary components and renderer integrations.
+上のコンポーネントは3つのプリミティブから作られています。
+アプリケーションコードでこれらを使う必要はありません。カスタムバウンダリコンポーネントやレンダラー統合のために存在します。
 
-- [`createLoadingBoundary(fn, fallback, options?)`](/reference/solid-js/advanced/jsx-component-primitives/create-loading-boundary) returns an accessor that switches between the tracked `fn` and the fallback.
-  Its `on` option takes an accessor, because the primitive does not receive JSX props.
-- [`createErrorBoundary(fn, fallback)`](/reference/solid-js/advanced/jsx-component-primitives/create-error-boundary) returns an accessor and passes the fallback an error accessor and a reset function.
-- [`createRevealOrder(fn, options?)`](/reference/solid-js/advanced/jsx-component-primitives/create-reveal-order) runs `fn` under a reveal controller; its `order` and `collapsed` options are accessors.
+- [`createLoadingBoundary(fn, fallback, options?)`](/reference/solid-js/advanced/jsx-component-primitives/create-loading-boundary) は、追跡される `fn` とフォールバックを切り替えるアクセサーを返します。
+  プリミティブは JSX の props を受け取らないため、その `on` オプションはアクセサーを取ります。
+- [`createErrorBoundary(fn, fallback)`](/reference/solid-js/advanced/jsx-component-primitives/create-error-boundary) はアクセサーを返し、フォールバックにエラーのアクセサーとリセット関数を渡します。
+- [`createRevealOrder(fn, options?)`](/reference/solid-js/advanced/jsx-component-primitives/create-reveal-order) は `fn` をリビールコントローラーの下で実行します。その `order` と `collapsed` オプションはアクセサーです。
 
 ```tsx
 import { createErrorBoundary, createLoadingBoundary } from "solid-js";
@@ -246,48 +246,48 @@ function StatusBoundary(props: {
 }
 ```
 
-## Common problems
+## よくある問題
 
-### The whole page shows a skeleton while one region loads
+### 1つの領域の読み込み中にページ全体がスケルトンになる
 
-The `Loading` boundary is above the region that is slow.
-Move the boundary down to the region whose fallback should show, and leave the rest of the page outside it.
-The request can stay where it was; the [Async reactivity](/concepts/async-reactivity#fetch-high-block-low) page explains why the fetch and the boundary are placed independently.
+`Loading` バウンダリが遅い領域より上にあります。
+フォールバックを表示すべき領域までバウンダリを下げ、ページの残りはその外側に残してください。
+リクエストは元の場所に置いたままで構いません。フェッチとバウンダリが独立して配置される理由は[非同期リアクティビティ](/concepts/async-reactivity#fetch-high-block-low)のページで説明しています。
 
-### Choosing a new item keeps the old one on screen
+### 新しい項目を選んでも古い項目が画面に残る
 
-That is the default: after a first answer, the boundary keeps its content and the update is held.
-Add `on={id()}` to the boundary when a change of subject should show the fallback, and pass the value rather than the accessor.
+これがデフォルトです。最初の答えの後、バウンダリはコンテンツを保持し、更新は保留されます。
+対象の変化でフォールバックを表示したい場合はバウンダリに `on={id()}` を追加し、アクセサーではなく値を渡してください。
 
-If `on` is already there and the old item still stays, something outside the boundary is waiting on the same change: a title reading the same item, or a sibling boundary without `on`.
-The update cannot commit until that reader is ready, so the fallback never shows.
-Move the boundary out to enclose the other reader, give the sibling its own `on`, or drop `on` and show the wait with `isPending`.
+`on` がすでにあっても古い項目が残る場合、バウンダリの外側で何かが同じ変化を待っています。同じ項目を読み取るタイトルや、`on` のない兄弟バウンダリです。
+その読み取り側が準備できるまで更新はコミットできないため、フォールバックは表示されません。
+バウンダリを外に広げてその読み取り側も囲むか、兄弟に独自の `on` を与えるか、`on` を外して `isPending` で待ちを表示してください。
 
-### Retry shows the same error
+### リトライで同じエラーが表示される
 
-`reset` re-runs the failed sources with the same inputs.
-If the cause has not changed, the same error comes back.
-When the fix is a different input, change the input; the boundary recovers on its own.
+`reset` は失敗したソースを同じ入力で再実行します。
+原因が変わっていなければ、同じエラーが戻ってきます。
+修正が別の入力である場合は入力を変えてください。バウンダリは自力で回復します。
 
-### A region inside `Reveal` does not appear when its data is ready
+### `Reveal` 内の領域がデータ準備後も現れない
 
-The region is a slot in a `sequential` group and an earlier slot is not ready.
-Give the group `order="natural"`, wrap the independent regions in a nested `<Reveal order="natural">`, or move the region outside the group.
+その領域は `sequential` グループのスロットであり、前のスロットがまだ準備できていません。
+グループに `order="natural"` を与えるか、独立した領域をネストした `<Reveal order="natural">` で包むか、その領域をグループの外に移してください。
 
-## Recap
+## まとめ
 
-- Put `Loading` around the smallest region its fallback should replace, and keep the controls the user needs outside it.
-- Put `Errored` around the smallest region that can fail and recover as a unit; both boundaries can wrap the same region.
-- After a first answer, `Loading` keeps its content during updates; add `on={key()}` when a changed subject should show the fallback again, and pass a value, not an accessor.
-  It takes effect only when nothing outside the boundary is waiting on the same change.
-- An errored region recovers when an input changes or a refresh succeeds; `reset` is for when nothing upstream will change.
-- An error thrown by a fallback needs a boundary above it.
-- Use `Reveal` to control the order sibling regions appear in; it changes timing, not what each boundary observes.
-- Nest `<Reveal order="natural">` to let a group of regions take one position in an outer sequence.
+- `Loading` はフォールバックが置き換えるべき最小の領域を囲み、ユーザーが必要とするコントロールは外側に残します。
+- `Errored` は1つの単位として失敗し回復できる最小の領域を囲みます。両方のバウンダリが同じ領域を包めます。
+- 最初の答えの後、`Loading` は更新中もコンテンツを保持します。変わった対象にフォールバックを再び表示させたい場合は `on={key()}` を追加し、アクセサーではなく値を渡します。
+  これは、バウンダリの外側で同じ変化を待っているものがない場合にのみ効果があります。
+- エラーになった領域は、入力が変わるかリフレッシュが成功すると回復します。`reset` は上流が自力では変わらない場合のためのものです。
+- フォールバックが投げたエラーには、その上にバウンダリが必要です。
+- 兄弟領域が現れる順序を制御するには `Reveal` を使います。変わるのはタイミングであり、各バウンダリが観察するものではありません。
+- `<Reveal order="natural">` をネストすると、領域のグループが外側の順序の中で1つの位置を占められます。
 
-## Next steps
+## 次のステップ
 
-- [Rendering and SSR](/concepts/rendering-and-ssr): how `Loading` boundaries decide what goes in the initial HTML shell and what streams later.
-- [Mutations](/concepts/mutations): which errors an `action` should catch itself and which should reach `Errored`.
-- [Server functions](/building-apps/server-functions): reads and live sources whose errors and reconnects these boundaries handle.
-- [Solid Router](/routing/solid-router): where to put the `Loading` boundary around `props.children` so the first page load has a fallback, and why a later navigation keeps the current page without one.
+- [レンダリングと SSR](/concepts/rendering-and-ssr): `Loading` バウンダリが、初期の HTML シェルに入れるものと後でストリーミングするものをどう決めるか。
+- [ミューテーション](/concepts/mutations): `action` が自分で捕捉すべきエラーと、`Errored` に届かせるべきエラー。
+- [サーバー関数](/building-apps/server-functions): これらのバウンダリが扱うエラーや再接続を持つ、読み取りとライブソース。
+- [Solid Router](/routing/solid-router): 初回ページロードにフォールバックを持たせるための `props.children` の周りへの `Loading` バウンダリの置き方、そして後のナビゲーションがなければ現在のページを維持する理由。
