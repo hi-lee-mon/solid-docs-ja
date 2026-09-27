@@ -1,19 +1,19 @@
 ---
 title: "TypeScript"
 version: "2.0"
-description: "Replace the any annotations in a storefront with the types Solid exports for props, children, accessors, store drafts, event handlers, refs, server function results, and typed routes."
+description: "ストアフロント内の any アノテーションを、props、children、アクセサー、ストアのドラフト、イベントハンドラー、ref、サーバー関数の戻り値、型付きルートのために Solid がエクスポートする型に置き換える。"
 ---
 
-The storefront compiles, and a search for `any` in `src` finds six of them: the props of `LineItem`, the `children` of `Panel`, the `query` passed into `SearchResults`, the draft inside a `setCart` callback, an `onInput` handler, and a `ref`.
-Each one was written to silence an error whose message was not clear at the time.
+ストアフロントはコンパイルが通りますが、`src` 内を `any` で検索すると 6 箇所見つかります。`LineItem` の props、`Panel` の `children`、`SearchResults` に渡される `query`、`setCart` コールバック内のドラフト、`onInput` ハンドラー、そして `ref` です。
+どれも、当時は意味が分からなかったエラーメッセージを黙らせるために書かれたものです。
 
-This guide goes through those six places and shows which exported type belongs in each, and what the type checker reports when the wrong one is used.
-The [type reference pages](/reference/solid-js/types/component-types) list the exports; [Components and JSX](/concepts/components-and-jsx#children-and-composition) introduces `ParentProps`.
-This guide starts from there and shows the types in the cart and product pages those pages built.
+このガイドでは、その 6 箇所を順に見て、それぞれにどのエクスポートされた型が対応するのか、間違った型を使ったときに型チェッカーが何を報告するのかを示します。
+[型リファレンスのページ](/reference/solid-js/types/component-types)にエクスポートの一覧があり、[コンポーネントと JSX](/concepts/components-and-jsx#children-and-composition)で `ParentProps` を紹介しています。
+このガイドはそこから出発し、それらのページで作ったカートページと商品ページの中で各型を示します。
 
-## Set up
+## セットアップ
 
-The templates ship a `tsconfig.json` with three settings that matter for Solid:
+テンプレートには、Solid で重要な 3 つの設定を含む `tsconfig.json` が同梱されています。
 
 ```json
 {
@@ -25,13 +25,13 @@ The templates ship a `tsconfig.json` with three settings that matter for Solid:
 }
 ```
 
-`jsx: "preserve"` leaves JSX in place for the Solid compiler in the Vite plugin, which handles `.tsx` and `.jsx` files itself.
-`jsxImportSource` points TypeScript at `@solidjs/web/jsx-runtime`, where the element, attribute, and event types for the DOM renderer live.
-`strict` turns on the null checks that make `createSignal<Product>()` report its `undefined` before the first render does.
+`jsx: "preserve"` は JSX をそのまま残し、Vite プラグイン内の Solid コンパイラが `.tsx` と `.jsx` ファイルを自ら処理します。
+`jsxImportSource` は TypeScript を `@solidjs/web/jsx-runtime` に向けます。そこには DOM レンダラーの要素・属性・イベントの型があります。
+`strict` は null チェックを有効にし、最初のレンダーより先に `createSignal<Product>()` が `undefined` を報告するようにします。
 
-## Type component props
+## コンポーネントの props に型を付ける
 
-A component is a function that takes one `props` object, so the first choice is between annotating the parameter and annotating the function:
+コンポーネントは一つの `props` オブジェクトを受け取る関数なので、最初の選択肢はパラメータにアノテーションを付けるか、関数にアノテーションを付けるかです。
 
 ```tsx
 import type { Component } from "solid-js";
@@ -49,11 +49,11 @@ const LineItem: Component<{ product: Product; quantity: number }> = (props) => (
 );
 ```
 
-Both accept the same JSX and reject the same mistakes.
-`Component<P>` is `(props: P) => Element`, so use it when the component is a value: stored in a map, passed to `dynamic()`, or returned from `lazy()`.
-Use the function declaration otherwise; it reads the same and needs no import.
+どちらも同じ JSX を受け入れ、同じ間違いを拒否します。
+`Component<P>` は `(props: P) => Element` なので、コンポーネントが値として扱われる場合——マップに格納する、`dynamic()` に渡す、`lazy()` から返す——にはこちらを使います。
+それ以外では関数宣言を使います。同じように読めて、インポートも不要です。
 
-Three helpers extend a props type with a `children` contract:
+3 つのヘルパーが props 型に `children` の契約を追加します。
 
 ```tsx
 import type { ParentProps, VoidProps } from "solid-js";
@@ -69,14 +69,14 @@ function Price(props: VoidProps<{ amount: number }>) {
 }
 ```
 
-Write `<Price amount={12}>USD</Price>` and the checker reports `'Price' components don't accept text as child elements. Text in JSX has the type 'string', but the expected type of 'children' is 'undefined'`.
-Without `VoidProps`, the text would type-check and be dropped at runtime, because a component only renders the children it reads.
-`FlowProps` is the third helper; it requires children of a specific type and appears in the next section.
+`<Price amount={12}>USD</Price>` と書くと、チェッカーは `'Price' components don't accept text as child elements. Text in JSX has the type 'string', but the expected type of 'children' is 'undefined'` と報告します。
+`VoidProps` がなければ、このテキストは型チェックを通過し、実行時に捨てられます。コンポーネントは自分が読み取る children しかレンダーしないからです。
+`FlowProps` は 3 つ目のヘルパーで、特定の型の children を必須にします。次のセクションで登場します。
 
-To reuse another component's props, take them from the component: `function IconButton(props: ComponentProps<typeof Button> & { icon: JSX.Element })`.
-`ComponentProps<typeof Button>` is whatever `Button` declared, so adding a `variant` to `Button` adds it to `IconButton` with no second edit.
+別のコンポーネントの props を再利用するには、そのコンポーネントから取得します。`function IconButton(props: ComponentProps<typeof Button> & { icon: JSX.Element })` のように書きます。
+`ComponentProps<typeof Button>` は `Button` が宣言したものそのものなので、`Button` に `variant` を追加すれば、二箇所目の編集なしに `IconButton` にも追加されます。
 
-Defaults and rest props keep their types through `merge` and `omit`:
+デフォルト値と rest props は、`merge` と `omit` を通しても型を保ちます。
 
 ```tsx
 import { merge, omit } from "solid-js";
@@ -99,11 +99,11 @@ function Button(
 }
 ```
 
-After `merge`, `props.variant` is `"primary" | "ghost"` with the `undefined` gone.
-After `omit`, `rest.label` is a type error, so nothing the component consumed leaks onto the `<button>`.
-Both keep reactivity, which is why they replace destructuring and spreading; the [`merge`](/reference/solid-js/stores/merge) and [`omit`](/reference/solid-js/stores/omit) references list the signatures.
+`merge` の後、`props.variant` は `undefined` が取り除かれた `"primary" | "ghost"` になります。
+`omit` の後、`rest.label` は型エラーになるので、コンポーネントが消費したものが `<button>` に漏れ出すことはありません。
+どちらもリアクティビティを保持します。これが分割代入やスプレッドの代わりにこれらを使う理由です。[`merge`](/reference/solid-js/stores/merge)と[`omit`](/reference/solid-js/stores/omit)のリファレンスにシグネチャがあります。
 
-:::pitfall[Destructuring type-checks and still breaks]
+:::pitfall[分割代入は型チェックを通っても壊れる]
 
 ```tsx
 // Avoid: valid TypeScript, reads quantity once
@@ -117,24 +117,24 @@ function LineItem(props: { quantity: number }) {
 }
 ```
 
-The `Avoid` version compiles without a warning, because destructuring a parameter is ordinary TypeScript.
-At runtime the parent's next `quantity` never reaches the row, and development prints `[STRICT_READ_UNTRACKED]` with the component name.
-Types describe the shape of `props`, not when it is read; [Props](/concepts/components-and-jsx#props) explains the getter the compiler generates.
+`Avoid` 側は警告なくコンパイルされます。パラメータの分割代入は普通の TypeScript だからです。
+実行時には、親の次の `quantity` はその行に届かず、開発環境ではコンポーネント名とともに `[STRICT_READ_UNTRACKED]` が出力されます。
+型は `props` の形を記述するもので、いつ読み取られるかは記述しません。コンパイラが生成するゲッターについては [Props](/concepts/components-and-jsx#props) を参照してください。
 :::
 
-## Element and children types
+## 要素と children の型
 
-Most components need no return annotation; the checker infers it from the JSX.
-When a type is needed, for a prop that takes markup or a function that returns it, use `JSX.Element` from `@solidjs/web`.
+ほとんどのコンポーネントは戻り値のアノテーションを必要としません。チェッカーが JSX から推論します。
+マークアップを受け取る prop やそれを返す関数など、型が必要な場合は `@solidjs/web` の `JSX.Element` を使います。
 
-:::note[Two packages export types]
-`solid-js` exports the renderer-neutral types: `Component`, `Element`, `ParentProps`, `Accessor`, `Store`.
-`@solidjs/web` exports the DOM renderer's `JSX` namespace, and its own `ComponentProps` that also accepts a tag name, so `ComponentProps<"button">` is the attribute type of a native button.
-There is no `JSX` export on `solid-js`.
-`JSX.Element` in `@solidjs/web` is the core `Element` type widened with DOM `Node`, so a component may return a node it created by hand.
+:::note[2 つのパッケージが型をエクスポートする]
+`solid-js` はレンダラー非依存の型をエクスポートします。`Component`、`Element`、`ParentProps`、`Accessor`、`Store` です。
+`@solidjs/web` は DOM レンダラーの `JSX` 名前空間と、タグ名も受け取れる独自の `ComponentProps` をエクスポートするので、`ComponentProps<"button">` はネイティブの button の属性型になります。
+`solid-js` に `JSX` のエクスポートはありません。
+`@solidjs/web` の `JSX.Element` は、コアの `Element` 型を DOM の `Node` で広げたものなので、コンポーネントは手作業で作ったノードを返すこともできます。
 :::
 
-A component that hands a value to its children declares the callback type with `FlowProps`:
+children に値を渡すコンポーネントは、`FlowProps` でコールバックの型を宣言します。
 
 ```tsx
 import { createMemo, type Accessor, type FlowProps } from "solid-js";
@@ -152,15 +152,15 @@ function ProductLoader(
 </ProductLoader>;
 ```
 
-The callback parameter is typed from the declaration, so `product().name` completes and `product().nmae` is an error.
-Pass an element instead of a function and the checker reports `Type 'Element' is not assignable to type '(product: Accessor<Product>) => Element'`.
+コールバックのパラメータは宣言から型付けされるので、`product().name` は補完が効き、`product().nmae` はエラーになります。
+関数ではなく要素を渡すと、チェッカーは `Type 'Element' is not assignable to type '(product: Accessor<Product>) => Element'` と報告します。
 
-When a component must inspect its children, the [`children`](/reference/solid-js/components-context/children) helper returns a `ChildrenReturn`: an `Accessor<ResolvedChildren>` with a `toArray()` that returns `ResolvedElement[]`.
-Both types are exported from `solid-js`.
+コンポーネントが children を調べる必要がある場合、[`children`](/reference/solid-js/components-context/children)ヘルパーは `ChildrenReturn` を返します。これは `ResolvedElement[]` を返す `toArray()` を持つ `Accessor<ResolvedChildren>` です。
+どちらの型も `solid-js` からエクスポートされています。
 
-## Signals, memos, and setters
+## シグナル・メモ・セッター
 
-`createSignal` infers its type from the initial value, and the no-argument form includes `undefined`:
+`createSignal` は初期値から型を推論し、引数なしの形式は `undefined` を含みます。
 
 ```tsx
 import { createMemo, createSignal } from "solid-js";
@@ -174,10 +174,10 @@ setSelected(); // clears to undefined; allowed because the type includes it
 const product = createMemo(() => getProduct(props.id)); // SourceAccessor<Product>
 ```
 
-`product()` is a `Product`, not a `Promise<Product>`.
-A compute function may return a promise, and the memo's type is the settled value; what a reader sees while the promise is pending is the subject of [Async reactivity](/concepts/async-reactivity#a-memo-that-returns-a-promise).
+`product()` は `Promise<Product>` ではなく `Product` です。
+計算関数は Promise を返すことができ、メモの型は確定後の値になります。Promise が保留中の間に読み取り側に見えるものについては、[非同期リアクティビティ](/concepts/async-reactivity#a-memo-that-returns-a-promise)を参照してください。
 
-Accessors travel as props in two ways, and the error that follows from mixing them is the most common one on this page:
+アクセサーが props として渡される方法は 2 通りあり、それらを混同したときのエラーはこのページで最も多いものです。
 
 ```tsx
 import type { Accessor } from "solid-js";
@@ -193,21 +193,21 @@ function Results(props: { query: string }) {
 <Results query={query()} />;
 ```
 
-The `Avoid` version reports `Type 'SourceAccessor<string>' is not assignable to type 'string'`.
-The `Prefer` version stays reactive, because a dynamic attribute compiles to a getter on `props`, so `props.query` inside `Results` re-reads `query()` where it is used.
-Type a prop as `Accessor<T>` only when the child needs the function itself, to hand it to a primitive or to defer the read; the [Custom primitives](/guides/custom-primitives) guide covers accepting either form.
+`Avoid` 側は `Type 'SourceAccessor<string>' is not assignable to type 'string'` と報告されます。
+`Prefer` 側はリアクティブのままです。動的な属性は `props` 上のゲッターにコンパイルされるので、`Results` 内の `props.query` は使われる場所で `query()` を読み直します。
+prop を `Accessor<T>` と型付けするのは、プリミティブに渡したり読み取りを遅らせたりするために、子が関数そのものを必要とする場合だけです。どちらの形式も受け取れるようにする方法は[カスタムプリミティブ](/guides/custom-primitives)ガイドで説明しています。
 
-`Setter<T>` types a setter passed down, as in `props: { value: Accessor<number>; setValue: Setter<number> }`, and the child may call it with a value or an updater.
+`Setter<T>` は、`props: { value: Accessor<number>; setValue: Setter<number> }` のように下へ渡されるセッターを型付けします。子は値でもアップデーターでも呼び出せます。
 
-:::caution[A function passed to a setter is an updater]
-`setHandler(() => console.log("saved"))` reports `Type 'void' is not assignable to type 'Handler'`, because the setter reads a function argument as `(prev) => next` and checks its return.
-To store a function as the value, return it from an updater: `setHandler(() => next)`.
-The same rule applies to `createSignal`: a function as the first argument is the derived, writable form, not an initial value.
+:::caution[セッターに渡した関数はアップデーターになる]
+`setHandler(() => console.log("saved"))` は `Type 'void' is not assignable to type 'Handler'` と報告されます。セッターは関数引数を `(prev) => next` と解釈し、その戻り値をチェックするからです。
+関数を値として保存するには、アップデーターから返します。`setHandler(() => next)` のように書きます。
+同じルールが `createSignal` にも適用されます。最初の引数の関数は初期値ではなく、派生した書き込み可能な形式です。
 :::
 
-## Stores
+## ストア
 
-`createStore<T>` returns `[Store<T>, StoreSetter<T>]`, and `Store<T>` is `T`:
+`createStore<T>` は `[Store<T>, StoreSetter<T>]` を返し、`Store<T>` は `T` です。
 
 ```tsx
 import { createStore, reconcile } from "solid-js";
@@ -225,27 +225,27 @@ setCart((draft) => {
 setCart(reconcile(await getCart()));
 ```
 
-The draft is a `Cart`, so a write to the wrong property or a half-built item is reported at the line that wrote it.
-Because `Store<Cart>` is `Cart`, the proxy passes anywhere a `Cart` or a `CartItem[]` is expected, such as `<CartLines items={cart.items} />`, with no cast.
-`reconcile(value)` returns `(state: Cart) => Cart`, which is exactly what the setter takes.
+ドラフトは `Cart` なので、間違ったプロパティへの書き込みや不完全なアイテムは、それを書いた行で報告されます。
+`Store<Cart>` は `Cart` なので、`<CartLines items={cart.items} />` のように `Cart` や `CartItem[]` が期待される場所には、キャストなしでプロキシを渡せます。
+`reconcile(value)` は `(state: Cart) => Cart` を返します。これはセッターが受け取るものと正確に一致します。
 
-The function form, `createStore(async () => getCart(), seed)`, is typed by its seed and return value, and [`createProjection`](/reference/solid-js/stores/create-projection) returns a `Store<T>` of its seed type.
-[Stores](/concepts/stores#update-with-a-draft) explains what the draft does at runtime.
+関数形式の `createStore(async () => getCart(), seed)` はシードと戻り値で型付けされ、[`createProjection`](/reference/solid-js/stores/create-projection)はそのシード型の `Store<T>` を返します。
+ドラフトが実行時に何をするかは、[ストア](/concepts/stores#update-with-a-draft)を参照してください。
 
-## Events and refs
+## イベントと ref
 
-Inline handlers are typed from the element they sit on:
+インラインのハンドラーは、それが置かれた要素から型付けされます。
 
 ```tsx
 <input onInput={(event) => setQuery(event.currentTarget.value)} />
 <button onClick={(event) => event.currentTarget.disabled} />
 ```
 
-`event.currentTarget` is the element the handler is on: `HTMLInputElement` in the first line, `HTMLButtonElement` in the second.
-For `onInput`, `onChange`, and focus events on an input, select, or textarea, `event.target` is narrowed to the same element.
-For every other handler, `event.target` is `Element`, so `event.target.value` in an `onClick` reports `Property 'value' does not exist on type 'EventTarget & Element'`; read `currentTarget`.
+`event.currentTarget` はハンドラーが置かれた要素です。1 行目では `HTMLInputElement`、2 行目では `HTMLButtonElement` です。
+input、select、textarea 上の `onInput`、`onChange`、フォーカスイベントでは、`event.target` も同じ要素に絞り込まれます。
+それ以外のハンドラーでは `event.target` は `Element` なので、`onClick` 内の `event.target.value` は `Property 'value' does not exist on type 'EventTarget & Element'` と報告されます。`currentTarget` を読んでください。
 
-A handler defined outside the JSX takes one of the handler types from the `JSX` namespace:
+JSX の外で定義するハンドラーには、`JSX` 名前空間のハンドラー型のいずれかを使います。
 
 ```tsx
 import type { JSX } from "@solidjs/web";
@@ -257,9 +257,9 @@ const onClick: JSX.EventHandler<HTMLButtonElement, MouseEvent> = (event) =>
 	event.currentTarget.blur();
 ```
 
-A prop that forwards to an element, such as `onClick: JSX.EventHandlerUnion<HTMLButtonElement, MouseEvent>`, takes the union the element attribute takes, which includes the bound `[handler, data]` form.
+要素へ転送する prop（例: `onClick: JSX.EventHandlerUnion<HTMLButtonElement, MouseEvent>`）は、要素の属性が受け取るのと同じユニオンを受け取ります。そこにはバインド済みの `[handler, data]` 形式も含まれます。
 
-A `ref` variable is `undefined` until Solid creates the element:
+`ref` の変数は、Solid が要素を作成するまでは `undefined` です。
 
 ```tsx
 // Avoid: the checker is right, and so is the runtime
@@ -272,14 +272,14 @@ let input!: HTMLInputElement;
 <button type="button" onClick={() => input.select()} />;
 ```
 
-The `!` says the variable is assigned before it is read, which holds when every read happens in an event handler or in `onSettled`, both of which run after the element exists.
+`!` は、その変数が読まれる前に代入されることを宣言します。すべての読み取りがイベントハンドラーか `onSettled` の中で行われるならこの条件は満たされます。どちらも要素が存在した後に実行されるからです。
 
-A component that exposes its element takes a `Ref<T>` prop, `T | ((val: T) => void) | undefined | Ref<T>[]` from `solid-js`, and passes it straight through to `ref`.
-The [`ref` reference](/reference/solid-web/jsx-properties/ref) lists what the attribute accepts.
+要素を公開するコンポーネントは、`solid-js` の `Ref<T>` prop（`T | ((val: T) => void) | undefined | Ref<T>[]`）を受け取り、それをそのまま `ref` に渡します。
+この属性が受け取るものの一覧は、[`ref` のリファレンス](/reference/solid-web/jsx-properties/ref)を参照してください。
 
-## Server functions and the router
+## サーバー関数とルーター
 
-A `"use server"` function is typed like any async function, and the caller sees its declared return:
+`"use server"` 関数は他の非同期関数と同じように型付けされ、呼び出し側には宣言された戻り値が見えます。
 
 ```tsx
 import { getRequestEvent, redirect } from "@solidjs/web";
@@ -299,12 +299,12 @@ export async function deleteAccount() {
 }
 ```
 
-`redirect()` returns a `Response`.
-Thrown, it leaves the return type alone, so `await getCart()` is a `Cart`; returned, it widens the result to `Cart | Response`, which matches what plain code receives when it calls the function directly.
-[Redirect the caller](/building-apps/server-functions/mutations-and-responses#redirect-the-caller) covers which callers follow the redirect.
+`redirect()` は `Response` を返します。
+throw された場合は戻り値の型は変わらず、`await getCart()` は `Cart` のままです。return された場合は結果が `Cart | Response` に広がり、これは普通のコードが関数を直接呼んだときに受け取るものと一致します。
+どの呼び出し側がリダイレクトに従うかは、[呼び出し側のリダイレクト](/building-apps/server-functions/mutations-and-responses#redirect-the-caller)を参照してください。
 
-Solid Router derives its types from the route table.
-`defineRoutes` keeps the path literals, `RouteComponent<typeof Router.paths.products>` types `props.params.id` as `string`, and `PathParamsOf<typeof Router.paths.products>` is `{ id: string }`:
+Solid Router はルートテーブルから型を導出します。
+`defineRoutes` はパスのリテラルを保持し、`RouteComponent<typeof Router.paths.products>` は `props.params.id` を `string` と型付けし、`PathParamsOf<typeof Router.paths.products>` は `{ id: string }` です。
 
 ```tsx
 import type { PathParamsOf, RouteComponent } from "@solidjs/router";
@@ -316,12 +316,12 @@ const Product: RouteComponent<typeof Router.paths.products> = (props) => (
 type ProductParams = PathParamsOf<typeof Router.paths.products>; // { id: string }
 ```
 
-With `matchFilters: { id: int }` on the orders route, `Router.paths.account.orders("latest")` reports `Argument of type 'string' is not assignable to parameter of type 'number'`.
-[Type a route at its definition](/routing/solid-router/route-definitions#type-a-route-at-its-definition) and [Type search parameters](/routing/solid-router/navigation#type-search-parameters) cover `defineRoute`, filters, and search schemas.
+orders ルートに `matchFilters: { id: int }` がある場合、`Router.paths.account.orders("latest")` は `Argument of type 'string' is not assignable to parameter of type 'number'` と報告します。
+`defineRoute`、フィルター、検索スキーマについては、[ルートを定義時点で型付けする](/routing/solid-router/route-definitions#type-a-route-at-its-definition)と[検索パラメータの型付け](/routing/solid-router/navigation#type-search-parameters)を参照してください。
 
-## Generic components
+## ジェネリックなコンポーネント
 
-A size picker that works for sizes, colors, and shipping methods takes a type parameter:
+サイズ・色・配送方法のいずれにも使えるサイズ選択コンポーネントは、型パラメータを受け取ります。
 
 ```tsx
 import { For } from "solid-js";
@@ -345,51 +345,51 @@ function Select<T>(props: {
 }
 ```
 
-Render `<Select options={sizes} label={(size) => size.label} onChange={(size) => setSize(size.code)} />` and `T` is inferred from `options` as `Size`, so `size.code` completes in both callbacks.
-An arrow function needs a trailing comma in the type parameter list, `const Select = <T,>(props: ...) => ...`, because in a `.tsx` file `<T>` on its own reads as a JSX tag and reports `JSX element 'T' has no corresponding closing tag`.
+`<Select options={sizes} label={(size) => size.label} onChange={(size) => setSize(size.code)} />` とレンダーすると、`T` は `options` から `Size` と推論されるので、両方のコールバックで `size.code` が補完されます。
+アロー関数では型パラメータリストに末尾のカンマが必要です（`const Select = <T,>(props: ...) => ...`）。`.tsx` ファイルでは単独の `<T>` が JSX タグとして読まれ、`JSX element 'T' has no corresponding closing tag` と報告されるからです。
 
-## Common problems
+## よくある問題
 
 ### `Type 'SourceAccessor<string>' is not assignable to type 'string'`
 
-An accessor was passed where the prop type expects the value.
-Call it in the attribute, `query={query()}`, which stays reactive; type the prop as `Accessor<string>` only when the child needs the function.
+prop 型が値を期待する場所にアクセサーが渡されています。
+`query={query()}` のように属性内で呼び出せばリアクティブのままです。prop を `Accessor<string>` と型付けするのは、子が関数を必要とする場合だけにしてください。
 
-### The child never updates, and there is no type error
+### 子が更新されず、型エラーも出ない
 
-The child destructured `props` or copied a prop into a local variable.
-TypeScript allows both; development prints `[STRICT_READ_UNTRACKED]`.
-Read `props.name` inside the JSX; see [Props](/concepts/components-and-jsx#props).
+子が `props` を分割代入したか、prop をローカル変数にコピーしています。
+TypeScript はどちらも許可します。開発環境では `[STRICT_READ_UNTRACKED]` が出力されます。
+JSX の中で `props.name` を読んでください。[Props](/concepts/components-and-jsx#props) を参照。
 
 ### `'Price' components don't accept text as child elements`
 
-The component's props use `VoidProps`, which types `children` as `never`, so any child is rejected.
-Remove the child, or change the props to `ParentProps` if the component should render children.
+そのコンポーネントの props は `VoidProps` を使っており、`children` が `never` と型付けされるので、どんな子も拒否されます。
+子を取り除くか、コンポーネントが children をレンダーすべきなら props を `ParentProps` に変えてください。
 
 ### `Type 'SourceAccessor<number>' is not assignable to type 'Element'`
 
-A signal was placed in JSX without calling it: `{quantity}` instead of `{quantity()}`.
-A function is not a valid child, so the checker reports it; add the parentheses.
+シグナルが呼び出されずに JSX に置かれています。`{quantity()}` ではなく `{quantity}` と書いています。
+関数は有効な子ではないためチェッカーが報告します。括弧を追加してください。
 
 ### `'input' is possibly 'undefined'`
 
-The `ref` variable is typed `HTMLInputElement | undefined` and read in the component body, before the element exists.
-Move the read into an event handler or `onSettled`, and declare the variable with `!` once every read happens after creation.
+`ref` の変数が `HTMLInputElement | undefined` と型付けされ、要素が存在する前のコンポーネント本体で読まれています。
+読み取りをイベントハンドラーか `onSettled` の中に移し、すべての読み取りが作成後に行われるようになったら `!` 付きで変数を宣言してください。
 
-## Recap
+## まとめ
 
-- Type `props` on the parameter, or use `Component<P>` when the component is a value; both produce the same checks.
-- Add `children` with `ParentProps` (optional), `FlowProps` (required, with its type), or `VoidProps` (forbidden).
-- Import `JSX` from `@solidjs/web`; `solid-js` exports the renderer-neutral `Component`, `Element`, and reactive types.
-- Pass `query()` to a prop typed `string`; the compiled getter keeps it reactive, and `Accessor<T>` is for children that need the function.
-- A memo that returns a promise is typed as the settled value; `createSignal<T>()` with no argument includes `undefined`.
-- A store draft has the store's type, and `Store<T>` is `T`, so a store passes where the plain object is expected.
-- Read `event.currentTarget`; `event.target` is only narrowed for input events on form controls.
-- A thrown `redirect()` keeps the server function's return type; a returned one adds `Response`.
+- `props` の型はパラメータに付けるか、コンポーネントが値の場合は `Component<P>` を使います。どちらも同じチェックになります。
+- `children` の追加には `ParentProps`（任意）、`FlowProps`（必須・型指定あり）、`VoidProps`（禁止）を使います。
+- `JSX` は `@solidjs/web` からインポートします。`solid-js` はレンダラー非依存の `Component`、`Element`、リアクティブな型をエクスポートします。
+- `string` と型付けされた prop には `query()` を渡します。コンパイルされたゲッターがリアクティブ性を保ち、`Accessor<T>` は関数そのものが必要な子のためのものです。
+- Promise を返すメモは確定後の値として型付けされます。引数なしの `createSignal<T>()` は `undefined` を含みます。
+- ストアのドラフトはストアの型を持ち、`Store<T>` は `T` なので、プレーンなオブジェクトが期待される場所にストアを渡せます。
+- `event.currentTarget` を読みます。`event.target` が絞り込まれるのはフォームコントロール上の入力イベントだけです。
+- throw された `redirect()` はサーバー関数の戻り値の型を変えません。return されたものは `Response` を追加します。
 
-## Next steps
+## 次のステップ
 
-- [Components and JSX](/concepts/components-and-jsx): the runtime behavior behind the props, children, and ref types on this page.
-- [Custom primitives](/guides/custom-primitives): accept a value or an accessor in a `createX` function, and return accessors from it.
-- [Route definitions](/routing/solid-router/route-definitions): `defineRoute`, match filters, and lazily loaded route tables, all typed from the path literal.
-- [Server functions](/building-apps/server-functions): argument encoding and validation, which is where an `unknown` argument gets its type.
+- [コンポーネントと JSX](/concepts/components-and-jsx): このページの props、children、ref の型の背後にある実行時の動作。
+- [カスタムプリミティブ](/guides/custom-primitives): `createX` 関数で値またはアクセサーを受け取り、アクセサーを返す。
+- [ルート定義](/routing/solid-router/route-definitions): `defineRoute`、マッチフィルター、遅延ロードされるルートテーブル。すべてパスリテラルから型付けされます。
+- [サーバー関数](/building-apps/server-functions): 引数のエンコードとバリデーション。`unknown` の引数が型を得るのはここです。
