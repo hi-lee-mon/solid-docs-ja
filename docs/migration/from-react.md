@@ -1,26 +1,26 @@
 ---
-title: "From React"
+title: "React からの移行"
 version: "2.0"
-description: "Map familiar React concepts to their closest Solid concepts, with equivalent examples and the semantic differences that matter during migration."
+description: "よく知られた React の概念を最も近い Solid の概念に対応付け、同等の例と移行時に重要となる意味上の違いを示します。"
 ---
 
-React and Solid share many application concepts, but they update interfaces differently.
-This guide maps familiar React patterns to their closest Solid concepts and highlights where a direct translation would miss part of Solid's model.
+React と Solid は多くのアプリケーション概念を共有していますが、インターフェースの更新方法は異なります。
+このガイドでは、おなじみの React パターンを最も近い Solid の概念に対応付け、単純な置き換えでは Solid のモデルの一部を取りこぼしてしまう箇所を重点的に解説します。
 
-Your knowledge of components, props, JSX, events, context, refs, and composition still applies.
-The main shift is how state changes reach the DOM.
-[Thinking in Solid](/guides/thinking-in-solid) shows that shift inside one feature built end to end; this page maps the concepts one by one.
+コンポーネント、props、JSX、イベント、コンテキスト、ref、コンポジションに関する知識はそのまま活かせます。
+主な変化は、状態の変更が DOM に届く仕組みです。
+[Thinking in Solid](/guides/thinking-in-solid) は、1 つの機能を最初から最後まで構築する中でその変化を示しています。このページでは概念を 1 つずつ対応付けます。
 
-## Start with the execution model
+## まず実行モデルを理解する
 
-A React component renders from its current props and state.
-When that state changes, React runs the component again to produce its next result.
+React のコンポーネントは、現在の props と状態からレンダーされます。
+その状態が変わると、React は次の結果を生成するためにコンポーネントを再実行します。
 
-A Solid component runs when Solid mounts that component.
-Signals and stores then notify only the computations and JSX expressions that read them.
-The component function does not need to run again.
+Solid のコンポーネントは、Solid がそのコンポーネントをマウントしたときに実行されます。
+その後、シグナルとストアは自身を読み取った計算と JSX 式だけに通知します。
+コンポーネント関数を再実行する必要はありません。
 
-The following counters express the same interface:
+次のカウンターはどちらも同じインターフェースを表しています。
 
 ### React
 
@@ -56,59 +56,59 @@ function Counter() {
 }
 ```
 
-The Solid signal returns an accessor and a setter.
-An accessor is a function that reads a reactive value.
-Calling `count()` inside JSX subscribes that expression to the signal.
-Calling `doubled()` inside JSX lets the same tracking scope discover its read of `count()`.
+Solid のシグナルはアクセサーとセッターを返します。
+アクセサーとは、リアクティブな値を読み取る関数です。
+JSX 内で `count()` を呼び出すと、その式がシグナルを購読します。
+JSX 内で `doubled()` を呼び出すと、同じ追跡スコープがその中の `count()` の読み取りを検出できるようになります。
 
-A tracking scope records the reactive values read while it runs so Solid can update that work later.
-Keep reactive reads inside JSX or another tracking scope.
-A read at the top level of a Solid component is a one-time read because component bodies run untracked.
+追跡スコープは、実行中に読み取られたリアクティブな値を記録し、Solid が後でその処理を更新できるようにします。
+リアクティブな読み取りは JSX 内か別の追跡スコープ内に置いてください。
+コンポーネント本体は追跡されずに実行されるため、Solid コンポーネントのトップレベルでの読み取りは 1 回限りの読み取りになります。
 
-See [Reactivity](/concepts/reactivity) for tracking, scheduling, ownership, and disposal.
+追跡、スケジューリング、オーナーシップ、破棄については [リアクティビティ](/concepts/reactivity) を参照してください。
 
-## Translate hooks by purpose
+## フックを目的別に変換する
 
-React calls hooks in a fixed order during renders to access preserved state and schedule behavior.
-Solid creates primitives during component setup.
-Computations and cleanup attach to an owner, which provides the lifetime of the mounted component or reactive scope.
-Solid primitives are regular function calls and do not use hook ordering or naming rules.
+React はレンダー中に決まった順序でフックを呼び出し、保持された状態へのアクセスや振る舞いのスケジューリングを行います。
+Solid はコンポーネントのセットアップ中にプリミティブを作成します。
+計算とクリーンアップはオーナーに結び付けられ、オーナーがマウントされたコンポーネントやリアクティブスコープのライフタイムを提供します。
+Solid のプリミティブは通常の関数呼び出しであり、フックのような順序や命名のルールはありません。
 
-Translate each hook according to the role it serves:
+各フックは、その役割に応じて変換してください。
 
-- Local scalar state usually maps to [`createSignal`](/reference/solid-js/reactivity/create-signal).
-- Object or collection state can map to [`createStore`](/reference/solid-js/stores/create-store).
-- Cached derived state can map to [`createMemo`](/reference/solid-js/reactivity/create-memo).
-- Imperative synchronization can map to [`createEffect`](/reference/solid-js/reactivity/create-effect).
-- Shared subtree state can map to [`createContext`](/reference/solid-js/components-context/create-context) and [`useContext`](/reference/solid-js/components-context/use-context).
-- Reusable stateful behavior can become a custom primitive: a plain function that creates and returns Solid primitives.
+- ローカルなスカラー状態は通常 [`createSignal`](/reference/solid-js/reactivity/create-signal) に対応します。
+- オブジェクトやコレクションの状態は [`createStore`](/reference/solid-js/stores/create-store) に対応できます。
+- キャッシュされた派生状態は [`createMemo`](/reference/solid-js/reactivity/create-memo) に対応できます。
+- 命令的な同期処理は [`createEffect`](/reference/solid-js/reactivity/create-effect) に対応できます。
+- サブツリーで共有する状態は [`createContext`](/reference/solid-js/components-context/create-context) と [`useContext`](/reference/solid-js/components-context/use-context) に対応できます。
+- 再利用可能な状態を持つ振る舞いはカスタムプリミティブ、つまり Solid のプリミティブを作成して返す普通の関数にできます。
 
-These mappings describe related responsibilities rather than interchangeable implementations.
-Choose the Solid primitive from the data flow that the code needs.
+これらの対応関係は、互換できる実装ではなく関連する責務を示したものです。
+コードが必要とするデータフローから Solid のプリミティブを選んでください。
 
-## Read and write local state
+## ローカル状態の読み取りと書き込み
 
-`useState` and `createSignal` both provide a value and a setter.
-The visible syntax differs because a Solid signal uses an accessor.
-The counter above shows the same state update in each library.
+`useState` と `createSignal` はどちらも値とセッターを提供します。
+Solid のシグナルはアクセサーを使うため、見た目の構文が異なります。
+上のカウンターは、それぞれのライブラリで同じ状態更新を示しています。
 
-Both setters accept updater functions for values derived from the previous state:
+どちらのセッターも、前の状態から値を導出する更新関数を受け付けます。
 
 ```tsx
 setCount((value) => value + 1);
 ```
 
-### Scheduling note
+### スケジューリングの補足
 
-Solid stages signal and store writes made outside a synchronous flush scope.
-It commits the reactive queue on a microtask, after the current JavaScript task completes.
-Application event handlers normally need no explicit flush.
-Use [`flush()`](/reference/solid-js/reactivity/flush) when a test or imperative integration must observe the committed state or DOM synchronously.
+Solid は、同期的なフラッシュスコープの外で行われたシグナルやストアへの書き込みをいったん保留します。
+現在の JavaScript タスクが完了した後、マイクロタスクでリアクティブキューをコミットします。
+アプリケーションのイベントハンドラーでは、通常、明示的なフラッシュは必要ありません。
+テストや命令的な連携で、コミットされた状態や DOM を同期的に観測する必要がある場合は [`flush()`](/reference/solid-js/reactivity/flush) を使います。
 
-## Work with object and collection state
+## オブジェクトやコレクションの状態を扱う
 
-React applications often update an object by producing a new object.
-A Solid store provides a read-only reactive view with a setter that mutates a draft.
+React アプリケーションでは、新しいオブジェクトを生成してオブジェクトを更新することがよくあります。
+Solid のストアは読み取り専用のリアクティブなビューを提供し、そのセッターはドラフトを直接変更します。
 
 ### React
 
@@ -140,21 +140,21 @@ function rename(name: string) {
 }
 ```
 
-Reading `profile.name` inside a tracking scope subscribes to that property.
-Unrelated property updates do not require that reader to run again.
+追跡スコープ内で `profile.name` を読み取ると、そのプロパティが購読されます。
+無関係なプロパティの更新では、その読み取り側を再実行する必要はありません。
 
-Signals also work for objects when the whole value has one identity and changes as a unit.
-See [Stores](/concepts/stores) for store setters, projections, reconciliation, and optimistic stores.
+値全体が 1 つの同一性を持ち、まとめて変更される場合は、オブジェクトにもシグナルが使えます。
+ストアのセッター、プロジェクション、リコンシリエーション、楽観的ストアについては [ストア](/concepts/stores) を参照してください。
 
-## Derive values from state
+## 状態から値を導出する
 
-React can calculate a value during render and can use `useMemo` as a performance optimization.
-React may discard that cache, so application behavior cannot depend on its persistence.
+React はレンダー中に値を計算でき、パフォーマンス最適化として `useMemo` を使えます。
+React はそのキャッシュを破棄することがあるため、アプリケーションの動作をキャッシュの存続に依存させることはできません。
 
-A Solid derived function runs in the tracking scope that calls it.
-`createMemo` creates a reactive computation whose cached result and equality behavior are part of the reactive graph.
+Solid の派生関数は、それを呼び出した追跡スコープ内で実行されます。
+`createMemo` はリアクティブな計算を作成し、キャッシュされた結果と等価性の振る舞いはリアクティブグラフの一部になります。
 
-Use a function for a small derivation consumed in one place:
+1 か所で使う小さな導出には関数を使います。
 
 ```tsx
 const fullName = () => `${firstName()} ${lastName()}`;
@@ -162,7 +162,7 @@ const fullName = () => `${firstName()} ${lastName()}`;
 return <p>{fullName()}</p>;
 ```
 
-Use `createMemo` for an expensive derivation, when several consumers need the same result, or when the result should form an equality boundary:
+コストの高い導出、複数のコンシューマーが同じ結果を必要とする場合、あるいは結果を等価性のバウンダリにしたい場合は `createMemo` を使います。
 
 ```tsx
 import { createMemo } from "solid-js";
@@ -180,20 +180,20 @@ return (
 );
 ```
 
-The memo tracks `firstName()` and `lastName()`.
-Consumers track the memo rather than its individual inputs.
+このメモは `firstName()` と `lastName()` を追跡します。
+コンシューマーは個々の入力ではなくメモを追跡します。
 
-State that can be calculated from other reactive values usually remains a derivation.
-It does not need a second signal plus an effect that keeps the two values synchronized.
-See [Avoid unnecessary effects](/guides/avoid-unnecessary-effects) for synchronous derivation, async derivation, and temporary writable overrides.
+他のリアクティブな値から計算できる状態は、通常、そのまま導出として表現します。
+2 つ目のシグナルと、2 つの値を同期し続けるエフェクトは必要ありません。
+同期的な導出、非同期の導出、一時的な書き込み可能オーバーライドについては [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects) を参照してください。
 
-## Keep an editable value derived from props
+## props 由来の編集可能な値を保つ
 
-An editable field may follow a prop until the user changes it locally, then reset when the upstream prop changes.
-Both React and Solid can express this without an effect.
+編集可能なフィールドでは、ユーザーがローカルで変更するまでは prop に追従し、上流の prop が変わったらリセットしたい場合があります。
+React と Solid のどちらでも、これをエフェクトなしで表現できます。
 
-React recommends first checking whether the value can be calculated during render or whether a `key` can reset the component.
-When one piece of local state must adjust to a prop change, React also documents comparing the current prop with information stored from the previous render:
+React ではまず、その値をレンダー中に計算できるか、`key` でコンポーネントをリセットできるかを確認することが推奨されています。
+1 つのローカル状態を prop の変更に合わせて調整しなければならない場合、React は現在の prop を前回のレンダーで保存した情報と比較する方法もドキュメントに記載しています。
 
 ### React
 
@@ -216,12 +216,12 @@ function NameField({ name }: { name: string }) {
 }
 ```
 
-The guarded setters ask React to retry the current render with state derived from the new prop.
-This follows React's [adjusting state during render](https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes) guidance and avoids committing a stale value before an effect corrects it.
+ガード付きのセッターは、新しい prop から導出した状態で現在のレンダーをやり直すよう React に要求します。
+これは React の [レンダー中の状態調整](https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes) ガイダンスに従ったもので、エフェクトが修正する前に古い値がコミットされるのを防ぎます。
 
 ### Solid
 
-Solid can create a writable derived signal by passing a function to `createSignal`:
+Solid では、`createSignal` に関数を渡して書き込み可能な派生シグナルを作成できます。
 
 ```tsx
 function NameField(props: { name: string }) {
@@ -236,18 +236,18 @@ function NameField(props: { name: string }) {
 }
 ```
 
-The derivation supplies `props.name` until `setDraft` places a local override over it.
-When a dependency of the derivation changes, the source produces the next value and replaces that override.
-No synchronization effect or previous-prop bookkeeping is required.
+この導出は、`setDraft` がローカルのオーバーライドを上書きするまで `props.name` を供給します。
+導出の依存関係が変わると、ソースが次の値を生成してそのオーバーライドを置き換えます。
+同期用のエフェクトや、前回の prop を記録しておく処理は必要ありません。
 
-The function form means “writable derivation”; it does not store the function itself as the signal value.
-Use the function form of `createStore` for the same pattern with nested form state.
-See [Avoid unnecessary effects](/guides/avoid-unnecessary-effects#use-a-writable-derivation-for-a-local-override) for the store version and guidance on choosing independent local state instead.
+関数形式は「書き込み可能な導出」を意味し、関数自体をシグナルの値として保存するわけではありません。
+ネストしたフォーム状態で同じパターンを使うには、`createStore` の関数形式を使います。
+ストア版や、代わりに独立したローカル状態を選ぶ場合の指針については [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects#use-a-writable-derivation-for-a-local-override) を参照してください。
 
-## Translate effects by responsibility
+## エフェクトを責務別に変換する
 
-React pairs an imperative effect callback with a declared dependency array.
-Solid uses a tracked compute function to discover dependencies through reactive reads, then passes its result to an untracked effect function.
+React は、命令的なエフェクトコールバックと宣言された依存配列を組み合わせます。
+Solid は追跡される計算関数を使ってリアクティブな読み取りから依存関係を検出し、その結果を追跡されないエフェクト関数に渡します。
 
 ### React
 
@@ -272,27 +272,27 @@ createEffect(
 );
 ```
 
-The compute function reads every reactive dependency that should trigger the effect.
-Its return value becomes the input to the effect function.
-The effect function performs imperative work and can return cleanup.
-Reads inside the effect function do not become dependencies.
+計算関数は、エフェクトをトリガーすべきリアクティブな依存関係をすべて読み取ります。
+その戻り値がエフェクト関数への入力になります。
+エフェクト関数は命令的な処理を実行し、クリーンアップを返すことができます。
+エフェクト関数内での読み取りは依存関係になりません。
 
-Not every React effect becomes a Solid effect:
+React のエフェクトがすべて Solid のエフェクトになるわけではありません。
 
-- Calculate renderable values with a function or memo.
-- Start interaction-specific work in the event handler that observed the interaction.
-- Put asynchronous derived data in an async memo or store projection.
-- Use an effect when a settled reactive result must update an imperative system outside Solid.
+- レンダー可能な値は関数またはメモで計算します。
+- インタラクション固有の処理は、そのインタラクションを観測したイベントハンドラーで開始します。
+- 非同期の派生データは非同期メモまたはストアのプロジェクションに置きます。
+- 確定したリアクティブな結果で Solid 外の命令的システムを更新しなければならない場合にエフェクトを使います。
 
-This distinction is often more useful than translating a dependency array mechanically.
+この区別は、依存配列を機械的に変換するよりも、多くの場合有用です。
 
-## Keep props reactive
+## props をリアクティブに保つ
 
-React props are values from the current component render, so destructuring them is common.
-Potentially changing Solid props may be backed by getters.
-The child reads the current value when a tracking scope accesses that prop.
+React の props は現在のコンポーネントレンダーから得られる値なので、分割代入するのが一般的です。
+変更され得る Solid の props はゲッターで裏付けられていることがあります。
+追跡スコープがその prop にアクセスしたとき、子コンポーネントは現在の値を読み取ります。
 
-Keep the props object intact when its values can change:
+値が変わり得る場合は、props オブジェクトをそのまま保持します。
 
 ```tsx
 function Greeting(props: { name: string; punctuation?: string }) {
@@ -305,7 +305,7 @@ function Greeting(props: { name: string; punctuation?: string }) {
 }
 ```
 
-Destructuring in the parameter list reads those values at component setup time:
+パラメーターリストでの分割代入は、コンポーネントのセットアップ時にそれらの値を読み取ります。
 
 ```tsx
 function Greeting({ name }: { name: string }) {
@@ -313,11 +313,11 @@ function Greeting({ name }: { name: string }) {
 }
 ```
 
-Use the destructured form only when a one-time value is intentional.
-Destructuring reads getter-backed props eagerly.
-Solid emits a development warning when a component reads reactive values at the top level.
+分割代入形式は、1 回限りの値でよいことが意図的な場合にだけ使ってください。
+分割代入はゲッターで裏付けられた props を即時に読み取ります。
+コンポーネントがトップレベルでリアクティブな値を読み取ると、Solid は開発時に警告を出します。
 
-Create a memo when a local name should retain reactive behavior:
+ローカル名にリアクティブな振る舞いを持たせたい場合は、メモを作成します。
 
 ```tsx
 function Greeting(props: { first: string; last: string }) {
@@ -326,10 +326,10 @@ function Greeting(props: { first: string; last: string }) {
 }
 ```
 
-## Handle events and form controls
+## イベントとフォームコントロールの処理
 
-Event props remain camelCase, such as `onClick` and `onInput`.
-Solid handlers receive native DOM events, and `event.currentTarget` is typed as the element that owns the handler.
+イベント props は `onClick` や `onInput` のような camelCase のままです。
+Solid のハンドラーはネイティブの DOM イベントを受け取り、`event.currentTarget` はそのハンドラーを持つ要素として型付けされます。
 
 ### React
 
@@ -357,22 +357,22 @@ return (
 );
 ```
 
-`onInput` observes each browser input event.
-Use `onChange` when the native change event timing is the intended behavior.
+`onInput` はブラウザの input イベントを毎回観測します。
+ネイティブの change イベントのタイミングが意図した動作である場合は `onChange` を使います。
 
-Event handlers run outside reactive tracking.
-They can read current signal and store values without subscribing to them.
+イベントハンドラーはリアクティブな追跡の外で実行されます。
+シグナルやストアの現在値を、それらを購読せずに読み取れます。
 
-## Translate DOM properties and styles
+## DOM プロパティとスタイルの変換
 
-Most JSX attributes remain recognizable.
-Some DOM-facing details differ:
+ほとんどの JSX 属性はそのまま認識できます。
+DOM 向けの細部にはいくつか違いがあります。
 
-- Use `class` instead of `className`.
-- The Solid [`class` prop](/reference/solid-web/jsx-properties/class) accepts strings, conditional objects, and nested arrays.
-- Style objects use CSS names such as `"background-color"` rather than JavaScript names such as `backgroundColor`.
-- Numeric style values do not receive automatic units.
-- Use `textContent` for escaped text-only content and `innerHTML` only for trusted or sanitized markup.
+- `className` の代わりに `class` を使います。
+- Solid の [`class` prop](/reference/solid-web/jsx-properties/class) は文字列、条件付きオブジェクト、ネストした配列を受け付けます。
+- スタイルオブジェクトは `backgroundColor` のような JavaScript 名ではなく、`"background-color"` のような CSS 名を使います。
+- 数値のスタイル値には単位が自動で付きません。
+- エスケープされたテキストのみのコンテンツには `textContent` を使い、`innerHTML` は信頼できる、またはサニタイズ済みのマークアップにだけ使います。
 
 ```tsx
 <button
@@ -386,28 +386,28 @@ Some DOM-facing details differ:
 </button>
 ```
 
-See the [`style`](/reference/solid-web/jsx-properties/style), [`textContent`](/reference/solid-web/jsx-properties/text-content), and [`innerHTML`](/reference/solid-web/jsx-properties/inner-html) references for their DOM behavior.
+それぞれの DOM での振る舞いについては、[`style`](/reference/solid-web/jsx-properties/style)、[`textContent`](/reference/solid-web/jsx-properties/text-content)、[`innerHTML`](/reference/solid-web/jsx-properties/inner-html) の各リファレンスを参照してください。
 
-## Render conditions and lists
+## 条件とリストのレンダー
 
-JavaScript ternaries and logical expressions work directly in Solid JSX.
-The JSX compiler recognizes this native control-flow syntax and creates a reactive conditional around it.
+JavaScript の三項演算子や論理式は Solid の JSX でそのまま使えます。
+JSX コンパイラはこのネイティブな制御フロー構文を認識し、その周囲にリアクティブな条件分岐を作成します。
 
-Array methods such as `map` also return valid JSX.
-They remain ordinary function calls, so the compiler cannot infer row identity or lifecycle from the call itself.
-Solid's list components make those update semantics explicit.
+`map` のような配列メソッドも有効な JSX を返します。
+ただしそれらは通常の関数呼び出しのままなので、コンパイラは呼び出し自体から行の同一性やライフサイクルを推論できません。
+Solid のリストコンポーネントは、これらの更新セマンティクスを明示的にします。
 
-### Conditional content
+### 条件付きコンテンツ
 
-A React conditional can keep its ternary form.
-The Solid version calls reactive accessors:
+React の条件分岐は三項演算子の形をそのまま使えます。
+Solid 版ではリアクティブなアクセサーを呼び出します。
 
 ```tsx
 return <>{user() ? <Profile user={user()!} /> : <SignIn />}</>;
 ```
 
-The compiler tracks `user()` and updates the active branch when its truthiness changes.
-Use [`Show`](/reference/solid-js/components-jsx/show) when the code benefits from an explicit fallback, a narrowed value, or control over identity:
+コンパイラは `user()` を追跡し、truthy かどうかの評価が変わったときにアクティブな分岐を更新します。
+明示的なフォールバック、絞り込まれた値、同一性の制御が役立つ場合は [`Show`](/reference/solid-js/components-jsx/show) を使います。
 
 ```tsx
 import { Show } from "solid-js";
@@ -419,18 +419,18 @@ return (
 );
 ```
 
-By default, `Show` preserves its child across truthy changes and passes a narrowed accessor to its function child.
-With `keyed`, it passes the raw value and remounts the child when the value's identity changes.
+デフォルトでは、`Show` は truthy な変化をまたいで子要素を保持し、関数の子には絞り込まれたアクセサーを渡します。
+`keyed` を指定すると、生の値を渡し、値の同一性が変わったときに子要素を再マウントします。
 
-### List content
+### リストコンテンツ
 
-A React list commonly uses `map` with a `key`:
+React のリストは一般に `key` 付きの `map` を使います。
 
 ```tsx
 return todos.map((todo) => <TodoRow key={todo.id} todo={todo} />);
 ```
 
-A direct Solid `map` also renders:
+Solid でも `map` を直接使ってレンダーできます。
 
 ```tsx
 return (
@@ -442,8 +442,8 @@ return (
 );
 ```
 
-Because `map` is an ordinary function call, reevaluating this expression creates the mapped row output again.
-For a reactive list, [`For`](/reference/solid-js/components-jsx/for) preserves rows according to an explicit identity mode:
+`map` は通常の関数呼び出しなので、この式を再評価するとマップされた行の出力が作り直されます。
+リアクティブなリストでは、[`For`](/reference/solid-js/components-jsx/for) が明示的な同一性モードに従って行を保持します。
 
 ```tsx
 import { For } from "solid-js";
@@ -455,17 +455,17 @@ return (
 );
 ```
 
-The React `key` and the Solid `keyed` function both express row identity.
-By default, `For` uses item identity.
-It can instead use positional identity with `keyed={false}` or a key function such as the example above.
+React の `key` と Solid の `keyed` 関数は、どちらも行の同一性を表現します。
+デフォルトでは `For` はアイテムの同一性を使います。
+代わりに `keyed={false}` で位置による同一性を使うことも、上の例のようなキー関数を使うこともできます。
 
-Use [`Repeat`](/reference/solid-js/components-jsx/repeat) for positional rendering over a store without diffing array items or identities.
-Its `from` and `count` props can represent a sliding window while preserving rows whose absolute indexes remain in the overlapping range.
+配列アイテムや同一性を差分比較せずに、ストアに対する位置的なレンダリングを行うには [`Repeat`](/reference/solid-js/components-jsx/repeat) を使います。
+その `from` と `count` props は、絶対インデックスが重複範囲内に残る行を保持しながら、スライドウィンドウを表現できます。
 
-## Share state with context
+## コンテキストで状態を共有する
 
-Both libraries use context to scope a value to descendants.
-In Solid, the context object is also its provider component.
+どちらのライブラリも、コンテキストを使って値を子孫にスコープします。
+Solid では、コンテキストオブジェクト自体がそのプロバイダーコンポーネントでもあります。
 
 ```tsx
 import {
@@ -508,13 +508,13 @@ function ThemeButton() {
 }
 ```
 
-A default-less context throws when code reads it without an enclosing provider.
-Pass signals, stores, or service objects through context when descendants need reactive state, including application-wide state provided at the root of `App`.
-Avoid module-level signals or stores for shared state: they have no owner, and on the server one module instance is shared across requests.
+デフォルト値のないコンテキストは、囲むプロバイダーなしでコードが読み取ると例外をスローします。
+`App` のルートで提供するアプリケーション全体の状態も含め、子孫がリアクティブな状態を必要とするときは、コンテキスト経由でシグナル、ストア、サービスオブジェクトを渡します。
+共有状態にモジュールレベルのシグナルやストアを使うのは避けてください。それらにはオーナーがなく、サーバーでは 1 つのモジュールインスタンスがリクエスト間で共有されます。
 
-## Work with refs and owned setup
+## ref とオーナー付きセットアップを扱う
 
-Both libraries can expose a DOM element to component code.
+どちらのライブラリでも、DOM 要素をコンポーネントのコードに公開できます。
 
 ### React
 
@@ -533,7 +533,7 @@ function SearchField() {
 
 ### Solid
 
-Solid can assign the element to a local variable through a `ref` callback:
+Solid では `ref` コールバックを通して、要素をローカル変数に代入できます。
 
 ```tsx
 function SearchField() {
@@ -548,18 +548,18 @@ function SearchField() {
 }
 ```
 
-React stores the committed element in the ref object's `current` property.
-The Solid callback receives the element after Solid creates it and assigns it to the local variable.
-Solid also accepts an assignable variable or an array of callbacks through the `ref` prop.
+React はコミットされた要素を ref オブジェクトの `current` プロパティに格納します。
+Solid のコールバックは、Solid が要素を作成した後にそれを受け取り、ローカル変数に代入します。
+Solid は `ref` prop で、代入可能な変数やコールバックの配列も受け付けます。
 
-### Pass and compose refs through components
+### コンポーネントをまたいだ ref の受け渡しと合成
 
-React 19 accepts `ref` as a regular component prop, so new components do not need [`forwardRef`](https://react.dev/reference/react/forwardRef).
-`forwardRef` remains available, but React marks it for deprecation in a future release.
-Code targeting earlier React versions may still use `forwardRef` to receive and pass that ref.
+React 19 では `ref` を通常のコンポーネント prop として受け取れるため、新しいコンポーネントに [`forwardRef`](https://react.dev/reference/react/forwardRef) は不要です。
+`forwardRef` は引き続き使えますが、React は将来のリリースで非推奨にする予定です。
+それ以前の React バージョンを対象とするコードでは、その ref を受け取って渡すために `forwardRef` を使うことがあります。
 
-Solid also receives a component ref through `props.ref`.
-Pass it to the element as one entry in a ref array when the component needs the same element locally:
+Solid も `props.ref` を通してコンポーネントの ref を受け取ります。
+コンポーネントが同じ要素をローカルでも必要とする場合は、ref 配列の 1 要素として要素に渡します。
 
 ```tsx
 import type { Ref } from "solid-js";
@@ -580,28 +580,28 @@ function SearchField(props: SearchFieldProps) {
 }
 ```
 
-Solid recursively flattens the array and invokes each ref callback in order.
-The parent receives the element through `props.ref`, while the component can compose local element access and additional directives without a wrapper callback.
+Solid は配列を再帰的に平坦化し、各 ref コールバックを順番に呼び出します。
+親は `props.ref` を通して要素を受け取り、コンポーネントはラッパーコールバックなしで、ローカルの要素アクセスと追加のディレクティブを組み合わせられます。
 
-Use a ref directive when element behavior needs reusable setup, native event options, owned reactive work, or cleanup.
-See [Refs and directives](/concepts/components-and-jsx#refs-and-directives) and the [`ref` reference](/reference/solid-web/jsx-properties/ref) for that lifecycle and callback composition.
+要素の振る舞いに、再利用可能なセットアップ、ネイティブイベントのオプション、オーナー付きのリアクティブな処理、クリーンアップが必要な場合は ref ディレクティブを使います。
+そのライフサイクルとコールバックの合成については、[ref とディレクティブ](/concepts/components-and-jsx#refs-and-directives) と [`ref` リファレンス](/reference/solid-web/jsx-properties/ref) を参照してください。
 
-## Map asynchronous UI by state
+## 非同期 UI を状態で対応付ける
 
-React applications coordinate asynchronous UI through framework APIs, Suspense boundaries, transitions, and data libraries.
-Solid represents asynchronous reads as part of its reactive graph.
+React アプリケーションは、フレームワーク API、Suspense バウンダリ、トランジション、データライブラリを通じて非同期 UI を調整します。
+Solid は非同期の読み取りをリアクティブグラフの一部として表現します。
 
-Map each responsibility separately:
+各責務を個別に対応付けます。
 
-- A React Suspense fallback is closest to a Solid `Loading` fallback.
-- A React error boundary is closest to a Solid `Errored` boundary.
-- A `SuspenseList`-style reveal policy is closest to Solid's `Reveal`.
-- Pending transition UI is closest to Solid's automatic held updates with `isPending`.
-- Mutation coordination can use a Solid `action`.
+- React の Suspense フォールバックに最も近いのは Solid の `Loading` フォールバックです。
+- React のエラーバウンダリに最も近いのは Solid の `Errored` バウンダリです。
+- `SuspenseList` 形式の表示ポリシーに最も近いのは Solid の `Reveal` です。
+- 保留中のトランジション UI に最も近いのは、`isPending` を使った Solid の自動的な保留更新です。
+- ミューテーションの調整には Solid の `action` が使えます。
 
-These concepts serve related UI responsibilities, but their runtime contracts are not interchangeable.
+これらの概念は関連する UI の責務を担いますが、ランタイム上の契約は互換ではありません。
 
-An async memo remains an accessor:
+非同期メモもアクセサーのままです。
 
 ```tsx
 import { type Accessor, Errored, Loading, createMemo } from "solid-js";
@@ -632,18 +632,18 @@ function Page(props: { id: string }) {
 }
 ```
 
-[`Loading`](/reference/solid-js/components-jsx/loading) handles a read that has no settled answer.
-[`Errored`](/reference/solid-js/components-jsx/errored) handles an error that travels through the reactive graph.
+[`Loading`](/reference/solid-js/components-jsx/loading) は、確定した結果がまだない読み取りを処理します。
+[`Errored`](/reference/solid-js/components-jsx/errored) は、リアクティブグラフを通って伝播するエラーを処理します。
 
-The async memo is created in `Page`, but `Loading` sits in `UserProfile` directly above the reads of `props.user()`.
-A loading boundary only needs to be an owner ancestor of the read that can report “not ready.”
-It does not need to wrap the component that created the computation or the parent call site for the component that performs the read.
-The boundary can also sit farther up the owner tree when one fallback should cover a larger coherent region.
+非同期メモは `Page` で作成されますが、`Loading` は `props.user()` の読み取りの直上である `UserProfile` に置かれています。
+ローディングバウンダリは、「まだ準備できていない（not ready）」と報告できる読み取りのオーナー祖先であることだけが必要です。
+計算を作成したコンポーネントや、読み取りを実行するコンポーネントの親の呼び出し箇所を包む必要はありません。
+1 つのフォールバックでより大きな一貫した領域をカバーしたい場合は、バウンダリをオーナーツリーのさらに上に置くこともできます。
 
-### Async coordination follows data
+### 非同期の調整はデータに従う
 
-Solid waits on reactive data rather than treating a component as the unit of suspension.
-A not-ready read blocks that reactive output, but it does not abort setup of the remaining nested component tree.
+Solid はコンポーネントをサスペンドの単位として扱うのではなく、リアクティブなデータを待ちます。
+未準備（not ready）の読み取りはそのリアクティブな出力をブロックしますが、残りのネストされたコンポーネントツリーのセットアップを中断しません。
 
 ```tsx
 import { render } from "@solidjs/web";
@@ -688,28 +688,28 @@ render(
 );
 ```
 
-`A` starts its request before `a()` reports that its value is not ready.
-Solid continues setting up the nested JSX, so `B` and then `C` start their own requests in the same pass.
-All three requests overlap even though the components are nested.
+`A` は `a()` が値がまだ準備できていないことを報告する前に、リクエストを開始します。
+Solid はネストされた JSX のセットアップを続けるため、`B`、続いて `C` が同じパスでそれぞれのリクエストを開始します。
+コンポーネントはネストされていますが、3 つのリクエストはすべて重なり合います。
 
-The one `Loading` boundary above `A` handles every not-ready read beneath it.
-It detaches the in-progress branch from visible output, retains its reactive ownership offscreen, and shows the fallback.
-Component setup and ownership remain in place while the async expressions continue toward resolution.
-When the values settle, Solid updates the reactive text expressions and reveals the retained branch.
-The component functions do not run again.
+`A` の上にある 1 つの `Loading` バウンダリが、その配下のすべての未準備の読み取りを処理します。
+進行中の分岐を表示出力から切り離し、そのリアクティブなオーナーシップをオフスクリーンに保持したまま、フォールバックを表示します。
+非同期の式が解決に向かう間、コンポーネントのセットアップとオーナーシップはそのまま残ります。
+値が確定すると、Solid はリアクティブなテキスト式を更新し、保持していた分岐を表示します。
+コンポーネント関数が再実行されることはありません。
 
-A computation that reads another async result still waits for that dependency.
-Parallel work comes from independent data dependencies rather than the depth of the component tree.
+別の非同期結果を読み取る計算は、その依存関係を待ちます。
+並列処理は、コンポーネントツリーの深さではなく、独立したデータ依存関係から生まれます。
 
-React applications can also achieve parallel requests through framework loading, caching, or preloading.
-This example shows the Solid default: pending status belongs to the data read, so a pending expression does not stop nested components from setting up their own independent work.
+React アプリケーションも、フレームワークのローディング、キャッシュ、プリロードを通じて並列リクエストを実現できます。
+この例は Solid のデフォルトを示しています。保留中ステータスはデータの読み取りに属するため、保留中の式があっても、ネストされたコンポーネントが独自の独立した処理をセットアップするのを止めません。
 
-### Coordinate several loading regions
+### 複数のローディング領域を調整する
 
-React explored coordinating several Suspense boundaries through the experimental `SuspenseList` API.
-React 19 does not include `SuspenseList` in its stable API, though applications may encounter the concept in experimental releases or framework abstractions.
+React は実験的な `SuspenseList` API を通じて、複数の Suspense バウンダリの調整を検討してきました。
+React 19 では `SuspenseList` は安定版 API に含まれていませんが、実験的なリリースやフレームワークの抽象化でこの概念に出会うことがあります。
 
-Solid's [`Reveal`](/reference/solid-js/components-jsx/reveal) coordinates the reveal timing of sibling `Loading` boundaries:
+Solid の [`Reveal`](/reference/solid-js/components-jsx/reveal) は、兄弟の `Loading` バウンダリが表示されるタイミングを調整します。
 
 ```tsx
 import { Loading, Reveal } from "solid-js";
@@ -724,21 +724,21 @@ import { Loading, Reveal } from "solid-js";
 </Reveal>;
 ```
 
-`Reveal` does not start async work or create loading state.
-It controls when its direct loading regions become visible:
+`Reveal` は非同期処理を開始したり、ローディング状態を作成したりしません。
+直下のローディング領域がいつ表示されるかを制御します。
 
-- `"sequential"` reveals them in registration order.
-- `"together"` waits until every direct region has its first visible content.
-- `"natural"` lets each region reveal when its own work settles.
+- `"sequential"` は登録順に表示します。
+- `"together"` は直下のすべての領域に最初の表示コンテンツがそろうまで待ちます。
+- `"natural"` は各領域が自身の処理の確定時に表示されるようにします。
 
-Nested `Reveal` groups compose as one slot in their parent group.
-See [Boundaries](/concepts/boundaries#reveal-order) for ordering, collapsed fallbacks, and group membership.
+ネストされた `Reveal` グループは、親グループ内の 1 つのスロットとして合成されます。
+順序付け、折りたたまれたフォールバック、グループのメンバーシップについては [バウンダリ](/concepts/boundaries#reveal-order) を参照してください。
 
-### Updates are coordinated implicitly
+### 更新は暗黙的に調整される
 
-React provides `startTransition` to mark selected state updates as non-blocking.
-Solid does not require a wrapper that marks an update.
-All signal and store writes made during one uninterrupted synchronous call stack join the same coordinated update.
+React は選択した状態更新をノンブロッキングとしてマークする `startTransition` を提供します。
+Solid は更新をマークするラッパーを必要としません。
+1 つの中断されない同期コールスタック中に行われたすべてのシグナルとストアへの書き込みは、同じ調整された更新にまとめられます。
 
 ```tsx
 function selectUser(id: string) {
@@ -747,53 +747,53 @@ function selectUser(id: string) {
 }
 ```
 
-Both writes above belong to one update.
-This implicit grouping is not a priority or interruptibility API like React's transition APIs.
+上の 2 つの書き込みは 1 つの更新に属します。
+この暗黙的なグループ化は、React のトランジション API のような優先度や中断可能性の API ではありません。
 
-When its downstream work remains synchronous, Solid commits the update on the normal microtask flush.
-When participating computations wait for async work, the unit becomes a held update.
-Solid keeps the current committed view visible, then reveals the participating writes together when that work settles.
-That retained-UI behavior is the closest analogue to a React transition.
+下流の処理が同期的なままなら、Solid は通常のマイクロタスクのフラッシュで更新をコミットします。
+参加する計算が非同期処理を待つ場合、その単位は保留された更新（held update）になります。
+Solid は現在のコミット済みビューを表示したままにし、その処理が確定したときに参加する書き込みをまとめて表示します。
+この UI 保持の振る舞いが、React のトランジションに最も近いものです。
 
-Use [`isPending`](/reference/solid-js/reactivity/is-pending) when the held view needs an updating indicator.
-This behavior is automatic rather than an explicit `startTransition` call.
+保持されたビューに更新中のインジケーターが必要な場合は [`isPending`](/reference/solid-js/reactivity/is-pending) を使います。
+この動作は、明示的な `startTransition` 呼び出しではなく、自動的に行われます。
 
-Solid [`action`](/reference/solid-js/lifecycle-actions/action) coordinates generator-based mutations, optimistic state, and refresh behavior.
-The shared term “action” does not imply that action APIs in different ecosystems have identical contracts.
+Solid の [`action`](/reference/solid-js/lifecycle-actions/action) は、ジェネレーターベースのミューテーション、楽観的状態、リフレッシュの振る舞いを調整します。
+「アクション」という用語が共通していても、異なるエコシステムの action API が同一の契約を持つことを意味しません。
 
-See [Async reactivity](/concepts/async-reactivity) for readiness, held updates, errors, actions, optimistic state, and durable refresh.
+準備状態、保留された更新、エラー、アクション、楽観的状態、永続的なリフレッシュについては [非同期リアクティビティ](/concepts/async-reactivity) を参照してください。
 
-## Plan an incremental migration
+## 段階的な移行を計画する
 
-React and Solid JSX look similar, but their compiled component values and runtime ownership are not interchangeable.
-Treat a route, page, island, or separate application root as the boundary between the two renderers.
+React と Solid の JSX は似ていますが、コンパイルされたコンポーネントの値とランタイムのオーナーシップは互換ではありません。
+ルート、ページ、アイランド、独立したアプリケーションルートを、2 つのレンダラー間の境界として扱います。
 
-A practical migration sequence is:
+実践的な移行の順序は次のとおりです。
 
-1. Create the Solid application shell and choose its routing and rendering setup.
-2. Move framework-independent types, validation, data clients, and utility functions.
-3. Migrate leaf UI components and their local state.
-4. Move shared state and context after the consuming components have clear Solid boundaries.
-5. Translate derived state and effects by responsibility.
-6. Move async reads, loading UI, errors, and mutations into Solid's async model.
-7. Retire the React root or route boundary after its descendants have moved.
+1. Solid のアプリケーションシェルを作成し、ルーティングとレンダリングの設定を決めます。
+2. フレームワークに依存しない型、バリデーション、データクライアント、ユーティリティ関数を移動します。
+3. 末端の UI コンポーネントとそのローカル状態を移行します。
+4. 利用するコンポーネントに明確な Solid の境界ができたら、共有状態とコンテキストを移動します。
+5. 派生状態とエフェクトを責務に応じて変換します。
+6. 非同期の読み取り、ローディング UI、エラー、ミューテーションを Solid の非同期モデルに移します。
+7. その子孫の移動が完了したら、React のルートまたはルート境界を廃止します。
 
-Use [Quick start](/getting-started/quick-start) to create a Solid project.
-The [routing overview](/routing/overview) describes the router-independent application boundary and links to supported routers.
+Solid プロジェクトの作成には [クイックスタート](/getting-started/quick-start) を使います。
+[ルーティングの概要](/routing/overview) では、ルーターに依存しないアプリケーション境界を説明し、サポートされているルーターへのリンクを示しています。
 
-## Review the translation
+## 移行結果を確認する
 
-Before considering a migrated component complete, check:
+移行したコンポーネントを完成と見なす前に、次を確認してください。
 
-- Signal values are read by calling their accessors.
-- Reads intended to drive reactive updates occur in JSX, a memo, an async computation, or an effect compute function.
-- Event handlers and intentional one-time snapshots can read values without tracking them.
-- Props that can change remain on the props object or are wrapped in a reactive derivation.
-- Calculated values remain derivations instead of synchronized copies of state.
-- Effects send settled reactive results to imperative systems.
-- Interaction-specific work starts in the event handler or action that observed it.
-- Reactive lists use a `For` keying mode or `Repeat` range that matches how the collection changes.
-- Async reads have an appropriate loading and error boundary.
-- Renderer-specific React components do not cross directly into the Solid component tree.
+- シグナルの値がアクセサーを呼び出して読み取られている。
+- リアクティブな更新を駆動するための読み取りが、JSX、メモ、非同期の計算、エフェクトの計算関数のいずれかで行われている。
+- イベントハンドラーや意図的な 1 回限りのスナップショットが、追跡せずに値を読み取っている。
+- 変更され得る props が、props オブジェクト上に残っているか、リアクティブな導出でラップされている。
+- 計算された値が、同期された状態のコピーではなく導出のままになっている。
+- エフェクトが、確定したリアクティブな結果を命令的なシステムに送っている。
+- インタラクション固有の処理が、それを観測したイベントハンドラーまたはアクションで開始されている。
+- リアクティブなリストが、コレクションの変化の仕方に合った `For` のキー付けモードまたは `Repeat` の範囲を使っている。
+- 非同期の読み取りに、適切なローディングバウンダリとエラーバウンダリがある。
+- レンダラー固有の React コンポーネントが、Solid のコンポーネントツリーに直接またがっていない。
 
-A successful migration preserves application behavior while expressing its data flow through Solid's execution model.
+成功した移行とは、アプリケーションの振る舞いを保ちながら、そのデータフローを Solid の実行モデルで表現するものです。
