@@ -1,195 +1,188 @@
-The second quarter of 2022 has proven to be very eventful for Solid. Since the last article, we’ve seen an incredible amount of growth and progress. We’ve structured new core efforts, and an incredible amount of organic growth has attracted new users and followers of the project. Here’s a recap of what we’ve been up to over the past quarter.
+2022 年第 2 四半期は、Solid にとって非常に動きの多い四半期となりました。前回の記事以来、信じられないほどの成長と進歩を目の当たりにしています。コアの新しい取り組みを構造化し、驚異的な自然な成長がプロジェクトに新しいユーザーとフォロワーを引き寄せています。ここでは、この四半期の取り組みを振り返ります。
 
-# Sponsorships
+# スポンサーシップ
 
-We’re proud to announce that the amazing folks at JetBrains have decided to sponsor SolidJS for $500/month. They’re known for intelligent development tools and IDEs like WebStorm and IntelliJ, and their open-source support includes projects like Nest and XState.
+JetBrains の素晴らしい皆さんが、月額 500 ドルで SolidJS のスポンサーになることを決定したことを発表できることを誇りに思います。WebStorm や IntelliJ のようなインテリジェントな開発ツールや IDE で知られており、Nest や XState などのプロジェクトへのオープンソース支援も行っています。
 
-<a href="https://www.jetbrains.com/" target="_blank">
-  ![Jet Brains](/img/blog/state-of-solid-july-2022/solid-jetbrains-sponsor.jpg)
-</a>
+[![JetBrains](/img/blog/state-of-solid-july-2022/solid-jetbrains-sponsor.jpg)](https://www.jetbrains.com/)
 
-The Solid Core team feels privileged by this amazing recognition. We’re very lucky to have monthly like `Netlify` ($500), `Vercel` ($100), `Builder` ($100), `<div>riots` ($100).
+Solid コアチームはこの素晴らしい評価を光栄に思っています。また、月額スポンサーとして `Netlify`（500 ドル）、`Vercel`（100 ドル）、`Builder`（100 ドル）、`<div>riots`（100 ドル）がいることも幸運です。
 
-Funds contributed to SolidJS go towards covering domain registrations, events and meetups, and other initiatives that benefit the community at large.
+SolidJS への資金は、ドメイン登録、イベントやミートアップ、そしてコミュニティ全体に利益をもたらすその他の取り組みの費用に充てられます。
 
-# Awards & Recognition
+# 受賞と評価
 
-SolidJS is the recipient of the OSAwards 2022 Breakthrough of the Year Award!
+SolidJS は OSAwards 2022 の Breakthrough of the Year Award を受賞しました!
 
-<center>
-  <a href="https://osawards.com/javascript/2022" target="_blank">
-    ![OpenSource Awards](/img/blog/state-of-solid-july-2022/osawards-breakthrough.jpeg)
-  </a>
-</center>
+[![OpenSource Awards](/img/blog/state-of-solid-july-2022/osawards-breakthrough.jpeg)](https://osawards.com/javascript/2022)
 
-Solid never sought to win awards, and they aren’t common in the open-source world. This kind of recognition is cause for celebration and reflection. Vite (2021), Deno & Svelte (2020) and Strapi (2019) all received this award, and it validates Solid’s path as a project and a community.
+Solid は受賞を求めてきたわけではなく、オープンソースの世界では賞は珍しいものです。この種の評価は、祝うと同時に振り返るきっかけとなります。Vite（2021 年）、Deno と Svelte（2020 年）、Strapi（2019 年）もこの賞を受賞しており、プロジェクトとコミュニティとしての Solid の歩みを裏付けるものです。
 
-We were delighted to see this, and we hope to deliver more breakthroughs for years to come!
+これを目にしてとても嬉しく思います。今後何年にもわたって、さらなるブレイクスルーをお届けしたいと思います!
 
-# Community, Growth and Ecosystem
+# コミュニティ・成長・エコシステム
 
-Solid’s growth in the second quarter was greater than we anticipated. As we’ve mentioned in our previous reports, our week over week increase has shown no signs of stopping. Our key indicators across Twitter, GitHub, and Discord are all extremely positive.
+第 2 四半期の Solid の成長は予想を上回るものでした。以前のレポートでも述べたように、週ごとの増加は止まる気配を見せていません。Twitter、GitHub、Discord にわたる主要指標はすべて非常に良好です。
 
-The following are charts taken directly from our recent Community Meeting:
+以下は、最近の Community Meeting からそのまま引用したグラフです:
 
-![Community Stats](/img/blog/state-of-solid-july-2022/community-stats.png)
+![コミュニティの統計](/img/blog/state-of-solid-july-2022/community-stats.png)
 
-Our base metrics show growth across our websites and social media: more people are hearing about, talking about, and trying Solid.
+基本指標は、ウェブサイトとソーシャルメディア全体での成長を示しています。Solid を耳にし、話題にし、試す人が増えています。
 
-An important metric used specifically within open-source is GitHub Stars, which allow users to flag open-source projects on GitHub. Solid has surpassed a major 20k star milestone:
+オープンソース特有の重要な指標として GitHub Stars があります。これはユーザーが GitHub 上のオープンソースプロジェクトにフラグを立てられるものです。Solid は 20k スターという大きなマイルストーンを突破しました:
 
 ![GitHub Stars](/img/blog/state-of-solid-july-2022/github-star-chart.png)
 
-Above all else, the metric we’re eager to track is NPM downloads, which is our best representation of Solid’s usage. In this quarter alone we saw a download increase up to 31%. We anticipate this number to continue its increase as Solid adoption picks up.
+何よりも私たちが注目している指標は NPM のダウンロード数です。これが Solid の利用状況を最もよく表しています。この四半期だけでダウンロード数は最大 31% 増加しました。Solid の採用が進むにつれ、この数字はさらに伸びると予想しています。
 
-![NPM downloads](/img/blog/state-of-solid-july-2022/npm-downloads.png)
+![NPM ダウンロード数](/img/blog/state-of-solid-july-2022/npm-downloads.png)
 
-In summary, growth this quarter has been pretty fantastic!
+まとめると、今四半期の成長は素晴らしいものでした!
 
-# Solid Meetups
+# Solid ミートアップ
 
-This quarter our Core team has stepped up on efforts to engage directly with community members by running in-person events. We hosted two meetups, in New York City and San Francisco.
+今四半期、コアチームは対面イベントの開催を通じてコミュニティメンバーと直接関わる取り組みを強化しました。ニューヨークとサンフランシスコで 2 回のミートアップを開催しました。
 
-![June and July Meetups](/img/blog/state-of-solid-july-2022/june-july-meetup.png)
+![6 月と 7 月のミートアップ](/img/blog/state-of-solid-july-2022/june-july-meetup.png)
 
-With meetups, we can foster a community that goes beyond online connections. It’s an opportunity to meet other Soliders, share advice and experiences, and talk about where we’re heading as a project and a community.
+ミートアップによって、オンラインのつながりを超えたコミュニティを育てることができます。他の Solider に会い、アドバイスや経験を共有し、プロジェクトとコミュニティとして私たちがどこへ向かうのかを語り合う機会です。
 
-If you’re interested in hosting an event in your city, please reach out to us at <a href="mailto:community@solidjs.com">community@solidjs.com</a> or hop on Discord in the #irl-meetup channel. Sponsors are encouraged to help cover the cost of event spaces or receive funding from our OpenCollective budget directly.
+あなたの街でイベントを主催することに興味がある場合は、[community@solidjs.com](mailto:community@solidjs.com) までご連絡いただくか、Discord の #irl-meetup チャンネルにお越しください。スポンサーの方は、イベント会場の費用の支援、または OpenCollective の予算からの直接の資金提供を歓迎します。
 
-# Ecosystem Growth
+# エコシステムの成長
 
-On a weekly basis Solid grows with a number of new packages. Here’s a shortlist of projects to keep an eye on:
+Solid は毎週のように新しいパッケージとともに成長しています。以下は注目すべきプロジェクトの一覧です:
 
-- [solid-devtools](https://github.com/thetarnav/solid-devtools): An incredibly ambitious project to bring Developer Tools to Solid. It’s lead by the incredibly talented Damnian Tarnawski (thetarnav), an Ecosystem Team member.
-- [@motionone/solid](https://www.npmjs.com/package/@motionone/solid): The powerful MotionOne project gets official Solid support.
-- [TanStack](https://tanstack.com/): TanStack goes agnostic with Solid options for Query, Table, Virtual etc.
-- [solid-supabase](https://github.com/wobsoriano/solid-supabase): Use Supabase reactively with your Solid codebase
-- [solid-dexie](https://github.com/faassen/solid-dexie): Dexie is a reactive IndexedDB wrapper that pairs beautifully with Solid
-- [solid-lexical](https://github.com/mosheduminer/lexical-solid): Solid bindings for the [Lexical project](https://github.com/facebook/lexical#readme)
+- [solid-devtools](https://github.com/thetarnav/solid-devtools): Solid に開発者ツールをもたらす非常に野心的なプロジェクト。エコシステムチームのメンバーである、非常に才能ある Damnian Tarnawski（thetarnav）が主導しています。
+- [@motionone/solid](https://www.npmjs.com/package/@motionone/solid): 強力な MotionOne プロジェクトに Solid の公式サポートが加わりました。
+- [TanStack](https://tanstack.com/): TanStack がアグノスティック化し、Query、Table、Virtual などで Solid 向けの選択肢が登場しています。
+- [solid-supabase](https://github.com/wobsoriano/solid-supabase): Solid のコードベースで Supabase をリアクティブに使えます。
+- [solid-dexie](https://github.com/faassen/solid-dexie): Dexie はリアクティブな IndexedDB ラッパーで、Solid と見事に組み合わさります。
+- [solid-lexical](https://github.com/mosheduminer/lexical-solid): [Lexical プロジェクト](https://github.com/facebook/lexical#readme)の Solid バインディング。
 
-This isn’t a complete list! We do attempt to maintain a complete list of packages [on the Solid website](https://www.solidjs.com/ecosystem). Check it out, and if you have a package, be sure to submit your work.
+これは完全なリストではありません! [Solid ウェブサイト](https://www.solidjs.com/ecosystem)では全パッケージのリストの維持に取り組んでいます。ぜひチェックして、あなたのパッケージがあれば作品を提出してください。
 
-Solid support is growing in many ways beyond its direct package support. Projects such as Astro, Tauri and Bun now offer growing levels of integration:
+Solid のサポートは、直接的なパッケージサポートを超えた多くの形で広がっています。Astro、Tauri、Bun などのプロジェクトは現在、統合のレベルを高めています:
 
-<Tweet tweetLink="macronimous/status/1547196712372125696" />
-<Tweet tweetLink="jarredsumner/status/1527272957017325570" />
+[ツイートを見る](https://twitter.com/macronimous/status/1547196712372125696)
+[ツイートを見る](https://twitter.com/jarredsumner/status/1527272957017325570)
 
-Here are some fresh highlights in case you missed the discussions surrounding Solid:
+Solid をめぐる話題を見逃した方のために、最近のハイライトをいくつか紹介します:
 
-<Tweet tweetLink="solid_js/status/1544415135002812418" />
-<Tweet tweetLink="niallcrosby/status/1544327157727592450" />
-<Tweet tweetLink="tannerlinsley/status/1542925072502968320" />
+[ツイートを見る](https://twitter.com/solid_js/status/1544415135002812418)
+[ツイートを見る](https://twitter.com/niallcrosby/status/1544327157727592450)
+[ツイートを見る](https://twitter.com/tannerlinsley/status/1542925072502968320)
 
-Also have a read through some of these articles:
+以下の記事もぜひ読んでみてください:
 
-- [SolidJS fits my brain](https://blog.startifact.com/posts/solidjs-fits-my-brain/) by Martijn Faassen
-- [Build a task tracker with SolidJS and TypeScript](https://blog.logrocket.com/build-task-tracker-solidjs-typescript) by Ebenezer Don
-- [Converting a React component to Solid](https://dev.to/mbarzeev/converting-a-react-component-to-solidjs-5bgj) by Matti Bar-Zeev
-- [Solid.js feels like what I always wanted react to be](https://typeofnan.dev/solid-js-feels-like-what-i-always-wanted-react-to-be/) by Nick Sciali
+- [SolidJS fits my brain](https://blog.startifact.com/posts/solidjs-fits-my-brain/)（Martijn Faassen 著）
+- [Build a task tracker with SolidJS and TypeScript](https://blog.logrocket.com/build-task-tracker-solidjs-typescript)（Ebenezer Don 著）
+- [Converting a React component to Solid](https://dev.to/mbarzeev/converting-a-react-component-to-solidjs-5bgj)（Matti Bar-Zeev 著）
+- [Solid.js feels like what I always wanted react to be](https://typeofnan.dev/solid-js-feels-like-what-i-always-wanted-react-to-be/)（Nick Sciali 著）
 
-And some fantastic video clips we enjoyed:
+そして、私たちが楽しんだ素晴らしい動画もいくつかあります:
 
-<YouTube youTubeId="A_dUsSzxwkI" />
-<br />
-<YouTube youTubeId="O4sgwuMQns0" />
+[YouTube で見る](https://www.youtube.com/watch?v=A_dUsSzxwkI)
+[YouTube で見る](https://www.youtube.com/watch?v=O4sgwuMQns0)
 
-Who could forget about the pivotal moment when Fireship released its 100 seconds of Solid video! Hitting ~330k unique views, 19k likes and 1200 comments this video is the most successful to date.
+Fireship が 100 seconds of Solid の動画を公開したあの節目の瞬間を忘れられる人がいるでしょうか! 約 33 万のユニーク視聴、1.9 万のいいね、1,200 件のコメントを記録し、この動画はこれまでで最も成功したものとなりました。
 
-<YouTube youTubeId="hw3Bx5vxKl0" />
+[YouTube で見る](https://www.youtube.com/watch?v=hw3Bx5vxKl0)
 
-Not to mention the first official Solid video produced by core team member Dan Jutan, which reached 50k views.
+さらに、コアチームメンバーの Dan Jutan が制作した初の公式 Solid 動画は 5 万回再生に達しました。
 
-<YouTube youTubeId="J70HXl1KhWE" />
+[YouTube で見る](https://www.youtube.com/watch?v=J70HXl1KhWE)
 
-# Core and Team Changes
+# コアとチームの変更
 
-The Solid team is growing!
+Solid チームは成長しています!
 
-We’re proud to announce that Nikhil Saraf has joined as SolidStart team leader. Nikhil is a self-proclaimed “devtools maniac” and constantly strives to improve the developer experience for his teams whenever possible.
+Nikhil Saraf が SolidStart チームリーダーとして加わったことを発表できることを誇りに思います。Nikhil は自称「devtools マニア」で、可能な限りチームの開発者体験を向上させようと常に努力しています。
 
-<center>![Nikhil Saraf](/img/blog/state-of-solid-july-2022/team-nikhil.png)</center>
+![Nikhil Saraf](/img/blog/state-of-solid-july-2022/team-nikhil.png)
 
-We're excited to have him onboard!
+彼を迎えられることを嬉しく思います!
 
-Aside from new team membership, Solid is focusing on decentralizing core responsibilities and onboarding community team members wherever possible. Our docs team has grown and we’ve established two new teams including Infrastructure and Growth.
+新しいチームメンバーの加入に加えて、Solid はコアの責任の分散と、可能な限りコミュニティのチームメンバーを迎え入れることに注力しています。ドキュメントチームは拡大し、Infrastructure と Growth の 2 つの新しいチームを設立しました。
 
-![Growth Team](/img/blog/state-of-solid-july-2022/community-teams.png)
+![Growth チーム](/img/blog/state-of-solid-july-2022/community-teams.png)
 
-# Ryan joins Netlify
+# Ryan が Netlify に入社
 
-This quarter Ryan Carniato announced major update of his own: he has taken a new position at Netlify. This means that he will unfortunately be leaving eBay and a team of incredibly talented engineers, but he’s still involved with Marko. His new position as Principal Open-Source Engineer gives him the ability to focus on open-source projects including Solid and Marko.
+今四半期、Ryan Carniato は自身の大きな発表を行いました。Netlify の新しいポジションに就いたのです。残念ながら eBay と、信じられないほど才能あるエンジニアのチームを去ることになりますが、Marko には引き続き関わっていきます。Principal Open-Source Engineer という新しいポジションにより、Solid や Marko を含むオープンソースプロジェクトに集中できるようになります。
 
-Netlify is already an incredible supporter of the Solid project. With Ryan on staff, it shows how they’ve doubled-down on its mission to building powerful infrastructure and supporting the broader open-source community.
+Netlify はすでに Solid プロジェクトの素晴らしいサポーターです。Ryan がスタッフに加わったことで、強力なインフラの構築と、より広いオープンソースコミュニティの支援という彼らの使命へのさらなる注力が示されています。
 
-![Growth Team](/img/blog/state-of-solid-july-2022/ryan-netlify.jpeg)
+![Growth チーム](/img/blog/state-of-solid-july-2022/ryan-netlify.jpeg)
 
-You can read all about it in his article: [When Netlify asks you to full-time OSS, you say yes!](https://dev.to/ryansolid/when-netlify-asks-you-to-full-time-oss-you-say-yes-5ccf).
+詳細は彼の記事で読むことができます: [When Netlify asks you to full-time OSS, you say yes!](https://dev.to/ryansolid/when-netlify-asks-you-to-full-time-oss-you-say-yes-5ccf)
 
-With this new work opportunity Ryan is officially taking the opportunity to grow his outreach efforts. His late-night stream time is now to be scheduled Friday afternoons EST to ensure a more international crowd has access to the streams. Join our Discord, follow him on Twitter or <a href="https://www.youtube.com/c/RyanCarniato9/videos" target="blank">visit his YouTube channel</a> for stream announcements.
+この新しい仕事の機会を得て、Ryan は正式にアウトリーチ活動を拡大しています。深夜だった配信時間は、より国際的な視聴者がアクセスできるよう、現在は EST の金曜午後にスケジュールされています。配信のお知らせは、Discord への参加、Twitter のフォロー、または[彼の YouTube チャンネル](https://www.youtube.com/c/RyanCarniato9/videos)をご覧ください。
 
 # Solid Store
 
-That’s right, it’s finally here! Our long-requested [Solid Store](https://www.solidjs.com) has launched. Profit goes straight to our OpenCollective, and we’ve strived to price the items reasonably to keep them accessible.
+そうです、ついに登場です! 長らく要望のあった [Solid Store](https://www.solidjs.com) がオープンしました。収益はそのまま OpenCollective に送られ、アイテムは手に取りやすいよう妥当な価格設定を心がけています。
 
-Solid Store was developed by Infrastructure and Core Team members using Shopify Buy API. Purchases are automatically fulfilled and shipped to customers within 1-2 weeks.
+Solid Store は、Infrastructure チームとコアチームのメンバーによって Shopify Buy API を使って開発されました。購入は自動的に処理され、1〜2 週間以内に顧客に発送されます。
 
-<Tweet tweetLink="solid_js/status/1547644005999005701" />
-<Tweet tweetLink="davedbase/status/1545791421520777217" />
+[ツイートを見る](https://twitter.com/solid_js/status/1547644005999005701)
+[ツイートを見る](https://twitter.com/davedbase/status/1545791421520777217)
 
-You can purchase everything from t-shirts, mouse pads, stickers, water bottles, hoodies, winter hats, ballcaps and more. We're proud of the quality and service offered by our fulfillment partners and thank them for their service and support of our community.
+T シャツ、マウスパッド、ステッカー、ウォーターボトル、パーカー、冬用帽子、キャップなど、あらゆるものを購入できます。フルフィルメントパートナーが提供する品質とサービスを誇りに思い、コミュニティへの支援に感謝しています。
 
-Head on over to grab your merch!
+ぜひチェックしてグッズを手に入れてください!
 
 # Solid Playground
 
-Our official Playground is getting an official upgrade. Thanks to the efforts of the amazing Infrastructure Team, led by modderme123, the Solid Playground now has a login feature that lets you create and save REPLs. The new Playground uses Stytch’s OAuth integration leveraged via Solid’s new custom API service. We use Supabase as the back-end thanks to the amazing support of their company.
+公式 Playground が正式にアップグレードされます。modderme123 が率いる素晴らしい Infrastructure チームの努力により、Solid Playground にログイン機能が追加され、REPL を作成・保存できるようになりました。新しい Playground は、Solid の新しいカスタム API サービス経由で活用される Stytch の OAuth 統合を使用しています。同社の素晴らしいサポートのおかげで、バックエンドには Supabase を使用しています。
 
-Coming up in future upgrades, the Infrastructure Team is currently investigating WebContainers via Stackblitz. This integration will allow the playground to support SolidStart in the future. We’re very excited to be working with the Stackblitz team to stabilize the API and bring it to our project.
+今後のアップグレードとして、Infrastructure チームは現在 Stackblitz 経由の WebContainers を調査しています。この統合により、将来 Playground が SolidStart をサポートできるようになります。Stackblitz チームと協力して API を安定させ、私たちのプロジェクトに導入できることを非常に嬉しく思っています。
 
-# Docs & Website
+# ドキュメントとウェブサイト
 
-It’s time for the next phase of Solid Docs. On the [Solid Docs Next repo](https://github.com/solidjs/solid-docs-next), you’ll find:
+Solid Docs の次のフェーズの始まりです。[Solid Docs Next リポジトリ](https://github.com/solidjs/solid-docs-next)には以下があります:
 
-- A SolidStart docs site supporting MDX
-- A “four-sided” content structure, following [Diataxis](https://diataxis.fr/)
-- A full [Writing Guide](https://github.com/solidjs/solid-docs-next/blob/main/WRITING.md) laying out the writing principles that drive the new docs, and a [Contributing Guide](https://github.com/solidjs/solid-docs-next/blob/main/CONTRIBUTING.md) explaining how to be a part of it
-- A [project board](https://github.com/solidjs/solid-docs-next/projects/1) laying out issues, making it clear what’s on the roadmap
-- A draft of a [beginner tutorial](https://docs.solidjs.com/tutorials/getting-started-with-solid/welcome) that includes “framework asides”: choose the framework you’re coming from at the beginning, and we’ll inject tips that help you migrate
+- MDX をサポートする SolidStart のドキュメントサイト
+- [Diataxis](https://diataxis.fr/) に基づく「4 つの側面」を持つコンテンツ構造
+- 新しいドキュメントを支える執筆原則を定めた完全な[執筆ガイド](https://github.com/solidjs/solid-docs-next/blob/main/WRITING.md)と、その参加方法を説明する[コントリビューションガイド](https://github.com/solidjs/solid-docs-next/blob/main/CONTRIBUTING.md)
+- Issue を整理し、ロードマップの内容を明確にする[プロジェクトボード](https://github.com/solidjs/solid-docs-next/projects/1)
+- 「フレームワーク別の補足」を含む[初心者向けチュートリアル](https://docs.solidjs.com/tutorials/getting-started-with-solid/welcome)のドラフト: 最初に移行元のフレームワークを選ぶと、移行に役立つヒントが差し込まれます
 
-<Tweet tweetLink="rachelnabors/status/1528535366600232963" />
+[ツイートを見る](https://twitter.com/rachelnabors/status/1528535366600232963)
 
-Currently, these docs live on their own beta site, but this will merge with our main site as it nears completion.
+現在、これらのドキュメントは独自のベータサイトにありますが、完成に近づくにつれてメインサイトに統合されます。
 
-We presented our project at the [WriteTheDocs conference](https://www.writethedocs.org/conf/portland/2022/), and it was amazing to meet other docs enthusiasts and learn from technical writers and experts in the field.
+[WriteTheDocs カンファレンス](https://www.writethedocs.org/conf/portland/2022/)でプロジェクトを発表しました。他のドキュメント愛好家と出会い、この分野のテクニカルライターや専門家から学べたのは素晴らしい経験でした。
 
-<Tweet tweetLink="jutanium/status/1529252112026173442" />
+[ツイートを見る](https://twitter.com/jutanium/status/1529252112026173442)
 
-It’s been especially exciting to see new contributors get involved in the docs, and we’re always looking for writers. On the roadmap for the next few months, we’ll be focusing on the content itself: now that the docs team and repository are set up, it’s time to create drafts for each page on the roadmap. If you love writing and want to be part of that effort, [please reach out](https://twitter.com/jutanium)!
+新しいコントリビューターがドキュメントに参加してくれるのは特に嬉しいことで、私たちは常にライターを募集しています。今後数か月のロードマップでは、コンテンツ自体に注力します。ドキュメントチームとリポジトリが整った今、ロードマップ上の各ページのドラフトを作成するときです。執筆が好きでこの取り組みに参加したい方は、[ぜひご連絡ください](https://twitter.com/jutanium)!
 
-# SolidStart Updates
+# SolidStart のアップデート
 
-SolidStart is an important part of Solid’s future. As a dedicated full-stack/SSR framework, it’s optimized for Solid and brings new architecture patterns to the table. It’s built on Vite to take full advantage of the growing Vite ecosystem, and it’s completely modular: each SolidStart feature is essentially Vite plugin.
+SolidStart は Solid の将来において重要な部分です。専用のフルスタック/SSR フレームワークとして、Solid 向けに最適化され、新しいアーキテクチャパターンをもたらします。成長する Vite エコシステムを最大限に活用するため Vite 上に構築されており、完全にモジュラー式です。各 SolidStart 機能は本質的に Vite プラグインです。
 
-SolidStart has seen incredible progress this quarter. We’re proud to announce that the team has mostly locked in the API for a 1.0 release and are approaching beta stability with the current foundations.
+SolidStart は今四半期、驚異的な進歩を遂げました。チームが 1.0 リリースに向けた API をほぼ確定させ、現在の基盤でベータ版の安定性に近づいていることを発表できることを誇りに思います。
 
-More announcements and information will be made in the coming weeks regarding the beta release.
+ベータリリースに関するさらなる発表と情報は、今後数週間以内に行われます。
 
-# Core Roadmap & Updates
+# コアのロードマップとアップデート
 
-The past few months have been the start of a transition in direction for Solid. Version 1.3 signaled the end of the target feature set that we had envisioned for years.
+ここ数か月は、Solid にとって方向性の転換の始まりでした。バージョン 1.3 は、長年構想してきた目標機能セットの終わりを告げるものでした。
 
-Ryan will be hitting the conference circuit in the next few months. Aside from his Friday streams you can catch him at:
+Ryan は今後数か月、カンファレンスを巡回します。金曜の配信以外では、以下で会うことができます:
 
-- [React In Real Life](https://www.meetup.com/real-world-react/events/287308278/) - July 28th
-- [Houston React Developers](https://www.meetup.com/houston-react-js-group/events/286450583/) - Aug 4th
-- [State of Web Components](https://www.thisdotmedia.com/state-of-the-web/state-of-web-components/) - Aug 9th
-- [React Finland 2022](https://react-finland.fi/) - Sept 15th-16th
-- [ViteConf](https://viteconf.org/) - Oct 10th-11th
+- [React In Real Life](https://www.meetup.com/real-world-react/events/287308278/) - 7 月 28 日
+- [Houston React Developers](https://www.meetup.com/houston-react-js-group/events/286450583/) - 8 月 4 日
+- [State of Web Components](https://www.thisdotmedia.com/state-of-the-web/state-of-web-components/) - 8 月 9 日
+- [React Finland 2022](https://react-finland.fi/) - 9 月 15〜16 日
+- [ViteConf](https://viteconf.org/) - 10 月 10〜11 日
 
-# Conclusion
+# まとめ
 
-This quarter has been fantastic for community and ecosystem growth. Every day, we see new faces and new projects. As we lean into the launch of SolidStart and begin work on Solid 2.0, we invite anyone interested in contributing to make Solid a better framework for everyone. Hop on our Discord or have a look at our contributions document to learn how you can become involved.
+この四半期はコミュニティとエコシステムの成長にとって素晴らしいものでした。毎日、新しい顔と新しいプロジェクトを目にしています。SolidStart のローンチに向け、Solid 2.0 の作業を開始するにあたり、Solid をすべての人にとってより良いフレームワークにするために貢献したい方を歓迎します。Discord に参加するか、コントリビューションのドキュメントをご覧ください。
 
-The Solid Team is more encouraged and incentivized than ever to nurture powerful foundations. Our goal is to provide the JS ecosystem with a new alternative, one that promotes our philosophy of simplicity, performance, and reliability. Solid is about building incredible developer and user experience without compromises.
+Solid チームは、強力な基盤を育てることにかつてないほど励まされ、意欲を高めています。私たちの目標は、JS エコシステムに新しい選択肢を提供することです。それは、シンプルさ、パフォーマンス、信頼性という私たちの哲学を促進するものです。Solid は、妥協のない素晴らしい開発者体験とユーザー体験を構築することです。
 
-We look forward to building a rock-solid future with you!
+皆さんとともに揺るぎない未来を築いていくことを楽しみにしています!

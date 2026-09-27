@@ -1,86 +1,84 @@
-Since our last State of Solid article in September, a lot has happened in and around the community. We’re more excited than ever about the trajectory of Solid, and this update comes packed with the latest.
+9月の前回の State of Solid 記事から、コミュニティ内外で多くのことが起きました。私たちは Solid の進む方向性にかつてないほどわくわくしており、このアップデートには最新情報がぎっしり詰まっています。
 
-## Community, Growth and Ecosystem
+## コミュニティ・成長・エコシステム
 
-Solid’s growth over the past few months has been remarkable to watch. The metrics we’ve been monitoring since 1.0 show a palpable acceptance of Solid despite deep skepticism related to new JavaScript frameworks. What’s most exciting are all of the new users willing to hop onboard, hack with Solid, and post their honest feedback.
+ここ数か月の Solid の成長は目を見張るものがあります。1.0 以降モニタリングしてきた指標は、新しい JavaScript フレームワークに対する根深い懐疑論にもかかわらず、Solid が確かに受け入れられていることを示しています。最も嬉しいのは、進んで飛び込み、Solid でハックし、率直なフィードバックを投稿してくれる新しいユーザーたちの存在です。
 
-Growth has been exceptional. We hit 13k stars and the numbers keep climbing. Our Discord has exploded with new members, and there are both challenges and opportunities that come along with that. We’ve hosted two live Community Meetings, allowing the community to interact with core and ecosystem team members and share what they’ve been building. We’ve also made improvements to the Solid website with new languages, better documentation formats, and better offline mode.
+成長は驚異的です。スター数は 13k に達し、今も伸び続けています。Discord には新しいメンバーが殺到しており、それに伴う課題と機会の両方が生まれています。これまでに 2 回のライブ Community Meeting を開催し、コミュニティがコアチームやエコシステムチームのメンバーと交流し、各自が作っているものを共有できるようにしました。また、新しい言語への対応、より良いドキュメント形式、改善されたオフラインモードなど、Solid のウェブサイトも改善しています。
 
-There have been hundreds if not thousands of new Tweets and content pieces that explain the benefits of Solid and cultivate positivity surrounding its growth. It’s a really exciting time to be at the grassroots of this community hearing comments such as:
+Solid の利点を解説し、その成長を前向きに盛り上げる新しいツイートやコンテンツが、数百とは言わないまでも数千は投稿されています。次のような声をコミュニティの草の根で聞けるのは、本当に胸が躍る時期です。
 
-> "It has the building blocks needed to build empires and that's how React succeeded and I think that's how Solid is going to succeed too" - [Theo - t3.gg](https://twitter.com/JacobMGEvans/status/1473801127066054659?s=20)
+> 「帝国を築くのに必要な構成要素が揃っている。それが React が成功したやり方であり、Solid も同じように成功すると思う」 - [Theo - t3.gg](https://twitter.com/JacobMGEvans/status/1473801127066054659?s=20)
 
-While there’s plenty of excitement, the biggest battle we face is showing why Solid isn’t just another React; it’s a powerful new model for thinking reactively. Ryan has been doing an incredible job of speaking publicly on the topic in the hopes that others have similar “wow” moments, resulting in some truly energizing coding sessions. A favorite one to date was the Learn with Jason session, 90 minutes of “wow” moments for him and the audience.
+盛り上がりは十分にありますが、私たちが直面している最大の戦いは、Solid が単なる「もう一つの React」ではないこと、つまりリアクティブに考えるための強力な新しいモデルであることを示すことです。Ryan はこのテーマについて公開の場で素晴らしい発信を続けており、他の人たちにも同じような「wow」の瞬間を届けようとしています。その結果、本当に活力に満ちたコーディングセッションがいくつも生まれました。これまでのお気に入りは Learn with Jason のセッションで、彼にとっても視聴者にとっても 90 分間「wow」の連続でした。
 
-<YouTube youTubeId="ZZ-a7B761Ds" />
-<br />
+[YouTube で見る](https://www.youtube.com/watch?v=ZZ-a7B761Ds)
 
-Solid has also been on a few other streams and podcasts recently:
+最近、Solid は他にもいくつかの配信やポッドキャストに登場しています:
 
-<Spotify spotifyLink="episode/2acyt1NRqjXMnX4LZqDyTV" />
-<br />
+[Spotify で聴く](https://open.spotify.com/episode/2acyt1NRqjXMnX4LZqDyTV)
 
-<YouTube youTubeId="PRDtEyC5X1U" />
-<br />
-<YouTube youTubeId="LZc2hSghezM" />
+[YouTube で見る](https://www.youtube.com/watch?v=PRDtEyC5X1U)
 
-Ryan has also started [his own Friday evening streams](https://www.youtube.com/c/RyanCarniato9/videos) that focus on everything from Solid to Marko and JS in general.
+[YouTube で見る](https://www.youtube.com/watch?v=LZc2hSghezM)
 
-SolidJS is still a very early community and ecosystem. It’s a concern we used to hear quite a bit after the 1.0 release, but less so now.
-The concern is no longer whether the ecosystem can get off the ground, but how fast it will.
-There have been a number of new tools and releases and we’re seeing much larger efforts start to mature.
-We expect 2022 to be a year that the Solid ecosystem will 10x in size and richness and we’re looking forward to it!
+また、Ryan は[金曜夜の自身の配信](https://www.youtube.com/c/RyanCarniato9/videos)を始めており、Solid から Marko、そして JS 全般まで幅広く取り上げています。
 
-## Documenting Solid
+SolidJS はまだ非常に初期のコミュニティとエコシステムです。1.0 リリース後はよく聞かれた懸念でしたが、今ではそれほどでもありません。
+懸念はもはやエコシステムが離陸できるかどうかではなく、どれだけ速く離陸するかに変わっています。
+多くの新しいツールやリリースが登場し、はるかに大規模な取り組みが成熟し始めているのが見えます。
+2022 年は Solid エコシステムが規模と豊かさの両面で 10 倍になる年になると予想しており、楽しみにしています!
 
-Documentation is a core concern for Solid. Over the past few months, we’ve overhauled the documentation system to make it as maintainable as possible. The [Solid docs repository](https://github.com/solidjs/solid-docs) now exports the docs in an npm package and has a watcher, allowing you to link the package to [solid-site](https://github.com/solidjs/solid-site) and see your changes as you work on it. We always wanted the docs repository to be separate from the site repository, but now the [integration between the two](https://github.com/solidjs/solid-docs#importing-docs-and-tutorials) is cleaner than ever.
+## Solid のドキュメント
 
-We’re grateful to have such active translators to bring the docs to nine languages, with more to come. It was incredible to see the Russian translation team finish the docs just in time for the HolyJS conference. To make this easier, each language folder in the docs repo now has an [automated README section](https://github.com/solidjs/solid-docs/tree/main/langs/de) that tells the translator what files might be out of date and what files still need to be created. It’s also a place for translators to add notes about their translations and language-specific guides for their team. This is a bit of an experiment and we’d love to hear feedback from translators on how we could make the workflow easier.
+ドキュメントは Solid にとって中心的な関心事です。ここ数か月で、できる限りメンテナンスしやすくなるようドキュメントシステムを全面的に見直しました。[Solid docs リポジトリ](https://github.com/solidjs/solid-docs)はドキュメントを npm パッケージとしてエクスポートするようになり、watcher も備わっています。このパッケージを [solid-site](https://github.com/solidjs/solid-site) にリンクすれば、作業しながら変更を確認できます。ドキュメントリポジトリをサイトリポジトリから分離したいと以前から考えていましたが、今では[両者の統合](https://github.com/solidjs/solid-docs#importing-docs-and-tutorials)はかつてないほどクリーンになりました。
 
-Docs infrastructure development is important—and we’ve very recently unlocked a world of new possibilities thanks to [high1’s Solid MDX integration](https://github.com/high1/solid-jsx)—but its purpose is to pave the way for better content. We’ve made small improvements to API docs and tutorials, but with the bulk of the technical work behind us, we’re focusing on streamlining the documentation and improving the beginner experience.
+ドキュメントを 9 つの言語に届けてくれる活発な翻訳者たちがいて、今後さらに増える予定であることに感謝しています。ロシア語翻訳チームが HolyJS カンファレンスに間に合うようにドキュメントを仕上げたのは見事でした。この作業を容易にするため、docs リポジトリの各言語フォルダーには[自動化された README セクション](https://github.com/solidjs/solid-docs/tree/main/langs/de)があり、どのファイルが古くなっている可能性があり、どのファイルをまだ作成する必要があるかを翻訳者に伝えます。翻訳者が翻訳に関するメモや、チーム向けの言語固有ガイドを追加する場所にもなっています。これは一種の実験なので、ワークフローをより簡単にする方法について、翻訳者の皆さんのフィードバックをぜひ聞かせてください。
 
-We [split up the guides](https://dev.solidjs.com/guides/getting-started) section, and over the coming months we’ll be reworking them for content and readability and working with the community to develop new guides, like Alex Lohr’s new [testing guide](https://dev.solidjs.com/guides/testing). If you’re curious, [check out the RFC](https://docs.google.com/document/d/1Z25C3LhJF4KGbf1YvnmQo7dOzF5KjEVQtoE0ucy3BJs/edit?usp=sharing) for the new guides structure. We won’t stop until we have a zero-to-hero learning process for Solid that works for all learners.
+ドキュメント基盤の開発は重要です——ごく最近も [high1 による Solid MDX 統合](https://github.com/high1/solid-jsx)のおかげで新しい可能性の世界が開けました——しかしその目的は、より良いコンテンツへの道を開くことです。API ドキュメントとチュートリアルには小さな改善を加えてきましたが、技術的な作業の大部分が終わった今、ドキュメントの合理化と初心者体験の向上に注力しています。
 
-One more experiment—detailed notes for Ryan’s past two streams. These will eventually be posted on the Solid blog, but for now you can read notes for [Streaming HTML](https://docs.google.com/document/d/11SADvxgGFoVv_k-1VaJRQUF3PX6N2IN_1QkGsC07__k/) and [Introduction to Compilation](https://docs.google.com/document/d/1Q4-GC4bNaLNPJ1V0cxUGhQre0Sa54x5GgBsPvpRdBZY/). These take a lot of work, so please let Dan know (Jutanium on Discord and GitHub) if you think they’d be helpful to continue or if you have any feedback at all about Solid’s documentation!
+[ガイドのセクションを分割](https://dev.solidjs.com/guides/getting-started)しました。今後数か月かけて内容と読みやすさを改善し、Alex Lohr の新しい[テストガイド](https://dev.solidjs.com/guides/testing)のように、コミュニティと協力して新しいガイドを開発していきます。興味があれば、新しいガイド構成の [RFC をチェック](https://docs.google.com/document/d/1Z25C3LhJF4KGbf1YvnmQo7dOzF5KjEVQtoE0ucy3BJs/edit?usp=sharing)してみてください。すべての学習者にとって機能する、Solid のゼロからヒーローへの学習プロセスができるまで、私たちは止まりません。
 
-## Next Minor Release: 1.3
+もう一つの実験として、Ryan の過去 2 回の配信の詳細なノートがあります。これらはいずれ Solid ブログに投稿されますが、今のところ [HTML のストリーミング](https://docs.google.com/document/d/11SADvxgGFoVv_k-1VaJRQUF3PX6N2IN_1QkGsC07__k/)と[コンパイル入門](https://docs.google.com/document/d/1Q4-GC4bNaLNPJ1V0cxUGhQre0Sa54x5GgBsPvpRdBZY/)のノートを読むことができます。これらは大変な作業なので、続ける価値があると思う場合や、Solid のドキュメントについて何かフィードバックがある場合は、Dan（Discord と GitHub では Jutanium）までお知らせください!
 
-The next minor release brings with it some great features for Server Rendering that have been long overdue.
+## 次のマイナーリリース: 1.3
 
-First and foremost: support for full HTML streaming. So far, Solid has used a combination of streaming data and client-side rendering to achieve streaming. And while that has made for some impressive demos, it always relies on client side-rendering and waiting on the client JavaScript bundle to load. HTML streaming is a step further: the server renders the content, and it comes in as soon as it is available. A parent doesn’t have to wait for a child element to render; we use placeholder elements that are dynamically replaced when the child loads. HTML streaming is a solution that scales across end user networks; we no longer have to wait on the bundle in slower networks, and we can take full advantage of faster networks to display content as soon as it is rendered.
+次のマイナーリリースには、待望のサーバーレンダリング向けの素晴らしい機能がいくつか含まれています。
 
-In addition to rendering, it is important to handle errors gracefully. We have now added support for [ErrorBoundaries](https://www.solidjs.com/docs/latest/api#%3Cerrorboundary%3E) on the server. Streaming can make this a challenge as ErrorBoundaries can be sent to the browser while nested Suspense boundaries are still waiting to render. To handle this challenge, we have implemented the first isomorphic ErrorBoundary solution that is able to throw Errors on the server and catch them in the browser.
+まず最も重要なのは、完全な HTML ストリーミングのサポートです。これまで Solid は、ストリーミングデータとクライアントサイドレンダリングを組み合わせてストリーミングを実現してきました。それは印象的なデモを生みましたが、常にクライアントサイドレンダリングに依存し、クライアントの JavaScript バンドルの読み込みを待つ必要がありました。HTML ストリーミングはさらに一歩進んでいます。サーバーがコンテンツをレンダーし、利用可能になり次第すぐに届きます。親は子要素のレンダーを待つ必要がありません。子が読み込まれたときに動的に置き換えられるプレースホルダー要素を使います。HTML ストリーミングはエンドユーザーのネットワーク全体にスケールするソリューションです。遅いネットワークでバンドルを待つ必要がなくなり、速いネットワークを最大限に活用して、レンダーされ次第すぐにコンテンツを表示できます。
 
-Have you ever wanted to take your favorite reactive state management library and just have it work in the framework or your choice with no wrappers? Thanks to the work of @3shain we have a [new experimental feature](https://github.com/solidjs/solid/blob/next/CHANGELOG.md#external-sources-experimental) that will allow you to do exactly that.
+レンダリングに加えて、エラーを優雅に処理することも重要です。サーバー上での [ErrorBoundaries](https://www.solidjs.com/docs/latest/api#%3Cerrorboundary%3E) のサポートを追加しました。ネストされた Suspense バウンダリがまだレンダーを待っている間に ErrorBoundaries がブラウザに送信される可能性があるため、ストリーミングはこれを難しくします。この課題に対処するため、サーバーでエラーをスローしてブラウザでキャッチできる、初のアイソモーフィックな ErrorBoundary ソリューションを実装しました。
 
-I’m pretty excited to see these features land, and Solid 1.3.0 RC builds are now available to try out. Expect the official release to land early in the new year.
+お気に入りのリアクティブな状態管理ライブラリを、ラッパーなしで選択したフレームワークでそのまま動かしたいと思ったことはありませんか? @3shain の作業のおかげで、まさにそれを実現する[新しい実験的機能](https://github.com/solidjs/solid/blob/next/CHANGELOG.md#external-sources-experimental)ができました。
+
+これらの機能がリリースされるのが楽しみです。Solid 1.3.0 RC ビルドはすでに試すことができます。正式リリースは年明け早々を予定しています。
 
 ## Solid Start
 
-Solid Start has also been getting some attention. We’ve been making some great demos using the latest technology available across the major providers like Netlify’s functions, Cloudflare’s Edge Workers, and Vercel’s Edge Functions. We’ve created new adapters for each to make it easier for anyone to deploy to these platforms.
+Solid Start も注目を集めています。Netlify の Functions、Cloudflare の Edge Workers、Vercel の Edge Functions など、主要プロバイダーが提供する最新技術を使った素晴らしいデモを作ってきました。誰でもこれらのプラットフォームにデプロイしやすいよう、それぞれに新しいアダプターを作成しています。
 
-<Tweet tweetLink="RyanCarniato/status/1456551775725441033" />
-<Tweet tweetLink="RyanCarniato/status/1369238224233586691" />
-<Tweet tweetLink="RyanCarniato/status/1453283158149980161" />
+[ツイートを見る](https://twitter.com/RyanCarniato/status/1456551775725441033)
+[ツイートを見る](https://twitter.com/RyanCarniato/status/1369238224233586691)
+[ツイートを見る](https://twitter.com/RyanCarniato/status/1453283158149980161)
 
-Solid Start really has been the beacon that has been guiding a lot of the improvements to SSR in the core (mentioned above) and improvements to developer experience in general. @[lxsmnsyc](https://github.com/LXSMNSYC) has been doing great work to add component-granular Hot Module Replacement to all our Vite projects. That means only components that change reload, rather than the whole module.
+Solid Start は、コアにおける SSR の多くの改善（前述）や、開発者体験全般の改善を導く灯台のような存在でした。[@lxsmnsyc](https://github.com/LXSMNSYC) は、すべての Vite プロジェクトにコンポーネント単位のホットモジュールリプレイスメントを追加する素晴らしい仕事をしてくれています。つまり、モジュール全体ではなく、変更されたコンポーネントだけがリロードされるようになります。
 
-There is still a lot of work to be done and pieces to come together. But as each part is put into place, it’s clear that we’re only just starting to tap into the potential of what Solid has to offer.
+まだやるべき作業は多く、組み合わさるべきピースも残っています。しかし、各部分が所定の位置に収まるにつれて、Solid が持つ可能性をまだ引き出し始めたばかりだということが明らかになっています。
 
-## SolidHack 2022 is coming
+## SolidHack 2022 がやってきます
 
-![Tux, the Linux mascot](/img/blog/state-of-solid-december-2021/solidhack.png)
+![Linux のマスコット、Tux](/img/blog/state-of-solid-december-2021/solidhack.png)
 
-We’re pleased to announce that the Solid Core Team, with the support of new sponsors, will be launching our first public open-source hackathon on January 7th.
+新しいスポンサーの支援を受けて、Solid コアチームが 1 月 7 日に初の公開オープンソースハッカソンを開催することを発表できることを嬉しく思います。
 
-The hackathon is designed to provide that extra motivation to dive in and build some cool apps and libraries using Solid. We’ll have three categories to build for (announcing on January 7th), three months to build, and $9000+ to give away. We’ll be using a public voting system, and more details on submission and voting will be announced over the coming months. For now, head over to [solidjs.com/hack](https://www.solidjs.com/hack) for more!
+このハッカソンは、飛び込んで Solid を使ったクールなアプリやライブラリを作るための、ちょっとした追加のモチベーションとなるよう設計されています。3 つの部門があり（1 月 7 日に発表）、制作期間は 3 か月、賞金総額は 9,000 ドル以上です。公開投票システムを採用し、応募と投票の詳細は今後数か月以内に発表します。まずは [solidjs.com/hack](https://www.solidjs.com/hack) をチェックしてください!
 
-## Conclusion
+## まとめ
 
-2021 was about completing a journey that started many years ago. The culmination of 5+ years of tinkering with Solid 1.0, and with 1.3 completing this exploration of streaming SSR that began more than 2 years ago. We’ve learned a lot along the way.
+2021 年は、何年も前に始まった旅を完遂する年でした。5 年以上の試行錯誤の集大成である Solid 1.0、そして 2 年以上前に始まったストリーミング SSR の探求を完成させる 1.3。その過程で多くを学びました。
 
-When the project started, we could not have predicted the response; honestly, that so many people would just _get it_. Primitives make sense for longer term development of larger SPAs under the countless changes in technology and best practices we’ve seen the past decade. This focus on primitives fueled Solid’s early years in a time where frontend frameworks were doubling down on class lifecycles, options APIs, and localized compilation.
+プロジェクトが始まったとき、この反響は予測できませんでした。正直なところ、これほど多くの人がすぐに_理解してくれる_とは思っていませんでした。この 10 年間に見てきた技術とベストプラクティスの無数の変化の中で、プリミティブは大規模な SPA の長期的な開発に理にかなっています。フロントエンドフレームワークがクラスのライフサイクル、オプション API、局所的なコンパイルに傾倒していた時代に、このプリミティブへの注力が Solid の初期を支えました。
 
-We’ve demonstrated where we can take Solid now. From the depths of streaming SSR and the extents of WebGL with custom renderers, to places a Virtual DOM-less library was never meant to go like Suspense and concurrent rendering. Now, it’s time to return to the fundamentals to make it easier than ever to build the best experiences, to nurture the growth of libraries that offer powerful primitives, and to even re-examine the core building blocks we provide to make this all possible.
+Solid をどこまで持っていけるかは実証済みです。ストリーミング SSR の深淵からカスタムレンダラーによる WebGL の果てまで、そして Suspense や並行レンダリングのような、Virtual DOM のないライブラリが行くはずのなかった場所まで。今こそ基本に立ち返り、最高の体験をこれまで以上に簡単に構築できるようにし、強力なプリミティブを提供するライブラリの成長を育み、これらすべてを可能にするコアの構成要素を再検討するときです。
 
-We’ve worked harder than ever in 2021, and with every ending is a new beginning. In 2022, we hit the ground running.
+2021 年はこれまで以上に尽力しました。そして、すべての終わりは新しい始まりです。2022 年、私たちは走り出した状態でスタートします。
