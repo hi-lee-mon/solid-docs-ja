@@ -1,18 +1,18 @@
 ---
-title: "Middleware and API routes"
+title: "ミドルウェアと API ルート"
 version: "2.0"
-description: "Run code in front of every request with fetch-style middleware, share state with pages and server functions through the request event, and answer HTTP requests from route modules."
+description: "fetch スタイルのミドルウェアですべてのリクエストの手前でコードを実行し、リクエストイベントを介してページやサーバー関数と状態を共有し、ルートモジュールから HTTP リクエストに応答します。"
 ---
 
-Some work belongs in front of the app rather than inside it: reading the session cookie once instead of in every server function, turning an uncaught error into a 500 instead of a blank page, answering `GET /api/products` for a partner's script that is not a browser.
-Start mode runs a chain of fetch-style middleware before its request handler, and the `fullstack` project shape puts an API-route dispatcher in that chain.
+アプリの内部ではなく手前でやるべき仕事があります。すべてのサーバー関数ではなく一度だけセッションクッキーを読むこと、捕捉されなかったエラーを真っ白なページではなく 500 に変えること、ブラウザーではないパートナーのスクリプトからの `GET /api/products` に応答することです。
+Start モードはリクエストハンドラーの前に fetch スタイルのミドルウェアのチェーンを実行し、`fullstack` プロジェクト構成はそのチェーンに API ルートのディスパッチャーを置きます。
 
-Most apps need one or two middleware of the first shape below and, if anything outside the app needs the data, an API route.
-This page builds on the chain the template ships, then covers API routes.
+ほとんどのアプリで必要なのは、下記の最初の形のミドルウェアを1、2個と、アプリ外からデータが必要な場合は API ルートです。
+このページでは、まずテンプレートが同梱するチェーンを基に説明し、次に API ルートを扱います。
 
-## The chain the template ships
+## テンプレートが同梱するチェーン
 
-`vite.config.ts` names a server-only module:
+`vite.config.ts` でサーバー専用モジュールを指定します:
 
 ```ts
 // vite.config.ts
@@ -22,7 +22,7 @@ solid({
 });
 ```
 
-The module exports an array of middleware functions:
+このモジュールはミドルウェア関数の配列をエクスポートします:
 
 ```ts
 // src/middleware.ts
@@ -32,16 +32,16 @@ import routes from "virtual:file-routes";
 export default [createAPIHandler(routes)];
 ```
 
-Every request the server handles, whether a page render, a server-function call, or an API route, passes through this array in order before reaching the handler.
-`createAPIHandler` answers requests that match a route module's method exports and passes everything else along.
+サーバーが処理するすべてのリクエスト（ページのレンダー、サーバー関数呼び出し、API ルート）は、ハンドラーに届く前にこの配列を順番に通ります。
+`createAPIHandler` は、ルートモジュールのメソッドエクスポートに一致するリクエストに応答し、それ以外を次に渡します。
 
-`virtual:file-routes` has two exports.
-The default export is the flat manifest of every route file, which is what the API handler needs.
-The named `pageRoutes` export is the page tree with grouping segments stripped, which is what `src/router.ts` hands to Solid Router.
+`virtual:file-routes` には2つのエクスポートがあります。
+デフォルトエクスポートは全ルートファイルのフラットなマニフェストで、API ハンドラーが必要とするものです。
+名前付き `pageRoutes` エクスポートは、グルーピングセグメントを除いたページツリーで、`src/router.ts` が Solid Router に渡すものです。
 
-## Add a middleware
+## ミドルウェアを追加する
 
-A middleware is a function of the request and a `next` continuation:
+ミドルウェアは、リクエストと `next` 継続を取る関数です:
 
 ```ts
 type Middleware = (
@@ -50,11 +50,11 @@ type Middleware = (
 ) => Response | Promise<Response>;
 ```
 
-Three shapes cover most needs.
+3つの形でほとんどのニーズをカバーできます。
 
-### Do something, then continue
+### 何かをしてから続行する
 
-Read the session and put the customer where every later step can see it:
+セッションを読み、以降のすべてのステップから見える場所に顧客を置きます:
 
 ```ts
 import { getRequestEvent } from "@solidjs/web";
@@ -70,12 +70,12 @@ async function attachCustomer(
 }
 ```
 
-`getRequestEvent()` returns this request's event, which the page render sees directly and a server function sees as a derived copy with the same `locals`, so `locals.userId` set here is readable from a server function without being passed around.
-[Sessions and auth](/building-apps/sessions-and-auth) builds `getSession()`, which reads the signed cookie from that same event.
+`getRequestEvent()` はこのリクエストのイベントを返します。ページのレンダーはそれを直接参照し、サーバー関数は同じ `locals` を持つ派生コピーとして参照するため、ここで設定した `locals.userId` は受け渡しなしでサーバー関数から読めます。
+[セッションと認証](/building-apps/sessions-and-auth)で作成する `getSession()` は、その同じイベントから署名済みクッキーを読み取ります。
 
-### Continue, then change the response
+### 続行してからレスポンスを変える
 
-Nothing is written to the network until the outermost middleware returns, so headers can be set after `await next()`, even on a streamed body:
+最も外側のミドルウェアが返るまでネットワークには何も書き込まれないため、`await next()` の後でも、ストリーミングされるボディでもヘッダーを設定できます:
 
 ```ts
 // Avoid: headers on the request never reach the browser
@@ -98,12 +98,12 @@ async function securityHeaders(
 }
 ```
 
-With the `Avoid` version the header never reaches the browser: the request's headers describe what the browser sent, not what the server answers, and some runtimes make an incoming request's headers immutable so the write throws.
-With the `Prefer` version, the header is on every response, page and API alike.
+`Avoid` 版ではヘッダーはブラウザーに届きません。リクエストのヘッダーはブラウザーが送ったものを表すのであり、サーバーが返すものではありません。また、ランタイムによっては受信リクエストのヘッダーがイミュータブルで、書き込みが例外になります。
+`Prefer` 版では、ページでも API でもすべてのレスポンスにヘッダーが付きます。
 
-### Stop the chain
+### チェーンを止める
 
-Return a `Response` without calling `next()`:
+`next()` を呼ばずに `Response` を返します:
 
 ```ts
 function requireHttps(request: Request, next: () => Promise<Response>) {
@@ -116,7 +116,7 @@ function requireHttps(request: Request, next: () => Promise<Response>) {
 }
 ```
 
-Add the functions to the array in the order they should run:
+実行したい順序で配列に関数を追加します:
 
 ```ts
 export default [
@@ -127,24 +127,24 @@ export default [
 ];
 ```
 
-The request travels down the array and the response travels back up it.
+リクエストは配列を下り、レスポンスはそれを上って戻ります。
 
-![Four middleware in a row, then the page render. A request arrow passes through each from left to right and a response arrow returns through them. requireHttps can return a Response without calling next and stop the chain; attachCustomer sets locals on the way in, visible to every later step; securityHeaders sets a header on the response on the way out.](/images/diagrams/middleware-chain.svg)
+![4つのミドルウェアが並び、その後にページのレンダー。リクエストの矢印が左から右へ各ミドルウェアを通り、レスポンスの矢印がそれらを通って戻る。requireHttps は next を呼ばずに Response を返してチェーンを止められる。attachCustomer は入り方向で locals を設定し、以降のすべてのステップから見える。securityHeaders は戻り方向でレスポンスにヘッダーを設定する。](/images/diagrams/middleware-chain.svg)
 
-`securityHeaders` runs before `attachCustomer` on the way in and receives its response on the way out.
-Put the session reader before anything that needs `locals.userId`, and put the API handler after it if API routes need the customer.
+`securityHeaders` は入り方向では `attachCustomer` より先に実行され、戻り方向ではそのレスポンスを受け取ります。
+セッションを読むミドルウェアは `locals.userId` を必要とするものより前に置き、API ルートが顧客を必要とするなら API ハンドラーはその後に置きます。
 
-Pass a `Request` to `next(request)` to replace the request for the rest of the chain, for example after rewriting a URL.
-Do not call `next()` twice from one invocation.
+`next(request)` に `Request` を渡すと、チェーンの残りで使われるリクエストを置き換えられます（例: URL を書き換えた後）。
+1回の呼び出しで `next()` を2回呼ばないでください。
 
-:::note[In development, unhandled non-page requests fall through to Vite]
-In `vite dev`, a request that is not an HTML-accepting `GET` and that no middleware answered goes to Vite's own pipeline rather than rendering the page at that URL.
-Production has no Vite pipeline, so every request that reaches the end of the chain renders.
+:::note[開発時、処理されなかったページ以外のリクエストは Vite にフォールスルーする]
+`vite dev` では、HTML を受け付ける `GET` ではなく、どのミドルウェアも応答しなかったリクエストは、その URL のページをレンダーするのではなく Vite 自身のパイプラインに渡されます。
+本番には Vite パイプラインがないため、チェーンの最後まで到達したリクエストはすべてレンダーされます。
 :::
 
-### Catching errors
+### エラーを捕捉する
 
-A middleware that wraps `next()` in `try`/`catch` sees anything the rest of the chain throws:
+`next()` を `try`/`catch` で囲むミドルウェアは、チェーンの残りがスローしたものをすべて捕捉できます:
 
 ```ts
 async function catchErrors(_request: Request, next: () => Promise<Response>) {
@@ -157,13 +157,13 @@ async function catchErrors(_request: Request, next: () => Promise<Response>) {
 }
 ```
 
-Log the real error and return a generic body.
-Exception messages can carry database, filesystem, or token details; the only errors whose text belongs in a response are the ones the app marked safe, which [Mutations and responses](/building-apps/server-functions/mutations-and-responses#handle-thrown-errors) covers for server functions.
-Production builds also wrap the generated page render in a default error boundary; set `start.errorBoundary: false` when this middleware owns errors, as [App structure](/building-apps/app-structure#common-problems) notes.
+実際のエラーはログに記録し、汎用的なボディを返します。
+例外メッセージはデータベース・ファイルシステム・トークンの詳細を含み得ます。レスポンスに入れてよいテキストを持つエラーは、アプリが安全とマークしたものだけです。サーバー関数については[ミューテーションとレスポンス](/building-apps/server-functions/mutations-and-responses#handle-thrown-errors)を参照してください。
+本番ビルドでは生成されるページレンダーもデフォルトのエラーバウンダリで囲まれます。このミドルウェアがエラーを所有する場合は、[アプリ構造](/building-apps/app-structure#common-problems)にあるように `start.errorBoundary: false` を設定してください。
 
-## API routes
+## API ルート
 
-An API route is a route module that exports uppercase HTTP methods instead of, or as well as, a default component:
+API ルートとは、デフォルトのコンポーネントの代わりに、あるいはそれと併せて、大文字の HTTP メソッドをエクスポートするルートモジュールです:
 
 ```ts
 // src/routes/api/products.ts
@@ -182,24 +182,24 @@ export const POST: APIHandler = async ({ request }) => {
 };
 ```
 
-Run `curl http://localhost:3000/api/products` and the JSON list comes back; `POST` with a body creates one.
-`src/routes/api/products/[id].ts` answers `/api/products/:id` with `params.id`, the same convention that maps pages.
+`curl http://localhost:3000/api/products` を実行すると JSON のリストが返り、ボディ付きの `POST` で作成できます。
+`src/routes/api/products/[id].ts` は、ページをマッピングするのと同じ規約で、`params.id` とともに `/api/products/:id` に応答します。
 
-Enable method discovery in the plugin and the template's `createAPIHandler` picks the exports up:
+プラグインでメソッド検出を有効にすると、テンプレートの `createAPIHandler` がこれらのエクスポートを拾います:
 
 ```ts
 // vite.config.ts
 fileRoutes({ httpMethods: true });
 ```
 
-The rule for what counts as a route module is the same for pages and API routes.
-A `.js`, `.jsx`, `.ts`, or `.tsx` file under `src/routes` is a route when it has a default export (a page) or, with `httpMethods` on, an uppercase method export (an API route); a module with both serves HTML to browsers and JSON to `fetch`.
-A `.md` or `.mdx` file is always a page.
-A file with neither a default export nor a method export is not a route and does not appear in the manifest, so a helper module under `src/routes` is ignored rather than served.
-Keep helpers and server functions in `src/server` or `src/data` anyway, so a default export added later does not turn one into a page by accident.
+ルートモジュールとみなされる規則は、ページと API ルートで同じです。
+`src/routes` 配下の `.js`、`.jsx`、`.ts`、`.tsx` ファイルは、デフォルトエクスポートを持つ（ページ）か、`httpMethods` がオンのときに大文字のメソッドエクスポートを持つ（API ルート）場合にルートになります。両方を持つモジュールは、ブラウザーには HTML を、`fetch` には JSON を提供します。
+`.md` や `.mdx` ファイルは常にページです。
+デフォルトエクスポートもメソッドエクスポートも持たないファイルはルートではなくマニフェストにも現れないため、`src/routes` 配下のヘルパーモジュールは提供されず無視されます。
+それでもヘルパーやサーバー関数は `src/server` や `src/data` に置いてください。後からデフォルトエクスポートを追加して、誤ってページにしてしまうことを防ぐためです。
 
-The handler receives the request event with the matched `params`, so it can read `locals.userId` set by middleware and append cookies to `event.response.headers`.
-Authorization belongs in the handler:
+ハンドラーは、マッチした `params` を含むリクエストイベントを受け取るため、ミドルウェアが設定した `locals.userId` を読んだり、`event.response.headers` にクッキーを追加したりできます。
+認可はハンドラーに置きます:
 
 ```ts
 // Avoid: the folder name is the only protection
@@ -218,70 +218,70 @@ export const DELETE: APIHandler = async ({ params }) => {
 };
 ```
 
-The `Avoid` version deletes a product for any HTTP client that sends `DELETE /api/products/mug`; a route file is not protected by its location.
-A middleware that is guaranteed to run before the handler is the other place for the check.
+`Avoid` 版は、`DELETE /api/products/mug` を送るあらゆる HTTP クライアントに対して商品を削除します。ルートファイルはその場所によって保護されるわけではありません。
+ハンドラーの前に必ず実行されるミドルウェアが、もう1つのチェック場所です。
 
-### Return values
+### 戻り値
 
-- A `Response` is sent as-is; use it to control status and headers.
-- A string becomes a `text/plain` response.
-- Any other value becomes a JSON response.
-- `undefined` from a `GET` in a module that also has a page component lets the page render, which is how a route can serve HTML to browsers and JSON to `fetch`.
-  From an API-only `GET`, `undefined` is a `404`.
-  From any other method, `undefined` throws, since the handler was expected to answer.
+- `Response` はそのまま送信されます。ステータスとヘッダーを制御するのに使います。
+- 文字列は `text/plain` レスポンスになります。
+- その他の値は JSON レスポンスになります。
+- ページコンポーネントも持つモジュールの `GET` が `undefined` を返すとページがレンダーされます。これが、1つのルートがブラウザーに HTML を、`fetch` に JSON を提供する仕組みです。
+  API のみの `GET` では、`undefined` は `404` です。
+  その他のメソッドでは `undefined` はスローします。ハンドラーが応答する想定だからです。
 
-A request whose method has no export continues down the chain.
-`HEAD` uses a `HEAD` export when present and otherwise falls back to `GET`.
+メソッドに対応するエクスポートがないリクエストは、チェーンの下へ続きます。
+`HEAD` は `HEAD` エクスポートがあればそれを使い、なければ `GET` にフォールバックします。
 
-Server functions, not API routes, are how the app's own components talk to the server; they are typed end to end and need no URL design.
-API routes are for everything else: webhooks, other services, scripts, and public endpoints.
+アプリ自身のコンポーネントがサーバーと話す手段は API ルートではなくサーバー関数です。エンドツーエンドで型付きで、URL 設計も不要です。
+API ルートはそれ以外のすべて、つまり Webhook、他のサービス、スクリプト、公開エンドポイントのためのものです。
 
-:::deep-dive[What is Solid's and what is the router's]
-The method-export convention, the route matching, and `createAPIHandler` come from `filesystem-routing`, the same package that scans `src/routes` for pages.
-The contract Solid's server runtime exposes is the fetch-style `(request, next)` middleware shape and the request event it runs under; any dispatcher that fits that shape can sit in the chain, so a project on another router or another file convention swaps the dispatcher, not the chain.
-Under the hood, the dispatcher matches the URL against the flat manifest with a radix tree, writes the matched params onto the request event, and imports the handler module on demand, so handler code and the server-only modules it imports never enter the client bundle.
+:::deep-dive[Solid の部分とルーターの部分]
+メソッドエクスポートの規約、ルートマッチング、`createAPIHandler` は `filesystem-routing` 由来です。これはページのために `src/routes` をスキャンするのと同じパッケージです。
+Solid のサーバーランタイムが公開する契約は、fetch スタイルの `(request, next)` ミドルウェアの形と、その下で動くリクエストイベントです。その形に合うディスパッチャーはどれでもチェーンに置けるため、別のルーターや別のファイル規約を使うプロジェクトでは、チェーンではなくディスパッチャーを入れ替えます。
+内部では、ディスパッチャーは radix 木でフラットなマニフェストと URL を照合し、マッチした params をリクエストイベントに書き込み、ハンドラーモジュールをオンデマンドでインポートします。そのため、ハンドラーのコードとそれがインポートするサーバー専用モジュールはクライアントバンドルに入りません。
 :::
 
-## Common problems
+## よくある問題
 
-### `locals.userId` is `undefined` in a server function
+### サーバー関数で `locals.userId` が `undefined` になる
 
-The middleware that sets it runs after the API handler in the array, or is not in the array at all.
-Middleware order is array order.
+それを設定するミドルウェアが配列内で API ハンドラーより後に実行されているか、配列に入っていません。
+ミドルウェアの順序は配列の順序です。
 
-### An API route returns HTML
+### API ルートが HTML を返す
 
-The module has a default export and the `GET` handler returned `undefined`, so the page rendered.
-Return a `Response` or remove the component.
+モジュールがデフォルトエクスポートを持ち、`GET` ハンドラーが `undefined` を返したため、ページがレンダーされました。
+`Response` を返すか、コンポーネントを削除してください。
 
 ### `API handler for POST "..." did not return a response`
 
-A non-`GET` handler returned `undefined`.
-Only a `GET` may decline; return a `Response`, a string, or a JSON value.
+`GET` 以外のハンドラーが `undefined` を返しました。
+辞退できるのは `GET` だけです。`Response`、文字列、または JSON 値を返してください。
 
-### Headers set in middleware are missing on a streamed page
+### ミドルウェアで設定したヘッダーがストリーミングされたページにない
 
-They were set on the request before `await next()`, not on the returned response.
-Set them on the `Response` after `next()` resolves.
+`await next()` の前にリクエストに設定されており、返されたレスポンスに設定されていません。
+`next()` が解決した後の `Response` に設定してください。
 
 ### `Duplicate API routes for "/api/products"`
 
-Two route files map to the same path with method exports, for example `api/products.ts` and `api/products/index.ts`.
-Keep one.
+2つのルートファイルがメソッドエクスポートで同じパスにマッピングされています（例: `api/products.ts` と `api/products/index.ts`）。
+1つだけ残してください。
 
-## Recap
+## まとめ
 
-- Middleware is `(request, next) => Response`; export an array and the request runs down it, the response back up.
-- Read the request and write `locals` before `next()`; change headers on the response after it.
-- Return without calling `next()` to stop the chain, and never call `next()` twice.
-- Catch errors in one middleware that logs the real error and returns a generic body.
-- A file under `src/routes` is a route when it has a default export or, with `httpMethods`, an uppercase method export; anything else there is ignored.
-- Check the caller inside every API handler or in a middleware before it; a folder name protects nothing.
-- Use server functions for the app's own components and API routes for callers that are not the app.
+- ミドルウェアは `(request, next) => Response` です。配列をエクスポートすると、リクエストはそれを下り、レスポンスは上って戻ります。
+- `next()` の前にリクエストを読み `locals` に書き、その後はレスポンスでヘッダーを変更します。
+- `next()` を呼ばずに返すとチェーンが止まります。`next()` を2回呼んではいけません。
+- エラーは1つのミドルウェアで捕捉し、実際のエラーをログに記録して汎用的なボディを返します。
+- `src/routes` 配下のファイルは、デフォルトエクスポートを持つか、`httpMethods` で大文字のメソッドエクスポートを持つ場合にルートになります。それ以外は無視されます。
+- 呼び出し元のチェックは各 API ハンドラーの内部かその前のミドルウェアで行います。フォルダー名は何も守りません。
+- アプリ自身のコンポーネントにはサーバー関数を、アプリ以外の呼び出し元には API ルートを使います。
 
-## Next steps
+## 次のステップ
 
-- [Sessions and auth](/building-apps/sessions-and-auth): the most common middleware, reading a session cookie into `event.locals`.
-- [Server functions](/building-apps/server-functions): they run under the same request event, so state set here is visible to them.
-- [Protected routes](/guides/protected-routes#middleware-for-whole-sections): a sign-in redirect for a whole section from middleware, and what the middleware does not see.
-- [Deployment](/building-apps/deployment): where the request handler this chain fronts runs, and how a host serves `dist/client`.
+- [セッションと認証](/building-apps/sessions-and-auth): 最も一般的なミドルウェアで、セッションクッキーを `event.locals` に読み込みます。
+- [サーバー関数](/building-apps/server-functions): 同じリクエストイベントの下で実行されるため、ここで設定した状態が見えます。
+- [保護されたルート](/guides/protected-routes#middleware-for-whole-sections): ミドルウェアからセクション全体へのサインインリダイレクトと、ミドルウェアに見えないものです。
+- [デプロイ](/building-apps/deployment): このチェーンが前段となるリクエストハンドラーがどこで実行されるか、ホストが `dist/client` をどう提供するかです。
