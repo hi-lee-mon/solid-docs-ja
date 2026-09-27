@@ -2,13 +2,14 @@
   "name": "solid-docs-ja",
   "private": true,
   "type": "module",
+  "packageManager": "npm@12.1.0",
   "scripts": {
     "docs:dev": "vitepress dev --port 5173",
     "docs:build": "vitepress build",
     "docs:preview": "vitepress preview"
   },
   "devDependencies": {
-    "vitepress": "^1.6.3",
-    "markdown-it-container": "^4.0.0"
+    "vitepress": "2.0.0-alpha.20",
+    "markdown-it-container": "4.0.0"
   }
 }
