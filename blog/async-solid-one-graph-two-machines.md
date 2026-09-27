@@ -1,3 +1,9 @@
+---
+title: "Async Solid - One Graph, Two Machines"
+date: "2026-08-26"
+author: "Ryan Carniato"
+---
+
 *これは Solid 2.0 が非同期をどう扱うかを深掘りするシリーズの第 3 回です。[第 1 回](/blog/async-solid-fetch-high-block-low.md)は読み取り、[第 2 回](/blog/async-solid-write-sync-run-async.md)は書き込みについてでした。今回はネットワークです。*
 
 実は前回の記事で今回の内容を少しネタバレしていました。

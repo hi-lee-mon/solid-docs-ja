@@ -1,3 +1,9 @@
+---
+title: "Introducing SolidStart: The SolidJS Framework"
+date: "2022-11-09"
+author: "SolidJS Core"
+---
+
 > この発表以降、SolidStart には大きな変更がありました。2024年5月21日に SolidStart 1.0 が破壊的変更を含めて正式リリースされました。そのため、この記事に示されたコード例や API は古くなっている可能性があります。最新の SolidStart ドキュメントは start.solidjs.com をご覧ください。
 
 私たちはかなり長い間 SolidJS に取り組んできました。最初の数年は、私自身が何かを証明するためだけのものでした。次の数年は、学んだことを広めるためのものでした。

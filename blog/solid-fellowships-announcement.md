@@ -1,3 +1,9 @@
+---
+title: "Announcing SolidJS Fellowships"
+date: "2022-09-19"
+author: "SolidJS Core"
+---
+
 SolidJS コアチームとエコシステムチームは、SolidJS の開発を支援する新しいプログラムの開始を発表できることを嬉しく思います。2022 年はプロジェクトの成長にとって格別な一年でした。採用が増え続ける中、あらゆる規模のプロジェクトやエンタープライズチームが本番環境で Solid に依存できるようにすることが、コアチームが直接注力する課題です。
 
 Solid は v1.0 のリリースから 1 年が経ち、SolidStart のリリースも間近に控え、コアチームはさらなる飛躍的成長の基盤を築くため、かつてないほど忙しくしています。コアチームは [OpenCollective](https://opencollective.com/solid) を通じて広いコミュニティから託された資金を活用し、より良く、より速い Solid と SolidStart のリリースを支える取り組みへと投入します。

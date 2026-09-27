@@ -1,3 +1,9 @@
+---
+title: "The State of Solid: September 2021"
+date: "2021-09-30"
+author: "Ryan Carniato"
+---
+
 1.0 リリースからのここ数か月、Solid では多くのわくわくする出来事がありました。
 
 まずは大きなニュースから始めましょう。

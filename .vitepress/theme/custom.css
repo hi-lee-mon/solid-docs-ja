@@ -1,0 +1,73 @@
+/* custom containers for translated mdx directives */
+
+.custom-block.note {
+  border-left-color: var(--vp-c-brand-1);
+  background-color: var(--vp-custom-block-info-bg);
+  color: var(--vp-custom-block-info-text);
+}
+.custom-block.note .custom-block-title {
+  color: var(--vp-custom-block-info-text);
+}
+
+.custom-block.solution {
+  border-left-color: var(--vp-c-tip-1);
+  background-color: var(--vp-custom-block-tip-bg);
+}
+.custom-block.solution .custom-block-title {
+  color: var(--vp-custom-block-tip-text);
+}
+
+details.custom-block.deep-dive {
+  border-left-color: var(--vp-c-purple-1, #8e5cd9);
+  background-color: var(--vp-custom-block-details-bg);
+}
+details.custom-block.deep-dive > summary {
+  font-weight: 600;
+  cursor: pointer;
+  margin: -8px -16px;
+  padding: 8px 16px;
+}
+details.custom-block.deep-dive > summary::before {
+  content: '🔍 ';
+}
+details.custom-block.deep-dive[open] > summary {
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--vp-c-divider);
+}
+
+.dtab-group {
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  padding: 4px 16px 12px;
+  margin: 16px 0;
+}
+.custom-block.dtab {
+  border-left: none;
+  padding: 8px 0;
+  background: transparent;
+}
+.custom-block.dtab .custom-block-title {
+  color: var(--vp-c-brand-1);
+  font-size: 0.95em;
+}
+.custom-block.dtab {
+  border-top: 1px solid var(--vp-c-divider);
+}
+.dtab-group > .custom-block.dtab:first-child {
+  border-top: none;
+}
+
+.custom-block.advanced {
+  border-left-color: var(--vp-c-purple-1, #8e5cd9);
+  background-color: var(--vp-custom-block-info-bg);
+}
+.custom-block.caution {
+  border-left-color: var(--vp-custom-block-caution-border, #e2b93d);
+  background-color: var(--vp-custom-block-caution-bg, rgba(226,185,61,0.1));
+}
+.custom-block.caution .custom-block-title { color: #b58b00; }
+.custom-block.pitfall {
+  border-left-color: var(--vp-custom-block-danger-border, #e13238);
+  background-color: var(--vp-custom-block-danger-bg, rgba(225,50,56,0.08));
+}
+.custom-block.pitfall .custom-block-title { color: var(--vp-custom-block-danger-text, #e13238); }

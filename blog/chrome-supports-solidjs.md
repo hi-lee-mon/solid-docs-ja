@@ -1,3 +1,9 @@
+---
+title: "Chrome Supports SolidJS in Building a Performant Web"
+date: "2023-07-12"
+author: "SolidJS Core"
+---
+
 SolidJS とそのシグナルの活用は、この1年でフロントエンドの世界を大きく揺さぶりましたが、誕生から最初の数年は、少数のメンテナーだけが関わる比較的無名のプロジェクトでした。その物語は一夜の成功ではなく、小さな一歩の積み重ねです。そしてある日目覚めると、ほぼすべての JavaScript フレームワークがシグナルから影響を受け、細粒度リアクティビティへの関心を新たにしている世界になっていました。
 
 ここに至るまでの道のりは容易ではありませんでした。私たちは多くのインスピレーション元から大いに拝借しただけでなく、コントリビューターや支援者のコミュニティの善意に支えられてきました。Netlify、JetBrains、Builder.io をはじめとする多くの企業が開発を支援し、[フェローシップ](https://www.solidjs.com/blog/solid-fellowships-announcement)、[SolidHack](https://hack.solidjs.com/)、そして現在の [SolidStart Fund](https://opencollective.com/solid/projects/solidstart-fund) といったプログラムにつなげてくれました。これらのプログラムや取り組みは、パートタイムのリソースを直接支援し、メンバーが Solid に取り組む機会を得られるようにすることで、コミュニティに価値を還元するよう丁寧に設計されています。

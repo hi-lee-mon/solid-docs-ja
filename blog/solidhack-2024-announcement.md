@@ -1,3 +1,9 @@
+---
+title: "SolidHack 2024 Announcement"
+date: "2024-09-03"
+author: "SolidJS Core"
+---
+
 Solid コアチーム、Solid DX チーム、そして寛大な協賛企業である
 [Netlify](https://www.netlify.com) と [Sentry](https://sentry.io/) は、SolidHack 2024 の
 開催を誇りをもって発表します。今年の賞金総額は 15,000 米ドルで、両スポンサーが

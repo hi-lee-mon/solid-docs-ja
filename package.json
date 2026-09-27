@@ -1,0 +1,14 @@
+{
+  "name": "solid-docs-ja",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "docs:dev": "vitepress dev --port 5173",
+    "docs:build": "vitepress build",
+    "docs:preview": "vitepress preview"
+  },
+  "devDependencies": {
+    "vitepress": "^1.6.3",
+    "markdown-it-container": "^4.0.0"
+  }
+}

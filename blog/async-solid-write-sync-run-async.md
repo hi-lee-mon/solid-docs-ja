@@ -1,3 +1,9 @@
+---
+title: "Async Solid - Write Sync, Run Async"
+date: "2026-08-24"
+author: "Ryan Carniato"
+---
+
 *これは Solid 2.0 が非同期をどう扱うかを深掘りするシリーズの第2回です。[第1回](/blog/async-solid-fetch-high-block-low.md)は読み取りについて、第2回は書き込みについてです。*
 
 前回は、非同期の読み取りにおけるカラーレスな合成によって、管理しやすいコードとパフォーマントな UI のどちらかを選ばなくて済むことを見ました。

@@ -1,3 +1,9 @@
+---
+title: "The State of Solid: December 2021"
+date: "2021-12-23"
+author: "SolidJS Core"
+---
+
 9月の前回の State of Solid 記事から、コミュニティ内外で多くのことが起きました。私たちは Solid の進む方向性にかつてないほどわくわくしており、このアップデートには最新情報がぎっしり詰まっています。
 
 ## コミュニティ・成長・エコシステム
