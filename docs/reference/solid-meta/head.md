@@ -2,8 +2,8 @@
 title: Head
 order: 8
 use_cases: >-
-  grouped meta tags, multiple og images, social tag blocks, atomic head
-  replacement
+  グループ化されたメタタグ、複数の og 画像、ソーシャルタグのブロック、
+  アトミックな head の置き換え
 tags:
   - head
   - group
@@ -14,23 +14,25 @@ source_repo: "solidjs/solid-meta"
 source_ref: "next"
 source_path: "src/index.ts"
 description: >-
-  Head groups its child head tags into one replacement set through Solid Meta.
+  Head は Solid Meta を通じて、子の head タグを 1 つの置き換えセットにグループ化します。
 ---
 
-`Head` groups its child head tags into one replacement set.
-Some head state is a _set_, not a single tag — multiple `og:image`s, or a block of social tags that should override together.
+`Head` は子の head タグを 1 つの置き換えセットにグループ化します。
+head の状態には単一のタグではなく _セット_ であるものがあります —
+複数の `og:image` や、まとめて上書きされるべきソーシャルタグの
+ブロックなどです。
 
-:::note[New in 1.0]
-`Head` did not exist in `@solidjs/meta` 0.x.
+:::note[1.0 の新機能]
+`Head` は `@solidjs/meta` 0.x には存在しませんでした。
 :::
 
-## Import
+## インポート
 
 ```tsx
 import { Head } from "@solidjs/meta";
 ```
 
-## Type
+## 型
 
 ```tsx
 const Head: ParentComponent;
@@ -40,26 +42,26 @@ const Head: ParentComponent;
 
 ### `children`
 
-- **Type:** `JSX.Element`
-- **Optional:** Yes
+- **型:** `JSX.Element`
+- **省略可能:** はい
 
-Head tag components (and any components that render them).
+head タグコンポーネント（およびそれらをレンダーするコンポーネント）。
 
-## Behavior
+## 動作
 
-- **Within the group, same-identity tags coexist.**
-  Two `<Meta property="og:image">` tags inside one `<Head>` both render.
-- **Groups replace wholesale.**
-  A later group replaces an earlier group's set for an identity as a unit, and unmounting restores the earlier set.
-- **Membership is reactive.**
-  Tags rendered conditionally (or by child components) inside a `<Head>` join and leave the set as they mount and unmount.
-  Group scope propagates via context through component calls.
-- **Nesting starts a new group.**
-  A `<Head>` inside another `<Head>`'s children forms its own independent group; to contribute tags _into_ the surrounding group, render bare tag components instead.
+- **グループ内では、同一 identity のタグが共存します。**
+  1 つの `<Head>` の中にある 2 つの `<Meta property="og:image">` タグは両方ともレンダーされます。
+- **グループはまとめて置き換わります。**
+  後のグループは、ある identity について前のグループのセットを一単位として置き換え、アンマウントすると前のセットが復元されます。
+- **メンバーシップはリアクティブです。**
+  `<Head>` の中で条件付きで（または子コンポーネントによって）レンダーされるタグは、マウント・アンマウントに応じてセットに参加・離脱します。
+  グループのスコープはコンテキストを通じてコンポーネント呼び出しをまたいで伝播します。
+- **ネストすると新しいグループが始まります。**
+  別の `<Head>` の children 内にある `<Head>` は独自の独立したグループを形成します。周囲のグループ _へ_ タグを追加したい場合は、裸のタグコンポーネントをレンダーしてください。
 
-## Examples
+## 例
 
-### Overriding a default set
+### デフォルトのセットを上書きする
 
 ```tsx
 // Layout
@@ -74,7 +76,7 @@ Head tag components (and any components that render them).
 </Head>
 ```
 
-### Social tag block
+### ソーシャルタグのブロック
 
 ```tsx
 import { Head, Meta, Title } from "@solidjs/meta";
@@ -93,7 +95,7 @@ export default function Article(props: {
 }
 ```
 
-## Related
+## 関連項目
 
 - [`Meta`](/reference/solid-meta/meta)
 - [`Title`](/reference/solid-meta/title)

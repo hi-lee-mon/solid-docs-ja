@@ -2,7 +2,7 @@
 title: Base
 order: 7
 use_cases: >-
-  base url, relative url resolution, document base
+  ベース URL、相対 URL の解決、ドキュメントの base
 tags:
   - base
   - head
@@ -13,18 +13,18 @@ source_repo: "solidjs/solid-meta"
 source_ref: "next"
 source_path: "src/index.ts"
 description: >-
-  Base sets the document base URL through Solid Meta during server rendering.
+  Base はサーバーレンダリング中に Solid Meta を通じてドキュメントのベース URL を設定します。
 ---
 
-`Base` adds a [`<base>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base) element that specifies the base URL for all relative URLs in the document.
+`Base` はドキュメント内のすべての相対 URL のベースとなる URL を指定する [`<base>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base) 要素を追加します。
 
-## Import
+## インポート
 
 ```tsx
 import { Base } from "@solidjs/meta";
 ```
 
-## Type
+## 型
 
 ```tsx
 const Base: Component<JSX.BaseHTMLAttributes<HTMLBaseElement>>;
@@ -32,18 +32,18 @@ const Base: Component<JSX.BaseHTMLAttributes<HTMLBaseElement>>;
 
 ## Props
 
-Accepts attributes for [`<base>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base) (`href`, `target`).
+[`<base>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base) の属性（`href`、`target`）を受け取ります。
 
-## Behavior
+## 動作
 
-- **Server shell only.**
-  `<base>` has hard placement constraints — it must appear before any relative URL resolves — so it is rendered into the head prelude on the first server flush.
-- Registrations arriving after the shell has flushed are ignored with a dev warning, and `Base` is ignored (with a dev warning) on the client: a base that changes after relative URLs resolved is incoherent by definition.
-- `Base` does not accept a `key` and does not participate in cascade/restore semantics.
+- **サーバーのシェルのみ。**
+  `<base>` には厳格な配置制約があります — 相対 URL が解決されるより前に出現する必要がある — ため、最初のサーバーフラッシュで head のプリリュードにレンダーされます。
+- シェルがフラッシュされた後に届いた登録は開発時警告とともに無視され、クライアントでも `Base` は（開発時警告とともに）無視されます。相対 URL の解決後に変わる base は定義上、一貫性を持ち得ません。
+- `Base` は `key` を受け取らず、カスケード・復元のセマンティクスにも参加しません。
 
-## Examples
+## 例
 
-### Basic usage
+### 基本的な使い方
 
 ```tsx
 import { Base } from "@solidjs/meta";
@@ -53,7 +53,7 @@ export default function App() {
 }
 ```
 
-## Related
+## 関連項目
 
 - [`Link`](/reference/solid-meta/link)
 - [`Meta`](/reference/solid-meta/meta)
