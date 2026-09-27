@@ -1,31 +1,31 @@
 ---
-title: "Data fetching from Solid 1"
+title: "Solid 1 のデータフェッチ"
 version: "2.0"
-description: "Move Solid 1 data loading patterns to async computations one fetch at a time, and decide per fetch whether an update should wait, dim, or show a placeholder."
+description: "Solid 1 のデータ読み込みパターンを一度に 1 フェッチずつ非同期の計算へ移し、更新を待たせるか・薄く表示するか・プレースホルダーを見せるかをフェッチごとに決める。"
 ---
 
-Most of the Solid 1 migration is renaming and reshaping: split an effect, convert a store setter, replace `Suspense` with `Loading`.
-Data fetching is different.
-`createMemo(async () => ...)` looks like `createResource` with less ceremony, and for one memo on one page it is.
-Across an application it changes when the screen updates, and the change is silent: nothing errors, nothing warns, and the app starts waiting in places it never waited before.
+Solid 1 からの移行の大半は改名と形の調整です。エフェクトを分割し、ストアのセッターを変換し、`Suspense` を `Loading` に置き換える。
+しかしデータフェッチは違います。
+`createMemo(async () => ...)` は `createResource` を儀式めいた部分を省いたもののように見え、1 ページに 1 つのメモという規模なら実際その通りです。
+アプリケーション全体では、画面がいつ更新されるかが変わります。しかもその変化は静かです。エラーも警告もなく、アプリはこれまで待ったことのない場所で待つようになります。
 
-This page is for teams whose Solid 1 app already fetches data in a way that works.
-It names the common patterns, shows how to keep each one working unchanged in Solid 2, shows what changes when you convert it, and gives you the choice per fetch.
-It is a path, not a destination: the coordinated behavior is the better default for new code, and the [Async reactivity](/concepts/async-reactivity) page explains why.
-The [general migration guide](/migration/from-solid-1) covers everything that is not fetching.
+このページは、Solid 1 のアプリですでに機能する形でデータをフェッチしているチーム向けです。
+よくあるパターンに名前を付け、それぞれを Solid 2 でも変えずに動かし続ける方法を示し、変換したときに何が変わるかを示したうえで、フェッチごとに選択できるようにします。
+これは目的地ではなく経路です。協調する動作は新しいコードにとってよりよいデフォルトであり、その理由は[非同期リアクティビティ](/concepts/async-reactivity)のページで説明しています。
+フェッチ以外のすべては[移行ガイド全般](/migration/from-solid-1)が扱っています。
 
-## What changes
+## 何が変わるか
 
-In Solid 1 a fetch and its consumer were connected by you.
-An effect or a resource started the request; a signal, store, or the resource itself received the result; the JSX read it and checked a loading flag.
-Solid did not know that the request and the value were related, so a write to an input made each consumer react on its own schedule.
+Solid 1 では、フェッチとそのコンシューマーをつなぐのはあなたでした。
+エフェクトやリソースがリクエストを開始し、シグナル・ストア・リソース自身のいずれかが結果を受け取り、JSX がそれを読んでローディングフラグを確認していました。
+Solid はリクエストと値が関連していることを知らないため、入力への書き込みがあると各コンシューマーがそれぞれのスケジュールで反応していました。
 
-In Solid 2 an async computation is a value in the graph.
-Solid knows which inputs it depends on and knows when it does not have an answer yet.
-The consequence is the one to internalize: **a write to an input of an async computation is held until that computation has its next answer, and everything else in the same update waits with it.**
+Solid 2 では、非同期の計算はグラフ内の値です。
+Solid はそれがどの入力に依存しているかを知っており、まだ回答を持っていないときも分かっています。
+そこから生じる、最も身に付けるべき結論はこれです。**非同期の計算の入力への書き込みは、その計算が次の回答を得るまで保留され、同じ更新内の他のすべても一緒に待ちます。**
 
-A dashboard shows the difference.
-A period selector feeds three panels whose requests take 200 milliseconds, one second, and ten seconds:
+ダッシュボードで違いが分かります。
+期間セレクターが 3 つのパネルに入力を供給し、リクエストにはそれぞれ 200 ミリ秒、1 秒、10 秒かかるとします。
 
 ```tsx
 const [period, setPeriod] = createSignal("2026-Q2");
@@ -36,38 +36,38 @@ const [period, setPeriod] = createSignal("2026-Q2");
 <AuditPanel period={period()} />     // 10 s
 ```
 
-With Solid 1 fetching, changing the period flips the selector at once and each panel replaces itself when its own request lands.
-For ten seconds the summary shows the new period beside an audit log for the old one.
+Solid 1 のフェッチでは、期間を変えるとセレクターは即座に切り替わり、各パネルは自分のリクエストが届き次第内容を置き換えます。
+その 10 秒間、サマリーは新しい期間を表示し、その横で監査ログは古い期間を表示し続けます。
 
-With three async memos, the write to `period` is held.
-The selector and all three panels keep their old content, and at ten seconds everything changes together.
-The page never disagrees with itself.
-The fast panel waits for the slow one, and unless something acknowledges the click, the page looks dead for ten seconds.
+3 つの非同期メモの場合、`period` への書き込みは保留されます。
+セレクターと 3 つのパネルすべてが古い内容を保持し、10 秒後にすべてが一体として切り替わります。
+ページが自分自身と矛盾することはありません。
+速いパネルは遅いパネルを待ちます。そしてクリックを受理したことを示すものがなければ、その 10 秒間ページは反応しないように見えます。
 
-Neither is right for every screen.
-Totals that must add up, a detail page, and a form should change together.
-Independent widgets should not have to.
-Solid 2 gives you the tools for both, but the default moved, and a migrated app inherits the new default everywhere at once.
-The rest of this page is about making that choice deliberately, one fetch at a time.
+すべての画面に正しい一方の答えはありません。
+合計が一致しなければならない数値、詳細ページ、フォームは一体として変わるべきです。
+独立したウィジェットはそうである必要はありません。
+Solid 2 はどちらのための道具も提供しますが、デフォルトは移動しました。移行したアプリは新しいデフォルトをあらゆる場所で一度に引き継ぎます。
+このページの残りでは、その選択を一度に 1 フェッチずつ意図的に行う方法を説明します。
 
-## Migrate in this order
+## この順序で移行する
 
-1. **Make the app run on Solid 2 without changing how it fetches.**
-   Split effects into compute and effect phases, fix reads that expect to see a write immediately, and replace `onMount` and `Suspense`.
-   Your fetching code keeps its shape and its timing.
-   Test here; this is your baseline.
-2. **Convert one fetch at a time to an async computation.**
-   For each one, decide what the user should see while it refetches, using the [table](#decide-per-fetch) below.
-   Start with fetches that stand alone on a page, where the hold changes nothing visible.
-3. **Delete what the graph now does for you.**
-   Loading flags, cancellation of superseded requests, and stale-result guards go away as each fetch converts.
+1. **フェッチのやり方を変えずに、アプリを Solid 2 で動かす。**
+   エフェクトを計算フェーズとエフェクトフェーズに分割し、書き込みが即座に見えることを前提にしている読み取りを修正し、`onMount` と `Suspense` を置き換えます。
+   フェッチのコードは形もタイミングも維持します。
+   ここでテストしてください。これがベースラインです。
+2. **一度に 1 フェッチずつ非同期の計算に変換する。**
+   それぞれについて、再フェッチ中にユーザーに何を見せるべきかを、下の[表](#decide-per-fetch)で決めます。
+   ページ上で単独で成立している、保留が見た目に何も変えないフェッチから始めます。
+3. **グラフが代わりにやってくれるようになったものを削除する。**
+   ローディングフラグ、置き換えられたリクエストのキャンセル、古い結果へのガードは、各フェッチが変換されるにつれて不要になります。
 
-Do not convert every fetch in one commit.
-The hold is a property of the graph, so it appears when the last non-async link in a chain converts, which can be far from the code you are editing.
+すべてのフェッチを 1 回のコミットで変換しないでください。
+保留はグラフの性質なので、チェーンの中の最後の非同期でないリンクが変換されたときに現れます。それは編集しているコードから遠く離れた場所かもしれません。
 
-## Pattern: an effect, a store, and a loading flag
+## パターン: エフェクト・ストア・ローディングフラグ
 
-This shape is common in Solid 1 applications that never adopted `Suspense`:
+この形は `Suspense` を採用しなかった Solid 1 アプリケーションでよく見られます。
 
 ```tsx
 // Solid 1
@@ -102,11 +102,11 @@ function TabPanel() {
 }
 ```
 
-### Step 1: keep it working
+### ステップ 1: そのまま動かし続ける
 
-Solid 2 effects have two phases.
-The compute phase tracks reads and returns a value; the effect phase receives that value, runs untracked, may do imperative work, and may return a cleanup.
-Effects run once on creation, so the `onMount` call folds into the effect:
+Solid 2 のエフェクトには 2 つのフェーズがあります。
+計算フェーズは読み取りを追跡して値を返します。エフェクトフェーズはその値を受け取り、追跡されずに実行され、命令的な処理を行うことができ、クリーンアップを返すこともできます。
+エフェクトは作成時に一度実行されるため、`onMount` の呼び出しはエフェクトに畳み込まれます。
 
 ```tsx
 // Solid 2, same behavior
@@ -137,19 +137,19 @@ function TabPanel() {
 }
 ```
 
-This works and produces no diagnostics.
-Writing to a signal or store from the effect phase is what the effect phase is for, and the [`createEffect`](/reference/solid-js/reactivity/create-effect) reference uses a fetch with an abort cleanup as its own example.
-The graph does not know that `tabData` comes from a request, so nothing is held: the period write commits at once, the panel shows its indicator, and the rows replace themselves when the response lands.
-That is Solid 1 behavior, on Solid 2.
+これは動作し、診断も出力されません。
+エフェクトフェーズからシグナルやストアへ書き込むのは、エフェクトフェーズ本来の役目であり、[`createEffect`](/reference/solid-js/reactivity/create-effect) のリファレンスもアボートのクリーンアップ付きのフェッチを例に使っています。
+グラフは `tabData` がリクエスト由来だとは知らないため、何も保留されません。期間への書き込みは即座にコミットされ、パネルはインジケーターを表示し、行はレスポンスが届き次第置き換わります。
+これは Solid 2 の上での Solid 1 の動作です。
 
-It is a step, not a place to stop.
-The graph cannot see this fetch, so [`isPending`](/reference/solid-js/reactivity/is-pending), [`refresh`](/reference/solid-js/lifecycle-actions/refresh), [`Errored`](/reference/solid-js/components-jsx/errored), and server streaming do not apply to it, and you keep owning the loading flag, the cancellation, and the stale-response guard.
-The [Avoid unnecessary effects](/guides/avoid-unnecessary-effects) guide argues against this shape for new code, and the argument stands.
-For an app that already has fifty of them, it is the safe first commit.
+これは通過点であり、止まる場所ではありません。
+グラフはこのフェッチを見えていないため、[`isPending`](/reference/solid-js/reactivity/is-pending)、[`refresh`](/reference/solid-js/lifecycle-actions/refresh)、[`Errored`](/reference/solid-js/components-jsx/errored)、サーバーストリーミングは適用されず、ローディングフラグ、キャンセル、古いレスポンスへのガードをあなたが持ち続けることになります。
+[不要なエフェクトを避ける](/guides/avoid-unnecessary-effects)ガイドは新しいコードでこの形を使うことに反対しており、その主張は有効です。
+すでに 50 個あるアプリにとっては、これが安全な最初のコミットです。
 
-### Step 2: convert it, and choose the refetch behavior
+### ステップ 2: 変換し、再フェッチの動作を選ぶ
 
-The async version removes the flag, the cancellation, and the guard:
+非同期版はフラグ、キャンセル、ガードを取り除きます。
 
 ```tsx
 function TabPanel() {
@@ -171,21 +171,21 @@ function TabPanel() {
 }
 ```
 
-`createStore(async fn, seed)` reads the inputs, awaits the response, and reconciles the result into the store, so `TabRows` re-renders only the rows that changed.
-A superseded run is discarded by Solid; the `AbortController` was doing that job by hand.
-A failed response throws, so the nearest `Errored` boundary can show it and retry it.
-`reloadSignal()` becomes `refresh(tabData)`.
+`createStore(async fn, seed)` は入力を読み取り、レスポンスを待ち、結果をストアへ突き合わせるため、`TabRows` は変わった行だけを再レンダーします。
+より新しい実行に置き換えられた実行は Solid が破棄します。`AbortController` はその仕事を手動でやっていました。
+失敗したレスポンスは throw されるため、最も近い `Errored` バウンダリがそれを表示し、リトライできます。
+`reloadSignal()` は `refresh(tabData)` になります。
 
-Now the behavior change from the [first section](#what-changes) applies.
-The first load still shows `LoadingIndicator`.
-When `global.period` changes, the indicator does not come back: the old rows stay on screen, the write to `period` is held, and the rows swap when the response lands.
-If other panels read the same period, they all swap together, and the selector waits with them.
+ここで[最初のセクション](#what-changes)の動作変更が適用されます。
+最初の読み込みではやはり `LoadingIndicator` が表示されます。
+`global.period` が変わっても、インジケーターは戻ってきません。古い行は画面に残り、`period` への書き込みは保留され、行はレスポンスが届いたときに入れ替わります。
+他のパネルが同じ期間を読んでいれば、すべてが一緒に入れ替わり、セレクターもそれらと一緒に待ちます。
 
-Decide what this panel should do while it refetches:
+このパネルが再フェッチ中に何をすべきかを決めます。
 
-- **Keep the old rows and dim them** while the new ones load.
-  This is the default, and it is the coordinated behavior.
-  Add an indicator so the wait is visible:
+- **古い行を残し、薄く表示する**。新しい行の読み込み中。
+  これがデフォルトであり、協調する動作です。
+  待っていることが見えるようにインジケーターを追加します。
 
   ```tsx
   <Loading fallback={<LoadingIndicator />}>
@@ -195,8 +195,8 @@ Decide what this panel should do while it refetches:
   </Loading>
   ```
 
-- **Show the indicator again**, as the Solid 1 version did, when the subject of the panel changed.
-  Name that subject in the boundary's `on` prop:
+- **インジケーターを再表示する**。Solid 1 版がそうしていたように、パネルの対象が変わったときに。
+  その対象をバウンダリの `on` prop で指定します。
 
   ```tsx
   <Loading
@@ -207,16 +207,16 @@ Decide what this panel should do while it refetches:
   </Loading>
   ```
 
-  When the period or department changes, this boundary shows its fallback and handles the wait itself instead of holding the update.
-  The panel no longer keeps the selector from updating.
-  Other panels that read the same period without `on` still hold it, so give `on` to each panel that should behave independently.
-  The boundary compares `on` values by identity, so combine several inputs into one string or number rather than an array.
+  期間や部署が変わると、このバウンダリはフォールバックを表示し、更新を保留する代わりに自分で待ちを処理します。
+  このパネルはもはやセレクターの更新を妨げません。
+  `on` なしで同じ期間を読んでいる他のパネルは依然として更新を保留するため、独立して振る舞うべき各パネルに `on` を付けてください。
+  バウンダリは `on` の値を同一性で比較するため、複数の入力は配列ではなく 1 つの文字列や数値に結合してください。
 
-The literal translation of the Solid 1 `<Show when={!isLoading()}>` is `<Show when={!isPending(() => tabData.rows)} fallback={<LoadingIndicator />}>` inside the `Loading` boundary.
-It works: while the refetch is pending the content unmounts, which also stops the panel from holding the update.
-Prefer `on` when the panel should reset because its subject changed, because `on` does not unmount content for refetches of the same subject, such as a `refresh`.
+Solid 1 の `<Show when={!isLoading()}>` を文字通り訳すと、`Loading` バウンダリの内側の `<Show when={!isPending(() => tabData.rows)} fallback={<LoadingIndicator />}>` です。
+これは動きます。再フェッチが保留中のあいだ内容はアンマウントされ、それによってパネルが更新を保留することも止まります。
+対象の変更でパネルをリセットすべき場合は `on` を優先してください。`on` は `refresh` のような同じ対象への再フェッチでは内容をアンマウントしないからです。
 
-## Pattern: `createResource` with `Suspense`
+## パターン: `createResource` と `Suspense`
 
 ```tsx
 // Solid 1
@@ -227,7 +227,7 @@ const [user] = createResource(() => params.id, fetchUser);
 </Suspense>;
 ```
 
-Convert the resource to an async memo and the boundary to `Loading`:
+リソースを非同期メモに、バウンダリを `Loading` に変換します。
 
 ```tsx
 // Solid 2
@@ -238,16 +238,16 @@ const user = createMemo(() => fetchUser(params.id));
 </Loading>;
 ```
 
-`user()` is typed `User`, not `User | undefined`, and the boundary handles the first load as `Suspense` did.
+`user()` の型は `User | undefined` ではなく `User` であり、バウンダリは `Suspense` と同じように最初の読み込みを処理します。
 
-The change is in the refetch.
-In Solid 1, changing `params.id` refetched the resource and, unless the change happened inside `startTransition`, the boundary showed its fallback again.
-Teams worked around this with `user.latest` or by wrapping navigation in a transition.
-In Solid 2 the held update is the default: the old user stays on screen, the write is held, and the new user replaces it when ready.
-`resource.latest` has no replacement because that is now what a plain read does.
+変わるのは再フェッチです。
+Solid 1 では、`params.id` を変えるとリソースが再フェッチされ、その変更が `startTransition` の中で起きない限り、バウンダリはフォールバックを再表示していました。
+チームは `user.latest` を使うか、ナビゲーションをトランジションで包むことでこれを回避していました。
+Solid 2 では保留される更新がデフォルトです。古いユーザーは画面に残り、書き込みは保留され、準備ができたときに新しいユーザーが置き換わります。
+`resource.latest` に相当するものはありません。それが今や通常の読み取りの動作だからです。
 
-You were already close to the coordinated model, so most resource-and-`Suspense` code needs no more than the rename.
-Where the Solid 1 fallback-on-refetch was the intended design, such as a profile page that should not show one user's name over another's data, use `on`:
+すでに協調モデルに近かったため、ほとんどのリソースと `Suspense` のコードは改名だけで済みます。
+Solid 1 の再フェッチ時フォールバックが意図した設計だった場所、たとえば別のユーザーのデータの上に一人のユーザーの名前を表示すべきでないプロフィールページでは、`on` を使います。
 
 ```tsx
 <Loading on={params.id} fallback={<UserSkeleton />}>
@@ -255,20 +255,20 @@ Where the Solid 1 fallback-on-refetch was the intended design, such as a profile
 </Loading>
 ```
 
-Where you used `startTransition` to get the held behavior, delete it; the behavior is now the default, and [`isPending`](/reference/solid-js/reactivity/is-pending) replaces the `useTransition` pending flag.
+保留される動作を得るために `startTransition` を使っていた場所では、それを削除してください。その動作は今やデフォルトであり、[`isPending`](/reference/solid-js/reactivity/is-pending) が `useTransition` の保留中フラグの代わりになります。
 
-The resource's other members map as follows:
+リソースの他のメンバーの対応は次の通りです。
 
 | Solid 1                      | Solid 2                                                                                                                                                                             |
 | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `user.loading` on first load | `Loading` boundary                                                                                                                                                                  |
-| `user.loading` on refetch    | `isPending(user)`                                                                                                                                                                   |
-| `user.error`                 | `Errored` boundary                                                                                                                                                                  |
-| `refetch()`                  | [`refresh(user)`](/reference/solid-js/lifecycle-actions/refresh); add [`affects(user)`](/reference/solid-js/lifecycle-actions/affects) first when the reload should show as pending |
-| `mutate(value)`              | An `action` with [`createOptimistic`](/reference/solid-js/reactivity/create-optimistic)                                                                                             |
-| `user.latest`                | A plain read                                                                                                                                                                        |
+| 初回読み込み時の `user.loading` | `Loading` バウンダリ                                                                                                                                                                |
+| 再フェッチ時の `user.loading`   | `isPending(user)`                                                                                                                                                                   |
+| `user.error`                 | `Errored` バウンダリ                                                                                                                                                                |
+| `refetch()`                  | [`refresh(user)`](/reference/solid-js/lifecycle-actions/refresh)。再読み込みを保留中として表示したい場合は先に [`affects(user)`](/reference/solid-js/lifecycle-actions/affects) を追加 |
+| `mutate(value)`              | [`createOptimistic`](/reference/solid-js/reactivity/create-optimistic) を使う `action`                                                                                              |
+| `user.latest`                | 通常の読み取り                                                                                                                                                                      |
 
-## Pattern: `createResource` with `.loading` and no `Suspense`
+## パターン: `.loading` 付きの `createResource`（`Suspense` なし）
 
 ```tsx
 // Solid 1
@@ -279,9 +279,9 @@ const [orders] = createResource(() => filters(), fetchOrders);
 </Show>;
 ```
 
-This is the resource used as a value with a flag, and it behaves like the [effect pattern](#pattern-an-effect-a-store-and-a-loading-flag): a spinner on first load and on every refetch, each table on its own schedule.
+これはフラグ付きの値として使うリソースで、[エフェクトのパターン](#pattern-an-effect-a-store-and-a-loading-flag)と同じように振る舞います。初回読み込みと毎回の再フェッチでスピナーが表示され、各テーブルがそれぞれのスケジュールで更新されます。
 
-The conversion is the same as above, and the same choice applies:
+変換は上と同じで、同じ選択が適用されます。
 
 ```tsx
 // Solid 2
@@ -292,10 +292,10 @@ const orders = createMemo(() => fetchOrders(filters()));
 </Loading>;
 ```
 
-With `on`, a change to the filters shows the spinner and does not hold the update, which is the Solid 1 behavior.
-Without `on`, the old table stays and the update is held until the new orders arrive; add `isPending(orders)` to show that.
+`on` を付けると、フィルターの変更はスピナーを表示し、更新を保留しません。これが Solid 1 の動作です。
+`on` なしでは、古いテーブルが残り、新しい注文が届くまで更新が保留されます。それを示すには `isPending(orders)` を追加します。
 
-If the first-load branch must live in your own JSX rather than a boundary, for example because the spinner is part of the table's own layout, declare a placeholder with `loadingValue`:
+初回読み込みの分岐をバウンダリではなく自分の JSX に置かなければならない場合、たとえばスピナーがテーブル自身のレイアウトの一部である場合は、`loadingValue` でプレースホルダーを宣言します。
 
 ```tsx
 const orders = createMemo<Order[] | undefined>(() => fetchOrders(filters()), {
@@ -307,54 +307,54 @@ const orders = createMemo<Order[] | undefined>(() => fetchOrders(filters()), {
 </Show>;
 ```
 
-The placeholder answers for the source before its first result, so the read never reaches a `Loading` boundary and the `Show` decides what renders.
-Refetches still behave as above.
-Reach for this only when the boundary does not fit; a boundary is the clearer way to describe a first load.
+プレースホルダーは最初の結果が来る前にソースの代わりに回答するため、読み取りは `Loading` バウンダリに届かず、`Show` が何をレンダーするかを決めます。
+再フェッチは依然として上記の通りに動作します。
+これに頼るのはバウンダリが合わないときだけにしてください。初回読み込みを表現するならバウンダリのほうが明確です。
 
-## Pattern: Solid Router `createAsync` and `cache`
+## パターン: Solid Router の `createAsync` と `cache`
 
-Router data loading in Solid 1 sat on top of resources, so `createAsync` with `Suspense` behaves like the [resource pattern](#pattern-createresource-with-suspense), including the change to refetch behavior.
-Replace `createAsync(() => getUser(params.id))` with `createMemo(() => getUser(params.id))` and `cache` with `query`.
-Route navigations already ran inside a transition in Solid 1, so a route whose content held during navigation keeps that behavior.
+Solid 1 のルーターのデータ読み込みはリソースの上に成り立っていたため、`Suspense` 付きの `createAsync` は[リソースのパターン](#pattern-createresource-with-suspense)と同じように振る舞います。再フェッチ動作の変更も含めて。
+`createAsync(() => getUser(params.id))` を `createMemo(() => getUser(params.id))` に、`cache` を `query` に置き換えます。
+ルートナビゲーションは Solid 1 ですでにトランジションの内側で実行されていたため、ナビゲーション中に内容が保持されていたルートはその動作を維持します。
 
-The [Solid Router migration guide](/migration/from-solid-router#migrate-data-loading-and-caching) covers the API changes, and [Data loading and mutations](/routing/solid-router/data) covers `query`, `preload`, and revalidation in Solid 2.
+[Solid Router 移行ガイド](/migration/from-solid-router#migrate-data-loading-and-caching)が API の変更を説明しており、[データ読み込みとミューテーション](/routing/solid-router/data)が Solid 2 の `query`、`preload`、再検証を説明しています。
 
-## Decide per fetch
+## フェッチごとに決める
 
-Ask the question your designer can answer: **while this data is being refetched, what should the user see?**
+デザイナーが答えられる問いを立ててください。**このデータが再フェッチされているあいだ、ユーザーには何が見えるべきか?**
 
-| The user should see…                                                   | Use                                                      |
+| ユーザーに見えるべきもの                                                   | 使うもの                                                  |
 | ---------------------------------------------------------------------- | -------------------------------------------------------- |
-| Nothing change until everything that depends on the input is ready     | The default; add `isPending` so the wait is visible.     |
-| The control they touched reflect their input now, and the content wait | `latest` on the control, `isPending` to dim the content. |
-| A placeholder in place of the content for the changed subject          | `<Loading on={key}>` around that content.                |
+| 入力に依存するすべてが準備できるまで何も変わらない                          | デフォルト。待ちが見えるように `isPending` を追加        |
+| 触れたコントロールには今すぐ入力を反映し、内容は待つ                       | コントロールに `latest`、内容を薄くするのに `isPending`   |
+| 変わった対象の内容の代わりにプレースホルダー                              | その内容を `<Loading on={key}>` で囲む                    |
 
-The first two rows describe the same screen: the tab highlights at once, the content dims, the content swaps when ready.
-[Async reactivity](/concepts/async-reactivity#what-the-hold-means-for-a-shared-input) shows each piece.
+最初の 2 行は同じ画面を説明しています。タブは即座にハイライトされ、内容は薄くなり、準備ができたときに内容が入れ替わります。
+[非同期リアクティビティ](/concepts/async-reactivity#what-the-hold-means-for-a-shared-input)にそれぞれの要素が示されています。
 
-A useful test for a widget: if it showed last period's numbers for five seconds with a spinner on it, is that fine or wrong?
-Fine means the widget is independent, and `on` or a dimmed hold are both acceptable.
-Wrong means the widget is part of a coherent view, and the default hold is doing its job.
+ウィジェットへの有用なテスト: 前の期間の数値がスピナー付きで 5 秒間表示されたら、それは問題ないか、間違いか?
+問題ないなら、そのウィジェットは独立しており、`on` でも薄く表示する保留でもどちらでも構いません。
+間違いなら、そのウィジェットは一貫したビューの一部であり、デフォルトの保留が役目を果たしています。
 
-## What you get when you stop
+## 移行を終えると得られるもの
 
-Each fetch that converts removes code you were maintaining:
+変換されたフェッチごとに、あなたが保守していたコードが取り除かれます。
 
-- The loading flag and the code that sets it in the right order.
-- The `AbortController` or "is this response still current" guard; Solid discards superseded runs.
-- The `success` check that turned an error into a silent empty state; a thrown error reaches `Errored` and can be retried.
-- The reload signal; `refresh(source)` re-asks the same question.
+- ローディングフラグと、それを正しい順序で設定するコード。
+- `AbortController` や「このレスポンスはまだ最新か」のガード。より新しい実行に置き換えられた実行は Solid が破棄します。
+- エラーを静かな空の状態に変えていた `success` チェック。throw されたエラーは `Errored` に届き、リトライできます。
+- 再読み込みシグナル。`refresh(source)` が同じ問いを再び尋ねます。
 
-And it adds behavior you could not get before: a panel that reveals together with its siblings, `isPending` from any consumer without threading a flag through props, and server rendering that streams each region as its data settles.
+そしてこれまで得られなかった動作も加わります。兄弟と一緒に表示されるパネル、props にフラグを通さずにどのコンシューマーからでも使える `isPending`、そしてデータが確定するたびに各領域をストリーミングするサーバーレンダリングです。
 
-Convert the standalone fetches first, the independent panels with `on` second, and the coherent views last, when you can see what the hold does for them.
+まず単独で成立するフェッチを変換し、次に `on` を付けた独立したパネルを、最後に一貫したビューを、保留がそれらに何をもたらすかが見えた段階で変換してください。
 
-## Checklist
+## チェックリスト
 
-- [ ] The app runs on Solid 2 with its Solid 1 fetching shape and passes its tests.
-- [ ] Each fetch has a decision: hold, hold with `latest` on the control, or `on`.
-- [ ] Every `on` prop receives a value such as `params.id`, not an accessor.
-- [ ] `isPending` appears wherever a held update could otherwise look like a dead click.
-- [ ] Loading flags, abort controllers, and stale-response guards are gone from converted fetches.
-- [ ] Reload signals are `refresh(source)` calls, with `affects` where the reload should show as pending.
-- [ ] Failed requests throw and an `Errored` boundary covers them.
+- [ ] アプリが Solid 1 のフェッチの形のまま Solid 2 で動作し、テストに合格する。
+- [ ] 各フェッチに決定がある: 保留、コントロールに `latest` を使った保留、または `on`。
+- [ ] すべての `on` prop が `params.id` のような値を受け取り、アクセサーではない。
+- [ ] 保留される更新がさもなければ反応しないクリックに見えるすべての場所に `isPending` がある。
+- [ ] ローディングフラグ、アボートコントローラー、古いレスポンスへのガードが変換済みのフェッチから消えている。
+- [ ] 再読み込みシグナルが `refresh(source)` 呼び出しになり、再読み込みを保留中として表示すべき場所に `affects` がある。
+- [ ] 失敗したリクエストは throw され、`Errored` バウンダリがそれらをカバーしている。
