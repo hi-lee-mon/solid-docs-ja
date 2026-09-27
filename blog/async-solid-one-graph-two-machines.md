@@ -1,14 +1,14 @@
-*This is part three of a deep dive into how Solid 2.0 handles async. [Part one](/blog/async-solid-fetch-high-block-low) was about reads. [Part two](/blog/async-solid-write-sync-run-async) was about writes. This one is the network.*
+*これは Solid 2.0 が非同期をどう扱うかを深掘りするシリーズの第 3 回です。[第 1 回](/blog/async-solid-fetch-high-block-low)は読み取り、[第 2 回](/blog/async-solid-write-sync-run-async)は書き込みについてでした。今回はネットワークです。*
 
-So I sort of already spoiled this one in the last article.
+実は前回の記事で今回の内容を少しネタバレしていました。
 
-The TodoMVC example already revealed an `api.ts` whose functions ran on a different machine. Their arguments serialized, sent over HTTP, deserialized, ran against a database, and sent back the same way, finally reconciling in an optimistic store. During initial server render they didn't make an HTTP request at all. Since this wasn't code you had to write I didn't mention it.
+TodoMVC の例では、別のマシンで実行される関数を持つ `api.ts` がすでに登場していました。引数はシリアライズされ、HTTP で送られ、デシリアライズされ、データベースに対して実行され、同じ経路で送り返され、最終的に楽観的ストアで再整合されます。初回のサーバーレンダー中は HTTP リクエストを一切出しません。あなたが書く必要のないコードだったので、触れませんでした。
 
-But today we get to look a bit deeper.
+でも今日は、もう少し深く見ていきます。
 
-## A Function That Isn't There
+## そこにない関数
 
-It all starts with one directive:
+すべては 1 つのディレクティブから始まります。
 
 ```ts
 export function fetchStory(id: number): Promise<Story> {
@@ -17,32 +17,32 @@ export function fetchStory(id: number): Promise<Story> {
 }
 ```
 
-The compiler splits this out into its own module and the server build registers it under a stable identifier. The client build gets a reference with the same signature that fetches instead. TypeScript flows through this unchanged. Which is great as there is no type-gen, no schema layer, no file routes. When the function is called during SSR we just call it directly and the server knows how to handle the async.
+コンパイラはこれを独立したモジュールに切り出し、サーバービルドは安定した識別子でそれを登録します。クライアントビルドは同じシグネチャを持ち、代わりに fetch を行う参照を受け取ります。TypeScript はそのまま流れます。型生成も、スキーマ層も、ファイルルートもないので素晴らしい。SSR 中にその関数が呼ばれたら直接呼ぶだけで、サーバーは非同期の扱い方を知っています。
 
-It's worth pointing out that the HTTP boundary doesn't enforce your types. It exposes a public endpoint with untrusted inputs. Validation inside the function is necessary.
+指摘しておく価値があるのは、HTTP バウンダリは型を強制しないということです。信頼できない入力を持つ公開エンドポイントを公開します。関数内でのバリデーションが必要です。
 
-But the part that matters for this article: a server function returns a promise. Parts one and two already told you everything the graph does with promises.
+この記事で重要なのは、サーバー関数は Promise を返すということです。第 1 回と第 2 回で、グラフが Promise に対して行うことはすべて説明済みです。
 
 ```ts
 const story = createMemo(() => fetchStory(props.id));
 ```
 
-If Server Functions look familiar to you, they should. This is another place, like the tuple return from Signals, where we pioneered the feature but later adopted better syntax.
+サーバー関数に見覚えがあるなら、当然です。シグナルのタプル返却と同様に、私たちが機能を先駆けて作り、後により良い構文を採用した場所の 1 つです。
 
-## Origin of Server Functions
+## サーバー関数の起源
 
-Vite 2 was released in February 2021, which was the final push I needed to get started on creating SolidStart. I was able to very quickly put something together over the next few weeks since Solid's router was already shaped to handle parallel non-blocking data loading and Solid itself already supported streaming SSR. We just ran our route loaders on both sides.
+Vite 2 が 2021 年 2 月にリリースされ、それが SolidStart の作成を始めるために必要な最後の後押しになりました。Solid のルーターはすでに並列でノンブロッキングなデータロードを扱える形になっており、Solid 自体もストリーミング SSR をサポートしていたので、数週間でとても早く形にできました。ルートローダーを両側で実行しただけです。
 
-I looked at the metaframeworks of the times and they had things like `getServerSideProps` or API Routes. And I just wasn't convinced of the shape. They either didn't fit with my fine-grained view of the world or they seemed like too much repetitive wiring when we had conceded we were building something that controlled all sides.
+当時のメタフレームワークを見ると、`getServerSideProps` や API Routes のようなものがありました。しかし、その形には納得できませんでした。私の細粒度な世界観に合わないか、全側面を制御するものを作ると認めた以上、繰り返しの配線が多すぎるように見えました。
 
-What I wanted was RPCs. I hadn't named it at the time. I just wanted a way to swap existing client functions. I just wanted `fetchStory` to run on the server.
+欲しかったのは RPC でした。当時はまだその名前を付けていませんでした。既存のクライアント関数を入れ替える方法が欲しかった。`fetchStory` をサーバーで実行したかっただけです。
 
 ```js
 // Solid 1.0 async primitive:
 const [story] = createResource(() => props.id, fetchStory)
 ```
 
-I had a late-night chat with [Romuald Brillout](https://github.com/brillout) about his library [wildcard-api](https://github.com/brillout/wildcard-api) which used proxies to create a request in the client and agreed that it was the cleanest approach I had seen to date. I landed my first version on April 22nd, 2021.
+ある夜遅く、[Romuald Brillout](https://github.com/brillout) と、プロキシを使ってクライアントでリクエストを作る彼のライブラリ [wildcard-api](https://github.com/brillout/wildcard-api) について話し、それがそれまでに見た中で最もクリーンなアプローチだという点で一致しました。2021 年 4 月 22 日に最初のバージョンをランドしました。
 
 ```js
 // packages/start/runtime/actions.ts (2021)
@@ -55,9 +55,9 @@ actionProxy = new Proxy({}, {
 })
 ```
 
-Shortly after, I would put SolidStart on hold to focus on the [Solid 1.0](https://dev.to/ryansolid/solidjs-official-release-the-long-road-to-1-0-4ldd) release, which among other things would bring in the creator of Server Functions, [Nikhil Saraf](https://github.com/nksaraf). He'd been in our ecosystem for all of a month and he had ported `react-three-fiber` and `react-ink`, and made `solid-markdown`.
+その直後、私は SolidStart を保留にして [Solid 1.0](https://dev.to/ryansolid/solidjs-official-release-the-long-road-to-1-0-4ldd) のリリースに集中することになりました。そのリリースは、とりわけサーバー関数の生みの親である [Nikhil Saraf](https://github.com/nksaraf) を迎え入れることになりました。彼は私たちのエコシステムに参加してまだ 1 か月ほどで、`react-three-fiber` と `react-ink` を移植し、`solid-markdown` を作っていました。
 
-I remember lamenting in our Discord, that it felt like it could be so much easier if we could just compile the functions in place. Nikhil came back a few days later with `server()`, a compiler driven version of RPC that landed [January 2022](https://youtu.be/lsWXyyEsw7E?t=6934). He had repurposed Next.js' dead-code elimination plugin they had used for SSG into something that changed the way we all build.
+Discord で「その場で関数をコンパイルできれば、ずっと簡単になるはずだ」と嘆いていたのを覚えています。数日後、Nikhil は `server()` ——コンパイラ駆動の RPC ——を持って帰ってきて、[2022 年 1 月](https://youtu.be/lsWXyyEsw7E?t=6934)にランドしました。彼は Next.js が SSG に使っていたデッドコード除去プラグインを転用し、私たち全員の作り方を変えるものにしました。
 
 ```ts
 export const fetchStory = server((id: number) => {
@@ -65,13 +65,13 @@ export const fetchStory = server((id: number) => {
 })
 ```
 
-We would go on to add the trailing `$` to make the callsite more obvious and then replace the function with the directive as that made the scope more explicit and better reflected the rules of composition.
+その後、呼び出し側をより分かりやすくするために末尾の `$` を追加し、スコープをより明示的にして合成のルールをよりよく反映するため、関数をディレクティブに置き換えました。
 
-The pattern has since spread across the ecosystem: React's server actions/functions, Svelte's remote functions, TanStack's server functions, and more. After Signals/Fine-grained rendering, this may be Solid's biggest contribution to the wider ecosystem. So with Solid 2.0 this isn't something new. Five years of iteration on the idea we originated, brought into core, and built on web standards.
+このパターンはその後エコシステム全体に広がりました。React のサーバーアクション／関数、Svelte のリモート関数、TanStack のサーバー関数などです。シグナル／細粒度レンダリングに次ぐ、Solid のより広いエコシステムへの最大の貢献かもしれません。だから Solid 2.0 でこれは新しいものではありません。私たちが始めたアイデアの 5 年間の反復を、コアに取り込み、Web 標準の上に構築したものです。
 
-## The Internet Already Knows How to Cache
+## インターネットはキャッシュの方法を知っている
 
-Server functions default to `POST` — the safest choice for anything that might mutate. But reads already have browser mechanisms that we can leverage.
+サーバー関数はデフォルトで `POST` です。ミューテートする可能性のあるものには最も安全な選択です。しかし読み取りには、活用できるブラウザの仕組みがすでにあります。
 
 ```ts
 import { GET } from "@solidjs/web/server-functions";
@@ -82,9 +82,9 @@ export const fetchStory = GET((id: number) => {
 });
 ```
 
-`GET` puts the arguments on the url and sends a `GET` request. That one change gives us access to 30 years of web infrastructure: browser caches, CDN edges, proxies.
+`GET` は引数を URL に載せて `GET` リクエストを送ります。その 1 つの変更で、30 年分の Web インフラ——ブラウザキャッシュ、CDN エッジ、プロキシ——が使えるようになります。
 
-The `respond` helper wraps a return value with response metadata:
+`respond` ヘルパーは戻り値をレスポンスメタデータで包みます。
 
 ```ts
 import { respond } from "@solidjs/web";
@@ -99,15 +99,15 @@ export const fetchStory = GET(async (id: number) => {
 });
 ```
 
-The caller still gets the `Story`. The memo reading this has no idea the headers exist. The metadata rides the transport, the value rides the reactive graph, and your most popular story never touches the database twice.
+呼び出し側は相変わらず `Story` を受け取ります。これを読むメモはヘッダーの存在を知りません。メタデータはトランスポートに乗り、値はリアクティブグラフに乗り、人気の story は二度とデータベースに触れません。
 
-This is a pattern worth noticing in 2.0. We don't build a proprietary caching layer. Solid's instinct is to handle the protocol and push other decisions to libraries and applications. You can use the platform as it is as the default. Or import `query` and `action` from `@solidjs/router` or even use `@tanstack/solid-query`. This is what allows us to pull these features into core without being too opinionated about how you build.
+これは 2.0 で注目すべきパターンです。私たちは独自のキャッシュ層を作りません。Solid の本能はプロトコルを処理し、他の決定をライブラリとアプリケーションに任せることです。デフォルトではプラットフォームをそのまま使えます。あるいは `@solidjs/router` から `query` と `action` をインポートしたり、`@tanstack/solid-query` を使うこともできます。これが、作り方に強い意見を持たずにこれらの機能をコアに取り込める理由です。
 
-## A Value That Keeps Arriving
+## 到着し続ける値
 
-Back in part one I defined async as "a computation that returns a promise", but that is only half of it. We also support async iterators. This gives us a natural interface to connect to event streams. Even things like RxJS observables. The rule is simple: until the first value arrives, we consider it unsettled triggering things like `<Loading>`, just like a Promise. After that, values flow in as they come.
+第 1 回で非同期を「Promise を返す計算」と定義しましたが、それは半分にすぎません。非同期イテレーターもサポートしています。これはイベントストリームに接続する自然なインターフェイスになります。RxJS の Observable のようなものも含めて。ルールはシンプルです。最初の値が到着するまでは、Promise と同じように未確定とみなして `<Loading>` などをトリガーします。その後は、値は到着するままに流れ込みます。
 
-But if we are sending these values over the wire we need a bit more consideration:
+ただし、これらの値をワイヤー越しに送るなら、もう少し考慮が必要です。
 
 ```ts
 import { live } from "@solidjs/web/server-functions";
@@ -118,9 +118,9 @@ export const stockPrice = live(async function* (symbol: string) {
 });
 ```
 
-`live` gives us the lifecycle a raw stream doesn't have. If the connection dies—network drops, server restarts—we reconnect with exponential backoff. You are never behind after a reconnect because the contract is value-based: every connection yields current state as its first value. If the design wants to show wire status, there's an `onstatus` side channel for "connected", "reconnecting", "closed" — deliberately kept out of the value stream, because data freshness and connection state are different concerns.
+`live` は生のストリームにはないライフサイクルを与えます。接続が切れたら——ネットワーク断、サーバー再起動——指数バックオフで再接続します。再接続後に遅れを取ることはありません。契約が値ベースだからです。すべての接続は最初の値として現在の状態を yield します。デザインが通信状態を表示したいなら、「connected」「reconnecting」「closed」のための `onstatus` サイドチャンネルがあります。データの鮮度と接続状態は別の関心事なので、意図的に値ストリームから外しています。
 
-Here is the component that consumes it:
+これを消費するコンポーネントです。
 
 ```tsx
 function Ticker(props) {
@@ -130,15 +130,15 @@ function Ticker(props) {
 }
 ```
 
-There is no subscription API. No store integration to configure. No unsubscribe to forget. One callsite consumes and every reader of the memo shares its latest value. Sharing more widely means hoisting higher or tying into a cache system like `@solidjs/router`'s `liveQuery`.
+サブスクリプション API はありません。設定するストア統合も、忘れてしまうアンサブスクライブもありません。1 つの呼び出し側が消費し、そのメモのすべての読み取り側が最新値を共有します。より広く共有するには、より高く持ち上げるか、`@solidjs/router` の `liveQuery` のようなキャッシュシステムに接続します。
 
-## HTML is a Stream Too
+## HTML もストリーム
 
-Everything we've been talking about is after the page is loaded. But it all works on the way out too.
+ここまで話してきたのはすべてページが読み込まれた後のことです。しかし、出ていく途中でも全部動きます。
 
-Server rendering streams. The shell goes out immediately. `<Loading>` fallbacks hold the document open, and content replaces them as promises resolve—before, after, and during hydration. This works before your bundle has loaded. Async values serialize as async values. A Promise in flight serializes as a Promise and resolves in the client graph as it settles. A `live` source sends its first value along in the HTML and then picks up the stream in the client. The reactive graph doesn't restart at the browser boundary, it continues.
+サーバーレンダリングはストリームします。シェルはすぐに出ていきます。`<Loading>` フォールバックがドキュメントを開いたままにし、Promise が解決するたびにコンテンツがそれを置き換えます——ハイドレーションの前、後、そして最中にも。バンドルが読み込まれる前から動きます。非同期の値は非同期の値としてシリアライズされます。飛行中の Promise は Promise としてシリアライズされ、確定するとクライアントのグラフで解決します。`live` ソースは最初の値を HTML に乗せて送り、その後クライアントでストリームを引き継ぎます。リアクティブグラフはブラウザの境界で再起動せず、継続します。
 
-Out-of-order streaming creates design problems HTML never had. Content arrives as it is ready, and doesn't necessarily respect your layout. Fast queries pop in below slow ones. The page assembles like popcorn. That's what `<Reveal>` is for:
+順不同のストリーミングは、HTML にはなかったデザインの問題を生みます。コンテンツは準備でき次第到着し、レイアウトを尊重するとは限りません。速いクエリが遅いものの下に飛び出します。ページはポップコーンのように組み立てられます。それが `<Reveal>` の役目です。
 
 ```tsx
 <Reveal collapsed>
@@ -148,13 +148,13 @@ Out-of-order streaming creates design problems HTML never had. Content arrives a
 </Reveal>
 ```
 
-Siblings reveal in order as they resolve — the sidebar can finish first and it will still wait its turn. We don't block the stream so HTML is sent as soon as it's ready, but we control when it appears. `collapsed` keeps the tail skeletons from stacking below. Whether content streams from SSR or resolves client-side, reveal order is a design decision now, declared where the design lives.
+兄弟は解決するにつれ順番に姿を現します——サイドバーが最初に終わっても、自分の番を待ちます。ストリームはブロックしないので HTML は準備でき次第送られますが、表示するタイミングは制御します。`collapsed` は末尾のスケルトンが下に積み重なるのを防ぎます。コンテンツが SSR からストリームされるかクライアント側で解決するかに関わらず、表示順序は今やデザインの決定であり、デザインのある場所で宣言します。
 
-## When the Wire Breaks
+## ワイヤーが切れたとき
 
-It's always easier to talk about the success case. You write your code in a way that mirrors how you want things to play out. Optimism is an example of that, and being the most speculative, we already handle the failure automatically there.
+成功ケースの話のほうがいつも簡単です。物事がうまくいくように映るようにコードを書きます。楽観的更新はその例であり、最も投機的なものとして、そこでは失敗をすでに自動的に処理しています。
 
-We know that we can capture an error in a read:
+読み取りでエラーを捕捉できることは分かっています。
 
 ```tsx
 <Errored fallback={(err, reset) => <OfflineBanner onRetry={reset} />}>
@@ -162,22 +162,22 @@ We know that we can capture an error in a read:
 </Errored>
 ```
 
-But do we ever talk about what happens next? In Solid 1.x, and pretty much everywhere else Error Boundaries are treated as the end of the line. You tripped them, and then you have to go do some work, reset them and hopefully everything works this time. In contrast, how do you reset a `<Loading>` boundary?
+でも、その後何が起きるかを話したことはありますか？ Solid 1.x、そしてほぼどこでも、エラーバウンダリは終着点として扱われます。それに引っかかったら、何か作業をして、リセットして、今度はうまくいくことを祈るしかない。対照的に、`<Loading>` バウンダリはどうやってリセットしますか？
 
-You don't. Solid 2 doesn't have room for this asymmetry. An error is just the current status of that part of the graph. Part of the same lifecycle that "not ready" belongs to. So `<Errored>` behaves the same way as `<Loading>`. When the data underneath comes back — the live source reconnects, a refresh lands, an upstream signal changes and the read succeeds — the boundary heals and the content returns.
+しません。Solid 2 にはこの非対称性の余地はありません。エラーはグラフのその部分の現在の状態にすぎません。「準備未了」が属するのと同じライフサイクルの一部です。だから `<Errored>` は `<Loading>` と同じように振る舞います。下のデータが戻ってきたら——live ソースが再接続し、リフレッシュが着地し、上流のシグナルが変わって読み取りが成功したら——バウンダリは治癒し、コンテンツが戻ります。
 
-You can still call `reset`. But even that is graph-aware. It retries the data, not the UI. So if some data source has errored upstream, the reset will try to refetch it rather than just showing you the same stale error again if you didn't take the proper steps to address it. This automatic recovery is not something you write but is inherent to the shape of your application.
+`reset` を呼ぶことはまだできます。しかしそれもグラフを意識しています。UI ではなくデータを再試行します。だから上流でデータソースがエラーになっていたら、適切な対処をしなかった場合に同じ古いエラーを再表示するのではなく、リセットはその再フェッチを試みます。この自動回復はあなたが書くものではなく、アプリケーションの形に内在するものです。
 
-If part one had transitions without a transition API, this is recovery without recovery code. An outage stops being a state your app can get stuck in and becomes one more pending question with a slow answer.
+第 1 回がトランジション API なしのトランジションだったなら、これは回復コードなしの回復です。障害はアプリがスタックする状態ではなくなり、答えが遅い保留中の質問の 1 つになります。
 
-## Beyond Data
+## データを超えて
 
-If I had to recap this series in one line: the reactive graph always knows. It is what ties together knowledge of how your application is running. That's not something you get with sophisticated compilers alone.
+このシリーズを一行でまとめるなら、リアクティブグラフは常に知っている、です。アプリケーションがどう動いているかの知識を結びつけるものです。それは洗練されたコンパイラだけでは得られないものです。
 
-Bringing Async into the graph, and by extension the network completes this narrative. That has always been a blind spot for JS frameworks and now it is just a natural part of it.
+非同期をグラフに、そして延長としてネットワークに組み込むことでこの物語は完成します。それは JS フレームワークにとってずっと盲点でしたが、今は自然な一部になりました。
 
-The upside goes beyond that though. In part one, we showed how making latency a property of the value allowed us to stop having reads dictate our architecture. Part two had us position writes as speculative by default, and Optimistic UI stopped being just an advanced technique. Today we moved our content across the network and the Components were none the wiser.
+利点はそれだけではありません。第 1 回では、レイテンシを値の属性にすることで、読み取りがアーキテクチャを支配しなくなることを示しました。第 2 回では、書き込みをデフォルトで投機的と位置づけ、楽観的 UI はもはや単なる高度な技法ではなくなりました。今日はコンテンツをネットワーク越しに動かし、コンポーネントは何も気づきませんでした。
 
-These changes are foundational. Although I didn't cover it today, they've allowed us to standardize on higher-level protocols, like "Single Flight Mutations", that let caching/router libraries close the action loop completely on the server in a single request. You can as easily use these with `@solidjs/router` as with `@tanstack/solid-router`.
+これらの変更は基礎的です。今日は触れませんでしたが、「シングルフライトミューテーション」のようなより高レベルのプロトコルを標準化できるようになり、キャッシュ／ルーターライブラリが 1 回のリクエストでアクションループをサーバー上で完全に閉じられます。`@solidjs/router` でも `@tanstack/solid-router` でも同じくらい簡単に使えます。
 
-I'll leave you with one last thought. A server function, we've now established, is a function whose return value crosses the wire — a value, a promise, a stream of values. Nothing in that sentence says the value has to be data.
+最後に 1 つだけ考えを残します。サーバー関数とは、戻り値がワイヤーを越える関数だと確立しました——値、Promise、値のストリーム。その文のどこにも、値がデータでなければならないとは書いていません。
