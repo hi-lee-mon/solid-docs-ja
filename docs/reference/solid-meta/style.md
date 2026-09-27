@@ -2,7 +2,7 @@
 title: Style
 order: 5
 use_cases: >-
-  inline styles, critical css, css-in-js output
+  インラインスタイル、クリティカル CSS、CSS-in-JS の出力
 tags:
   - style
   - css
@@ -13,18 +13,18 @@ source_repo: "solidjs/solid-meta"
 source_ref: "next"
 source_path: "src/index.ts"
 description: >-
-  Style adds an inline style element to the document head through Solid Meta.
+  Style は Solid Meta を通じてドキュメントの head にインラインの style 要素を追加します。
 ---
 
-`Style` adds a [`<style>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/style) element with an inline body to the document head.
+`Style` はインラインの本文を持つ [`<style>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/style) 要素をドキュメントの head に追加します。
 
-## Import
+## インポート
 
 ```tsx
 import { Style } from "@solidjs/meta";
 ```
 
-## Type
+## 型
 
 ```tsx
 const Style: Component<
@@ -34,32 +34,32 @@ const Style: Component<
 
 ## Props
 
-Accepts attributes for [`<style>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/style).
+[`<style>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/style) の属性を受け取ります。
 
 ### `children`
 
-- **Type:** `JSX.Element`
-- **Optional:** Yes
+- **型:** `JSX.Element`
+- **省略可能:** はい
 
-CSS text of the `style` element.
-Applied via `textContent`, so it is always escaped — markup cannot be injected through it.
-Can be a reactive expression.
+`style` 要素の CSS テキストです。
+`textContent` 経由で適用されるため、常にエスケープされます — これを通じてマークアップを注入することはできません。
+リアクティブな式を指定できます。
 
 ### `key`
 
-- **Type:** `string`
-- **Optional:** Yes
+- **型:** `string`
+- **省略可能:** はい
 
-Overrides the default identity used for deduplication.
+重複排除に使われるデフォルトの identity を上書きします。
 
-## Behavior
+## 動作
 
-- Keyless `<Style>` instances are append-only: each one adds its own element, and unmounting removes it.
-- Give a `key` to make one replaceable — later registrations with the same `key` override it, and unmounting restores the previous body.
+- key なしの `<Style>` インスタンスは追加専用です: それぞれが独自の要素を追加し、アンマウントすると削除されます。
+- 置き換え可能にするには `key` を指定します — 同じ `key` を持つ後の登録がそれを上書きし、アンマウントすると以前の本文が復元されます。
 
-## Examples
+## 例
 
-### Basic usage
+### 基本的な使い方
 
 ```tsx
 import { Style } from "@solidjs/meta";
@@ -69,7 +69,7 @@ export default function Page() {
 }
 ```
 
-### Replaceable themed style
+### 置き換え可能なテーマのスタイル
 
 ```tsx
 import { Style } from "@solidjs/meta";
@@ -79,7 +79,7 @@ export default function Theme(props: { accent: () => string }) {
 }
 ```
 
-## Related
+## 関連項目
 
 - [`Stylesheet`](/reference/solid-meta/stylesheet)
 - [`Script`](/reference/solid-meta/script)

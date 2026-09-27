@@ -2,7 +2,7 @@
 title: Title
 order: 1
 use_cases: >-
-  page titles, document titles, browser tab text, head metadata
+  ページタイトル、ドキュメントタイトル、ブラウザタブのテキスト、head メタデータ
 tags:
   - title
   - head
@@ -13,18 +13,18 @@ source_repo: "solidjs/solid-meta"
 source_ref: "next"
 source_path: "src/index.ts"
 description: >-
-  Title sets the document title through Solid Meta.
+  Title は Solid Meta を通じてドキュメントのタイトルを設定します。
 ---
 
-`Title` adds a [`<title>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title) element that sets the document title.
+`Title` はドキュメントのタイトルを設定する [`<title>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title) 要素を追加します。
 
-## Import
+## インポート
 
 ```tsx
 import { Title } from "@solidjs/meta";
 ```
 
-## Type
+## 型
 
 ```tsx
 const Title: Component<JSX.HTMLAttributes<HTMLTitleElement> & { key?: string }>;
@@ -34,29 +34,29 @@ const Title: Component<JSX.HTMLAttributes<HTMLTitleElement> & { key?: string }>;
 
 ### `children`
 
-- **Type:** `JSX.Element`
-- **Optional:** Yes
+- **型:** `JSX.Element`
+- **省略可能:** はい
 
-Text content of the `title` element.
-Applied via `textContent`, so it is always escaped.
-Can be a reactive expression.
+`title` 要素のテキスト内容です。
+`textContent` 経由で適用されるため、常にエスケープされます。
+リアクティブな式を指定できます。
 
 ### `key`
 
-- **Type:** `string`
-- **Optional:** Yes
+- **型:** `string`
+- **省略可能:** はい
 
-Accepted as part of the shared Solid Meta head-tag props.
-It does not change title identity because the document title remains a singleton.
+Solid Meta の共通 head タグ props の一部として受け取られます。
+ドキュメントのタイトルはシングルトンであり続けるため、タイトルの identity は変わりません。
 
-## Behavior
+## 動作
 
-- `title` is a hard singleton: the last-registered `<Title>` wins regardless of attributes.
-- Unmounting the winning `<Title>` restores the previous one; a static `<title>` in your server shell is the final fallback.
+- `title` は厳格なシングルトンです: 属性に関わらず、最後に登録された `<Title>` が優先されます。
+- 優先された `<Title>` がアンマウントされると前のものが復元されます。サーバーシェル内の静的な `<title>` が最終的なフォールバックです。
 
-## Examples
+## 例
 
-### Basic usage
+### 基本的な使い方
 
 ```tsx
 import { Title } from "@solidjs/meta";
@@ -66,7 +66,7 @@ export default function Page() {
 }
 ```
 
-### Reactive title
+### リアクティブなタイトル
 
 ```tsx
 import { Title } from "@solidjs/meta";
@@ -76,7 +76,7 @@ export default function Product(props: { name: () => string }) {
 }
 ```
 
-## Related
+## 関連項目
 
 - [`Meta`](/reference/solid-meta/meta)
 - [`Head`](/reference/solid-meta/head)

@@ -1,13 +1,13 @@
 ---
-title: "Router factory"
+title: "ルーターファクトリー"
 version: "2.0"
-description: "Reference for createRouter, defineRoute, defineRoutes, router configuration, and router instances."
+description: "createRouter・defineRoute・defineRoutes・ルーター設定・ルーターインスタンスのリファレンス。"
 source_repo: "solidjs/solid-router"
 source_ref: "next"
 source_path: "src/routers/factory.tsx"
 ---
 
-## Import
+## インポート
 
 ```ts
 import { createRouter, defineRoute, defineRoutes } from "@solidjs/router";
@@ -15,7 +15,7 @@ import { createRouter, defineRoute, defineRoutes } from "@solidjs/router";
 
 ## `createRouter`
 
-Creates an immutable router instance from a route tree.
+ルートツリーからイミュータブルなルーターインスタンスを作成します。
 
 ```ts
 function createRouter<const R extends readonly RouteDefinition[]>(
@@ -42,18 +42,18 @@ interface RouterConfig<
 }
 ```
 
-- `routes` is the route tree used for matching and path inference.
-- `base` prefixes matched and generated paths.
-- `preload` returns data for the root render prop.
-- `history` defaults to browser history on the client.
-- `singleFlight` defaults to `true`.
-- `actionBase` defaults to `/_server`.
-- `explicitLinks` defaults to `false`.
-- `preloadLinks` defaults to `true`.
-- `scrollRestoration` defaults to `true` with the default browser history.
-- `transformUrl` rewrites pathnames before matching and preloading.
+- `routes` はマッチングとパス推論に使われるルートツリーです。
+- `base` はマッチしたパスと生成されるパスにプレフィックスを付けます。
+- `preload` はルートのレンダープロップにデータを返します。
+- `history` はクライアントではブラウザ履歴がデフォルトです。
+- `singleFlight` のデフォルトは `true` です。
+- `actionBase` のデフォルトは `/_server` です。
+- `explicitLinks` のデフォルトは `false` です。
+- `preloadLinks` のデフォルトは `true` です。
+- `scrollRestoration` はデフォルトのブラウザ履歴では `true` がデフォルトです。
+- `transformUrl` はマッチングとプリロードの前にパス名を書き換えます。
 
-### Return value
+### 戻り値
 
 ```ts
 interface RouterInstance<
@@ -67,9 +67,9 @@ interface RouterInstance<
 }
 ```
 
-The instance is the provider component.
-`paths` is created on first access.
-`match(url)` returns root-to-leaf matches or an empty array.
+インスタンスはプロバイダーコンポーネントです。
+`paths` は最初のアクセス時に作成されます。
+`match(url)` はルートから葉までのマッチ、または空配列を返します。
 
 ```tsx
 const Router = createRouter({
@@ -88,13 +88,13 @@ interface RouterProps {
 }
 ```
 
-`url` selects a server-rendered location when no request event exists.
-A request event takes precedence.
-The client ignores `url`.
+`url` はリクエストイベントが存在しない場合に、サーバーレンダーされるロケーションを選択します。
+リクエストイベントが優先されます。
+クライアントは `url` を無視します。
 
 ## `defineRoutes`
 
-Preserves literal types for an extracted route tuple and returns the same value.
+抽出されたルートタプルのリテラル型を保持し、同じ値を返します。
 
 ```ts
 function defineRoutes<const R extends readonly RouteDefinition[]>(routes: R): R;
@@ -106,7 +106,7 @@ const routes = defineRoutes([{ path: "/" }, { path: "/users/:id" }]);
 
 ## `defineRoute`
 
-Returns the supplied route object while typing its component and preload parameters from its path.
+渡されたルートオブジェクトをそのまま返しつつ、そのパスから component と preload のパラメータに型を付けます。
 
 ```ts
 function defineRoute<
@@ -128,8 +128,8 @@ function defineRoute<
 }): DefinedRoute<S, T, F, C, Sch>;
 ```
 
-`RouteChildren` is `RouteDefinition | readonly RouteDefinition[] | LazyRouteChildren`.
-A pathless overload omits `path` and uses open `Params`.
+`RouteChildren` は `RouteDefinition | readonly RouteDefinition[] | LazyRouteChildren` です。
+パスレスのオーバーロードは `path` を省略し、開かれた `Params` を使います。
 
 ```tsx
 const route = defineRoute({
@@ -139,8 +139,8 @@ const route = defineRoute({
 });
 ```
 
-## Related
+## 関連項目
 
-- [Routes and typed paths](/reference/solid-router/routes-and-paths)
-- [History adapters](/reference/solid-router/history)
-- [Server integration](/reference/solid-router/server)
+- [ルートと型付きパス](/reference/solid-router/routes-and-paths)
+- [履歴アダプター](/reference/solid-router/history)
+- [サーバー統合](/reference/solid-router/server)
