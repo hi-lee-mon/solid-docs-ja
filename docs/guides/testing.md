@@ -1,41 +1,41 @@
 ---
-title: "Testing"
+title: "テスト"
 version: "2.0"
-description: "Write a component test that clicks a button and asserts the label, run it in jsdom or a real browser, and test fullstack server code in a separate Node project."
+description: "ボタンをクリックしてラベルを検証するコンポーネントテストを書き、jsdom または実ブラウザーで実行し、フルスタックのサーバーコードは別の Node プロジェクトでテストします。"
 ---
 
-The first test most people write for a Solid component clicks the counter from the Quick start and asserts the label.
-The click fires, the assertion runs on the next line, and the DOM still says `Clicks: 0`.
-Nothing is broken: Solid applies writes in a batch after the current code finishes, and the test asserted before the batch landed.
-One call fixes it, and it is the one Solid-specific thing in a component test.
+Solid コンポーネントに対して多くの人が最初に書くテストは、クイックスタートのカウンターをクリックしてラベルを検証するものです。
+クリックは発火し、次の行で検証が実行されるのに、DOM はまだ `Clicks: 0` と言っています。
+何も壊れていません。Solid は現在のコードが終わった後でバッチとして書き込みを適用するため、テストはバッチが適用される前に検証しただけです。
+1回の呼び出しで直ります。これがコンポーネントテストで唯一の Solid 固有の部分です。
 
-Beyond that call, testing a Solid app is a question of picking the smallest environment that exercises the behavior under test:
+その呼び出しを除けば、Solid アプリのテストは、テスト対象の振る舞いを実行できる最小の環境を選ぶ問題です:
 
-1. Start component tests in jsdom.
-   The `basic` template uses this configuration for component DOM tests.
-2. Use [Vitest browser mode](https://vitest.dev/guide/browser/) when the test depends on browser layout, CSS, focus, selection, or browser APIs.
-   The browser-mode template runs the same component test in Chromium.
-3. Add a separate Node project for server code in a fullstack app.
-   The `fullstack` template keeps DOM component tests and request-scoped server tests in different Vitest projects.
+1. コンポーネントテストは jsdom から始めます。
+   `basic` テンプレートはコンポーネントの DOM テストにこの構成を使います。
+2. テストがブラウザーのレイアウト、CSS、フォーカス、選択、ブラウザー API に依存するときは [Vitest ブラウザーモード](https://vitest.dev/guide/browser/) を使います。
+   ブラウザーモードのテンプレートは同じコンポーネントテストを Chromium で実行します。
+3. フルスタックアプリのサーバーコードには別の Node プロジェクトを追加します。
+   `fullstack` テンプレートは DOM コンポーネントテストとリクエストスコープのサーバーテストを別々の Vitest プロジェクトに分けています。
 
-:::tip[Assert what the user sees]
-Query by an accessible role and assert visible text or state.
-Do not inspect signal values, effect counts, or compiled output when the public behavior gives the same evidence.
-This follows the [Testing Library guiding principles](https://testing-library.com/docs/guiding-principles/).
+:::tip[ユーザーに見えるものを検証する]
+アクセシブルなロールでクエリし、見えるテキストや状態を検証してください。
+公開される振る舞いが同じ証拠を与えるなら、シグナルの値、エフェクトの実行回数、コンパイル後の出力を調べないでください。
+これは [Testing Library の指針](https://testing-library.com/docs/guiding-principles/) に従うものです。
 :::
 
-## Test components in jsdom
+## jsdom でコンポーネントをテストする
 
-The `basic` template ships Vitest, jsdom, Solid Testing Library, and the jest-dom matchers.
-Add the same development dependencies to an existing Solid project:
+`basic` テンプレートには Vitest、jsdom、Solid Testing Library、jest-dom マッチャーが同梱されています。
+既存の Solid プロジェクトにも同じ開発依存関係を追加します:
 
 ```sh
 pnpm add -D vitest jsdom @solidjs/testing-library @testing-library/jest-dom
 ```
 
-The template's `package.json` is the record of which versions are known to work together.
+テンプレートの `package.json` が、一緒に動作することが確認されているバージョンの記録です。
 
-Add a test script to `package.json`:
+`package.json` に test スクリプトを追加します:
 
 ```json
 {
@@ -45,8 +45,8 @@ Add a test script to `package.json`:
 }
 ```
 
-Import `defineConfig` from `vitest/config` in the Vite configuration.
-Keep the existing Solid plugin and add the `test` block:
+Vite の設定では `defineConfig` を `vitest/config` からインポートします。
+既存の Solid プラグインを残したまま `test` ブロックを追加します:
 
 ```ts
 import { defineConfig } from "vitest/config";
@@ -64,21 +64,21 @@ export default defineConfig({
 });
 ```
 
-Register the jest-dom matchers in `vitest-setup.ts`:
+`vitest-setup.ts` で jest-dom マッチャーを登録します:
 
 ```ts
 import "@testing-library/jest-dom/vitest";
 ```
 
-:::caution[isolate: false shares module state between files]
-The template sets `isolate: false` as a performance setting for a small suite.
-With it, module state can survive from one test file to the next.
-Remove the setting when tests mutate module-level state, or reset that state after each test.
+:::caution[isolate: false はファイル間でモジュールの状態を共有します]
+テンプレートは小規模なスイート向けのパフォーマンス設定として `isolate: false` を設定しています。
+この設定では、モジュールの状態があるテストファイルから次のファイルへ残ることがあります。
+テストがモジュールレベルの状態を変更する場合はこの設定を外すか、各テスト後にその状態をリセットしてください。
 :::
 
-### Test a user-visible interaction
+### ユーザーに見える操作をテストする
 
-This component exposes its state through the button label:
+このコンポーネントはボタンのラベルを通して状態を公開しています:
 
 ```tsx
 import { createSignal } from "solid-js";
@@ -94,8 +94,8 @@ export default function Counter() {
 }
 ```
 
-Pass a function to `render` so Solid Testing Library creates the component under a reactive owner.
-Query the button by role, interact with it, and assert the label that the user sees:
+`render` には関数を渡します。Solid Testing Library がリアクティブなオーナーの下でコンポーネントを作成するためです。
+ボタンをロールでクエリし、操作して、ユーザーに見えるラベルを検証します:
 
 ```tsx
 import { cleanup, fireEvent, render } from "@solidjs/testing-library";
@@ -119,8 +119,8 @@ describe("<Counter />", () => {
 });
 ```
 
-Run it and the test passes.
-Remove the `flush()` line and it fails on the last assertion with the label still at `Clicks: 0`:
+実行するとテストはパスします。
+`flush()` の行を外すと、ラベルが `Clicks: 0` のまま最後の検証で失敗します:
 
 ```tsx
 // Avoid: asserting before the staged write has landed
@@ -133,32 +133,32 @@ flush();
 expect(button).toHaveTextContent("Clicks: 1");
 ```
 
-The click event stages the signal update, and ordinary reads continue to return the last committed value until the batch lands.
-[`flush()`](/reference/solid-js/reactivity/flush) commits the staged value and drains queued work so the DOM is current when the assertion runs.
-It does not wait for async work: for behavior that is asynchronous by contract, such as an async memo, use the asynchronous queries or [`resolve(fn)`](/reference/solid-js/advanced/interop-async/resolve) rather than `flush()`.
+クリックイベントはシグナルの更新をステージし、通常の読み取りはバッチが適用されるまで最後にコミットされた値を返し続けます。
+[`flush()`](/reference/solid-js/reactivity/flush) はステージされた値をコミットしてキューにある処理をすべて流し切るため、検証の実行時に DOM は最新の状態になります。
+非同期処理は待ちません。非同期メモのように契約上非同期の振る舞いには、`flush()` ではなく非同期クエリか [`resolve(fn)`](/reference/solid-js/advanced/interop-async/resolve) を使ってください。
 
-Solid Testing Library tracks mounted containers and exports `cleanup`.
-It can register cleanup automatically when the test runner exposes a global `afterEach`.
-The configuration above sets `globals: false`, so the explicit `afterEach(cleanup)` keeps disposal independent of test-runner globals.
+Solid Testing Library はマウント済みコンテナを追跡し、`cleanup` をエクスポートしています。
+テストランナーがグローバルな `afterEach` を公開している場合、cleanup を自動で登録できます。
+上の設定では `globals: false` なので、明示的な `afterEach(cleanup)` によって破棄処理をテストランナーのグローバルに依存しない形にしています。
 
-## Test components in a real browser
+## 実ブラウザーでコンポーネントをテストする
 
-Choose browser mode when jsdom cannot provide the behavior that the test needs.
-The maintained browser-mode template uses the Playwright provider with headless Chromium.
+jsdom がテストに必要な振る舞いを提供できないときはブラウザーモードを選んでください。
+メンテナンスされているブラウザーモードのテンプレートは、ヘッドレス Chromium を使う Playwright プロバイダーを採用しています。
 
-:::note[Browser mode still needs jsdom installed]
-When `test.environment` is unset, `@solidjs/vite-plugin` supplies a jsdom environment and Vitest resolves that dependency before it starts the browser pool.
-Without jsdom, the Chromium test can pass while the Vitest command exits with a missing-dependency error.
+:::note[ブラウザーモードでも jsdom のインストールが必要]
+`test.environment` が未設定のとき、`@solidjs/vite-plugin` は jsdom 環境を供給し、Vitest はブラウザープールを起動する前にその依存関係を解決します。
+jsdom がないと、Chromium のテストがパスしても Vitest コマンドが依存関係不足のエラーで終了することがあります。
 :::
 
-For a new test setup, install the complete dependency set:
+新しくテスト環境を用意する場合は、依存関係を一式インストールします:
 
 ```sh
 pnpm add -D vitest jsdom @solidjs/testing-library @testing-library/jest-dom @vitest/browser-playwright playwright
 pnpm exec playwright install chromium
 ```
 
-Replace the jsdom environment in the `test` block:
+`test` ブロックの jsdom 環境を置き換えます:
 
 ```ts
 import { playwright } from "@vitest/browser-playwright";
@@ -180,24 +180,24 @@ export default defineConfig({
 });
 ```
 
-The `Counter` test above runs unchanged in this configuration.
-The component still renders through Solid Testing Library, and `flush()` still drains the staged DOM update after the click.
-The difference is the host environment: Vitest runs the test in a Chromium page instead of a simulated jsdom document.
-Run the browser suite once and exit with:
+上記の `Counter` テストはこの構成でもそのまま実行できます。
+コンポーネントは引き続き Solid Testing Library を通してレンダーされ、`flush()` はクリック後にステージされた DOM 更新を流し切ります。
+違いはホスト環境です。Vitest は模擬の jsdom ドキュメントではなく、Chromium のページでテストを実行します。
+ブラウザーのスイートを1回だけ実行して終了するには:
 
 ```sh
 pnpm test --run
 ```
 
-The templates demonstrate component tests, not browser-wide end-to-end flows.
-See the [Vitest browser-mode guide](https://vitest.dev/guide/browser/) for browser locators, interactions, and browser-mode limitations when a component test needs those APIs.
+これらのテンプレートが示すのはコンポーネントテストであり、ブラウザー全体のエンドツーエンドの流れではありません。
+コンポーネントテストでブラウザーのロケーター、インタラクション、ブラウザーモードの制限に関する API が必要な場合は [Vitest ブラウザーモードのガイド](https://vitest.dev/guide/browser/) を参照してください。
 
-## Test server code in a Node project
+## Node プロジェクトでサーバーコードをテストする
 
-A fullstack app needs separate client and server test environments.
-Use [Vitest projects](https://vitest.dev/guide/projects.html) to keep `*.test.tsx` component files in jsdom and `src/server/**/*.test.ts` files in Node.
+フルスタックアプリにはクライアントとサーバーで別々のテスト環境が必要です。
+[Vitest プロジェクト](https://vitest.dev/guide/projects.html) を使い、`*.test.tsx` のコンポーネントファイルは jsdom に、`src/server/**/*.test.ts` のファイルは Node に分けます。
 
-The fullstack template uses this project shape:
+`fullstack` テンプレートは次のプロジェクト構成を使います:
 
 ```ts
 import { fileURLToPath } from "node:url";
@@ -258,14 +258,14 @@ export default defineConfig({
 });
 ```
 
-The Node project compiles server code and resolves the server runtime.
-The fullstack template also inlines and aliases its `@solidjs/web` entries so the request helper and request-event storage use the same server-build instance.
-Keep the server include pattern separate from the client pattern so a server test does not run under jsdom.
+Node プロジェクトはサーバーコードをコンパイルし、サーバーランタイムを解決します。
+`fullstack` テンプレートは `@solidjs/web` のエントリーをインライン化しエイリアスも張るため、リクエストヘルパーとリクエストイベントのストレージが同じサーバービルドのインスタンスを使います。
+サーバーの include パターンはクライアントのパターンと分けて、サーバーテストが jsdom 下で実行されないようにしてください。
 
-### Stub the server environment module
+### サーバー環境モジュールをスタブする
 
-The fullstack template imports session secrets from `virtual:env/server`.
-Vitest runs the session test outside the start mode server, so the template aliases that virtual module to this test stub:
+`fullstack` テンプレートはセッションのシークレットを `virtual:env/server` からインポートします。
+Vitest は start モードのサーバーの外でセッションテストを実行するため、テンプレートはその仮想モジュールを次のテスト用スタブにエイリアスしています:
 
 ```ts
 export const env: Record<string, unknown> = new Proxy(
@@ -283,15 +283,15 @@ export const env: Record<string, unknown> = new Proxy(
 );
 ```
 
-The proxy reads `process.env` when code accesses a property and reproduces the schema's parsed output for the signing-key list.
-This behavior lets a test set `process.env.SESSION_SECRET` before it imports the session module.
-The stub only supplies the module contract needed by the template test.
-It does not validate key length or run the start mode server boot process, so use a realistic test key that satisfies the production schema.
+このプロキシはコードがプロパティにアクセスしたとき `process.env` を読み、署名キーリストについてスキーマのパース済み出力を再現します。
+この動作により、テストはセッションモジュールをインポートする前に `process.env.SESSION_SECRET` を設定できます。
+このスタブはテンプレートのテストが必要とするモジュール契約だけを提供します。
+キー長の検証や start モードサーバーの起動処理は実行しないため、本番スキーマを満たす現実的なテストキーを使ってください。
 
-### Exercise a session across requests
+### リクエストをまたいでセッションを動かす
 
-Test request-scoped helpers through the server runtime instead of replacing the request event with a plain object.
-This concise version of the fullstack template pattern creates an event, provides it to the handler, commits the outgoing response, and carries the response cookie into the next request:
+リクエストイベントを素のオブジェクトに置き換えるのではなく、リクエストスコープのヘルパーはサーバーランタイムを通してテストしてください。
+以下は `fullstack` テンプレートのパターンを簡潔にしたものです。イベントを作成してハンドラーに提供し、送信レスポンスをコミットし、レスポンスのクッキーを次のリクエストへ持ち越します:
 
 ```ts
 import { commitEventResponse, createRequestEvent } from "@solidjs/web";
@@ -348,52 +348,52 @@ test("reads a session on the next request", async () => {
 });
 ```
 
-Run it and the second request returns `{ userId: "user_1" }` from the cookie the first request set.
-The test asserts the public request-to-response contract: one request writes a cookie, and the next request reads the session.
-Reset modules before importing code that captures environment values at module initialization.
-Restore fake timers and mocks, delete changed environment variables, and dispose any other process-wide state in `afterEach`.
+実行すると、2回目のリクエストは1回目が設定したクッキーから `{ userId: "user_1" }` を返します。
+このテストは公開されたリクエストからレスポンスまでの契約を検証しています。1つのリクエストがクッキーを書き込み、次のリクエストがセッションを読み取ります。
+モジュール初期化時に環境変数を捕捉するコードをインポートする前に、モジュールをリセットしてください。
+`afterEach` でフェイクタイマーとモックを復元し、変更した環境変数を削除し、その他のプロセス全体の状態も破棄してください。
 
-## Common problems
+## よくある問題
 
-### The assertion after `fireEvent` sees the old DOM
+### `fireEvent` 後の検証が古い DOM を見る
 
-The write is staged and the batch has not landed when the next line runs.
-Call `flush()` after the event and before the assertion.
-For an async source, `flush()` does not help; await `resolve(() => value())` or use an asynchronous query.
+書き込みはステージされており、次の行の実行時点でバッチがまだ適用されていません。
+イベントの後、検証の前に `flush()` を呼んでください。
+非同期のソースには `flush()` は役に立ちません。`resolve(() => value())` を await するか非同期クエリを使ってください。
 
-### The Chromium test passes but Vitest exits with a missing-dependency error
+### Chromium のテストはパスするのに Vitest が依存関係不足のエラーで終了する
 
-jsdom is not installed.
-`@solidjs/vite-plugin` supplies a jsdom environment when `test.environment` is unset, and Vitest resolves that dependency before starting the browser pool.
-Keep `jsdom` in the development dependencies alongside the browser provider.
+jsdom がインストールされていません。
+`test.environment` が未設定のとき `@solidjs/vite-plugin` は jsdom 環境を供給し、Vitest はブラウザープールの起動前にその依存関係を解決します。
+ブラウザープロバイダーと一緒に `jsdom` も開発依存関係に入れておいてください。
 
-### A server test runs under jsdom
+### サーバーテストが jsdom 下で実行される
 
-The server file matches the client project's `include` pattern.
-Keep `src/server/**/*.test.ts` and `src/**/*.test.tsx` as separate patterns so each file lands in one project.
+サーバーのファイルがクライアントプロジェクトの `include` パターンに一致しています。
+`src/server/**/*.test.ts` と `src/**/*.test.tsx` を別々のパターンに保ち、各ファイルが1つのプロジェクトにだけ入るようにしてください。
 
-### The session module ignores the `SESSION_SECRET` set in the test
+### セッションモジュールがテストで設定した `SESSION_SECRET` を無視する
 
-The module captured the environment at import time, before the test set the variable.
-Set `process.env.SESSION_SECRET`, call `vi.resetModules()`, and import the module after both, as `loadSession` above does.
+モジュールがインポート時に、テストが変数を設定する前に環境を捕捉しています。
+上の `loadSession` のように、`process.env.SESSION_SECRET` を設定し、`vi.resetModules()` を呼んで、その両方の後でモジュールをインポートしてください。
 
-### State leaks from one test file into the next
+### 状態があるテストファイルから次へ漏れる
 
-`isolate: false` lets module state survive between files.
-Remove the setting, or reset the module-level state in `afterEach`.
+`isolate: false` だとモジュールの状態がファイル間で残ります。
+設定を外すか、`afterEach` でモジュールレベルの状態をリセットしてください。
 
-## Recap
+## まとめ
 
-- Test in the smallest environment that exercises the behavior: jsdom for component DOM, browser mode for layout and browser APIs, a Node project for server code.
-- Pass a function to `render` so the component has a reactive owner, and query by role.
-- Call `flush()` after `fireEvent` and before the assertion; it lands the staged write and does not wait for async work.
-- Register `afterEach(cleanup)` when `globals` is off.
-- Keep jsdom installed in browser mode; the plugin resolves it before the browser pool starts.
-- Give client and server tests separate `include` patterns in separate Vitest projects.
-- Set environment variables and reset modules before importing code that reads them at import time, and undo both in `afterEach`.
+- 対象の振る舞いを実行できる最小の環境でテストしてください。コンポーネントの DOM は jsdom、レイアウトとブラウザー API はブラウザーモード、サーバーコードは Node プロジェクトです。
+- `render` には関数を渡してコンポーネントにリアクティブなオーナーを持たせ、ロールでクエリしてください。
+- `fireEvent` の後・検証の前に `flush()` を呼んでください。ステージされた書き込みを適用しますが、非同期処理は待ちません。
+- `globals` がオフのときは `afterEach(cleanup)` を登録してください。
+- ブラウザーモードでも jsdom をインストールしたままにしてください。プラグインがブラウザープールの起動前にそれを解決します。
+- クライアントとサーバーのテストには、別々の Vitest プロジェクトで別々の `include` パターンを与えてください。
+- インポート時に環境変数を読むコードは、環境変数の設定とモジュールのリセットを済ませてからインポートし、両方とも `afterEach` で元に戻してください。
 
-## Next steps
+## 次のステップ
 
-- [Debugging reactivity](/guides/debugging-reactivity#the-test-sees-the-old-dom): `flush()` in full, `resolve` for async values, and the one place `flush()` is not allowed.
-- [Sessions and auth](/building-apps/sessions-and-auth): the session module the server test above exercises.
-- [Environment](/building-apps/environment): why server code that reads `virtual:env/server` needs the module reset the last section describes.
+- [リアクティビティのデバッグ](/guides/debugging-reactivity#the-test-sees-the-old-dom): `flush()` の全体像、非同期値の `resolve`、そして `flush()` が許されない唯一の場所。
+- [セッションと認証](/building-apps/sessions-and-auth): 上のサーバーテストが動かしたセッションモジュール。
+- [環境](/building-apps/environment): `virtual:env/server` を読むサーバーコードに、前の節で説明したモジュールリセットが必要な理由。

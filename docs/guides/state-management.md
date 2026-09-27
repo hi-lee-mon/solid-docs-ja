@@ -1,32 +1,32 @@
 ---
-title: "State management"
+title: "状態管理"
 version: "2.0"
-description: "Decide where each piece of storefront state lives: a component, a context provider, the URL, or the server, and keep it out of module scope in code that also runs on the server."
+description: "ストアフロントの各状態がどこに置かれるべきか（コンポーネント、コンテキストプロバイダー、URL、サーバーのいずれか）を決め、サーバーでも実行されるコードではモジュールスコープに置かないようにします。"
 ---
 
-The search page from [Thinking in Solid](/guides/thinking-in-solid) ended with a cart count created inside the `Search` component.
-The header shows that count on every page, so it has to move.
-The same question comes up for the signed-in customer's name, the search filter that should survive a refresh, the product catalog, and the open flag on the **Remove item?** dialog.
+[Thinking in Solid](/guides/thinking-in-solid) の検索ページは、`Search` コンポーネント内で作成されたカート件数で終わりました。
+ヘッダーはすべてのページでその件数を表示するため、別の場所へ移す必要があります。
+同じ問題は、サインイン中の顧客名、リロード後も残るべき検索フィルター、商品カタログ、そして **Remove item?** ダイアログの開閉フラグにも当てはまります。
 
-Each of those has one right home, and the wrong home shows up as a symptom: a count that resets when the page changes, a filter that clears on refresh, a dialog that stays open after the user navigates away, or a cart that belongs to a different visitor.
-This guide goes through the homes one at a time and ends with a decision list.
+それぞれに正しい置き場所が1つずつあり、間違った置き場所は症状として現れます。ページ遷移でリセットされる件数、リロードで消えるフィルター、ユーザーが移動した後も開いたままのダイアログ、別の来訪者のものになっているカートなどです。
+このガイドでは置き場所を1つずつ見ていき、最後に判断リストを示します。
 
-## Five kinds of state
+## 状態の5種類
 
-| Kind                | Storefront example                            | Home                                                  |
+| 種類                | ストアフロントでの例                            | 置き場所                                              |
 | ------------------- | --------------------------------------------- | ----------------------------------------------------- |
-| Local               | A dialog's open flag, a hovered row           | A signal or store in the component that renders it    |
-| Shared by a subtree | The cart, read by the header and the checkout | A store created in a provider, read through context   |
-| Shared by the app   | The current customer, the theme               | The same provider, placed at the root of `App`        |
-| In the URL          | Search query, category, sort, page            | Search parameters, read with `useSearchParams`        |
-| On the server       | The catalog, orders, the session              | Server functions; the client holds a view, not a copy |
+| ローカル            | ダイアログの開閉フラグ、ホバー中の行           | それをレンダーするコンポーネント内のシグナルまたはストア |
+| サブツリーで共有    | ヘッダーとチェックアウトから読まれるカート      | プロバイダー内で作成し、コンテキスト経由で読み取るストア |
+| アプリ全体で共有    | 現在の顧客、テーマ                            | 同じプロバイダーを `App` のルートに配置                 |
+| URL 内              | 検索クエリ、カテゴリ、並び順、ページ            | `useSearchParams` で読み取る検索パラメータ              |
+| サーバー上          | カタログ、注文、セッション                      | サーバー関数。クライアントが持つのはコピーではなくビュー |
 
-The first three differ only in where the provider sits.
-The last two are not held in Solid state at all: the URL and the server own them, and components read them through a router primitive or a server function.
+最初の3つは、プロバイダーを置く場所が違うだけです。
+最後の2つは Solid の状態としては一切保持されません。URL とサーバーがそれらを所有し、コンポーネントはルーターのプリミティブかサーバー関数を通して読み取ります。
 
-## Local state stays local
+## ローカルな状態はローカルに保つ
 
-The **Remove item?** dialog needs one boolean:
+**Remove item?** ダイアログに必要なのは1つの真偽値です:
 
 ```tsx
 import { Show, createSignal } from "solid-js";
@@ -61,21 +61,21 @@ function RemoveButton(props: { onConfirm: () => void }) {
 }
 ```
 
-Click **Remove** and the dialog appears; click **Keep** and it goes away.
-When the row is removed from the list, `RemoveButton` is disposed and the signal goes with it, so the next row's dialog starts closed.
+**Remove** をクリックするとダイアログが表示され、**Keep** をクリックすると閉じます。
+その行がリストから削除されると `RemoveButton` は破棄されシグナルも一緒に消えるため、次の行のダイアログは閉じた状態で始まります。
 
-Nothing else needs `open`, so nothing else should be able to see it.
-State created in a component is owned by that component: Solid disposes it when the component leaves the page, and a fresh instance gets a fresh value.
-[Ownership](/concepts/reactivity#ownership) explains what disposal covers.
+`open` を必要とするものは他にないので、他の何にも見えないようにすべきです。
+コンポーネント内で作成された状態はそのコンポーネントに所有されます。コンポーネントがページから離れるとき Solid が破棄し、新しいインスタンスには新しい値が入ります。
+破棄の対象範囲は [オーナーシップ](/concepts/reactivity#ownership) で説明しています。
 
-Lift the value only when a second component needs it.
-If the cart page also wants to disable every other **Remove** button while one dialog is open, `open` moves to the list component and reaches each row as a prop.
-Props are reactive on their own, so a lifted value costs nothing but the two lines that pass it down; [Props](/concepts/components-and-jsx#props) shows why.
+値を持ち上げるのは、2つ目のコンポーネントがそれを必要とするときだけです。
+カートページでも、1つのダイアログが開いている間は他のすべての **Remove** ボタンを無効にしたい場合、`open` はリストコンポーネントに移され、prop として各行に渡されます。
+props はそれ自体がリアクティブなので、持ち上げた値のコストは渡すための2行だけです。理由は [props](/concepts/components-and-jsx#props) を参照してください。
 
-## Share with context
+## コンテキストで共有する
 
-The header badge and the checkout page are far apart in the tree, and threading the cart through every layout between them would make each layout know about a cart it does not use.
-Create the cart once in a provider and let both read it:
+ヘッダーのバッジとチェックアウトページはツリー上で離れており、間にあるすべてのレイアウトにカートを通していくと、各レイアウトが使いもしないカートを知ることになります。
+カートをプロバイダー内で一度だけ作成し、両方から読み取らせます:
 
 ```tsx
 // src/cart.tsx
@@ -139,17 +139,17 @@ function Header() {
 }
 ```
 
-Navigate from the search page to the checkout page and the badge keeps its number.
-`createCart()` ran once, inside `CartProvider`, when `App` rendered; the pages under it come and go, and the provider stays.
+検索ページからチェックアウトページへ遷移しても、バッジは数値を保持します。
+`createCart()` は `App` のレンダー時に `CartProvider` 内で一度だけ実行されました。その配下のページは遷移のたびに入れ替わりますが、プロバイダーは残り続けます。
 
-The context object returned by [`createContext`](/reference/solid-js/components-context/create-context) is also the provider component, and it creates a scoped owner for its children.
-`useCart()` returns the same object from anywhere below the provider without a prop on any component in between.
-[Share state between components](/concepts/reactivity#share-state-between-components) introduced this shape; the rest of this section is about what to put in `value`.
+[`createContext`](/reference/solid-js/components-context/create-context) が返すコンテキストオブジェクトはプロバイダーコンポーネントでもあり、children 用のスコープ付きオーナーを作成します。
+`useCart()` は、間にあるどのコンポーネントにも prop を付けずに、プロバイダー配下のどこからでも同じオブジェクトを返します。
+この形は [コンポーネント間での状態の共有](/concepts/reactivity#share-state-between-components) で紹介しています。この節の残りでは `value` に何を入れるかを扱います。
 
-### Pass a store or accessors, not a snapshot
+### スナップショットではなくストアかアクセサーを渡す
 
-The provider reads `value` once, when it is created.
-Whatever is in the object at that moment is what every consumer gets:
+プロバイダーは `value` を作成時に一度だけ読み取ります。
+その時点でオブジェクトに入っているものが、すべてのコンシューマーが受け取るものになります:
 
 ```tsx
 // Avoid: the count is read here, once, and the consumers get a number
@@ -159,28 +159,28 @@ Whatever is in the object at that moment is what every consumer gets:
 <CartContext value={{ cart, add }}>
 ```
 
-Run the `Avoid` version and add an item: the badge keeps the number the provider saw when it ran, because nothing runs the provider's `value` expression a second time.
-In the `Prefer` version `cart` is the store proxy, and `cart.items.length` in the header is a tracked read that updates when the length changes.
-The rule is the same one that applies to props: pass the reactive value and read it where it is used.
+`Avoid` の方を実行してアイテムを追加すると、プロバイダーの `value` 式を二度目に実行するものは何もないため、バッジはプロバイダーが実行されたときに見た数値のままになります。
+`Prefer` の方では `cart` はストアのプロキシであり、ヘッダー内の `cart.items.length` は追跡される読み取りで、長さが変わると更新されます。
+ルールは props に適用されるものと同じです。リアクティブな値を渡し、使う場所で読み取ってください。
 
-### Default value or thrown error
+### デフォルト値かスローされるエラーか
 
-`createContext<T>()` with no default makes the provider mandatory: `useContext` outside one throws `ContextNotFoundError`, and its return type is `T` with no `undefined` to narrow.
-That is the right form for anything that carries reactive state, because a cart that silently reads as `undefined` is a bug found later than one that throws at the first read.
+デフォルトなしの `createContext<T>()` はプロバイダーを必須にします。その外側での `useContext` は `ContextNotFoundError` をスローし、戻り値の型は `undefined` を含まない `T` になるため絞り込みは不要です。
+リアクティブな状態を運ぶものにはこれが正しい形です。`undefined` と静かに読み取れるカートは、最初の読み取りでスローするものよりも発見が遅れるバグだからです。
 
-`createContext<T>(defaultValue)` returns the default outside a provider.
-Reserve it for a primitive with a meaningful fallback, such as a theme name or a locale, where a component rendered on its own in a test or a story should still work.
+`createContext<T>(defaultValue)` はプロバイダーの外側ではデフォルト値を返します。
+これは意味のあるフォールバックを持つプリミティブ（テーマ名やロケールなど）に限ってください。テストやストーリーで単体レンダーされるコンポーネントでも動作すべき場合に使います。
 
-:::deep-dive[How a context read resolves]
-Each owner carries a context record inherited from its parent.
-`useContext` looks the context up on the current owner's record; if the entry is `undefined` it falls back to the context's default, and if that is `undefined` too it throws `ContextNotFoundError`.
-A provider writes its `value` into a fresh copy of the record for the owner it creates, so siblings and ancestors never see it, and a nested provider for the same context replaces the value for its own subtree only.
-The lookup needs an owner, which is why `useContext` is called during component setup rather than inside an event handler.
+:::deep-dive[コンテキストの読み取りはどう解決されるか]
+各オーナーは親から継承したコンテキストのレコードを持ちます。
+`useContext` は現在のオーナーのレコードでコンテキストを検索します。エントリが `undefined` ならコンテキストのデフォルト値にフォールバックし、それも `undefined` なら `ContextNotFoundError` をスローします。
+プロバイダーは自身が作成するオーナー用にレコードの新しいコピーへ `value` を書き込むため、兄弟や祖先からは見えず、同じコンテキストのネストされたプロバイダーは自身のサブツリーの値だけを置き換えます。
+この検索にはオーナーが必要です。だからこそ `useContext` はイベントハンドラー内ではなくコンポーネントのセットアップ中に呼び出します。
 :::
 
-## Module-level state and the server
+## モジュールレベルの状態とサーバー
 
-The shortest way to share the cart is to export it from a module:
+カートを共有する最短の方法は、モジュールからエクスポートすることです:
 
 ```ts
 // Avoid: one store object for every request the server ever handles
@@ -193,37 +193,37 @@ function createCart() {
 }
 ```
 
-Run the `Avoid` version in a project with `ssr: true`.
-The generated server entry imports `App`, and through it this module, once when the entry loads; each request then calls `renderToStream` with the same imported `App`.
-On the server `createStore(value)` returns the object itself, and its setter mutates that object in place and warns `[SERVER_WRITE]`, so a write made during one request's render is what the next request reads.
-There is one cart for the whole server, not one per visitor.
+`ssr: true` のプロジェクトで `Avoid` の方を実行してみてください。
+生成されたサーバーエントリーは、エントリーの読み込み時に一度だけ `App`（そしてそれを通してこのモジュール）をインポートし、各リクエストは同じインポート済みの `App` で `renderToStream` を呼び出します。
+サーバー上で `createStore(value)` はオブジェクトそのものを返し、そのセッターはオブジェクトをその場で変更して `[SERVER_WRITE]` の警告を出します。そのため、あるリクエストのレンダー中に行われた書き込みが、次のリクエストで読み取られるものになります。
+来訪者ごとに1つではなく、サーバー全体で1つのカートになってしまいます。
 
-The `Prefer` version runs `createStore` inside `createCart()`, which the provider calls during render.
-That is once per browser tab in the client and once per request on the server, and each instance is owned by its provider and disposed with it.
+`Prefer` の方は `createStore` を `createCart()` 内で実行し、それをプロバイダーがレンダー中に呼び出します。
+これはクライアントではブラウザータブごとに1回、サーバーではリクエストごとに1回実行され、各インスタンスはそのプロバイダーに所有され、一緒に破棄されます。
 
-A module-scope store that is derived from a server function fails sooner:
+サーバー関数から派生したモジュールスコープのストアは、もっと早い段階で失敗します:
 
 ```ts
 // Avoid: runs while the module loads, with no request in scope
 export const [cart] = createStore(() => getCart(), { items: [] as CartItem[] });
 ```
 
-On the server the derivation runs as soon as the store is created, while the module is still being evaluated, and the in-process call to `getCart()` throws `Cannot call server function outside of a request` because no request event exists yet; [Server functions](/building-apps/server-functions#cannot-call-server-function-outside-of-a-request-on-the-server) lists the other places this appears.
-Inside `createCart()` the same line runs during a request, under the request event that middleware decorated, so `getRequestEvent()?.locals.userId` inside `getCart()` names the right customer.
+サーバー上ではストアが作成されるとすぐ、モジュールがまだ評価中の段階で派生が実行され、プロセス内の `getCart()` 呼び出しはリクエストイベントがまだ存在しないため `Cannot call server function outside of a request` をスローします。これが現れる他の場面は [サーバー関数](/building-apps/server-functions#cannot-call-server-function-outside-of-a-request-on-the-server) に一覧があります。
+`createCart()` 内では同じ行がリクエスト中、ミドルウェアが装飾したリクエストイベントの下で実行されるため、`getCart()` 内の `getRequestEvent()?.locals.userId` は正しい顧客を指します。
 
-:::note[Projects without server rendering]
-In a project built without `ssr: true`, the module is evaluated once per browser tab and a module-scope store is one store per tab, which is what app-wide state means there.
-The cost is portability: the day `ssr: true` is added, the same file also loads once on the server, and the store becomes the shared object described above.
-Creating it in a provider from the start removes that step.
+:::note[サーバーレンダリングを使わないプロジェクト]
+`ssr: true` を付けずにビルドされたプロジェクトでは、モジュールはブラウザータブごとに1回評価され、モジュールスコープのストアはタブごとに1つのストアになります。そこではそれがアプリ全体の状態の意味するところです。
+代償は移植性です。`ssr: true` を追加した日に、同じファイルがサーバーでも一度読み込まれ、ストアは上で説明した共有オブジェクトになります。
+最初からプロバイダー内で作成しておけば、その作業は不要になります。
 :::
 
-Constants are fine at module scope.
-A category list, a currency formatter, or a `createContext` call has no per-visitor state, and the server sharing one copy is the intended behavior.
+定数はモジュールスコープに置いて問題ありません。
+カテゴリリスト、通貨フォーマッター、`createContext` 呼び出しには来訪者ごとの状態がなく、サーバーで1つのコピーが共有されるのは意図された動作です。
 
-## State in the URL
+## URL 内の状態
 
-The search filter lived in a signal, so a refresh cleared it and a shared link opened an empty search.
-Values that describe which page the user is looking at belong in the URL:
+検索フィルターはシグナルに置かれていたため、リロードで消え、共有リンクは空の検索を開きました。
+ユーザーがどのページを見ているかを表す値は URL に置くべきです:
 
 ```tsx
 import { For, createMemo, latest } from "solid-js";
@@ -262,27 +262,27 @@ export default function Search() {
 }
 ```
 
-Type `mug`, pick **Kitchen**, and the address bar reads `/search?q=mug&category=kitchen`.
-Press refresh and the same results come back; paste the URL into another tab and it opens on the same search.
+`mug` と入力して **Kitchen** を選ぶと、アドレスバーは `/search?q=mug&category=kitchen` になります。
+リロードしても同じ結果が戻り、URL を別のタブに貼れば同じ検索で開きます。
 
-`setSearch` merges the keys it is given into the current query string and navigates without scrolling, so `q` and `category` can be set from two handlers without either one erasing the other.
-`search.q` is a reactive read like a store property, so the memo re-runs when the URL changes, including on **Back**.
-The two controls read through `latest` because the write to the URL is held while `results` fetches, and the control the user touched should show the new value while the old list waits; [Show the input now](/concepts/async-reactivity#show-the-input-now-latest) explains that pairing.
-Without a schema every value is a string or an array of strings; [Type search parameters](/routing/solid-router/navigation#type-search-parameters) shows how a route's `search` schema turns `"2"` into `2` and supplies defaults.
+`setSearch` は渡されたキーを現在のクエリ文字列にマージしてスクロールなしで遷移するため、`q` と `category` を2つのハンドラーから互いに消し合うことなく設定できます。
+`search.q` はストアのプロパティと同様のリアクティブな読み取りなので、**戻る** を含め URL が変わるとメモが再実行されます。
+2つのコントロールが `latest` 経由で読み取るのは、`results` がフェッチしている間 URL への書き込みが保留されるためで、ユーザーが触れたコントロールは古いリストが待っている間に新しい値を表示すべきだからです。この組み合わせは [入力を今すぐ表示する](/concepts/async-reactivity#show-the-input-now-latest) で説明しています。
+スキーマがなければすべての値は文字列または文字列の配列です。ルートの `search` スキーマが `"2"` を `2` に変えてデフォルト値を与える方法は [検索パラメータの型付け](/routing/solid-router/navigation#type-search-parameters) を参照してください。
 
-:::caution[Search parameters are user input]
-A value in the query string is user input.
-`String(search.category ?? "all")` accepts `?category=<script>`, and the server function has to validate it the same way it validates any other argument.
-[Arguments and security](/building-apps/server-functions/arguments-and-security) covers the checks that belong in `searchProducts`.
+:::caution[検索パラメータはユーザー入力です]
+クエリ文字列の値はユーザー入力です。
+`String(search.category ?? "all")` は `?category=<script>` を受け入れてしまうため、サーバー関数は他の引数と同じ方法でそれを検証しなければなりません。
+`searchProducts` に入れるべきチェックは [引数とセキュリティ](/building-apps/server-functions/arguments-and-security) で説明しています。
 :::
 
-Not everything on the page belongs in the URL.
-A dialog's open flag, a hovered row, or text typed into a form field before submit is local state; the test is whether a shared link should reproduce it.
+ページ上のすべてが URL に属するわけではありません。
+ダイアログの開閉フラグ、ホバー中の行、送信前にフォームフィールドへ入力されたテキストはローカルな状態です。判断基準は、共有リンクでそれが再現されるべきかどうかです。
 
-## State on the server
+## サーバー上の状態
 
-The signed-in customer, the catalog, and the order history live in the database and the session cookie.
-The client never holds them; it holds a view that a server function returned:
+サインイン中の顧客、カタログ、注文履歴はデータベースとセッションクッキーに存在します。
+クライアントがそれらを持つことはありません。持つのはサーバー関数が返したビューです:
 
 ```ts
 // src/data/account.ts
@@ -315,76 +315,76 @@ export function Header() {
 }
 ```
 
-Load the page signed out and the header shows **Sign in**.
-Sign in, and the next request carries the session cookie: middleware sets `event.locals.userId` from `getSession()`, `getCurrentUser()` finds the customer, and the header renders the name.
-No component ever saw the cookie.
+サインアウトした状態でページを読み込むと、ヘッダーは **Sign in** を表示します。
+サインインすると、次のリクエストはセッションクッキーを運びます。ミドルウェアが `getSession()` から `event.locals.userId` を設定し、`getCurrentUser()` が顧客を見つけ、ヘッダーが名前をレンダーします。
+どのコンポーネントもクッキーを見ることはありません。
 
-`user` is a memo of a promise, not a copy of the user.
-When something on the server changes what `getCurrentUser()` would return, the view is stale until it is re-read: a `refresh(user)` after a rename action, or a full navigation after sign-out.
-[Sessions and auth](/building-apps/sessions-and-auth) owns the cookie, the middleware, and the sign-in and sign-out functions; [Mutations](/concepts/mutations) shows how an optimistic layer sits on top of a view like this one without becoming a second source of truth.
+`user` はユーザーのコピーではなく、Promise のメモです。
+サーバー側で `getCurrentUser()` の返す内容が変わっても、再読み取りされるまでビューは古いままです。名前変更アクションの後の `refresh(user)`、またはサインアウト後の完全な遷移が必要です。
+クッキー、ミドルウェア、サインイン・サインアウト関数は [セッションと認証](/building-apps/sessions-and-auth) が扱います。このようなビューの上に、第2の情報源にならずに楽観的レイヤーを重ねる方法は [ミューテーション](/concepts/mutations) を参照してください。
 
-Put the memo where its readers are.
-`App` renders the header once, so a memo inside `Header` is created once per app; a product page that also needs the user should read it through a provider next to the cart rather than call the server function a second time.
+メモはそれを読む側がある場所に置いてください。
+`App` はヘッダーを一度だけレンダーするため、`Header` 内のメモはアプリごとに1回作成されます。ユーザーを必要とする商品ページは、サーバー関数を二度目に呼ぶのではなく、カートの隣のプロバイダー経由で読み取るべきです。
 
-## Decide
+## 判断する
 
-Ask these in order and stop at the first yes:
+次を順に尋ね、最初の「はい」で止めてください:
 
-1. Should a shared link or a refresh reproduce it?
-   Put it in a search parameter.
-2. Does the server own it, because it comes from a database or a session?
-   Read it through a server function into a memo or a store created from a function, and mutate it through an action.
-3. Does exactly one component read and write it?
-   Create a signal or store in that component.
-4. Do two nearby components need it?
-   Create it in their common parent and pass it as props.
-5. Do components far apart, or every page, need it?
-   Create it in a provider and read it with `useContext`; place the provider at the root of `App` for app-wide state.
+1. 共有リンクやリロードでそれを再現すべきですか？
+   検索パラメータに置いてください。
+2. データベースやセッション由来のため、サーバーが所有していますか？
+   サーバー関数を通してメモか関数から作成したストアに読み取り、アクションを通して変更してください。
+3. 読み書きするコンポーネントが正確に1つですか？
+   そのコンポーネント内にシグナルかストアを作成してください。
+4. 近くにある2つのコンポーネントが必要としますか？
+   共通の親で作成し、props として渡してください。
+5. 離れたコンポーネントやすべてのページが必要としますか？
+   プロバイダー内で作成し `useContext` で読み取ってください。アプリ全体の状態にはプロバイダーを `App` のルートに置いてください。
 
-Module scope is not on the list.
-Use it for constants and for the `createContext` call itself.
+モジュールスコープはこのリストにありません。
+定数と `createContext` 呼び出し自体にだけ使ってください。
 
-## Common problems
+## よくある問題
 
-### `useContext` throws `ContextNotFoundError`
+### `useContext` が `ContextNotFoundError` をスローする
 
-The component rendered outside the provider, or the provider is lower in the tree than the reader.
-In development the message reads `Context must either be created with a default value or a value must be provided before accessing it.`
-Move the provider up, usually to `App`; adding a default value hides the mistake rather than fixing it when the value is reactive state.
+コンポーネントがプロバイダーの外でレンダーされたか、プロバイダーが読み取り側よりツリーの下にあります。
+開発環境ではメッセージは `Context must either be created with a default value or a value must be provided before accessing it.` と表示されます。
+プロバイダーを上に移動してください（通常は `App` へ）。値がリアクティブな状態のとき、デフォルト値を追加するのは修正ではなく間違いを隠すだけです。
 
 ### `Context can only be accessed under a reactive root`
 
-`useContext` was called from an event handler or a callback, where there is no owner to look the context up on.
-Call it during component setup and keep the result in a variable the handler closes over.
+`useContext` がイベントハンドラーやコールバックから呼び出されました。そこにはコンテキストを検索するオーナーがありません。
+コンポーネントのセットアップ中に呼び出し、結果をハンドラーがクロージャーで捕捉する変数に保持してください。
 
-### The header shows the cart count from another customer
+### ヘッダーが別の顧客のカート件数を表示する
 
-A store was created at module scope in a project with server rendering, so one object served every request and a write during one render was visible to the next.
-Move the `createStore` call into a provider or component, and keep the source of truth behind a server function that reads the customer from `event.locals`.
+サーバーレンダリングを使うプロジェクトでモジュールスコープにストアが作成されたため、1つのオブジェクトがすべてのリクエストに応答し、あるレンダー中の書き込みが次に見えてしまいました。
+`createStore` 呼び出しをプロバイダーかコンポーネントに移し、信頼できる情報源は `event.locals` から顧客を読むサーバー関数の後ろに置いてください。
 
-### The filter clears when the page is refreshed
+### ページをリロードするとフィルターが消える
 
-The filter lived in a signal, which starts from its initial value on every load.
-Read and write it with `useSearchParams` so the URL carries it; see [State in the URL](#state-in-the-url).
+フィルターがシグナルに置かれていました。シグナルは読み込みのたびに初期値から始まります。
+`useSearchParams` で読み書きして URL に持たせてください。[URL 内の状態](#state-in-the-url) を参照。
 
-### The context value never updates
+### コンテキストの値が更新されない
 
-The provider was given a snapshot, such as `value={{ count: cart.items.length }}`, which was read once when the provider ran.
-Pass the store, the accessor, or a function, and read it in the consumer; see [Pass a store or accessors, not a snapshot](#pass-a-store-or-accessors-not-a-snapshot).
+プロバイダーに `value={{ count: cart.items.length }}` のようなスナップショットが渡されました。これはプロバイダー実行時に一度だけ読み取られます。
+ストア、アクセサー、関数のいずれかを渡し、コンシューマー側で読み取ってください。[スナップショットではなくストアかアクセサーを渡す](#pass-a-store-or-accessors-not-a-snapshot) を参照。
 
-## Recap
+## まとめ
 
-- Create state in the component that reads it, and lift it to a parent only when a second component needs it.
-- Share state across distant components with a provider that creates the store and a `useContext` read below it; put the provider at the root of `App` for app-wide state.
-- Pass stores, accessors, and functions through context; the provider reads `value` once.
-- Use `createContext<T>()` with no default for reactive state so a missing provider throws.
-- Do not create signals or stores at module scope in code that runs on the server; the module loads once and one object serves every request.
-- Put anything a shared link should reproduce in search parameters with `useSearchParams`.
-- Read server-owned data through a server function into a memo or store; the client holds a view, and `refresh` re-reads it.
+- 状態はそれを読むコンポーネント内で作成し、2つ目のコンポーネントが必要とするときだけ親に持ち上げてください。
+- 離れたコンポーネント間の状態共有は、ストアを作成するプロバイダーとその配下の `useContext` の読み取りで行います。アプリ全体の状態にはプロバイダーを `App` のルートに置いてください。
+- コンテキストにはストア・アクセサー・関数を渡してください。プロバイダーは `value` を一度だけ読み取ります。
+- リアクティブな状態にはデフォルトなしの `createContext<T>()` を使い、プロバイダーが無ければスローされるようにしてください。
+- サーバーで実行されるコードではモジュールスコープにシグナルやストアを作成しないでください。モジュールは一度だけ読み込まれ、1つのオブジェクトがすべてのリクエストに応答してしまいます。
+- 共有リンクで再現すべきものはすべて `useSearchParams` で検索パラメータに置いてください。
+- サーバーが所有するデータはサーバー関数を通してメモかストアに読み取ってください。クライアントが持つのはビューであり、`refresh` で再読み取りします。
 
-## Next steps
+## 次のステップ
 
-- [Mutations](/concepts/mutations): writes to server-owned state with `action`, `createOptimisticStore`, and `refresh`, layered without a second copy of the data.
-- [Sessions and auth](/building-apps/sessions-and-auth): how `event.locals.userId` gets set, and how every server function checks it.
-- [Navigation and typed paths](/routing/solid-router/navigation): typed search parameters with a schema, and the rest of the URL as state.
-- [Rendering and SSR](/concepts/rendering-and-ssr): the other rules for code that runs on both the server and the client.
+- [ミューテーション](/concepts/mutations): `action`、`createOptimisticStore`、`refresh` によるサーバー所有の状態への書き込み。データの第2のコピーなしに重ねられます。
+- [セッションと認証](/building-apps/sessions-and-auth): `event.locals.userId` がどう設定され、各サーバー関数がどうそれを確認するか。
+- [ナビゲーションと型付きパス](/routing/solid-router/navigation): スキーマによる型付き検索パラメータと、状態としての URL の残りの部分。
+- [レンダリングと SSR](/concepts/rendering-and-ssr): サーバーとクライアントの両方で実行されるコードに関する他のルール。
