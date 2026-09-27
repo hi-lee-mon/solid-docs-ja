@@ -1,24 +1,24 @@
 ---
-title: "Performance"
+title: "パフォーマンス"
 version: "2.0"
-description: "Measure a slow catalog page with the browser profiler and Solid's attribution tables, then fix the cause each measurement points at: hot derivations, wide writes, rebuilt rows, waterfalls, unsplit code, and a blocked streaming shell."
+description: "ブラウザのプロファイラーと Solid の属性付け（attribution）テーブルで遅いカタログページを計測し、各計測が指し示す原因を修正します: 高頻度の導出、広範な書き込み、作り直される行、ウォーターフォール、分割されていないコード、ブロックされたストリーミングシェル。"
 ---
 
-The catalog page renders 2,000 products.
-Typing in its search box lags a beat behind each keystroke, and the first paint of the page waits until the product list, the cart badge, and the account menu have all answered.
-Someone suggests memoizing everything; someone else suggests a virtual list.
+カタログページは2,000件の商品をレンダリングします。
+検索ボックスへの入力はキーストロークごとに一拍遅れ、ページの最初のペイントは商品リスト・カートバッジ・アカウントメニューのすべてが応答を返すまで待ちます。
+「何でもメモ化すればいい」と提案する人もいれば、仮想リストを提案する人もいます。
 
-Both may be right, and neither is worth doing before a measurement says which part is slow.
-This guide is about taking that measurement and reading which knob it points at.
-It does not make speed claims; it describes what Solid does and does not do when a value changes, so the profile can be read against it.
+どちらも正しいかもしれませんが、どの部分が遅いのかを計測が示すまで、どちらをやる価値もありません。
+このガイドは、その計測を行い、それがどのつまみを指しているかを読み取る方法についてのものです。
+速度に関する主張はしません。値が変化したときに Solid が何をし、何をしないのかを説明するので、プロファイルをそれと照らし合わせて読めます。
 
-## Measure before changing
+## 変更する前に計測する
 
-Start in the browser's Performance panel: record, type one character in the search box, stop.
-A long task after the keystroke shows the call stack that spent the time, and `performance.mark()` calls around suspect code give the flame chart named spans to look for.
-That tells you where the milliseconds went; the next tool tells you why that code ran.
+ブラウザの Performance パネルから始めます。記録を開始し、検索ボックスに1文字入力して、停止します。
+キーストローク後のロングタスクには時間を費やしたコールスタックが表示され、疑わしいコードの周囲に置いた `performance.mark()` 呼び出しが、フレームチャート上で探すべき名前付きスパンを与えます。
+これでミリ秒がどこへ消えたかが分かります。次のツールは、そのコードがなぜ実行されたのかを教えてくれます。
 
-Attribution is Solid's development-build recorder of every scope that re-ran, what changed to cause it, and how long it took:
+属性付け（attribution）は、再実行されたすべてのスコープ、その原因となった変更、かかった時間を記録する、Solid の開発ビルドのレコーダーです:
 
 ```ts
 import { attribution, costs, feedback } from "solid-js/attribution";
@@ -30,43 +30,43 @@ console.table(costs().scopes);
 console.table(feedback().flights);
 ```
 
-`costs().scopes` ranks scopes by `selfMs`, with `wastedMs` for the time spent on runs whose result did not change, and `costs().writes` ranks root writes by the downstream re-run time each one caused.
-`feedback().flights` counts, per async source, how many requests started and how many were `abandoned` before landing; a high abandon count is the request-per-keystroke signature.
-`feedback().fallbacks` counts how often each `Loading` boundary showed its fallback and how many of those were `flashes` under 150ms.
+`costs().scopes` はスコープを `selfMs` で順位付けし、結果が変わらなかった実行に費やした時間を `wastedMs` として示します。`costs().writes` はルートの書き込みを、それぞれが引き起こした下流の再実行時間で順位付けます。
+`feedback().flights` は非同期ソースごとに、開始されたリクエスト数と、着地する前に `abandoned` となった数を数えます。abandon 数が多いのは、キーストロークごとにリクエストが走っている兆候です。
+`feedback().fallbacks` は、各 `Loading` バウンダリがフォールバックを表示した回数と、そのうち 150ms 未満の `flashes` だった数を数えます。
 
-Name the scopes first: `createMemo(fn, { name: "visible" })`, `createStore(value, { name: "catalog" })`.
-Every table and every `why(visible)` chain refers to nodes by that name, and an unnamed memo prints as `computed`.
+まずスコープに名前を付けてください: `createMemo(fn, { name: "visible" })`、`createStore(value, { name: "catalog" })`。
+すべてのテーブルとすべての `why(visible)` チェーンはその名前でノードを参照し、名前のないメモは `computed` と表示されます。
 
-While attribution is enabled, Solid also warns on its own when a scope re-runs 120 or more times in one second (`HOT_SCOPE_RERUNS`), spends 8ms or more of compute in one second (`HOT_SCOPE_TIME`), tracks 30 or more sources (`WIDE_SCOPE_DEPS`), or when one write reaches 250 or more subscribers (`WIDE_WRITE`).
-Two warnings are always on in development: `HUGE_FAN_OUT` and `HUGE_FAN_IN`, from 2,000 subscribers or sources.
-[Debugging reactivity](/guides/debugging-reactivity#something-updates-too-often) explains how to read each report.
+属性付けが有効な間、Solid は次の場合に自分でも警告を出します: スコープが1秒間に120回以上再実行されたとき（`HOT_SCOPE_RERUNS`）、1秒間に8ms以上の計算を費やしたとき（`HOT_SCOPE_TIME`）、30個以上のソースを追跡したとき（`WIDE_SCOPE_DEPS`）、1回の書き込みが250個以上の購読者に届いたとき（`WIDE_WRITE`）。
+常時有効な警告が開発時に2つあります: `HUGE_FAN_OUT` と `HUGE_FAN_IN` で、2,000個の購読者またはソースから発火します。
+各レポートの読み方は[リアクティビティのデバッグ](/guides/debugging-reactivity#something-updates-too-often)で説明しています。
 
-:::note[Development build only]
-Attribution and the diagnostics on this page exist in the development build.
-A production build strips them, so measure the production bundle with the browser profiler and the development bundle with attribution, and expect the second to be slower in absolute terms.
+:::note[開発ビルドのみ]
+属性付けとこのページの診断は開発ビルドに存在します。
+本番ビルドでは取り除かれるため、本番バンドルはブラウザのプロファイラーで、開発バンドルは属性付けで計測してください。後者は絶対的には遅くなると想定してください。
 :::
 
-## What does not re-run
+## 再実行されないもの
 
-A component function runs once.
-The JSX it returns compiles to expressions that each track what they read, so a signal write re-runs the expressions that read that signal and nothing else.
-A component that runs too often is therefore not a failure mode to look for, and a profile that shows a component function high in the stack is showing its first and only run.
+コンポーネント関数は一度だけ実行されます。
+返される JSX は、それぞれが読み取ったものを追跡する式にコンパイルされるため、シグナルへの書き込みはそのシグナルを読んだ式だけを再実行し、それ以外は実行しません。
+したがって「コンポーネントが頻繁に実行される」は探すべき失敗モードではなく、コンポーネント関数がスタックの上位に現れるプロファイルは、その最初で唯一の実行を示しています。
 
-The failure modes that do exist are narrower, and each has a name in the console:
+実際に存在する失敗モードはより限定的で、それぞれコンソールに名前が出ます:
 
-| What the profile shows                                  | Code                                                  | Fix                                                            |
+| プロファイルが示すもの | コード | 修正方法 |
 | ------------------------------------------------------- | ----------------------------------------------------- | -------------------------------------------------------------- |
-| One derivation runs on every keystroke, in every reader | `HOT_SCOPE_RERUNS`, `HOT_SCOPE_TIME`                  | [Expensive derivations](#expensive-derivations)                |
-| One write re-runs thousands of small scopes             | `HUGE_FAN_OUT`, `WIDE_WRITE`                          | [Stores at scale](#stores-at-scale)                            |
-| Readers update twice per change, one flush apart        | `EFFECT_RELAY_TEAR`                                   | [Avoid unnecessary effects](/guides/avoid-unnecessary-effects) |
-| Rows are disposed and recreated for the same records    | `UNSTABLE_LIST_IDENTITY`, `IMMUTABLE_UPDATE_IN_STORE` | [Lists](#lists)                                                |
-| A memo notifies readers although nothing changed        | `UNSTABLE_MEMO_OUTPUT`                                | [Expensive derivations](#expensive-derivations)                |
-| Requests start one after another                        | `ASYNC_WATERFALL`                                     | [Waterfalls](#waterfalls)                                      |
+| 1つの導出がキーストロークごとに、すべての読み手で実行される | `HOT_SCOPE_RERUNS`, `HOT_SCOPE_TIME`                  | [高価な導出](#expensive-derivations)                |
+| 1回の書き込みが数千の小さなスコープを再実行する             | `HUGE_FAN_OUT`, `WIDE_WRITE`                          | [大規模なストア](#stores-at-scale)                            |
+| 読み手が変更ごとに1フラッシュずれて2回更新される        | `EFFECT_RELAY_TEAR`                                   | [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects) |
+| 同じレコードに対して行が破棄・再作成される    | `UNSTABLE_LIST_IDENTITY`, `IMMUTABLE_UPDATE_IN_STORE` | [リスト](#lists)                                                |
+| 何も変わっていないのにメモが読み手に通知する        | `UNSTABLE_MEMO_OUTPUT`                                | [高価な導出](#expensive-derivations)                |
+| リクエストが次々に開始される                        | `ASYNC_WATERFALL`                                     | [ウォーターフォール](#waterfalls)                                      |
 
-## Expensive derivations
+## 高価な導出
 
-The catalog filters 2,000 products by the query.
-Where that filter lives decides how many times it runs:
+カタログは2,000件の商品をクエリでフィルターします。
+そのフィルターがどこに置かれるかで、実行回数が決まります:
 
 ```tsx
 import { For, createMemo, createSignal, createStore } from "solid-js";
@@ -88,16 +88,16 @@ const visible = createMemo(
 <For each={visible()}>{(product) => <ProductCard product={product} />}</For>;
 ```
 
-Run the `Avoid` version and type one character: the filter runs twice, once for the count and once for the list, because a plain function is re-evaluated by each tracking scope that calls it.
-In `costs()`, `visible` does not appear at all, since a plain function is not a scope; its time is charged to the scopes that called it.
-In the `Prefer` version the memo runs once, both readers receive the stored array, and `costs()` shows one `visible` row.
+`Avoid` 版を実行して1文字入力すると、フィルターは2回実行されます。件数のためとリストのためです。プレーンな関数はそれを呼び出す追跡スコープごとに再評価されるからです。
+`costs()` では `visible` は一切現れません。プレーンな関数はスコープではないため、その時間は呼び出したスコープに計上されます。
+`Prefer` 版ではメモは1回だけ実行され、両方の読み手が保存された配列を受け取り、`costs()` には `visible` の行が1つ表示されます。
 
-A memo costs a node in the graph and a comparison on each run; for a cheap expression with one reader, the function is smaller.
-Reach for the memo when several readers share the result, when the computation is expensive, or when the result is often unchanged.
-That last case is the equality gate: a memo compares its new value to the previous one and does not notify readers when the two are equal, so nothing downstream runs.
+メモはグラフのノードと実行ごとの比較をコストとして要します。読み手が1つだけの安い式なら、関数のほうが小さく済みます。
+結果を複数の読み手が共有するとき、計算が高価なとき、結果がしばしば変わらないときにメモを使ってください。
+最後のケースが等価性ゲートです: メモは新しい値を前の値と比較し、2つが等しければ読み手に通知しないため、下流では何も実行されません。
 
-The gate compares by reference, which a filter defeats: every run produces a new array.
-Move the equality boundary to where the value is a primitive:
+このゲートは参照で比較するため、フィルターはこれをすり抜けます: 実行のたびに新しい配列が生成されるからです。
+等価性の境界を、値がプリミティブになる場所に移動させてください:
 
 ```tsx
 // Prefer: the trimmed query settles first, so " mug" and "mug" filter once
@@ -111,13 +111,13 @@ const visible = createMemo(
 );
 ```
 
-Type a trailing space and `needle` recomputes, produces the same string, and stops there; `visible` and the 2,000-row list do not run.
-When a memo must return an object or array that is often equal in content, pass an `equals` option that compares by content; without one, attribution reports `[UNSTABLE_MEMO_OUTPUT]` after four consecutive new-but-equivalent results, because every subscriber re-ran for nothing.
+末尾にスペースを入力すると `needle` は再計算しますが、同じ文字列を生成してそこで止まります。`visible` と2,000行のリストは実行されません。
+メモが内容上しばしば等しいオブジェクトや配列を返さなければならない場合は、内容で比較する `equals` オプションを渡してください。これがないと、新しいが等価な結果が4回連続した後に属性付けが `[UNSTABLE_MEMO_OUTPUT]` を報告します。すべての購読者が無駄に再実行されたからです。
 
-## Lists
+## リスト
 
-A list is where one mistake is paid once per row.
-`For` keeps a row when the same object comes back and rebuilds it when a new object appears, so the expensive version of a list is the one that hands `For` new objects for the same records:
+リストは、1つのミスが行ごとに支払われる場所です。
+`For` は同じオブジェクトが戻ってきたときは行を保持し、新しいオブジェクトが現れたときは作り直します。したがって、リストの高価な版は、同じレコードに対して `For` に新しいオブジェクトを渡すものです:
 
 ```tsx
 // Avoid: a new object per product on every change, so every row is rebuilt
@@ -136,22 +136,22 @@ A list is where one mistake is paid once per row.
 </For>;
 ```
 
-Run the `Avoid` version and add one item to the cart: all 2,000 rows are disposed and recreated, and attribution reports `[UNSTABLE_LIST_IDENTITY]`.
-In the `Prefer` version `inCart` is a store keyed by product id, built in [Stores at scale](#stores-at-scale), so adding an item updates the one row whose key flipped.
+`Avoid` 版を実行してカートに1点追加すると、2,000行すべてが破棄・再作成され、属性付けは `[UNSTABLE_LIST_IDENTITY]` を報告します。
+`Prefer` 版では `inCart` は商品 id をキーにしたストアで、[大規模なストア](#stores-at-scale)で作られるため、アイテムを追加するとキーが切り替わった1行だけが更新されます。
 
-The [Lists](/guides/lists) guide owns the rest: [keeping identity across a refetch](/guides/lists#keep-row-identity-across-updates), [selection without touching every row](/guides/lists#select-a-row), and [rendering a window](/guides/lists#render-a-window-over-a-large-list) with `Repeat` when 2,000 rows should not all be in the DOM.
+残りは[リスト](/guides/lists)ガイドが扱います: [再取得をまたいで行の同一性を保つ](/guides/lists#keep-row-identity-across-updates)、[すべての行に触れずに選択する](/guides/lists#select-a-row)、2,000行すべてを DOM に置くべきでないときに `Repeat` で[ウィンドウをレンダリングする](/guides/lists#render-a-window-over-a-large-list)方法。
 
-## Waterfalls
+## ウォーターフォール
 
-The first paint waits on three requests because each one starts when the one before it lands: the product needs nothing, the brand read waits for the product, and the brand's catalog waits for the brand.
-Derive each request from the input you already have, so the ones that do not depend on each other start together, and join the ones that do on the server.
-With attribution on, three or more sequential flights of 50ms or more print `[ASYNC_WATERFALL]` with the serialized time; a two-flight chain is recorded at `info` only.
-[Dependent requests](/guides/data-fetching-patterns#dependent-requests) shows the `Avoid` and `Prefer` versions, and a route [`preload`](/routing/solid-router/data#start-work-before-the-component-runs) starts the reads before the component runs at all.
+最初のペイントが3つのリクエストを待つのは、それぞれが前のリクエストの着地を待って開始されるからです。商品は何も必要とせず、ブランドの読み取りは商品を待ち、ブランドのカタログはブランドを待ちます。
+すでに持っている入力から各リクエストを導出して、互いに依存しないものは同時に開始させ、依存するものはサーバーで結合してください。
+属性付けが有効な場合、50ms以上のシーケンシャルなフライトが3つ以上続くと `[ASYNC_WATERFALL]` がシリアル化された時間とともに表示されます。2フライトのチェーンは `info` でのみ記録されます。
+[依存するリクエスト](/guides/data-fetching-patterns#dependent-requests)に `Avoid` 版と `Prefer` 版が示されており、ルートの [`preload`](/routing/solid-router/data#start-work-before-the-component-runs) はコンポーネントが実行される前から読み取りを開始します。
 
-## Code splitting
+## コード分割
 
-The account area is a third of the bundle and most visitors never open it.
-[`lazy`](/reference/solid-js/components-context/lazy) turns an import into a component that loads its chunk on first render:
+アカウント領域はバンドルの3分の1を占めますが、ほとんどの訪問者はそれを開きません。
+[`lazy`](/reference/solid-js/components-context/lazy)は import を、初回レンダー時にチャンクを読み込むコンポーネントに変えます:
 
 ```tsx
 import { Loading, lazy } from "solid-js";
@@ -163,22 +163,22 @@ const Account = lazy(() => import("./account/Account"));
 </Loading>;
 ```
 
-Render `<Account />` for the first time and the dynamic import starts; while it is in flight the component suspends through the nearest `Loading` boundary, which shows the skeleton.
-Call `Account.preload()` to start the import early, for example from a link's `onMouseEnter`.
+`<Account />` を初めてレンダーすると dynamic import が開始されます。インポートが飛行中の間、コンポーネントは最も近い `Loading` バウンダリを通じてサスペンドし、バウンダリはスケルトンを表示します。
+`Account.preload()` を呼ぶとインポートを早めに開始できます。たとえばリンクの `onMouseEnter` から呼びます。
 
-With Solid Router the split usually happens at the route.
-A route whose `component` is a `lazy` component has its chunk loaded when the user hovers, focuses, or touches a link to it, and a `children: () => import("./account/routes")` thunk defers a whole route table the same way.
-[Load a route subtree lazily](/routing/solid-router/route-definitions#load-a-route-subtree-lazily) and [Preloading from links](/routing/solid-router/data#preloading-from-links) cover both.
+Solid Router では分割は通常ルートで行います。
+`component` が `lazy` コンポーネントであるルートは、ユーザーがそのルートへのリンクにホバー・フォーカス・タッチしたときにチャンクが読み込まれ、`children: () => import("./account/routes")` という thunk はルートテーブル全体を同様に遅延させます。
+[ルートサブツリーを遅延ロードする](/routing/solid-router/route-definitions#load-a-route-subtree-lazily)と[リンクからのプリロード](/routing/solid-router/data#preloading-from-links)がその両方をカバーしています。
 
-:::caution[A chunk is a round trip]
-Splitting a component that the first page needs adds a request before that page can paint.
-Split at the boundary between what the first page shows and what it does not, and leave the header, the product grid, and the cart badge in the main bundle.
+:::caution[チャンクは1回の往復]
+最初のページが必要とするコンポーネントを分割すると、そのページがペイントする前にリクエストが1つ増えます。
+最初のページが表示するものと表示しないものの境界で分割し、ヘッダー・商品グリッド・カートバッジはメインバンドルに残してください。
 :::
 
-## Server rendering and streaming
+## サーバーレンダリングとストリーミング
 
-With `ssr: true`, `renderToStream` sends the synchronous shell first and then a fragment for each `Loading` boundary as its content settles.
-An async read with no boundary above it holds the shell, so the visitor sees nothing until that read lands:
+`ssr: true` では、`renderToStream` はまず同期のシェルを送り、次に各 `Loading` バウンダリのコンテンツが確定するたびにフラグメントを送ります。
+上にバウンダリのない非同期読み取りはシェルを保留するため、その読み取りが着地するまで訪問者には何も見えません:
 
 ```tsx
 // Avoid: the shell waits for the catalog
@@ -196,17 +196,17 @@ An async read with no boundary above it holds the shell, so the visitor sees not
 </main>;
 ```
 
-Load the page with the `Avoid` version and nothing is sent until the catalog query resolves.
-With the `Prefer` version the header and the skeleton arrive at once, and the grid replaces the skeleton when its data lands.
+`Avoid` 版でページを読み込むと、カタログクエリが解決するまで何も送信されません。
+`Prefer` 版ではヘッダーとスケルトンが一度に届き、データが着地するとグリッドがスケルトンに置き換わります。
 
-When one read must be in the first HTML, for a crawler or a link preview, pass `deferStream: true` to that memo; the shell then waits for that read instead of sending its boundary's fallback.
-[Streaming rendering](/concepts/rendering-and-ssr#streaming-rendering) covers the output forms, and [Choose a rendering mode](/guides/choose-a-rendering-mode) weighs streaming against a static shell and prerendering.
+クローラーやリンクプレビューのために、ある読み取りが最初の HTML に含まれなければならない場合、そのメモに `deferStream: true` を渡してください。シェルはバウンダリのフォールバックを送る代わりにその読み取りを待ちます。
+[ストリーミングレンダリング](/concepts/rendering-and-ssr#streaming-rendering)は出力形式をカバーし、[レンダリングモードを選ぶ](/guides/choose-a-rendering-mode)はストリーミングと静的シェル・プリレンダリングを比較検討します。
 
-## Stores at scale
+## 大規模なストア
 
-A store holding 2,000 products does not create 2,000 sets of tracking nodes.
-The proxy creates a node for a property the first time a tracking scope reads it, so the rows on screen cost nodes and the rest cost nothing until they scroll into view.
-Two store features keep that cheap as the data changes:
+2,000件の商品を保持するストアは、2,000組の追跡ノードを作りません。
+プロキシは、追跡スコープが初めてプロパティを読んだときにそのプロパティのノードを作るため、画面上の行だけがノードのコストを持ち、残りはビューにスクロールインするまでコストゼロです。
+データが変化してもそれを安く保つストアの機能が2つあります:
 
 ```tsx
 import { createProjection, createStore } from "solid-js";
@@ -227,58 +227,58 @@ const inCart = createProjection<Record<string, boolean>>(
 );
 ```
 
-Refetch the catalog after a price change and one text node updates; the other 1,999 rows read properties whose values did not change and are not notified.
-Add an item to the cart and `inCart` gains one key, so one row's `inCart` read runs.
+価格変更後にカタログを再取得するとテキストノードが1つ更新されます。残りの1,999行は値が変わらなかったプロパティを読んでいるため、通知されません。
+カートにアイテムを追加すると `inCart` にキーが1つ増えるため、1行の `inCart` 読み取りが実行されます。
 
-The alternative, every row reading `cart.items.some((item) => item.id === product.id)`, subscribes 2,000 scopes to `cart.items`, and adding an item re-runs all of them.
-Development reports that write as `[HUGE_FAN_OUT]`, and with attribution on the lower threshold `[WIDE_WRITE]` names the signal from 250 subscribers.
-A [projection](/concepts/stores#derive-a-store-with-a-projection) or a store used as a map keyed by id is the repair both messages suggest.
+代替案である、すべての行が `cart.items.some((item) => item.id === product.id)` を読む方法は、2,000のスコープを `cart.items` に購読させ、アイテム追加ですべてが再実行されます。
+開発ビルドはその書き込みを `[HUGE_FAN_OUT]` として報告し、属性付けが有効なら低いしきい値の `[WIDE_WRITE]` が250購読者からシグナル名を示します。
+[プロジェクション](/concepts/stores#derive-a-store-with-a-projection)または id をキーにしたマップとして使うストアが、両方のメッセージが示唆する修復です。
 
-For a record map whose rows are replaced wholesale rather than edited, `createStore(value, { shallow: true })` tracks the root keys and stores each value by reference, so no per-field nodes are created for rows nothing reads field by field.
+フィールド単位で編集されるのではなく丸ごと置き換えられる行を持つレコードマップには、`createStore(value, { shallow: true })` がルートキーを追跡し、各値を参照で保持するため、フィールドごとに読まれることのない行にフィールド単位のノードは作られません。
 
-## Common problems
+## よくある問題
 
-### Typing in the search box lags
+### 検索ボックスへの入力が遅れる
 
-Three causes, and attribution separates them.
-If `costs().scopes` puts a filter or sort at the top, it runs in every reader; make it a memo and put an equality boundary on the normalized query, as in [Expensive derivations](#expensive-derivations).
-If `feedback().flights` shows most requests abandoned, a request starts per keystroke; debounce in the input handler, as [Search as you type](/guides/data-fetching-patterns#search-as-you-type) shows.
-If the input itself shows the previous character, it is bound to `query()` while a held update waits on results; bind `latest(query)` instead.
+原因は3つあり、属性付けがそれらを切り分けます。
+`costs().scopes` の上位にフィルターやソートがある場合、それはすべての読み手で実行されています。メモにして、[高価な導出](#expensive-derivations)のように正規化したクエリに等価性の境界を置いてください。
+`feedback().flights` でほとんどのリクエストが abandoned になっている場合、キーストロークごとにリクエストが開始されています。[入力しながら検索](/guides/data-fetching-patterns#search-as-you-type)が示すように、input ハンドラーでデバウンスしてください。
+input 自体が前の文字を表示する場合、`query()` にバインドされており、保留中の更新が結果を待っています。代わりに `latest(query)` にバインドしてください。
 
-### Every row updates when one product is selected
+### 1つの商品を選択するとすべての行が更新される
 
-Each row reads the selected id, so a selection change re-runs 2,000 scopes and development prints `[HUGE_FAN_OUT]`.
-Keep the selection in a store keyed by id and read `selected[product.id]` in the row; [Select a row](/guides/lists#select-a-row) shows the two versions.
+各行が選択中の id を読んでいるため、選択の変更で2,000のスコープが再実行され、開発ビルドは `[HUGE_FAN_OUT]` を出力します。
+選択を id をキーにしたストアに保持し、行で `selected[product.id]` を読んでください。[行を選択する](/guides/lists#select-a-row)に2つの版が示されています。
 
-### The list rebuilds on every refresh
+### リフレッシュのたびにリストが作り直される
 
-The refetch produced new objects for the same records, so `For` disposed every row, and attribution reports `[UNSTABLE_LIST_IDENTITY]`.
-Load the list into a store created from a function, or pass `keyed={(item) => item.id}`; see [Keep row identity across updates](/guides/lists#keep-row-identity-across-updates).
+再取得が同じレコードに対して新しいオブジェクトを生成したため、`For` がすべての行を破棄し、属性付けは `[UNSTABLE_LIST_IDENTITY]` を報告します。
+リストを関数から作成したストアに読み込むか、`keyed={(item) => item.id}` を渡してください。[更新をまたいで行の同一性を保つ](/guides/lists#keep-row-identity-across-updates)を参照してください。
 
-### First paint waits for all the data
+### 最初のペイントがすべてのデータを待つ
 
-An async read sits above every `Loading` boundary, so the streaming shell waits for it, or three reads run in sequence and the page waits for their sum.
-Put a boundary around the region that depends on the read, and check the console for `[ASYNC_WATERFALL]` to find the chain.
+非同期読み取りがすべての `Loading` バウンダリの上に位置しているためストリーミングシェルがそれを待つか、3つの読み取りが順次実行されていてページがその合計を待っています。
+読み取りに依存する領域をバウンダリで囲み、`[ASYNC_WATERFALL]` をコンソールで確認してチェーンを見つけてください。
 
-### The development build is slow and the production build is fine
+### 開発ビルドは遅いが本番ビルドは問題ない
 
-Attribution, the diagnostics, and the `[why-run]` console groups run in development only.
-Measure timings on a production build; use the development build to find out which scope ran and why.
+属性付け・診断・`[why-run]` コンソールグループは開発時のみ実行されます。
+タイミングは本番ビルドで計測し、開発ビルドはどのスコープがなぜ実行されたかを調べるために使ってください。
 
-## Recap
+## まとめ
 
-- Record a profile first, then enable `attribution` and read `costs()` and `feedback()` to see which scope ran and what caused it.
-- A component runs once; look for a hot derivation, a wide write, a relaying effect, or a rebuilt list, not a re-rendering component.
-- Put a shared or expensive derivation in a memo, and put an equality boundary on a primitive so a change that settles to the same value stops there.
-- Hand `For` the store's objects; a `map` that produces new objects rebuilds every row.
-- Derive independent requests from inputs you already have, so they start together.
-- Split code with `lazy` at the boundary between the first page and the rest, and let the router preload chunks on hover.
-- Wrap each streamed region in a `Loading` boundary so the shell does not wait for its data.
-- Keep per-row flags in a store or projection keyed by id, so a change touches the rows whose key flipped.
+- まずプロファイルを記録し、次に `attribution` を有効にして `costs()` と `feedback()` を読み、どのスコープが何を原因に実行されたかを確認する。
+- コンポーネントは一度だけ実行されます。再レンダリングするコンポーネントではなく、高頻度の導出・広範な書き込み・中継するエフェクト・作り直されるリストを探してください。
+- 共有されるまたは高価な導出はメモに置き、同じ値に確定する変更がそこで止まるよう、プリミティブに等価性の境界を置く。
+- `For` にはストアのオブジェクトを渡してください。新しいオブジェクトを生成する `map` はすべての行を作り直します。
+- 独立したリクエストはすでに持っている入力から導出し、同時に開始させる。
+- `lazy` で最初のページとそれ以外の境界でコードを分割し、ルーターにホバーでチャンクをプリロードさせる。
+- ストリーミングされる各領域を `Loading` バウンダリで囲み、シェルがそのデータを待たないようにする。
+- 行ごとのフラグは id をキーにしたストアかプロジェクションに保持し、変更がキーの切り替わった行だけに触れるようにする。
 
-## Next steps
+## 次のステップ
 
-- [Lists](/guides/lists): row identity, selection, and windowing over the catalog, with the diagnostics that fire when rows are rebuilt.
-- [Data fetching patterns](/guides/data-fetching-patterns): parallel reads, `preload`, sharing one request across components, and the full `[ASYNC_WATERFALL]` report.
-- [Debugging reactivity](/guides/debugging-reactivity): how to read every diagnostic named on this page and the `why` chains behind them.
-- [Rendering and SSR](/concepts/rendering-and-ssr): `renderToStream`, hydration, and where the boundaries on this page end up in the HTML.
+- [リスト](/guides/lists): カタログに対する行の同一性・選択・ウィンドウ表示と、行が作り直されたときに発火する診断。
+- [データ取得パターン](/guides/data-fetching-patterns): 並列読み取り、`preload`、コンポーネント間での1つのリクエストの共有、`[ASYNC_WATERFALL]` レポートの全体。
+- [リアクティビティのデバッグ](/guides/debugging-reactivity): このページで名前が出たすべての診断と、その背後の `why` チェーンの読み方。
+- [レンダリングと SSR](/concepts/rendering-and-ssr): `renderToStream`、ハイドレーション、このページのバウンダリが HTML のどこに来るか。
