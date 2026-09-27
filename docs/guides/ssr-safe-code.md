@@ -1,19 +1,19 @@
 ---
-title: "SSR-safe code"
+title: "SSR セーフなコード"
 version: "2.0"
-description: "Keep browser APIs, per-run values, and client-only data out of the server render, and read each hydration warning to find the line that made the server and the browser disagree."
+description: "ブラウザー API、実行ごとに変わる値、クライアント専用のデータをサーバーレンダーから排除し、各ハイドレーション警告を読んで、サーバーとブラウザーが食い違う原因となった行を見つけます。"
 ---
 
-The storefront passed `vite build`, and the first request to the dev server with `ssr: true` printed `ReferenceError: window is not defined` from the cart drawer.
-Moving that line fixed the crash, and the browser console then filled with `Hydration structure mismatch` warnings from the sale banner, which the server rendered and the browser decided not to.
+ストアフロントは `vite build` を通過しましたが、`ssr: true` を付けた開発サーバーへの最初のリクエストで、カートドロワーから `ReferenceError: window is not defined` が出力されました。
+その行を移すとクラッシュは直りましたが、今度はブラウザーのコンソールがセールバナーからの `Hydration structure mismatch` 警告で埋まりました。サーバーはレンダリングしたのに、ブラウザーはしないと判断したバナーです。
 
-Both problems have the same shape: one component source runs on the server and in the browser, and a line that gives a different answer in each place breaks one of them.
-[Rendering and SSR](/concepts/rendering-and-ssr) explains the model.
-This guide is the checklist for the code: where each line runs, which lines cannot run on the server, which values must not differ, and how to read the warnings when they do.
+どちらの問題も形は同じです。1つのコンポーネントソースがサーバーとブラウザーの両方で実行され、場所によって異なる答えを返す行がどちらかを壊します。
+このモデルについては [レンダリングと SSR](/concepts/rendering-and-ssr) で説明しています。
+このガイドはコードのためのチェックリストです。各行がどこで実行されるか、サーバーで実行できない行はどれか、一致していなければならない値はどれか、そして食い違ったときに警告をどう読むかを扱います。
 
-## Where each line runs
+## 各行がどこで実行されるか
 
-One component, with each kind of line marked:
+各種の行に印を付けた1つのコンポーネントです:
 
 ```tsx
 import {
@@ -64,31 +64,31 @@ export function CartSummary() {
 }
 ```
 
-Request the page and the server runs the module once, the component body once per request, the store's function and the memo, and the compute function of the effect.
-It does not run the effect function or the `onSettled` callback: on the server `createEffect` runs the compute function once and drops the effect function, and `onSettled` is a no-op that reserves a hydration id.
-The browser runs all of it, and `document.title` changes after hydration.
+ページをリクエストすると、サーバーはモジュールを1回、コンポーネント本体をリクエストごとに1回、ストアの関数とメモ、そしてエフェクトの計算関数を実行します。
+エフェクト関数と `onSettled` コールバックは実行しません。サーバーでは `createEffect` が計算関数を1回実行してエフェクト関数を捨て、`onSettled` はハイドレーション id を予約するだけの no-op だからです。
+ブラウザーはそのすべてを実行し、`document.title` はハイドレーション後に変わります。
 
-The rule for browser-only work follows from that list: put it in an effect function or `onSettled`.
-Event handlers also run only in the browser, because the server has no events to handle.
+ブラウザー専用処理のルールはこの一覧から導かれます。エフェクト関数か `onSettled` に入れてください。
+イベントハンドラーもブラウザーでのみ実行されます。サーバーには処理すべきイベントがないからです。
 
-A `"use server"` function is the reverse case.
-Its body runs on the server on both paths; in the browser the call becomes an HTTP request, and during a server render it runs in the same process under the request event.
-[What the call becomes](/building-apps/server-functions#what-the-call-becomes) describes both paths.
+`"use server"` 関数は逆のケースです。
+その本体はどちらの経路でもサーバーで実行されます。ブラウザーでは呼び出しが HTTP リクエストになり、サーバーレンダー中はリクエストイベントのもとで同じプロセス内で実行されます。
+両経路については [呼び出しは何になるか](/building-apps/server-functions#what-the-call-becomes) で説明しています。
 
-Module scope is the case that surprises people.
-A `const` at the top of a file is evaluated once when the server entry loads and then shared by every request, so a signal or store there is one object for every visitor.
-[Module-level state and the server](/guides/state-management#module-level-state-and-the-server) shows what that does to the cart and where to create the store instead.
+人を驚かせるのはモジュールスコープです。
+ファイル先頭の `const` はサーバーエントリーがロードされたときに1回だけ評価され、その後はすべてのリクエストで共有されるため、そこに置かれたシグナルやストアは全訪問者にとって1つのオブジェクトになります。
+それがカートに何をもたらすか、そして代わりにどこでストアを作成するかは、[モジュールレベルの状態とサーバー](/guides/state-management#module-level-state-and-the-server) を参照してください。
 
-:::caution[A setter called during a server render lands as inert data]
-A server render is one pass from inputs to HTML.
-Calling `setOpen(true)` in the component body on the server updates nothing, and development prints a `[SERVER_WRITE]` warning the first time it happens.
-[A write on the server did nothing](/guides/debugging-reactivity#a-write-on-the-server-did-nothing) explains the warning and what the write should have been.
+:::caution[サーバーレンダー中に呼ばれたセッターは、効果のないデータとして残る]
+サーバーレンダーは入力から HTML への1パスです。
+サーバー上でコンポーネント本体の `setOpen(true)` を呼んでも何も更新されず、開発環境では最初に起きたときに `[SERVER_WRITE]` 警告が出力されます。
+その警告と、あるべき書き込みの姿については [サーバーでの書き込みが何もしなかった](/guides/debugging-reactivity#a-write-on-the-server-did-nothing) を参照してください。
 :::
 
-## Browser APIs
+## ブラウザー API
 
-The cart drawer wants to know whether the viewport is narrow.
-`window.matchMedia` in the component body is the line that printed `window is not defined`:
+カートドロワーはビューポートが狭いかどうかを知りたがっています。
+コンポーネント本体の `window.matchMedia` が、`window is not defined` を出力した行です:
 
 ```tsx
 import { createSignal, onSettled } from "solid-js";
@@ -117,13 +117,13 @@ function CartDrawer() {
 }
 ```
 
-Run the `Avoid` version with `ssr: true` and the server render throws before the drawer produces any HTML.
-In the `Prefer` version the server renders `class="drawer"`, the browser hydrates the same markup, and the `onSettled` callback reads the media query and updates the class once.
-Resizing the window updates it again through the listener, and the returned cleanup removes the listener when the drawer is disposed.
-[Custom primitives](/guides/custom-primitives#clean-up-what-you-start) turns this into a reusable `createMediaQuery`.
+`Avoid` 版を `ssr: true` で実行すると、ドロワーが HTML を生成する前にサーバーレンダーがスローします。
+`Prefer` 版では、サーバーが `class="drawer"` をレンダリングし、ブラウザーが同じマークアップをハイドレートし、`onSettled` コールバックがメディアクエリを読んでクラスを1回更新します。
+ウィンドウのリサイズではリスナーを通じて再度更新され、返されたクリーンアップがドロワーの破棄時にリスナーを外します。
+[カスタムプリミティブ](/guides/custom-primitives#clean-up-what-you-start) ではこれを再利用可能な `createMediaQuery` にしています。
 
-Some helpers are called from places that have no owner, such as a formatting function shared with server code.
-For those, [`isServer`](/reference/solid-web/rendering-ssr/is-server) from `@solidjs/web` is a build-time constant, `true` in the server build and `false` in the browser build, so the bundler drops the branch that cannot run:
+サーバーコードと共有するフォーマット関数のように、オーナーのない場所から呼ばれるヘルパーもあります。
+そうした場面では、`@solidjs/web` の [`isServer`](/reference/solid-web/rendering-ssr/is-server) がビルド時定数として使えます。サーバービルドでは `true`、ブラウザービルドでは `false` になるため、バンドラーが実行できない側の分岐を取り除きます:
 
 ```ts
 import { isServer } from "@solidjs/web";
@@ -134,16 +134,16 @@ export function prefersReducedMotion() {
 }
 ```
 
-`isServer` stops the crash; it does not make the two renders agree.
-A helper like this returns `false` on the server and possibly `true` in the browser, so use its result in an effect function or `onSettled`, not in JSX that decides which elements exist.
+`isServer` はクラッシュを止めますが、2つのレンダーを一致させはしません。
+この種のヘルパーはサーバーでは `false`、ブラウザーでは `true` になり得るので、その結果はどの要素が存在するかを決める JSX の中ではなく、エフェクト関数か `onSettled` の中で使ってください。
 
-For a component that cannot be made safe, such as a map or a rich text editor whose library touches `window` at import, [`clientOnly`](/reference/solid-web/rendering-ssr/client-only) renders a fallback on the server and swaps the component in after hydration.
-[Keep it off the server](/guides/integrate-non-solid-code#keep-it-off-the-server) covers it, including the `{ lazy: true }` option.
+地図や、インポート時に `window` に触れるライブラリを使うリッチテキストエディターのように安全にできないコンポーネントには、[`clientOnly`](/reference/solid-web/rendering-ssr/client-only) がサーバーでフォールバックをレンダリングし、ハイドレーション後にコンポーネントへ入れ替えます。
+`{ lazy: true }` オプションを含めて、[サーバーから切り離す](/guides/integrate-non-solid-code#keep-it-off-the-server) で扱っています。
 
-## Values that differ on every run
+## 実行ごとに変わる値
 
-The product page shows a promotion banner to half of its visitors.
-`Math.random()` in JSX picks a different half on the server and in the browser:
+商品ページは訪問者の半数にプロモーションバナーを表示します。
+JSX 内の `Math.random()` は、サーバーとブラウザーでそれぞれ別の半数を選びます:
 
 ```tsx
 import { Show } from "solid-js";
@@ -159,22 +159,22 @@ import { Show } from "solid-js";
 </Show>;
 ```
 
-Run the `Avoid` version and half of the page loads disagree.
-When the server rendered the banner and the browser did not, development warns after hydration with `Hydration completed with 1 unclaimed server-rendered node(s):` followed by the banner's HTML, and the server's banner stays in the document with nothing attached to it.
-When the browser rendered it and the server did not, development warns `Hydration key miss for "..."`: the browser created the `<aside>` as a detached element, and the banner is not on the page.
+`Avoid` 版を実行すると、ページロードの半分で食い違いが起きます。
+サーバーがバナーをレンダリングしてブラウザーがしなかった場合、開発環境はハイドレーション後に `Hydration completed with 1 unclaimed server-rendered node(s):` とバナーの HTML を続けて警告し、サーバーのバナーは何も結び付かないままドキュメントに残ります。
+ブラウザーがレンダリングしてサーバーがしなかった場合は、開発環境が `Hydration key miss for "..."` を警告します。ブラウザーは `<aside>` を切り離された要素として作成したため、バナーはページに現れません。
 
-In the `Prefer` version `getProduct` decides on the server, in the same request that renders the page, and the browser reads the same field from the same data.
-The rule covers `Date.now()`, `Math.random()`, `crypto.randomUUID()`, `navigator.language`, and any other value the two sides compute independently: when the value decides which elements exist, compute it once, on the server, and pass it as data.
+`Prefer` 版では、`getProduct` がページをレンダリングするのと同じリクエスト内のサーバー上で決定し、ブラウザーは同じデータの同じフィールドを読みます。
+このルールは `Date.now()`、`Math.random()`、`crypto.randomUUID()`、`navigator.language`、その他両側が独立に計算するすべての値に当てはまります。その値がどの要素が存在するかを決めるなら、サーバーで1回だけ計算し、データとして渡してください。
 
-:::note[Text is not compared during hydration]
-Hydration claims each template root by its hydration key and the nodes inside it by position, checks element tags in development, and does not compare text.
-`<p>Rendered at {Date.now()}</p>` fires no warning, and the server's text stays on the page.
-The warnings in this guide come from values that change the structure: a `Show`, a list length, or an element that exists on one side only.
+:::note[テキストはハイドレーション中に比較されない]
+ハイドレーションは、各テンプレートルートをそのハイドレーションキーで、内部のノードを位置で引き取り、開発環境では要素タグを検査しますが、テキストは比較しません。
+`<p>Rendered at {Date.now()}</p>` は警告を発さず、サーバーのテキストがページに残ります。
+このガイドの警告は、構造を変える値から来ています。`Show`、リストの長さ、片側にしか存在しない要素などです。
 :::
 
-Ids are the other common per-run value.
-The checkout address form labels each input with a generated id, and a counter or `Math.random()` gives the server and the browser different strings.
-[`createUniqueId`](/reference/solid-js/components-context/create-unique-id) derives the id from the component's position in the owner tree, on both sides:
+id も実行ごとに変わる値のもう1つの代表的なものです。
+チェックアウトの住所フォームは生成した id で各入力にラベルを付けますが、カウンターや `Math.random()` はサーバーとブラウザーに異なる文字列を与えます。
+[`createUniqueId`](/reference/solid-js/components-context/create-unique-id) は、両側でコンポーネントのオーナーツリー内の位置から id を導きます:
 
 ```tsx
 import { createUniqueId } from "solid-js";
@@ -190,11 +190,11 @@ function Field(props: { label: string; value: string }) {
 }
 ```
 
-On the server and during hydration, each call takes the next child id of the current owner, so the `for` attribute the server wrote is the `id` the browser hydrates.
-Outside hydration, in a client-only render, it returns `cl-` followed by a counter.
-Call it during component setup; on the server it throws `createUniqueId cannot be used outside of a reactive context` when there is no owner.
+サーバー上およびハイドレーション中は、各呼び出しが現在のオーナーの次の子 id を取得するため、サーバーが書いた `for` 属性はブラウザーがハイドレートする `id` と一致します。
+ハイドレーション外、つまりクライアント専用のレンダーでは、`cl-` にカウンターを続けたものを返します。
+コンポーネントのセットアップ中に呼び出してください。サーバーでは、オーナーがないときに `createUniqueId cannot be used outside of a reactive context` をスローします。
 
-For a value that must count in the browser, such as "sale ends in 2:14", render a server-provided value first and let the browser take over after hydration:
+「sale ends in 2:14」のようにブラウザーでカウントし続けなければならない値は、まずサーバーが提供した値をレンダリングし、ハイドレーション後にブラウザーへ引き継ぎます:
 
 ```tsx
 import { createSignal, onSettled } from "solid-js";
@@ -211,16 +211,16 @@ function SaleCountdown(props: { endsAt: number; serverNow: number }) {
 }
 ```
 
-`serverNow` comes from the server function that returned the product, so both sides render the same first text, and the interval starts only in the browser.
+`serverNow` は商品を返したサーバー関数から来るので、両側が同じ最初のテキストをレンダリングし、インターバルはブラウザーだけで開始されます。
 
-## Data the server does not have
+## サーバーが持っていないデータ
 
-The cart draft lives in `localStorage`, which exists only in the browser.
-The server renders the cart it can see, an empty one, and the browser fills the draft in after hydration; [Sync with something outside Solid](/guides/custom-primitives#sync-with-something-outside-solid) has that primitive, with `onSettled` for the read and `createEffect` for the write.
-The cost is a first frame that shows an empty cart to a visitor who has three items in it.
+カートの下書きは `localStorage` にあり、それはブラウザーにしか存在しません。
+サーバーは見えるカート、つまり空のカートをレンダリングし、ブラウザーがハイドレーション後に下書きを埋めます。読み取りに `onSettled`、書き込みに `createEffect` を使うそのプリミティブは [Solid の外部と同期する](/guides/custom-primitives#sync-with-something-outside-solid) にあります。
+代償として、3点入っている訪問者にも空のカートを見せる最初のフレームが生じます。
 
-When the server should render the real cart, move the data to where the server can read it.
-A cart id in a cookie arrives with every request, and the server function reads it from the request event:
+サーバーが本物のカートをレンダリングすべきときは、データをサーバーが読める場所へ移します。
+Cookie に入れたカート id はすべてのリクエストとともに届き、サーバー関数がリクエストイベントからそれを読みます:
 
 ```ts
 // src/server/cart.ts
@@ -236,21 +236,21 @@ export async function getCart(): Promise<{ items: CartItem[] }> {
 }
 ```
 
-`createStore(() => getCart(), { items: [] as CartItem[] })` in the component now renders three items on the server, and the browser asks the same function and gets the same answer.
-`database.carts.get` is a stand-in for the storage the application uses.
-[Sessions and auth](/building-apps/sessions-and-auth) covers the signed cookie that identifies a customer, and `event.locals.userId` set by middleware replaces the cookie read once the customer is signed in.
+これでコンポーネント内の `createStore(() => getCart(), { items: [] as CartItem[] })` はサーバーで3点をレンダリングし、ブラウザーも同じ関数に問い合わせて同じ答えを得ます。
+`database.carts.get` はアプリケーションが使うストレージの代役です。
+顧客を識別する署名付き Cookie については [セッションと認証](/building-apps/sessions-and-auth) を参照してください。顧客がサインインした後は、ミドルウェアが設定する `event.locals.userId` が Cookie の読み取りに取って代わります。
 
-Choose by who needs the first frame.
-A draft only the current browser cares about can wait for hydration; a cart that a shared link, a crawler, or a slow connection should see belongs on the server.
+最初のフレームを誰が必要とするかで選んでください。
+今のブラウザーだけが気にする下書きはハイドレーションまで待てますが、共有リンク・クローラー・低速な回線が見るべきカートはサーバーに置きます。
 
-## Markup the browser rewrites
+## ブラウザーが書き換えるマークアップ
 
-The browser's HTML parser does not build every tree it is handed.
-A `<div>` inside a `<p>` closes the paragraph first, a `<tr>` directly inside a `<table>` gets an implied `<tbody>`, and an `<a>` inside an `<a>` ends the outer link.
-The server writes the string as the JSX describes it, the browser builds a different tree from that string, and the client's compiled template expects the tree the JSX described.
+ブラウザーの HTML パーサーは、渡された木をそのまま組み立てるとは限りません。
+`<p>` の内側の `<div>` は段落を先に閉じ、`<table>` の直下の `<tr>` には暗黙の `<tbody>` が補われ、`<a>` の内側の `<a>` は外側のリンクを終わらせます。
+サーバーは JSX が記述したとおりの文字列を書き出し、ブラウザーはその文字列から別の木を組み立てますが、クライアントのコンパイル済みテンプレートは JSX が記述した木を期待しています。
 
-The compiler catches this when the whole structure is in one JSX expression.
-A product description written as `<p>` around a `<div>`:
+構造全体が1つの JSX 式に収まっているとき、コンパイラはこれを検出します。
+`<div>` を `<p>` で囲んで書いた商品説明です:
 
 ```tsx
 // Avoid: the parser closes <p> when it meets <div>
@@ -266,96 +266,96 @@ A product description written as `<p>` around a `<div>`:
 </div>;
 ```
 
-Compile the `Avoid` version and the build fails at the template with `The HTML provided is malformed and will yield unexpected output when evaluated by a browser.`, followed by the HTML as written and the HTML a browser would build from it.
-The check runs on each template's markup with attributes and text stripped, so the two versions in the message are skeletons; compare the tag order to find the moved node.
+`Avoid` 版をコンパイルすると、テンプレートで `The HTML provided is malformed and will yield unexpected output when evaluated by a browser.` と、書かれたとおりの HTML およびブラウザーがそれから組み立てる HTML が続けて示され、ビルドが失敗します。
+このチェックは各テンプレートのマークアップから属性とテキストを除いたものに対して実行されるため、メッセージ中の2つの版は骨格です。タグの順序を比べて、移動したノードを見つけてください。
 
-The compiler cannot see across components.
-A `Description` component that renders `<p>{props.children}</p>` and a parent that passes `<div>` children each compile to a valid template, and the browser still rebuilds the tree at runtime.
-When a hydration warning points at an element whose parent in the Elements panel is not the parent in the JSX, look for nesting that spans a component boundary and fix the outer element.
+コンパイラはコンポーネントをまたいでは見えません。
+`<p>{props.children}</p>` をレンダリングする `Description` コンポーネントと、`<div>` の子を渡す親は、それぞれが有効なテンプレートにコンパイルされますが、ブラウザーは実行時にやはり木を組み立て直します。
+ハイドレーション警告が指す要素について、Elements パネルでの親が JSX の親でないときは、コンポーネント境界をまたぐネストを探して外側の要素を直してください。
 
-## Reading the hydration warnings
+## ハイドレーション警告の読み方
 
-Development prints one of five messages when the server's DOM and the client's expectations diverge.
-Each one names a different check, and the check says where to look.
+サーバーの DOM とクライアントの期待が食い違うと、開発環境は5種類のメッセージのどれかを出力します。
+それぞれが異なるチェックの名前を示し、そのチェックがどこを見るべきかを教えてくれます。
 
 ### `Hydration structure mismatch: expected <X> as first child of`
 
-The client is walking inside one template and the node at that position is not the element the template expects.
-The variant `Hydration structure mismatch: expected <X> after` reports the same check for a later sibling.
-The line after the message sketches the parent's children with `← expected X` at the node it found, or `← missing` when the position is empty.
-Look for markup the browser rewrote, or for a template root that was claimed from the wrong place because an earlier element shifted the ids.
+クライアントが1つのテンプレート内をたどっていて、その位置のノードがテンプレートの期待する要素ではありません。
+バリアントの `Hydration structure mismatch: expected <X> after` は、後続の兄弟について同じチェックを報告します。
+メッセージの次の行は親の子要素の概略を示し、見つかったノードに `← expected X`、その位置が空なら `← missing` と付きます。
+ブラウザーが書き換えたマークアップか、先行する要素が id をずらしたために間違った場所から引き取られたテンプレートルートを探してください。
 
 ### `Hydration tag mismatch for key "...": expected <X> but found`
 
-A template root was found under its hydration key, and it is a different element than the template's root.
-The two sides rendered different elements at the same position: a conditional that picked a different branch, or two components whose order differs.
+テンプレートルートがそのハイドレーションキーの下で見つかりましたが、テンプレートのルートとは別の要素です。
+両側が同じ位置に異なる要素をレンダリングしました。別の分岐を選んだ条件分岐か、順序が異なる2つのコンポーネントです。
 
 ### `Hydration key miss for "...": no server-rendered element carries this key`
 
-The client rendered a template root the server never emitted under that id.
-The message continues with what happened: `A detached element was created instead; its subtree will not appear in the document or become interactive.`
-Look for a branch that runs only in the browser, such as `Show when={!isServer}` or a per-run value, or for a subtree hydrated under a different `renderId` than the server used; the message names that case, and [Controlling hydration](/concepts/rendering-and-ssr#controlling-hydration) covers it.
+クライアントが、サーバーがその id で出力していないテンプレートルートをレンダリングしました。
+メッセージは起きたことを続けて説明します: `A detached element was created instead; its subtree will not appear in the document or become interactive.`
+`Show when={!isServer}` や実行ごとに変わる値のようなブラウザーだけで実行される分岐、あるいはサーバーが使ったのとは別の `renderId` でハイドレートされたサブツリーを探してください。メッセージはそのケースを明示し、[ハイドレーションの制御](/concepts/rendering-and-ssr#controlling-hydration) がそれを扱っています。
 
 ### `Hydration completed with N unclaimed server-rendered node(s):`
 
-Hydration finished and the server-rendered elements listed under the message were never claimed by the client.
-The server rendered something the browser did not: the mirror image of a key miss.
+ハイドレーションは完了しましたが、メッセージの下に列挙されたサーバーレンダリング済み要素はクライアントに一度も引き取られませんでした。
+サーバーがレンダリングしてブラウザーがしなかったものです。キーミスの鏡像です。
 
 ### `Hydration Mismatch. Unable to find DOM nodes for hydration key`
 
-This one is an error, not a warning.
-A `dynamic()` component that resolves to a string tag, and other code that claims an element without a template to fall back on, throws it when no server node carries the key.
-The cause is the same as a key miss; the difference is that there is no template to create a stand-in from.
+これは警告ではなくエラーです。
+文字列タグに解決される `dynamic()` コンポーネントなど、頼れるテンプレートなしに要素を引き取るコードは、どのサーバーノードもそのキーを持たないときにこれをスローします。
+原因はキーミスと同じです。違いは、代役を作るためのテンプレートがないことです。
 
-## Third-party code
+## サードパーティコード
 
-A library that reads `window` in its module body fails at import, before any component runs.
-Wrap the component that uses it in `clientOnly`, or move the import into an `onSettled` callback so it runs only in the browser.
-[Keep it off the server](/guides/integrate-non-solid-code#keep-it-off-the-server) shows both shapes and the `disposed` guard the dynamic import needs.
+モジュール本体で `window` を読むライブラリは、どのコンポーネントが実行されるより前、インポート時に失敗します。
+それを使うコンポーネントを `clientOnly` で包むか、インポートを `onSettled` コールバックの中へ移してブラウザーだけで実行されるようにしてください。
+[サーバーから切り離す](/guides/integrate-non-solid-code#keep-it-off-the-server) に両方の形と、動的インポートが必要とする `disposed` ガードが示されています。
 
-## Common problems
+## よくある問題
 
-### `window is not defined` or `document is not defined` on the first request
+### 最初のリクエストで `window is not defined` または `document is not defined`
 
-A module body, a component body, or a compute function reads a browser API, and with `ssr: true` that code runs on the server too.
-Move the read into an effect function or an `onSettled` callback, guard it with `isServer`, or wrap the component in `clientOnly`.
-If the stack points into `node_modules`, the library reads the browser at import; see [Third-party code](#third-party-code).
+モジュール本体・コンポーネント本体・計算関数のどれかがブラウザー API を読んでおり、`ssr: true` ではそのコードもサーバーで実行されます。
+読み取りをエフェクト関数や `onSettled` コールバックへ移すか、`isServer` でガードするか、コンポーネントを `clientOnly` で包んでください。
+スタックが `node_modules` を指しているなら、そのライブラリがインポート時にブラウザーを読んでいます。[サードパーティコード](#third-party-code) を参照してください。
 
-### `Hydration structure mismatch` after fixing the crash
+### クラッシュを直した後に `Hydration structure mismatch`
 
-The two sides now both render, and they render different structures.
-Find the value that differs: a `Math.random()` or `Date.now()` in a condition, a check on `isServer` inside JSX, or data one side has and the other does not.
-[Values that differ on every run](#values-that-differ-on-every-run) and [Data the server does not have](#data-the-server-does-not-have) cover the fixes.
+これで両側ともレンダリングするようになりましたが、異なる構造をレンダリングしています。
+食い違う値を見つけてください。条件内の `Math.random()` や `Date.now()`、JSX 内の `isServer` チェック、片側だけが持つデータなどです。
+直し方は [実行ごとに変わる値](#values-that-differ-on-every-run) と [サーバーが持っていないデータ](#data-the-server-does-not-have) が扱っています。
 
-### The build fails with `The HTML provided is malformed`
+### `The HTML provided is malformed` でビルドが失敗する
 
-One JSX template nests elements the browser's parser would move, such as `<div>` inside `<p>` or `<tr>` directly inside `<table>`.
-Compare the two HTML skeletons in the message and change the outer element; [Markup the browser rewrites](#markup-the-browser-rewrites) lists the common cases.
+ある JSX テンプレートが、ブラウザーのパーサーが移動させる要素をネストしています。`<p>` の内側の `<div>` や、`<table>` の直下の `<tr>` などです。
+メッセージ内の2つの HTML 骨格を比べて外側の要素を変えてください。よくあるケースは [ブラウザーが書き換えるマークアップ](#markup-the-browser-rewrites) に挙げています。
 
-### The cart shows empty, then fills in
+### カートが空で表示され、後で埋まる
 
-The data lives in the browser, in `localStorage` or in memory, so the server renders the empty seed and the browser replaces it after hydration.
-Either accept the first frame or move the data behind a cookie or a session so the server function can return it; see [Data the server does not have](#data-the-server-does-not-have).
+データはブラウザーの `localStorage` やメモリに置かれているので、サーバーは空の初期値をレンダリングし、ブラウザーがハイドレーション後に置き換えます。
+最初のフレームを許容するか、サーバー関数が返せるようデータを Cookie かセッションの背後へ移してください。[サーバーが持っていないデータ](#data-the-server-does-not-have) を参照してください。
 
-### A `<label>` points at a different id than its `<input>`
+### `<label>` がその `<input>` と異なる id を指す
 
-The id came from a counter or `Math.random()`, so the server and the browser generated different strings.
-Use `createUniqueId`, which derives the id from the owner tree on both sides.
+id がカウンターや `Math.random()` から来ているため、サーバーとブラウザーが別の文字列を生成しました。
+両側でオーナーツリーから id を導く `createUniqueId` を使ってください。
 
-## Recap
+## まとめ
 
-- The server runs module scope once per process, the component body once per request, and every compute function; it never runs an effect function or an `onSettled` callback.
-- Put browser-only work in an effect function or `onSettled`; use `isServer` for helpers that have no owner, and `clientOnly` for a component that cannot be made safe.
-- `isServer` prevents the crash and does not make the two renders agree; keep it out of JSX that decides which elements exist.
-- Compute `Math.random()`, `Date.now()`, and other per-run values once, on the server, and pass the result as data.
-- Use `createUniqueId` for ids that appear in both a `for` attribute and an `id` attribute.
-- Render the value the server has, then update from the browser after hydration; or move the data to a cookie or session so the server has it.
-- Nest elements the way the browser's parser will keep them; the compiler catches invalid nesting inside one template and not across components.
-- Read a hydration warning by the check it names: a structure mismatch is a walk inside a template, a key miss is an element the server never rendered, an unclaimed node is one the browser never rendered.
+- サーバーはモジュールスコープをプロセスごとに1回、コンポーネント本体をリクエストごとに1回、そしてすべての計算関数を実行します。エフェクト関数と `onSettled` コールバックは決して実行しません。
+- ブラウザー専用の処理はエフェクト関数か `onSettled` に入れてください。オーナーを持たないヘルパーには `isServer`、安全にできないコンポーネントには `clientOnly` を使います。
+- `isServer` はクラッシュを防ぎますが、2つのレンダーを一致させはしません。どの要素が存在するかを決める JSX には入れないでください。
+- `Math.random()`、`Date.now()` などの実行ごとに変わる値はサーバーで1回だけ計算し、結果をデータとして渡してください。
+- `for` 属性と `id` 属性の両方に現れる id には `createUniqueId` を使ってください。
+- サーバーが持つ値をレンダリングしてからハイドレーション後にブラウザーで更新するか、サーバーが持てるようデータを Cookie かセッションへ移してください。
+- ブラウザーのパーサーが維持する形で要素をネストしてください。コンパイラが捕捉するのは1つのテンプレート内の不正なネストで、コンポーネントをまたぐものは捕捉しません。
+- ハイドレーション警告は、その示すチェックで読み解きます。構造不一致はテンプレート内の探索、キーミスはサーバーがレンダリングしなかった要素、未引き取りノードはブラウザーがレンダリングしなかった要素です。
 
-## Next steps
+## 次のステップ
 
-- [Rendering and SSR](/concepts/rendering-and-ssr): the `render`, `hydrate`, and `renderToStream` calls, streaming with `Loading` boundaries, and `HydrationScript`.
-- [Integrate non-Solid code](/guides/integrate-non-solid-code): `clientOnly`, dynamic imports in `onSettled`, and refs for libraries that own their own DOM.
-- [Choose a rendering mode](/guides/choose-a-rendering-mode): whether the storefront needs a server at all, and what each mode asks of the code.
-- [Protected routes](/guides/protected-routes): the account area, where the server's view of the signed-in user decides what renders.
+- [レンダリングと SSR](/concepts/rendering-and-ssr): `render`、`hydrate`、`renderToStream` の呼び出し、`Loading` バウンダリによるストリーミング、`HydrationScript`。
+- [Solid 以外のコードを統合する](/guides/integrate-non-solid-code): `clientOnly`、`onSettled` 内の動的インポート、自分の DOM を所有するライブラリのための ref。
+- [レンダリングモードを選ぶ](/guides/choose-a-rendering-mode): ストアフロントにそもそもサーバーが必要かどうか、そして各モードがコードに求めるもの。
+- [保護されたルート](/guides/protected-routes): サーバーが見るサインイン済みユーザーが何をレンダリングするかを決める、アカウント領域。
