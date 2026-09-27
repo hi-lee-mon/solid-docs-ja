@@ -1,30 +1,30 @@
 ---
-title: "Components and JSX"
+title: "コンポーネントと JSX"
 version: "2.0"
-description: "Components as functions that run once: props, children, control flow, refs, and the JSX rules that follow from that."
+description: "一度だけ実行される関数としてのコンポーネント: props、children、制御フロー、ref、そしてそこから導かれる JSX のルール。"
 ---
 
-A Solid component is a function that runs once.
-It sets up state, returns JSX, and is not called again for the life of the component.
-If you come from a framework where components re-render, this is the fact to hold on to while reading this page: every rule about props, children, and control flow below exists because the function body will not run a second time.
+Solid のコンポーネントは一度だけ実行される関数です。
+状態をセットアップして JSX を返し、そのコンポーネントの生存期間中に再び呼び出されることはありません。
+コンポーネントが再レンダーされるフレームワークから来た場合、このページを読む間ずっと心に留めておくべき事実がこれです: 以下の props・children・制御フローに関するすべてのルールは、関数本体が二度目に実行されないために存在します。
 
-The [Reactivity](/concepts/reactivity) page explains how the JSX inside a component keeps updating after the function has returned.
-This page covers the rest of what a component does: receiving props, handling events, reaching the DOM, rendering lists and conditions, and composing with other components.
-The examples continue the shopping cart from that page.
+[リアクティビティ](/concepts/reactivity)のページでは、コンポーネント内の JSX が関数の return 後も更新され続ける仕組みを説明しています。
+このページではコンポーネントが行う残りの部分を扱います: props の受け取り、イベントの処理、DOM への到達、リストや条件のレンダリング、他のコンポーネントとの合成です。
+例はあのページのショッピングカートを引き続き使います。
 
-## How JSX executes
+## JSX の実行のしくみ
 
-JSX keeps element structure and JavaScript expressions in the same source.
-Use curly braces to place an expression inside an element.
-Lowercase JSX names describe native elements, while names that begin with a capital letter refer to components.
+JSX は要素の構造と JavaScript の式を同じソース内に保持します。
+要素の内部に式を置くには波括弧を使います。
+小文字で始まる JSX の名前はネイティブ要素を表し、大文字で始まる名前はコンポーネントを参照します。
 
-Solid compiles JSX into renderer operations.
-In a browser build, those operations create or claim DOM nodes and connect reactive expressions to them.
-In a server build, the same JSX source compiles to server-rendering operations.
-There is no virtual DOM value that Solid repeatedly rebuilds and compares.
+Solid は JSX をレンダラー操作にコンパイルします。
+ブラウザービルドでは、それらの操作が DOM ノードを作成または引き受け、リアクティブな式をそれらに接続します。
+サーバービルドでは、同じ JSX ソースがサーバーレンダリング操作にコンパイルされます。
+Solid が繰り返し再構築して比較するような仮想 DOM の値は存在しません。
 
-The compiled code calls a component function once, through `createComponent`, and it runs the function untracked so reactive reads in the body do not subscribe the parent.
-Each JSX expression the component returns is its own tracking scope with its own dependencies.
+コンパイルされたコードは `createComponent` を通してコンポーネント関数を一度だけ呼び出し、その関数は追跡されない（untracked）状態で実行されるため、本体内のリアクティブな読み取りが親を購読させることはありません。
+コンポーネントが返す各 JSX 式は、それぞれ独自の依存関係を持つ独立した追跡スコープになります。
 
 ```tsx
 import { createSignal } from "solid-js";
@@ -40,13 +40,13 @@ function LineItem() {
 }
 ```
 
-`LineItem` runs once and returns a button.
-The expression `{quantity()}` is tracked, so the text updates on every click; the function around it does not run again.
+`LineItem` は一度だけ実行されてボタンを返します。
+式 `{quantity()}` は追跡されるため、クリックごとにテキストが更新されます。それを囲む関数が再び実行されることはありません。
 
 ## Props
 
-Parents pass data to children through JSX attributes, and the child receives them as one `props` object.
-Here a cart passes each line item its product:
+親は JSX 属性を通して子にデータを渡し、子はそれらを1つの `props` オブジェクトとして受け取ります。
+ここではカートが各明細行にその商品を渡しています:
 
 ```tsx
 type Product = { id: string; name: string; price: number };
@@ -73,15 +73,15 @@ function Cart() {
 }
 ```
 
-`quantity={quantity()}` looks like it reads the signal once, when `Cart` runs.
-It does not.
-The compiler turns a dynamic attribute into a getter on the props object, so the read of `quantity()` happens when `LineItem` reads `props.quantity`, inside its JSX, in a tracking scope.
-That is why `props.quantity` in the child updates when the parent's signal changes, even though neither function runs again.
+`quantity={quantity()}` は、`Cart` の実行時にシグナルを一度だけ読み取るように見えます。
+実際は違います。
+コンパイラーは動的な属性を props オブジェクト上のゲッターに変換するため、`quantity()` の読み取りは `LineItem` が `props.quantity` を読み取るとき、その JSX 内部の追跡スコープで行われます。
+これが、どちらの関数も再実行されないにもかかわらず、親のシグナルが変わると子の `props.quantity` が更新される理由です。
 
-This works only as long as the read stays on the props object.
+これが機能するのは、読み取りが props オブジェクト上に留まっている間だけです。
 
-:::pitfall[Destructuring props reads them once]
-The shortcut that works on a plain object is the one that breaks here:
+:::pitfall[props の分割代入は一度しか読み取らない]
+プレーンなオブジェクトで有効なショートカットが、ここでは破綻します:
 
 ```tsx
 // Avoid: both read props.quantity in the component body, once
@@ -100,11 +100,11 @@ function LineItem(props: LineItemProps) {
 }
 ```
 
-Change the quantity in the parent and the `Avoid` versions keep showing the first value; development warns with `[STRICT_READ_UNTRACKED]` and the component name.
-Keep `props` intact and read `props.quantity` inside the JSX.
+親で数量を変更しても `Avoid` 側のバージョンは最初の値を表示し続け、開発環境ではコンポーネント名とともに `[STRICT_READ_UNTRACKED]` の警告が出ます。
+`props` をそのまま保ち、JSX の内部で `props.quantity` を読み取ってください。
 :::
 
-When a derived value from props needs its own identity, wrap it in `createMemo`:
+props からの派生値に独自の同一性が必要なときは、`createMemo` でラップします:
 
 ```tsx
 import { createMemo } from "solid-js";
@@ -119,8 +119,8 @@ function LineItem(props: { product: Product; quantity: number }) {
 }
 ```
 
-:::deep-dive[What the compiler does with a dynamic prop]
-For `<LineItem product={{ id: "mug", name: "Mug", price: 12 }} quantity={quantity()} />`, the compiler emits a call in this shape:
+:::deep-dive[コンパイラーが動的な prop に対して行うこと]
+`<LineItem product={{ id: "mug", name: "Mug", price: 12 }} quantity={quantity()} />` に対して、コンパイラーは次の形の呼び出しを出力します:
 
 ```js
 createComponent(LineItem, {
@@ -131,22 +131,22 @@ createComponent(LineItem, {
 });
 ```
 
-A static value becomes a plain property.
-An expression that could change becomes a getter, so `quantity()` runs each time the child reads `props.quantity`, in whatever tracking scope that read happens.
-Destructuring calls the getter once in the component body; reading `props.quantity` inside JSX calls it inside a tracking scope.
+静的な値はプレーンなプロパティになります。
+変化し得る式はゲッターになるため、`quantity()` は子が `props.quantity` を読み取るたびに、その読み取りが行われた追跡スコープ内で実行されます。
+分割代入はコンポーネント本体でゲッターを一度だけ呼び出します。JSX 内で `props.quantity` を読み取れば、追跡スコープ内で呼び出されます。
 :::
 
-Props are read-only from the child's side.
-When a child needs to change a value, the parent passes a function as a prop and the child calls it from an event handler, as `onSave` does in the next section.
-When a child needs a local, editable copy of a prop, see [Use a writable derivation for a local override](/guides/avoid-unnecessary-effects#use-a-writable-derivation-for-a-local-override).
+props は子側からは読み取り専用です。
+子が値を変更する必要があるときは、親が prop として関数を渡し、子はイベントハンドラーからそれを呼び出します（次のセクションの `onSave` がそうです）。
+prop のローカルな編集可能なコピーが必要なときは、[ローカルな上書きに書き込み可能な派生値を使う](/guides/avoid-unnecessary-effects#use-a-writable-derivation-for-a-local-override)を参照してください。
 
-See the [`Component`, `ParentProps`, and `FlowProps` types](/reference/solid-js/types/component-types) for typing component contracts.
+コンポーネントの契約の型付けについては、[`Component`、`ParentProps`、`FlowProps` の型](/reference/solid-js/types/component-types)を参照してください。
 
-## Handling events
+## イベントの処理
 
-Pass a function to a camelCase event prop such as `onClick` or `onInput`.
-Solid delegates supported events through the owning render or hydration root.
-The handler runs when the browser dispatches the event, so reactive reads inside the handler use current values.
+`onClick` や `onInput` のような camelCase のイベント prop に関数を渡します。
+Solid は対応するイベントを、所有するレンダーまたはハイドレーションのルートを通してデリゲーションします。
+ハンドラーはブラウザがイベントをディスパッチしたときに実行されるため、ハンドラー内のリアクティブな読み取りは最新の値を使います。
 
 ```tsx
 function SaveButton(props: { onSave: () => void }) {
@@ -158,13 +158,13 @@ function SaveButton(props: { onSave: () => void }) {
 }
 ```
 
-Use a `ref` directive with `addEventListener` when you need native listener options such as capture or passive handling.
+キャプチャやパッシブ処理のようなネイティブのリスナーオプションが必要なときは、`ref` ディレクティブと `addEventListener` を使います。
 
-## Refs and directives
+## ref とディレクティブ
 
-A `ref` callback receives an element after Solid creates it.
-Use the callback to keep an element reference or apply behavior that needs the DOM node.
-[Integrate non-Solid code](/guides/integrate-non-solid-code) applies this to a chart, a map, and a web component.
+`ref` コールバックは、Solid が要素を作成した後にその要素を受け取ります。
+コールバックを使って要素への参照を保持したり、DOM ノードを必要とする動作を適用したりします。
+[非 Solid コードの統合](/guides/integrate-non-solid-code)では、これをチャート・マップ・Web コンポーネントに適用しています。
 
 ```tsx
 function SearchField() {
@@ -181,12 +181,12 @@ function SearchField() {
 }
 ```
 
-A directive is a function you pass to `ref`; there is no separate directive syntax.
-A directive factory creates owned reactive primitives during component setup and returns the callback that applies the directive to an element.
+ディレクティブは `ref` に渡す関数です。独立したディレクティブ構文はありません。
+ディレクティブファクトリーはコンポーネントのセットアップ時にオーナーを持つリアクティブプリミティブを作成し、要素にディレクティブを適用するコールバックを返します。
 
-Ref callbacks run untracked and without an owner.
-Do not create effects or register cleanup inside the returned callback.
-Create them in the factory, where they belong to the component owner.
+ref コールバックは追跡されず、オーナーも持たない状態で実行されます。
+返されたコールバックの内部でエフェクトを作成したりクリーンアップを登録したりしないでください。
+それらはコンポーネントのオーナーに属するファクトリー内で作成します。
 
 ```tsx
 import { onSettled } from "solid-js";
@@ -212,11 +212,11 @@ function listen(
 }
 ```
 
-The factory registers setup and cleanup while it has an owner.
-The returned callback only stores the element for the settled work.
+ファクトリーはオーナーを持つ間にセットアップとクリーンアップを登録します。
+返されるコールバックは、確定時の処理のために要素を保存するだけです。
 
-The `ref` prop also accepts an array.
-Solid recursively flattens the array and calls each callback in order, so separate directives can share one element.
+`ref` prop は配列も受け付けます。
+Solid は配列を再帰的に平坦化して各コールバックを順に呼び出すため、個別のディレクティブが1つの要素を共有できます。
 
 ```tsx
 function autofocus(element: HTMLInputElement) {
@@ -244,14 +244,14 @@ function SearchField(props: { onInput: EventListener }) {
 }
 ```
 
-Use a ref array to compose element access, reusable directives, and third-party integrations without creating one wrapper callback.
-Ref callback return values are ignored; register cleanup through an owned primitive such as `onSettled`.
-See the [`ref` reference](/reference/solid-web/jsx-properties/ref) for its accepted values and callback behavior.
+ref 配列を使うと、要素アクセス・再利用可能なディレクティブ・サードパーティ統合を、1つのラッパーコールバックを作らずに合成できます。
+ref コールバックの戻り値は無視されます。クリーンアップは `onSettled` などのオーナーを持つプリミティブを通して登録してください。
+受け付ける値とコールバックの動作については [`ref` リファレンス](/reference/solid-web/jsx-properties/ref)を参照してください。
 
-## Classes
+## クラス
 
-Use the `class` prop for static and conditional class names.
-It accepts strings, objects, and nested arrays:
+静的・条件付きのクラス名には `class` prop を使います。
+文字列・オブジェクト・ネストした配列を受け付けます:
 
 ```tsx
 function SaveButton(props: {
@@ -276,21 +276,21 @@ function SaveButton(props: {
 }
 ```
 
-- A string supplies the complete class value or one always-present array entry.
-- An object adds each key whose value is truthy.
-  A key can contain several space-separated class names.
-- An array combines strings, objects, and other arrays.
+- 文字列は完全なクラス値、または常に存在する配列要素を1つ提供します。
+- オブジェクトは値が truthy な各キーを追加します。
+  キーにはスペース区切りで複数のクラス名を含められます。
+- 配列は文字列・オブジェクト・他の配列を組み合わせます。
 
-Put conditional names in an object instead of constructing a string with concatenation, `filter(Boolean)`, or `join`.
-Solid can then add and remove the affected class tokens directly.
-See the [`class` reference](/reference/solid-web/jsx-properties/class) for each supported value form.
+条件付きのクラス名は、連結や `filter(Boolean)`、`join` で文字列を組み立てるのではなく、オブジェクトに入れてください。
+そうすれば Solid は影響を受けるクラストークンを直接追加・削除できます。
+サポートされる各値の形式は [`class` リファレンス](/reference/solid-web/jsx-properties/class)を参照してください。
 
-## Children and composition
+## children と合成
 
-A component accepts children only when its props type includes a `children` property.
-Use `ParentProps` for optional element children or write a specific children type for a render callback.
+コンポーネントが children を受け取れるのは、その props 型に `children` プロパティが含まれる場合だけです。
+任意の要素 children には `ParentProps` を使うか、レンダーコールバック用の具体的な children 型を書いてください。
 
-Most wrapper components can render `props.children` directly.
+ほとんどのラッパーコンポーネントは `props.children` をそのままレンダーできます。
 
 ```tsx
 import type { ParentProps } from "solid-js";
@@ -305,8 +305,8 @@ function Panel(props: ParentProps<{ title: string }>) {
 }
 ```
 
-Use the [`children` helper](/reference/solid-js/components-context/children) when a component must resolve, inspect, or iterate over its children.
-It returns an accessor and adds `toArray()` for iteration.
+コンポーネントが children を解決・検査・反復する必要があるときは、[`children` ヘルパー](/reference/solid-js/components-context/children)を使います。
+これはアクセサーを返し、反復用の `toArray()` を追加します。
 
 ```tsx
 import { children, type ParentProps } from "solid-js";
@@ -317,18 +317,18 @@ function Stack(props: ParentProps) {
 }
 ```
 
-Composition can also use a function child when the parent needs to provide a value to the nested JSX.
-The control-flow components use this pattern for narrowed values and list rows.
+親がネストされた JSX に値を提供する必要がある場合、合成に関数の子を使うこともできます。
+制御フローコンポーネントは、絞り込まれた値やリスト行にこのパターンを使います。
 
-## Context
+## コンテキスト
 
-Context passes a value through a component subtree without forwarding it through every intermediate component.
-Use it when a value belongs to one subtree and several descendants need that value, including application-wide state: a provider at the root of `App` reaches every component.
-Prefer this over a module-scope signal or store.
-Module-scope state has no owner, and on the server one module instance is shared across requests; a context value is created per app, or per request.
-[Share state between components](/concepts/reactivity#share-state-between-components) shows the provider plus `useX` primitive pattern, and [State management](/guides/state-management#share-with-context) covers what to put in `value` and when a default is appropriate.
-[`createContext`](/reference/solid-js/components-context/create-context) returns a context that is also its provider component.
-[`useContext`](/reference/solid-js/components-context/use-context) reads the value associated with the current owner.
+コンテキストは、中間のコンポーネントすべてに転送せずに、コンポーネントのサブツリーへ値を渡します。
+値がある1つのサブツリーに属し、複数の子孫がその値を必要とするとき（アプリケーション全体の状態を含む）に使います: `App` のルートにあるプロバイダーはすべてのコンポーネントに届きます。
+モジュールスコープのシグナルやストアよりもこちらを推奨します。
+モジュールスコープの状態はオーナーを持たず、サーバーでは1つのモジュールインスタンスがリクエスト間で共有されます。コンテキスト値はアプリごと、またはリクエストごとに作成されます。
+[コンポーネント間での状態共有](/concepts/reactivity#share-state-between-components)ではプロバイダーと `useX` プリミティブのパターンを示し、[状態管理](/guides/state-management#share-with-context)では `value` に何を入れるか、デフォルトが適切なのはいつかを扱っています。
+[`createContext`](/reference/solid-js/components-context/create-context)はプロバイダーコンポーネントでもあるコンテキストを返します。
+[`useContext`](/reference/solid-js/components-context/use-context)は現在のオーナーに関連付けられた値を読み取ります。
 
 ```tsx
 import { createContext, useContext, type ParentProps } from "solid-js";
@@ -347,15 +347,15 @@ function ThemeButton() {
 }
 ```
 
-When a context has a default value, `useContext` returns that value outside a matching provider.
-When it has no default, reading it outside a matching provider throws `ContextNotFoundError`.
-Providers create a scoped owner, so nested providers can replace a value for their own descendants.
+コンテキストにデフォルト値がある場合、`useContext` は対応するプロバイダーの外側でその値を返します。
+デフォルトがない場合、対応するプロバイダーの外で読み取ると `ContextNotFoundError` をスローします。
+プロバイダーはスコープ付きのオーナーを作成するため、ネストしたプロバイダーは自身の子孫に対して値を置き換えられます。
 
-## Rendering lists
+## リストのレンダリング
 
-Use [`For`](/reference/solid-js/components-jsx/for) when rows come from an array.
-Its default keyed mode reuses the mapped row for an item with the same identity.
-The callback receives the raw item and a reactive index accessor.
+行が配列から来る場合は [`For`](/reference/solid-js/components-jsx/for)を使います。
+デフォルトのキー付きモードでは、同一の同一性を持つアイテムに対してマップされた行を再利用します。
+コールバックは生のアイテムとリアクティブなインデックスアクセサーを受け取ります。
 
 ```tsx
 import { For, createSignal } from "solid-js";
@@ -382,16 +382,16 @@ function TodoList() {
 }
 ```
 
-Set `keyed={false}` for position-based mapping.
-That form receives an item accessor and a stable numeric index.
-Pass a key function when identity should come from part of each item; that form provides accessors for both the item and index.
+位置ベースのマッピングには `keyed={false}` を設定します。
+その形式ではアイテムアクセサーと安定した数値インデックスを受け取ります。
+同一性を各アイテムの一部から取るべき場合はキー関数を渡します。その形式ではアイテムとインデックスの両方のアクセサーを提供します。
 
-Use [`Repeat`](/reference/solid-js/components-jsx/repeat) for positional rendering over a store.
-`Repeat` creates rows from a numeric range instead of diffing an array or item identities.
-Each row reads its store position directly, so a store update can notify only the expressions that read the changed properties.
+ストア上の位置ベースのレンダリングには [`Repeat`](/reference/solid-js/components-jsx/repeat)を使います。
+`Repeat` は配列やアイテムの同一性を差分比較するのではなく、数値範囲から行を作成します。
+各行はストア内の自身の位置を直接読み取るため、ストアの更新は変更されたプロパティを読んでいる式だけに通知できます。
 
-Set `from` and `count` to render a sliding window without creating a sliced array.
-When the window moves, `Repeat` preserves rows whose indexes remain in range, disposes rows that leave it, and creates rows for the new indexes.
+`from` と `count` を設定すると、スライスした配列を作らずにスライディングウィンドウをレンダーできます。
+ウィンドウが移動すると、`Repeat` は範囲内に留まるインデックスの行を保持し、範囲を出た行を破棄し、新しいインデックスの行を作成します。
 
 ```tsx
 import { Repeat, createSignal, createStore } from "solid-js";
@@ -425,12 +425,12 @@ function ActivityLog() {
 }
 ```
 
-The [Lists guide](/guides/lists) covers editing, filtering, selection, and keeping row identity across server refetches.
+[リストのガイド](/guides/lists)では、編集・フィルタリング・選択・サーバー再取得をまたいだ行の同一性の維持を扱っています。
 
-## Conditional content
+## 条件付きコンテンツ
 
-[`Show`](/reference/solid-js/components-jsx/show) renders its children when `when` is truthy and renders `fallback` otherwise.
-Its default function-child form receives an accessor for the narrowed value and preserves the child while `when` remains truthy.
+[`Show`](/reference/solid-js/components-jsx/show)は `when` が truthy のとき children をレンダーし、それ以外では `fallback` をレンダーします。
+デフォルトの関数の子の形式では、絞り込まれた値のアクセサーを受け取り、`when` が truthy の間は子を保持します。
 
 ```tsx
 import { Show, createSignal } from "solid-js";
@@ -448,11 +448,11 @@ function Account() {
 }
 ```
 
-With `keyed`, the callback receives the raw narrowed value and the child remounts when that value changes identity.
+`keyed` を付けると、コールバックは生の絞り込まれた値を受け取り、その値の同一性が変わると子が再マウントされます。
 
-Use [`Switch` and `Match`](/reference/solid-js/components-jsx/switch-and-match) when several conditions are mutually exclusive.
-`Switch` renders the first truthy `Match`, or its fallback when none match.
-Function children follow the same keyed and non-keyed value rules as `Show`.
+複数の条件が相互に排他的な場合は [`Switch` と `Match`](/reference/solid-js/components-jsx/switch-and-match)を使います。
+`Switch` は最初に truthy となった `Match` をレンダーし、どれも一致しなければフォールバックをレンダーします。
+関数の子は `Show` と同じキー付き・非キー付きの値のルールに従います。
 
 ```tsx
 import { Match, Switch } from "solid-js";
@@ -471,11 +471,11 @@ function Status(props: { code: number }) {
 }
 ```
 
-## Dynamic components
+## 動的コンポーネント
 
-Import `dynamic` from `@solidjs/web`.
-`dynamic()` is the canonical API for selecting a component or native element from a reactive source.
-It returns a stable component reference that forwards props and children.
+`dynamic` は `@solidjs/web` からインポートします。
+`dynamic()` は、リアクティブなソースからコンポーネントやネイティブ要素を選択するための標準 API です。
+props と children を転送する安定したコンポーネント参照を返します。
 
 ```tsx
 import { createSignal, type Component } from "solid-js";
@@ -503,17 +503,17 @@ export function Preview() {
 }
 ```
 
-The source may also resolve to a native tag name or an async component.
-See the [`dynamic()` reference](/reference/solid-web/components/dynamic).
+ソースはネイティブのタグ名や非同期コンポーネントに解決されることもあります。
+[`dynamic()` リファレンス](/reference/solid-web/components/dynamic)を参照してください。
 
-## Try it: remove a line from the cart
+## 試してみよう: カートから1行を削除する
 
-Take the `Cart` and `LineItem` components from the [Props](#props) section and make the cart hold several items in a signal.
-Render one `LineItem` per item with `For`, add a **Remove** button to each row, and have the click remove that item from the cart.
+[Props](#props)セクションの `Cart` と `LineItem` コンポーネントを取り上げ、カートが複数のアイテムをシグナルに保持するようにします。
+`For` でアイテムごとに1つの `LineItem` をレンダーし、各行に **Remove** ボタンを追加して、クリックでそのアイテムをカートから削除するようにしてください。
 
-Decide first which component owns the items and how the child tells the parent which item to remove.
+まず、どのコンポーネントがアイテムを所有するか、子がどうやって削除するアイテムを親に伝えるかを決めてください。
 
-:::solution[Remove a line from the cart]
+:::solution[カートから1行を削除する]
 
 ```tsx
 import { For, createSignal } from "solid-js";
@@ -557,53 +557,53 @@ function Cart() {
 }
 ```
 
-`Cart` owns the list, so `Cart` is the only place that writes it.
-`LineItem` gets a function prop and calls it with its own id; it never touches the list.
-`For` keys rows by the line object, so removing the T-shirt disposes that one row and leaves the Mug row untouched.
-When the last line goes, the `fallback` renders.
+`Cart` がリストを所有するため、書き込むのは `Cart` だけです。
+`LineItem` は関数 prop を受け取り、自身の id を渡して呼び出します。リストには一切触れません。
+`For` は行を line オブジェクトでキー付けするため、T シャツを削除するとその1行だけが破棄され、マグカップの行は無傷のままです。
+最後の行がなくなると `fallback` がレンダーされます。
 :::
 
-## Common problems
+## よくある問題
 
-### A child does not update when the parent's signal changes
+### 親のシグナルが変わっても子が更新されない
 
-The child read the prop in its body or destructured its parameters.
-Read `props.name` inside the JSX instead.
-See [Props](#props).
+子が本体で prop を読み取ったか、パラメーターを分割代入したためです。
+代わりに JSX の内部で `props.name` を読み取ってください。
+[Props](#props)を参照。
 
-### A list re-creates every row on each change
+### リストが変更のたびにすべての行を作り直す
 
-`For` reuses rows by item identity.
-If each update produces new objects for the same rows, for example by mapping over a fetched array on every read, every row is new and `For` rebuilds them.
-Keep item identity stable, pass a key function that reads an `id`, or use a [store](/concepts/stores) so that changes land on the existing objects.
+`For` はアイテムの同一性で行を再利用します。
+各更新が同じ行に対して新しいオブジェクトを生成する場合（たとえば読み取りのたびに取得した配列をマップするなど）、すべての行が新規になり `For` がそれらを再構築します。
+アイテムの同一性を安定させるか、`id` を読み取るキー関数を渡すか、[ストア](/concepts/stores)を使って変更が既存のオブジェクトに届くようにしてください。
 
-### `Show` renders the fallback even though the value is set
+### 値がセットされているのに `Show` がフォールバックをレンダーする
 
-`when` is checked for truthiness.
-A value of `0` or an empty string is falsy and shows the fallback.
-Compare explicitly, for example `when={count() !== undefined}`, or use `Switch` and `Match` when there are several cases.
+`when` は truthy かどうかで判定されます。
+`0` や空文字列は falsy で、フォールバックが表示されます。
+`when={count() !== undefined}` のように明示的に比較するか、複数のケースがある場合は `Switch` と `Match` を使ってください。
 
-### An effect or `onCleanup` inside a `ref` callback never runs
+### `ref` コールバック内のエフェクトや `onCleanup` が一度も実行されない
 
-Ref callbacks run untracked and without an owner, so primitives created there are never disposed.
-Create the effect in a directive factory during component setup and return the callback that stores the element.
-See [Refs and directives](#refs-and-directives).
+ref コールバックは追跡されずオーナーも持たないため、そこで作成されたプリミティブは破棄されません。
+コンポーネントのセットアップ時にディレクティブファクトリー内でエフェクトを作成し、要素を保存するコールバックを返してください。
+[ref とディレクティブ](#refs-and-directives)を参照。
 
-## Recap
+## まとめ
 
-- A component runs once; the JSX expressions it returns keep running.
-- Keep `props` whole and read `props.name` where it is used; destructuring reads once.
-- A child changes shared state by calling a function the parent passed, never by writing to props.
-- Pass a `ref` callback, or an array of them, to reach the element; create effects and cleanup in the factory that returns the callback, not in the callback.
-- Put conditional class names in an object under `class` instead of building a string.
-- Use `For` for rows from an array and `Show`, `Switch`, and `Match` for conditions; keep item identity stable so rows are reused.
-- Provide shared state through context created inside a component, not from a module-scope signal.
+- コンポーネントは一度だけ実行されます。返された JSX 式は実行され続けます。
+- `props` はそのまま保ち、使う場所で `props.name` を読み取ります。分割代入は一度しか読み取りません。
+- 子が共有状態を変えるときは、親が渡した関数を呼び出します。props に書き込んではいけません。
+- 要素に到達するには `ref` コールバック（またはその配列）を渡します。エフェクトやクリーンアップはコールバック内ではなく、コールバックを返すファクトリー内で作成します。
+- 条件付きのクラス名は文字列を組み立てるのではなく、`class` の下のオブジェクトに入れてください。
+- 配列からの行には `For`、条件には `Show`・`Switch`・`Match` を使います。行が再利用されるようアイテムの同一性を安定させてください。
+- 共有状態はモジュールスコープのシグナルではなく、コンポーネント内で作成したコンテキストを通して提供してください。
 
-## Next steps
+## 次のステップ
 
-- [Stores](/concepts/stores) hold the cart itself: an array of items where each property is tracked on its own, so editing one quantity does not rebuild the row.
-- [Async reactivity](/concepts/async-reactivity) covers components that read data from a promise, why the current view stays on screen while the next one loads, and when `Loading` shows a fallback instead.
-- [Boundaries](/concepts/boundaries) explains `Loading`, `Errored`, and where to place them in the tree.
-- [Avoid unnecessary effects](/guides/avoid-unnecessary-effects) is the guide to read before adding an effect to a component.
-- [TypeScript](/guides/typescript) types the props, children, refs, and events on this page, including generic components.
-- [App structure](/building-apps/app-structure) shows where `App` and the document shell fit around the components you write.
+- [ストア](/concepts/stores)はカートそのものを保持します: 各プロパティが個別に追跡されるアイテムの配列で、1つの数量を編集しても行は再構築されません。
+- [非同期リアクティビティ](/concepts/async-reactivity)では、Promise からデータを読み取るコンポーネント、次のビューが読み込まれる間に現在のビューが画面に残る理由、`Loading` が代わりにフォールバックを表示するタイミングを扱います。
+- [バウンダリ](/concepts/boundaries)では `Loading`・`Errored` と、それらをツリーのどこに置くかを説明します。
+- [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects)は、コンポーネントにエフェクトを追加する前に読むべきガイドです。
+- [TypeScript](/guides/typescript)では、このページの props・children・ref・イベントの型付け（ジェネリックコンポーネントを含む）を扱います。
+- [アプリの構造](/building-apps/app-structure)では、書いたコンポーネントの周囲に `App` とドキュメントシェルがどう収まるかを示します。
