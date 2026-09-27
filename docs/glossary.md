@@ -1,539 +1,539 @@
 ---
-title: "Glossary"
+title: "用語集"
 version: "2.0"
-description: "Solid's own words, each defined in a few sentences and linked to the page that teaches it."
+description: "Solid 固有の言葉を、それぞれ数文で定義し、その概念を教えるページへリンクしています。"
 ---
 
-This page is for a term you met on another page and want the short version of.
-Each entry gives the meaning in a few sentences and links to the page that explains the idea in full, with its examples and its trade-offs.
-Where an idea goes by another name elsewhere, an "Also called" line gives that name so you can connect what you already know.
+このページは、別のページで出会った用語の短い説明が欲しいときのためのものです。
+各項目は数文で意味を説明し、その概念を例やトレードオフとともに詳しく解説するページへリンクしています。
+ある概念が別の場所で別の名前で呼ばれる場合は、「別名」の行にその名前を記載しているので、すでに知っているものと結び付けられます。
 
-## Reactivity
+## リアクティビティ
 
-### Batch
+### バッチ
 
-Writes to signals and stores are staged, and Solid applies all staged writes together in a microtask after the current code finishes, so a read on the next line still sees the old value.
-`flush()` applies the staged writes synchronously, which tests call after firing an event.
+シグナルとストアへの書き込みはステージングされ、現在のコードが終わった後のマイクロタスクで Solid がステージングされた書き込みをすべてまとめて適用するため、次の行での読み取りにはまだ古い値が見えます。
+`flush()` はステージングされた書き込みを同期的に適用します。テストではイベントを発火させた後にこれを呼びます。
 
-See [When updates land](/concepts/reactivity#when-updates-land).
+[更新が反映されるタイミング](/concepts/reactivity#when-updates-land)を参照してください。
 
-### Computation
+### 計算（computation）
 
-A scope that Solid re-runs when the reactive values it read change: a memo's function, an effect's compute function, or a JSX expression.
-A computation that returns a promise is still a computation, and its readers wait for the result.
+読み取ったリアクティブな値が変わると Solid が再実行するスコープです。メモの関数、エフェクトの計算関数、JSX 式などです。
+Promise を返す計算も計算であり、その読み取り側は結果を待ちます。
 
-See [Derived values](/concepts/reactivity#derived-values) and [A memo that returns a promise](/concepts/async-reactivity#a-memo-that-returns-a-promise).
+[派生値](/concepts/reactivity#derived-values)と [Promise を返すメモ](/concepts/async-reactivity#a-memo-that-returns-a-promise)を参照してください。
 
-### Custom primitive
+### カスタムプリミティブ
 
-A `createX` function you write that packages signals, memos, effects, and cleanup so several components can call it.
-It follows the same rules as a core primitive: call it in a component body or in another primitive, accept accessors, and return accessors.
+シグナル・メモ・エフェクト・クリーンアップをパッケージ化して、複数のコンポーネントから呼び出せるようにする、自分で書く `createX` 関数です。
+コアのプリミティブと同じルールに従います。コンポーネント本体や別のプリミティブの中で呼び出し、アクセサーを受け取り、アクセサーを返します。
 
-Also called: hook.
+別名: フック。
 
-See [A primitive is a function that runs inside an owner](/guides/custom-primitives#a-primitive-is-a-function-that-runs-inside-an-owner).
+[プリミティブはオーナーの内側で実行される関数](/guides/custom-primitives#a-primitive-is-a-function-that-runs-inside-an-owner)を参照してください。
 
-### Effect
+### エフェクト
 
-The primitive that moves data out of Solid into something Solid does not own, such as storage, the document title, or a chart library.
-`createEffect` takes a compute function, which runs in a tracking scope and returns a value, and an effect function, which receives that value, runs untracked after the update has landed, and may return a cleanup.
+ストレージ・ドキュメントのタイトル・チャートライブラリなど、Solid が所有しないものへデータを Solid から移すプリミティブです。
+`createEffect` は、追跡スコープ内で実行されて値を返す計算関数と、その値を受け取り、更新が反映された後に追跡されずに実行され、クリーンアップを返してもよいエフェクト関数を受け取ります。
 
-Also called: side effect.
+別名: 副作用。
 
-See [Effects](/concepts/reactivity#effects).
+[エフェクト](/concepts/reactivity#effects)を参照してください。
 
-### Memo
+### メモ
 
-A cached derived value.
-`createMemo` runs its function in a tracking scope, stores the result, and notifies readers only when the result changes, which makes it a useful boundary in a chain of derivations.
+キャッシュされた派生値です。
+`createMemo` は追跡スコープ内で関数を実行し、結果を保存し、結果が変わったときだけ読み取り側に通知します。そのため派生の連鎖における有用な境界になります。
 
-Also called: computed.
+別名: computed。
 
-See [Derived values](/concepts/reactivity#derived-values).
+[派生値](/concepts/reactivity#derived-values)を参照してください。
 
-### Owner
+### オーナー
 
-The scope that was running when a primitive was created, and that disposes it later.
-A component is an owner: when Solid removes it, every memo, effect, and cleanup it created is disposed with it, which is what ownership means; a primitive created in an event handler has no owner and is never cleaned up.
+プリミティブが作られたときに実行中だったスコープで、後でそれを破棄するものです。
+コンポーネントはオーナーです。Solid がコンポーネントを取り除くと、それが作ったすべてのメモ・エフェクト・クリーンアップが一緒に破棄されます。これがオーナーシップの意味です。イベントハンドラーの中で作られたプリミティブにはオーナーがなく、クリーンアップされることもありません。
 
-Also called: reactive context, reactive scope, which is how the runtime's warnings name it.
+別名: リアクティブコンテキスト、リアクティブスコープ。ランタイムの警告ではそのように呼ばれます。
 
-See [Ownership](/concepts/reactivity#ownership).
+[オーナーシップ](/concepts/reactivity#ownership)を参照してください。
 
-### Primitive
+### プリミティブ
 
-A function that serves as a building block of reactivity or behavior and, when it creates something that needs disposal, attaches it to the current owner; its name usually begins with `create` or `use`.
+リアクティビティや振る舞いの構成要素となる関数で、破棄が必要なものを作るときは現在のオーナーにそれを結び付けます。名前は通常 `create` または `use` で始まります。
 
-See [A primitive is a function that runs inside an owner](/guides/custom-primitives#a-primitive-is-a-function-that-runs-inside-an-owner).
+[プリミティブはオーナーの内側で実行される関数](/guides/custom-primitives#a-primitive-is-a-function-that-runs-inside-an-owner)を参照してください。
 
-### Reactive value
+### リアクティブな値
 
-Any value Solid can track: a signal, a memo, a store property, or a property of `props`.
-Reading one inside a tracking scope subscribes that scope; reading one anywhere else returns a one-time snapshot.
+Solid が追跡できるあらゆる値です。シグナル、メモ、ストアのプロパティ、`props` のプロパティなどです。
+追跡スコープの内側で読み取るとそのスコープが購読され、それ以外の場所で読み取ると1回限りのスナップショットが返ります。
 
-See [Signals](/concepts/reactivity#signals).
+[シグナル](/concepts/reactivity#signals)を参照してください。
 
-### Root
+### ルート（root）
 
-An owner created by hand with `createRoot`, which returns its disposer.
-Created where nothing is running it stands alone; created inside a component it belongs to that component and is disposed with it.
-It is for tests and integrations that run reactivity outside any component, and application code shares state through context instead.
+`createRoot` で手動で作るオーナーで、`createRoot` はその破棄関数を返します。
+何も実行されていない場所で作れば単独で存在し、コンポーネントの内側で作ればそのコンポーネントに属し、一緒に破棄されます。
+コンポーネントの外でリアクティビティを動かすテストや統合のためのもので、アプリケーションコードでは代わりにコンテキストを通じて状態を共有します。
 
-See [Roots](/concepts/reactivity#roots).
+[ルート](/concepts/reactivity#roots)を参照してください。
 
-### Signal
+### シグナル
 
-A container for one value that knows who reads it.
-`createSignal` returns a getter and a setter; a read inside a tracking scope subscribes that scope, and a write re-runs the subscribed scopes.
+誰が読んだかを知っている、1つの値のためのコンテナです。
+`createSignal` はゲッターとセッターを返します。追跡スコープ内での読み取りはそのスコープを購読させ、書き込みは購読しているスコープを再実行します。
 
-See [Signals](/concepts/reactivity#signals).
+[シグナル](/concepts/reactivity#signals)を参照してください。
 
-### Tracking scope
+### 追跡スコープ
 
-A part of the code where Solid records which reactive values are read: a JSX expression, a memo's function, or an effect's compute function.
-Each value read there becomes a dependency of the scope, and the component body is not a tracking scope, so a read there is a one-time snapshot.
+Solid がどのリアクティブな値が読まれたかを記録するコードの領域です。JSX 式、メモの関数、エフェクトの計算関数などです。
+そこで読まれた各値はそのスコープの依存関係になります。コンポーネント本体は追跡スコープではないので、そこでの読み取りは1回限りのスナップショットです。
 
-Also called: tracking context.
+別名: 追跡コンテキスト。
 
-See [Signals](/concepts/reactivity#signals).
+[シグナル](/concepts/reactivity#signals)を参照してください。
 
 ### untrack
 
-Reads a reactive value inside a tracking scope without subscribing to it, and without the development warning about an untracked read.
+追跡スコープの内側でリアクティブな値を、それを購読せずに読み取ります。追跡されない読み取りに関する開発時の警告も出しません。
 
-See [Signals](/concepts/reactivity#signals) and the [`untrack` reference](/reference/solid-js/reactivity/untrack).
+[シグナル](/concepts/reactivity#signals)と [`untrack` リファレンス](/reference/solid-js/reactivity/untrack)を参照してください。
 
-## Updates and async
+## 更新と非同期
 
-### Action
+### アクション
 
-A generator function wrapped in `action` from `solid-js` that runs a mutation as one transaction: each `yield` waits for its promise and then restores the transaction, so the write before the `yield` and the refresh after it belong to the same update, and a plain `await` would leave it.
-Solid Router has its own `action`, which adds a form URL, submissions, and revalidation on top of a server function.
+`solid-js` の `action` で包んだジェネレーター関数で、ミューテーションを1つのトランザクションとして実行します。各 `yield` は Promise を待ってからトランザクションを復元するので、`yield` の前の書き込みとその後のリフレッシュは同じ更新に属します。素の `await` ではその更新から外れます。
+Solid Router にも独自の `action` があり、サーバー関数の上にフォーム URL・サブミッション・再検証を追加します。
 
-See [Move the cart to the server](/concepts/mutations#move-the-cart-to-the-server) and [Mutate with actions](/routing/solid-router/data#mutate-with-actions).
+[カートをサーバーへ移す](/concepts/mutations#move-the-cart-to-the-server)と [アクションでミューテートする](/routing/solid-router/data#mutate-with-actions)を参照してください。
 
 ### affects
 
-Marks a source, a store, or one store property as pending while the surrounding action is in flight, without predicting its value, so readers of that data report `isPending`.
+周囲のアクションが進行中の間、ソース・ストア・ストアの1つのプロパティを、その値を予測せずに保留中としてマークします。そのデータの読み取り側は `isPending` を報告します。
 
-See [Mark data as changing](/concepts/mutations#mark-data-as-changing-affects).
+[データに変化中の印を付ける](/concepts/mutations#mark-data-as-changing-affects)を参照してください。
 
-### Held update
+### 保持された更新
 
-A write whose commit waits for async work after a previous answer exists.
-The current view stays on screen, other writes in the same update wait with it, and everything commits together when the work settles, so the page never shows a mix of old and new data.
+以前の答えがすでにある状態で、コミットが非同期の処理を待つ書き込みです。
+現在のビューは画面に残り、同じ更新の中の他の書き込みも一緒に待ち、処理が確定するとすべてがまとめてコミットされます。ページに新旧のデータが混在することはありません。
 
-Also called: transition.
+別名: トランジション。
 
-See [Settled view and in-flight work](/concepts/async-reactivity#settled-view-and-in-flight-work).
+[確定済みビューと処理中の処理](/concepts/async-reactivity#settled-view-and-in-flight-work)を参照してください。
 
 ### isPending
 
-A question about one expression: is a newer answer on the way for a value that already has one?
-It is `true` from the moment a write is held until everything downstream has settled, and it does not report the first load.
+1つの式についての問いです。すでに答えを持っている値に、より新しい答えが来る途中かどうか。
+書き込みが保持された瞬間から下流のすべてが確定するまで `true` になり、初回の読み込みは報告しません。
 
-See [Another answer is coming](/concepts/async-reactivity#another-answer-is-coming-ispending).
+[次の答えが来る途中](/concepts/async-reactivity#another-answer-is-coming-ispending)を参照してください。
 
 ### latest
 
-Reads the value an update is moving toward instead of the value it has committed.
-Put it on the control the user touched, such as a tab or a selected row, so the control moves at once while the content below it waits.
+更新がコミットした値ではなく、更新が向かっている値を読み取ります。
+タブや選択された行など、ユーザーが触れたコントロールに付けます。コントロールはすぐに切り替わり、その下のコンテンツは待ちます。
 
-See [Show the input now](/concepts/async-reactivity#show-the-input-now-latest).
+[入力を今すぐ表示する](/concepts/async-reactivity#show-the-input-now-latest)を参照してください。
 
-### Not ready
+### 準備未了（not ready）
 
-The status of an async value before its first answer arrives.
-A read of a not-ready value makes the reader wait and the nearest loading boundary renders its fallback; the runtime carries this status as `NotReadyError`, which boundaries handle so application code does not catch it.
+非同期の値に最初の答えが届く前の状態です。
+準備未了の値を読み取ると読み取り側は待たされ、最も近いローディングバウンダリがフォールバックをレンダリングします。ランタイムはこの状態を `NotReadyError` として運び、バウンダリがそれを処理するので、アプリケーションコードがキャッチすることはありません。
 
-See [A memo that returns a promise](/concepts/async-reactivity#a-memo-that-returns-a-promise) and the [`NotReadyError` reference](/reference/solid-js/advanced/interop-async/not-ready-error).
+[Promise を返すメモ](/concepts/async-reactivity#a-memo-that-returns-a-promise)と [`NotReadyError` リファレンス](/reference/solid-js/advanced/interop-async/not-ready-error)を参照してください。
 
-### Optimistic value
+### 楽観的な値
 
-The expected result of a mutation, shown before the server confirms it.
-A write made inside an action on a `createOptimisticStore` is an overlay on the durable value; Solid discards the overlay when the action settles, on success and on failure, so there is no rollback code.
+ミューテーションの期待される結果で、サーバーが確認する前に表示されます。
+`createOptimisticStore` への、アクション内での書き込みは永続的な値の上のオーバーレイです。アクションが確定すると、成功時も失敗時も Solid はオーバーレイを破棄するので、ロールバックのコードはありません。
 
-Also called: optimistic update.
+別名: 楽観的更新。
 
-See [Optimistic stores](/concepts/stores#optimistic-stores) and [Move the cart to the server](/concepts/mutations#move-the-cart-to-the-server).
+[楽観的ストア](/concepts/stores#optimistic-stores)と [カートをサーバーへ移す](/concepts/mutations#move-the-cart-to-the-server)を参照してください。
 
-### Pending
+### 保留中（pending）
 
-Work is in flight: a held update is pending until its async work settles, an action is pending until it resolves, and `affects` marks data as pending by declaration.
+処理が進行中であることを表します。保持された更新は非同期処理が確定するまで保留中であり、アクションは解決するまで保留中であり、`affects` は宣言によってデータを保留中としてマークします。
 
-See [Another answer is coming](/concepts/async-reactivity#another-answer-is-coming-ispending) and [Show that a row is saving](/concepts/mutations#show-that-a-row-is-saving).
+[次の答えが来る途中](/concepts/async-reactivity#another-answer-is-coming-ispending)と [保存中の行を表示する](/concepts/mutations#show-that-a-row-is-saving)を参照してください。
 
 ### refresh
 
-Asks an async source the same question again without changing its inputs; after a mutation, `refresh(items)` re-runs the derivation so the store reconciles against what the server has.
+入力を変えずに、非同期ソースへ同じ問いをもう一度投げます。ミューテーションの後、`refresh(items)` は派生を再実行し、ストアがサーバーの持つものとリコンサイルするようにします。
 
-See [Move the cart to the server](/concepts/mutations#move-the-cart-to-the-server).
+[カートをサーバーへ移す](/concepts/mutations#move-the-cart-to-the-server)を参照してください。
 
-### Revalidation
+### 再検証（revalidation）
 
-Marking cached reads as stale and re-running the ones that are being read.
-A server function returns `reload`, `respond`, or `redirect` with a `revalidate` option to name the keys; Solid Router matches them against its `query` cache when the action completes, and with no keys every query revalidates.
+キャッシュされた読み取りを古いものとしてマークし、実際に読まれているものを再実行することです。
+サーバー関数は `revalidate` オプションでキーを指定して `reload`、`respond`、`redirect` を返します。Solid Router はアクションの完了時にそれらを `query` キャッシュと照合し、キーがなければすべてのクエリが再検証されます。
 
-See [Revalidate](/routing/solid-router/data#revalidate) and [Request revalidation](/building-apps/server-functions/mutations-and-responses#request-revalidation).
+[再検証](/routing/solid-router/data#revalidate)と [再検証を要求する](/building-apps/server-functions/mutations-and-responses#request-revalidation)を参照してください。
 
-### Settled
+### 確定（settled）
 
-Async work has finished and its answer is the one the user can see.
-Once a value has settled, a change to its input is held rather than blanking the screen; `onSettled` runs a callback once the first render has settled; a router action's `.onSettled(hook)` is a different API that runs after each submission completes.
+非同期処理が終わり、その答えがユーザーに見えているものです。
+値がいったん確定すれば、その入力への変更は画面を空白にするのではなく保持されます。`onSettled` は最初のレンダーが確定した後にコールバックを1回実行します。ルーターアクションの `.onSettled(hook)` は別の API で、各サブミッションが完了するたびに実行されます。
 
-See [Settled view and in-flight work](/concepts/async-reactivity#settled-view-and-in-flight-work).
+[確定済みビューと処理中の処理](/concepts/async-reactivity#settled-view-and-in-flight-work)を参照してください。
 
-### Superseded
+### 破棄された実行（superseded）
 
-A run of an async computation that a newer run has replaced because an input changed again; Solid drops the answer to a superseded run, so there is no request counter and no `AbortController` to write.
+入力が再び変わったために、より新しい実行に置き換えられた非同期の計算の実行です。Solid は破棄された実行への答えを捨てるので、リクエストカウンターや `AbortController` を書く必要はありません。
 
-See [Put asynchronous work in a derivation](/guides/avoid-unnecessary-effects#put-asynchronous-work-in-a-derivation).
+[非同期の処理は派生に置く](/guides/avoid-unnecessary-effects#put-asynchronous-work-in-a-derivation)を参照してください。
 
-### Tentative and authoritative
+### 仮の値と正本（tentative / authoritative）
 
-A tentative value is an optimistic write inside an action: it shows immediately and is removed when the action settles.
-The authoritative value is the one the store derives from its source, which is what the page shows once the overlay is gone and what `until` reads.
+仮の値はアクション内での楽観的な書き込みです。すぐに表示され、アクションが確定すると取り除かれます。
+正本の値は、ストアがソースから導出する値です。オーバーレイが消えた後にページが表示するものであり、`until` が読み取るものです。
 
-Also called: durable value, for the authoritative side.
+別名: 正本側は durable value（永続的な値）。
 
-See [Optimistic stores](/concepts/stores#optimistic-stores) and [Wait for the server to echo the write](/concepts/mutations#wait-for-the-server-to-echo-the-write-until).
+[楽観的ストア](/concepts/stores#optimistic-stores)と [サーバーが書き込みをエコーするのを待つ](/concepts/mutations#wait-for-the-server-to-echo-the-write-until)を参照してください。
 
-### Transaction
+### トランザクション
 
-The unit an action runs in: its writes are held until the action settles, and the writes before and after a `yield` belong to the same update.
+アクションが実行される単位です。その書き込みはアクションが確定するまで保持され、`yield` の前後の書き込みは同じ更新に属します。
 
-See [Move the cart to the server](/concepts/mutations#move-the-cart-to-the-server).
+[カートをサーバーへ移す](/concepts/mutations#move-the-cart-to-the-server)を参照してください。
 
 ### until
 
-Holds an action open until a predicate over authoritative data becomes true, for transports where the confirmation arrives later on a live source instead of in the response.
+正本のデータに対する述語が真になるまでアクションを開いたままにします。確認がレスポンスではなくライブソース上で後から届くトランスポート向けです。
 
-See [Wait for the server to echo the write](/concepts/mutations#wait-for-the-server-to-echo-the-write-until).
+[サーバーが書き込みをエコーするのを待つ](/concepts/mutations#wait-for-the-server-to-echo-the-write-until)を参照してください。
 
-## Components and rendering
+## コンポーネントとレンダリング
 
-### Boundary
+### バウンダリ
 
-A component that decides how much of the page a pending or failed read affects by rendering a fallback, a placeholder or an error message, in place of its content.
-The nearest matching boundary handles status produced by reads in its own subtree, and controls placed outside it stay on screen in every state.
+保留中または失敗した読み取りがページのどの程度に影響するかを決めるコンポーネントで、コンテンツの代わりにフォールバック・プレースホルダー・エラーメッセージをレンダリングします。
+最も近い一致するバウンダリが、自身のサブツリー内の読み取りが生んだ状態を処理し、その外側に置かれたコントロールはどの状態でも画面に残ります。
 
-See [Boundaries](/concepts/boundaries).
+[バウンダリ](/concepts/boundaries)を参照してください。
 
-### Children
+### children
 
-The JSX a parent places between a component's tags, received as `props.children`; a component accepts children only when its props type includes a `children` property.
+親がコンポーネントのタグの間に置く JSX で、`props.children` として受け取られます。コンポーネントが children を受け付けるのは、その props の型に `children` プロパティが含まれるときだけです。
 
-Also called: function child, for a function passed as `children` and called by the parent.
+別名: function child。`children` として関数を渡し、親がそれを呼び出す形です。
 
-See [Children and composition](/concepts/components-and-jsx#children-and-composition).
+[children と合成](/concepts/components-and-jsx#children-and-composition)を参照してください。
 
-### Client rendering
+### クライアントレンダリング
 
-`render` mounts a tree into a DOM container in the browser and returns a disposer; the static-shell project shapes ship an empty document shell and render the whole app this way.
+`render` はブラウザーで DOM コンテナにツリーをマウントし、破棄関数を返します。静的シェルのプロジェクト形状は空のドキュメントシェルを配信し、アプリ全体をこの方法でレンダリングします。
 
-See [Client rendering](/concepts/rendering-and-ssr#client-rendering).
+[クライアントレンダリング](/concepts/rendering-and-ssr#client-rendering)を参照してください。
 
 ### clientOnly
 
-Wraps a component that cannot run on the server: the server renders its fallback and does not start the import, and the browser swaps the component in after the module has loaded and hydration has settled.
+サーバーで実行できないコンポーネントを包みます。サーバーはそのフォールバックをレンダリングしてインポートを開始せず、ブラウザーはモジュールが読み込まれハイドレーションが確定した後にコンポーネントを差し込みます。
 
-See [Server and client boundaries](/concepts/rendering-and-ssr#server-and-client-boundaries).
+[サーバーとクライアントのバウンダリ](/concepts/rendering-and-ssr#server-and-client-boundaries)を参照してください。
 
-### Component
+### コンポーネント
 
-A function that runs once: it sets up state, returns JSX, and is not called again, while the JSX expressions it returned keep updating on their own.
+一度だけ実行される関数です。状態をセットアップして JSX を返し、二度と呼ばれません。返された JSX 式はそれ自身で更新し続けます。
 
-See [How JSX executes](/concepts/components-and-jsx#how-jsx-executes).
+[JSX の実行のしくみ](/concepts/components-and-jsx#how-jsx-executes)を参照してください。
 
-### Context
+### コンテキスト
 
-Passes a value through a component subtree without forwarding it through every intermediate component.
-`createContext` returns a context that is also its provider; `useContext` reads the value for the current owner, and throws `ContextNotFoundError` outside a provider when the context has no default.
+中間のすべてのコンポーネントへ転送せずに、コンポーネントのサブツリーへ値を渡します。
+`createContext` はそれ自身がプロバイダーでもあるコンテキストを返します。`useContext` は現在のオーナーに対応する値を読み取り、コンテキストにデフォルトがないときにプロバイダーの外で呼ばれると `ContextNotFoundError` をスローします。
 
-See [Context](/concepts/components-and-jsx#context).
+[コンテキスト](/concepts/components-and-jsx#context)を参照してください。
 
-### Directive
+### ディレクティブ
 
-A function you pass to `ref`; there is no separate directive syntax.
-A directive factory creates owned primitives during component setup and returns the callback that applies the behavior to an element.
+`ref` に渡す関数です。独立したディレクティブの構文はありません。
+ディレクティブファクトリーはコンポーネントのセットアップ中にオーナー付きのプリミティブを作り、要素に振る舞いを適用するコールバックを返します。
 
-Also called: `use:` directive, custom directive.
+別名: `use:` ディレクティブ、カスタムディレクティブ。
 
-See [Refs and directives](/concepts/components-and-jsx#refs-and-directives).
+[ref とディレクティブ](/concepts/components-and-jsx#refs-and-directives)を参照してください。
 
-### Error boundary
+### エラーバウンダリ
 
-`Errored` catches an error thrown by a read or computation in its subtree, including a rejected async source, and renders its fallback in place of the content.
-The error is a status that clears when an input changes or a refresh succeeds; `reset` re-runs the failed sources.
+`Errored` はサブツリー内の読み取りや計算がスローしたエラー（reject された非同期ソースを含む）を捕捉し、コンテンツの代わりにフォールバックをレンダリングします。
+エラーは、入力が変わるかリフレッシュが成功するとクリアされる状態です。`reset` は失敗したソースを再実行します。
 
-See [Error boundaries](/concepts/boundaries#error-boundaries).
+[エラーバウンダリ](/concepts/boundaries#error-boundaries)を参照してください。
 
-### Hydration
+### ハイドレーション
 
-Attaching event handlers and reactive bindings to HTML the server already rendered, without recreating the nodes.
-Solid assigns a hydration key to each template root during server rendering so the client can claim the matching node, which is why the server and client must render the same initial structure.
+サーバーがレンダリング済みの HTML に、ノードを作り直さずにイベントハンドラーとリアクティブなバインディングを取り付けることです。
+Solid はサーバーレンダリング中に各テンプレートルートへハイドレーションキーを割り当て、クライアントが対応するノードを引き取れるようにします。これがサーバーとクライアントが同じ初期構造をレンダリングしなければならない理由です。
 
-See [Hydrating server HTML](/concepts/rendering-and-ssr#hydrating-server-html) and [Reading the hydration warnings](/guides/ssr-safe-code#reading-the-hydration-warnings).
+[サーバー HTML のハイドレーション](/concepts/rendering-and-ssr#hydrating-server-html)と [ハイドレーション警告を読む](/guides/ssr-safe-code#reading-the-hydration-warnings)を参照してください。
 
 ### isServer
 
-A build-time constant from `@solidjs/web`: `true` in the server build and `false` in the browser build, so a bundler removes the unreachable side.
+`@solidjs/web` からのビルド時定数です。サーバービルドでは `true`、ブラウザービルドでは `false` なので、バンドラーが到達不能な側を取り除きます。
 
-See [Server and client boundaries](/concepts/rendering-and-ssr#server-and-client-boundaries).
+[サーバーとクライアントのバウンダリ](/concepts/rendering-and-ssr#server-and-client-boundaries)を参照してください。
 
-### Loading boundary
+### ローディングバウンダリ
 
-`Loading` renders its fallback while an async value read in its subtree has not produced a first answer.
-Once it has shown content it keeps that content during later updates; the `on` prop names the value whose change should bring the fallback back, which happens only when nothing outside the boundary is waiting on the same change.
+`Loading` は、サブツリー内で読み取られた非同期の値が最初の答えを出していない間、フォールバックをレンダリングします。
+いったんコンテンツを表示した後は、以降の更新中もそのコンテンツを保持します。`on` prop はフォールバックを呼び戻すべき変更の対象となる値を指定します。それはバウンダリの外側で同じ変更を待っているものが何もないときにだけ起きます。
 
-Also called: `Suspense`.
+別名: `Suspense`。
 
-See [Loading boundaries](/concepts/boundaries#loading-boundaries).
+[`Loading` バウンダリ](/concepts/boundaries#loading-boundaries)を参照してください。
 
-### Portal
+### ポータル
 
-Renders its children into another element, `document.body` by default, while they stay in the component's reactive scope; the server renders nothing for a portal, and its children render in the browser after hydration settles.
+children を別の要素（デフォルトでは `document.body`）へレンダリングします。children はコンポーネントのリアクティブスコープに留まります。サーバーはポータルに対して何もレンダリングせず、その children はハイドレーションが確定した後にブラウザーでレンダリングされます。
 
-See [Render Solid into a foreign container](/guides/integrate-non-solid-code#render-solid-into-a-foreign-container).
+[Solid を外部のコンテナへレンダリングする](/guides/integrate-non-solid-code#render-solid-into-a-foreign-container)を参照してください。
 
-### Prerendering
+### プリレンダリング
 
-Server rendering that happens once, during `vite build`: a crawler renders each reachable page through the server build and writes the HTML, so the deployed site is static files with content as fresh as the last build.
+`vite build` の間に一度だけ行われるサーバーレンダリングです。クローラーがサーバービルドを通じて到達可能な各ページをレンダリングして HTML を書き出すので、デプロイされるサイトは静的ファイルになり、コンテンツの鮮度は最後のビルド時点のものです。
 
-Also called: static site generation, SSG.
+別名: 静的サイト生成（SSG）。
 
-See [Prerendered at build time](/guides/choose-a-rendering-mode#prerendered-at-build-time).
+[ビルド時のプリレンダリング](/guides/choose-a-rendering-mode#prerendered-at-build-time)を参照してください。
 
-### Props
+### props
 
-The one object a component receives.
-The compiler turns a dynamic attribute into a getter, so `props.quantity` is read where it is used, inside the child's JSX; destructuring reads it once and the child stops updating.
+コンポーネントが受け取る唯一のオブジェクトです。
+コンパイラは動的な属性をゲッターに変えるので、`props.quantity` は使われる場所、つまり子の JSX の内側で読み取られます。分割代入すると1回だけ読み取られ、子は更新を止めます。
 
-See [Props](/concepts/components-and-jsx#props).
+[Props](/concepts/components-and-jsx#props)を参照してください。
 
-### Reveal order
+### Reveal の順序
 
-The order in which sibling loading regions appear.
-`Reveal` coordinates the `Loading` boundaries created directly within it, each of which is a slot: `sequential` reveals slots in registration order, `together` releases them as a group, and `natural` lets each reveal on its own.
+兄弟のローディング領域が現れる順序です。
+`Reveal` はその直下に作られた `Loading` バウンダリを調整します。それぞれがスロットです。`sequential` はスロットを登録順に公開し、`together` はグループとして解放し、`natural` はそれぞれが個別に公開されるようにします。
 
-See [Reveal order](/concepts/boundaries#reveal-order).
+[Reveal の順序](/concepts/boundaries#reveal-order)を参照してください。
 
-### Server rendering
+### サーバーレンダリング
 
-Running the same components on the server to produce HTML for a request.
-`renderToString` returns the shell with fallbacks in it; `renderToStream` sends the shell first and streams each boundary's content as it settles.
+同じコンポーネントをサーバーで実行し、リクエストに対する HTML を生成することです。
+`renderToString` はフォールバックを含んだシェルを返します。`renderToStream` は最初にシェルを送り、各バウンダリのコンテンツを確定次第ストリーミングします。
 
-Also called: server-side rendering, SSR.
+別名: サーバーサイドレンダリング、SSR。
 
-See [Rendering and SSR](/concepts/rendering-and-ssr).
+[レンダリングと SSR](/concepts/rendering-and-ssr)を参照してください。
 
-### Streaming
+### ストリーミング
 
-Server rendering that emits the synchronous shell first and then a fragment for each `Loading` boundary as its content settles; an async read with no boundary above it blocks the shell, so boundary placement is a server decision too.
+同期的なシェルを最初に出力し、各 `Loading` バウンダリのコンテンツが確定するごとにフラグメントを送るサーバーレンダリングです。上にバウンダリのない非同期の読み取りはシェルをブロックするので、バウンダリの配置はサーバー側の決定でもあります。
 
-See [Streaming rendering](/concepts/rendering-and-ssr#streaming-rendering).
+[ストリーミングレンダリング](/concepts/rendering-and-ssr#streaming-rendering)を参照してください。
 
-## Data and the server
+## データとサーバー
 
-### API route
+### API ルート
 
-A route module under `src/routes` that exports uppercase HTTP methods such as `GET` or `POST` instead of, or as well as, a page component, for callers that are not the app: webhooks, scripts, and other services.
+`src/routes` 以下のルートモジュールで、ページコンポーネントの代わりに、またはそれに加えて、`GET` や `POST` などの大文字の HTTP メソッドをエクスポートするものです。webhook・スクリプト・他のサービスなど、アプリではない呼び出し元のためのものです。
 
-See [API routes](/building-apps/middleware-and-api-routes#api-routes).
+[API ルート](/building-apps/middleware-and-api-routes#api-routes)を参照してください。
 
-### Draft
+### ドラフト
 
-The argument a store setter passes to its callback.
-Mutate it with normal property assignments and array methods, and Solid applies the changes to the store when the callback returns; a write to the store proxy itself is ignored.
+ストアのセッターがそのコールバックに渡す引数です。
+通常のプロパティ代入や配列メソッドでこれをミューテートすると、コールバックが戻るときに Solid がストアへ変更を適用します。ストアのプロキシ自体への書き込みは無視されます。
 
-See [Update with a draft](/concepts/stores#update-with-a-draft).
+[ドラフトで更新する](/concepts/stores#update-with-a-draft)を参照してください。
 
 ### locals
 
-A bag on the request event where middleware places request-scoped state, such as the signed-in customer's id, for server functions, API handlers, and the page render of the same request to read.
+リクエストイベント上の入れ物で、ミドルウェアがサインイン済み顧客の id などのリクエストスコープの状態を置き、同じリクエストのサーバー関数・API ハンドラー・ページレンダーが読み取ります。
 
-See [Read trusted request context](/building-apps/server-functions/arguments-and-security#read-trusted-request-context).
+[信頼できるリクエストコンテキストを読む](/building-apps/server-functions/arguments-and-security#read-trusted-request-context)を参照してください。
 
-### Middleware
+### ミドルウェア
 
-A function of the request and a `next` continuation that runs in front of every request start mode handles; the request travels down the exported array and the response travels back up it.
+リクエストと `next` 継続を受け取る関数で、start モードが処理するすべてのリクエストの前段で実行されます。リクエストはエクスポートされた配列を下り、レスポンスはそれを上って戻ります。
 
-See [Add a middleware](/building-apps/middleware-and-api-routes#add-a-middleware).
+[ミドルウェアを追加する](/building-apps/middleware-and-api-routes#add-a-middleware)を参照してください。
 
-### Origin check
+### オリジンチェック
 
-The server-function handler refuses a state-changing request whose `Sec-Fetch-Site`, `Origin`, or `Referer` headers say it came from another origin, or that carries none of them.
-It stops cross-site request forgery from a browser; it does not replace validation and authorization.
+サーバー関数のハンドラーは、`Sec-Fetch-Site`、`Origin`、`Referer` の各ヘッダーが別オリジンから来たことを示す、あるいはそれらを一切持たない状態変更リクエストを拒否します。
+ブラウザーからのクロスサイトリクエストフォージェリを防ぎます。バリデーションと認可の代わりにはなりません。
 
-Also called: CSRF protection.
+別名: CSRF 対策。
 
-See [Same-origin protection](/building-apps/server-functions/arguments-and-security#same-origin-protection).
+[同一オリジン保護](/building-apps/server-functions/arguments-and-security#same-origin-protection)を参照してください。
 
-### Progressive enhancement
+### プログレッシブエンハンスメント
 
-A form that posts to a server function's URL works before the client bundle loads, and the router takes it over after hydration.
+サーバー関数の URL へ POST するフォームはクライアントバンドルが読み込まれる前から動作し、ハイドレーション後にルーターがそれを引き継ぎます。
 
-See [Post a form through a router action](/building-apps/server-functions/progressive-enhancement#post-a-form-through-a-router-action).
+[ルーターアクション経由でフォームを POST する](/building-apps/server-functions/progressive-enhancement#post-a-form-through-a-router-action)を参照してください。
 
-### Projection
+### プロジェクション
 
-A store whose value is computed from other reactive values.
-Where a memo derives one value, a projection derives an object or array whose properties are tracked separately and whose items keep their identity, because results are reconciled into the seed by `id`.
+値が他のリアクティブな値から計算されるストアです。
+メモが1つの値を導出するのに対し、プロジェクションはプロパティが個別に追跡され、項目が同一性を保つオブジェクトや配列を導出します。結果が `id` でシードへリコンサイルされるからです。
 
-See [Derive a store with a projection](/concepts/stores#derive-a-store-with-a-projection).
+[プロジェクションでストアを導出する](/concepts/stores#derive-a-store-with-a-projection)を参照してください。
 
-### Reconcile
+### リコンサイル
 
-Matching incoming data into an existing store by key so that unchanged items keep their proxies and their DOM.
-A projection and the function form of `createStore` reconcile each result by `id`; the `reconcile` helper does the same for a value passed to a setter.
+キーによって入力データを既存のストアへ突き合わせ、変更のない項目がそのプロキシと DOM を保つようにします。
+プロジェクションと `createStore` の関数形式は各結果を `id` でリコンサイルします。`reconcile` ヘルパーはセッターに渡された値に対して同じことを行います。
 
-See [Derive a store with a projection](/concepts/stores#derive-a-store-with-a-projection) and the [`reconcile` reference](/reference/solid-js/stores/reconcile).
+[プロジェクションでストアを導出する](/concepts/stores#derive-a-store-with-a-projection)と [`reconcile` リファレンス](/reference/solid-js/stores/reconcile)を参照してください。
 
 ### redirect
 
-Returns a `Response` with a `Location` header from a server function: a router action or query navigates without a page load, a form post without JavaScript follows the redirect, and plain code receives the `Response` object.
+サーバー関数から `Location` ヘッダー付きの `Response` を返します。ルーターのアクションやクエリはページロードなしで遷移し、JavaScript なしのフォーム POST はリダイレクトに従い、素のコードは `Response` オブジェクトを受け取ります。
 
-See [Redirect the caller](/building-apps/server-functions/mutations-and-responses#redirect-the-caller).
+[呼び出し元をリダイレクトする](/building-apps/server-functions/mutations-and-responses#redirect-the-caller)を参照してください。
 
-### Request event
+### リクエストイベント
 
-The object that carries one HTTP exchange on the server: the `request`, a `locals` bag, and the outgoing `response` headers.
-`getRequestEvent()` returns it from middleware, a server function, or a render, and a server function called during rendering runs under an event derived from the page request.
+サーバー上の1回の HTTP やり取りを運ぶオブジェクトです。`request`、`locals` の入れ物、送信する `response` ヘッダーを持ちます。
+`getRequestEvent()` はミドルウェア・サーバー関数・レンダーの中からそれを返します。レンダリング中に呼ばれたサーバー関数は、ページリクエストから派生したイベントの下で実行されます。
 
-See [What the platform supplies](/building-apps/sessions-and-auth#what-the-platform-supplies).
+[プラットフォームが提供するもの](/building-apps/sessions-and-auth#what-the-platform-supplies)を参照してください。
 
 ### respond
 
-Pairs a return value with a status and headers.
-Returned, it resolves the caller with the value; thrown, it rejects the caller with the value and is the way to send a 400 the browser can show.
+戻り値にステータスとヘッダーを組み合わせます。
+返すと値で呼び出し元を解決し、スローすると値で呼び出し元を拒否します。ブラウザーが表示できる 400 を送る方法です。
 
-See [Return a value with response metadata](/building-apps/server-functions/mutations-and-responses#return-a-value-with-response-metadata).
+[レスポンスメタデータ付きで値を返す](/building-apps/server-functions/mutations-and-responses#return-a-value-with-response-metadata)を参照してください。
 
-### Safe error
+### 安全なエラー
 
-An error marked with `markSafeError` so its message crosses to the browser in production; every other thrown value becomes `Internal Server Error` there, so a database driver's message cannot leak.
+`markSafeError` でマークされたエラーで、そのメッセージは本番でもブラウザーへ届きます。それ以外のスローされた値はすべて本番では `Internal Server Error` になるので、データベースドライバーのメッセージは漏れません。
 
-See [Handle thrown errors](/building-apps/server-functions/mutations-and-responses#handle-thrown-errors).
+[スローされたエラーを処理する](/building-apps/server-functions/mutations-and-responses#handle-thrown-errors)を参照してください。
 
-### Seed
+### シード
 
-The starting object a projection or an async store reconciles its results into, which gives the root proxy a stable identity across recomputations; with an async function it is not shown as a first answer unless `seedLoadingValue` says so.
+プロジェクションや非同期ストアが結果をリコンサイルして入れていく開始オブジェクトで、再計算をまたいでルートプロキシに安定した同一性を与えます。非同期関数の場合、`seedLoadingValue` が指定しない限り最初の答えとしては表示されません。
 
-See [Derive a store with a projection](/concepts/stores#derive-a-store-with-a-projection).
+[プロジェクションでストアを導出する](/concepts/stores#derive-a-store-with-a-projection)を参照してください。
 
-### Server function
+### サーバー関数
 
-A function whose body runs on the server because its first statement is `"use server"`.
-The build leaves a typed stub in the browser that makes the HTTP request, and the call returns a promise on both sides.
+最初の文が `"use server"` であるために、本体がサーバーで実行される関数です。
+ビルドはブラウザーに HTTP リクエストを行う型付きスタブを残し、その呼び出しは両側で Promise を返します。
 
-Also called: server action, RPC.
+別名: サーバーアクション、RPC。
 
-See [Declare a server function](/building-apps/server-functions#declare-a-server-function).
+[サーバー関数を宣言する](/building-apps/server-functions#declare-a-server-function)を参照してください。
 
-### Session
+### セッション
 
-The state that identifies a caller across requests.
-Solid supplies the request event; a cookie library supplies the signing and expiry, and the `fullstack` template composes a signed cookie whose payload holds an id to look up on the server.
+リクエストをまたいで呼び出し元を識別する状態です。
+Solid はリクエストイベントを提供します。Cookie ライブラリが署名と有効期限を提供し、`fullstack` テンプレートは、サーバーで参照する id をペイロードに持つ署名付き Cookie を組み立てます。
 
-See [A signed cookie session](/building-apps/sessions-and-auth#a-signed-cookie-session).
+[署名付き Cookie セッション](/building-apps/sessions-and-auth#a-signed-cookie-session)を参照してください。
 
-### Single-flight mutation
+### シングルフライトミューテーション
 
-A mutation whose response also carries the refreshed query results the page will need, so the browser makes one request instead of a mutation followed by a revalidation fetch.
+レスポンスがページに必要な再取得済みクエリ結果も運ぶミューテーションです。ブラウザーは、ミューテーションとそれに続く再検証フェッチではなく、1回のリクエストで済ませます。
 
-See [One round trip for a mutation](/routing/solid-router/server-rendering#one-round-trip-for-a-mutation).
+[ミューテーションを1回の往復で](/routing/solid-router/server-rendering#one-round-trip-for-a-mutation)を参照してください。
 
-### Store
+### ストア
 
-A proxy over an object or array that tracks each property on its own: readers subscribe to the properties they read, writes go through the setter's draft, and changing one quantity updates the one text node that reads it.
+オブジェクトや配列の上のプロキシで、各プロパティを個別に追跡します。読み取り側は読んだプロパティを購読し、書き込みはセッターのドラフトを通り、1つの数量を変えればそれを読んでいる1つのテキストノードだけが更新されます。
 
-See [Create nested state](/concepts/stores#create-nested-state).
+[ネストされた状態を作る](/concepts/stores#create-nested-state)を参照してください。
 
-## Routing
+## ルーティング
 
-### File-system routing
+### ファイルシステムルーティング
 
-Files under `src/routes` become the route tree: `filesystem-routing` scans the directory and `@solidjs/router/fs` converts its manifest into the same route objects a hand-written array would contain.
+`src/routes` 以下のファイルがルートツリーになります。`filesystem-routing` がディレクトリをスキャンし、`@solidjs/router/fs` がそのマニフェストを、手書きの配列に含まれるのと同じルートオブジェクトへ変換します。
 
-See [Where the file-system adapter fits](/routing/solid-router#where-the-file-system-adapter-fits).
+[ファイルシステムアダプターの位置づけ](/routing/solid-router#where-the-file-system-adapter-fits)を参照してください。
 
-### Layout route
+### レイアウトルート
 
-A route with `children` whose component renders around whichever child matched, receiving it as `props.children`; the router keeps the layout mounted while pages change under it.
+`children` を持つルートで、コンポーネントがマッチした子を `props.children` として受け取りその周囲にレンダリングされます。その下でページが切り替わっても、ルーターはレイアウトをマウントしたままにします。
 
-See [A layout and its pages](/routing/solid-router/nested-routes#a-layout-and-its-pages).
+[レイアウトとそのページ](/routing/solid-router/nested-routes#a-layout-and-its-pages)を参照してください。
 
-### Pathless route
+### パスなしルート
 
-A route with no `path` that adds a component or a `preload` to the match without adding to the URL, such as a sign-in check around a group of pages.
+`path` を持たず、URL に追加せずにマッチへコンポーネントや `preload` を加えるルートです。ページ群の周囲のサインインチェックなどに使います。
 
-See [Layouts without a URL segment](/routing/solid-router/nested-routes#layouts-without-a-url-segment).
+[URL セグメントを持たないレイアウト](/routing/solid-router/nested-routes#layouts-without-a-url-segment)を参照してください。
 
 ### preload
 
-A route function that runs when the route matches, before the page component exists, with the matched `params` and an `intent`.
-Start queries in it with `void` rather than returning data, because whatever it returns is captured once as `props.data`.
+ルートがマッチしたとき、ページコンポーネントが存在する前に実行されるルート関数で、マッチした `params` と `intent` を受け取ります。
+返すのではなく `void` でクエリを開始してください。返り値は `props.data` として一度だけ取り込まれるからです。
 
-Also called: loader.
+別名: ローダー。
 
-See [Start work before the component runs](/routing/solid-router/data#start-work-before-the-component-runs).
+[コンポーネントが実行される前に処理を始める](/routing/solid-router/data#start-work-before-the-component-runs)を参照してください。
 
 ### query
 
-Wraps an async function and gives it a name; the name plus the arguments form a cache key, and every call with the same key during the cache lifetime shares one request.
+非同期関数を包んで名前を付けます。その名前と引数がキャッシュキーを構成し、キャッシュの存続期間中に同じキーで呼ばれたものはすべて1つのリクエストを共有します。
 
-See [Cache reads with query](/routing/solid-router/data#cache-reads-with-query).
+[`query` で読み取りをキャッシュする](/routing/solid-router/data#cache-reads-with-query)を参照してください。
 
-### Route definition
+### ルート定義
 
-A plain object with a path pattern, the component to render, and optionally a `preload`, `children`, match filters, and metadata; the route array is also where the types for `paths` and `params` come from.
+パスパターン・レンダリングするコンポーネント・オプションの `preload`・`children`・マッチフィルター・メタデータを持つプレーンなオブジェクトです。ルート配列は `paths` と `params` の型の由来でもあります。
 
-See [Route definitions](/routing/solid-router/route-definitions).
+[ルート定義](/routing/solid-router/route-definitions)を参照してください。
 
-### Search params
+### 検索パラメーター（search params）
 
-The query string of the URL, the right home for state that should survive a refresh and be shareable; `useSearchParams` reads and writes them, and a route `search` schema turns the strings into typed values.
+URL のクエリ文字列で、リフレッシュに耐え共有可能であるべき状態の適切な置き場所です。`useSearchParams` がそれらを読み書きし、ルートの `search` スキーマが文字列を型付きの値に変えます。
 
-See [Type search parameters](/routing/solid-router/navigation#type-search-parameters).
+[検索パラメーターを型付けする](/routing/solid-router/navigation#type-search-parameters)を参照してください。
 
-### Start mode
+### start モード
 
-The Vite plugin's `start: true` option, which generates the client entry, the server entry, and the request handler around `App.tsx` and `Document.tsx`; server functions, middleware, and the request event run under it.
+Vite プラグインの `start: true` オプションで、`App.tsx` と `Document.tsx` を中心にクライアントエントリー・サーバーエントリー・リクエストハンドラーを生成します。サーバー関数・ミドルウェア・リクエストイベントはその下で実行されます。
 
-See [Three rendering modes, one layout](/building-apps/app-structure#three-rendering-modes-one-layout).
+[3 つのレンダリングモードと1つのレイアウト](/building-apps/app-structure#three-rendering-modes-one-layout)を参照してください。
 
-### Submission
+### サブミッション
 
-One run of a router action: the `input` that was sent, its `result` or `error`, and `retry()` and `clear()`.
-`useSubmissions` returns the completed submissions that produced a result or an error, including ones recorded from a form posted without JavaScript.
+ルーターアクションの1回の実行です。送られた `input`、その `result` または `error`、`retry()` と `clear()` を持ちます。
+`useSubmissions` は、結果またはエラーを生んだ完了済みサブミッションを返します。JavaScript なしで POST されたフォームから記録されたものも含みます。
 
-See [When it fails](/routing/solid-router/data#when-it-fails).
+[失敗したとき](/routing/solid-router/data#when-it-fails)を参照してください。
 
-### Typed paths
+### 型付きパス（typed paths）
 
-`paths`, a proxy inferred from the route tree, so `paths.products("mug")` is checked by the compiler and a renamed route is a type error at every call site.
+ルートツリーから推論されるプロキシ `paths` です。`paths.products("mug")` はコンパイラにチェックされ、ルート名を変えればすべての呼び出し箇所が型エラーになります。
 
-See [Build URLs with paths](/routing/solid-router/navigation#build-urls-with-paths).
+[`paths` で URL を組み立てる](/routing/solid-router/navigation#build-urls-with-paths)を参照してください。
 
-## Tooling and diagnostics
+## ツーリングと診断
 
-### Attribution
+### アトリビューション
 
-A development-build recording of every scope that re-ran, what changed to cause it, and how long it took.
-Enable it, reproduce the behavior, and ask `why(scope)` from `solid-js/attribution`; while it is on, Solid also reports cost and responsiveness findings such as `SILENT_HOLD`.
+どのスコープが再実行されたか、何が変わってそれを引き起こしたか、どれくらいかかったかを記録する、開発ビルドの記録です。
+有効にして挙動を再現し、`solid-js/attribution` の `why(scope)` に尋ねます。有効な間、Solid は `SILENT_HOLD` などのコストと応答性の検出も報告します。
 
-See [Something updates too often](/guides/debugging-reactivity#something-updates-too-often).
+[更新が多すぎる場合](/guides/debugging-reactivity#something-updates-too-often)を参照してください。
 
-### Development build and production build
+### 開発ビルドと本番ビルド
 
-The development build prints diagnostics, records attribution once `attribution.enable()` is called, and returns real error messages from server functions.
-The production build strips the diagnostics and sanitizes unbranded errors to `Internal Server Error`; on the server the line between the two is the `development` export condition rather than `NODE_ENV`.
+開発ビルドは診断を出力し、`attribution.enable()` が呼ばれるとアトリビューションを記録し、サーバー関数から実際のエラーメッセージを返します。
+本番ビルドは診断を取り除き、ブランドのないエラーを `Internal Server Error` に無害化します。サーバーで両者を分かつのは `NODE_ENV` ではなく `development` エクスポート条件です。
 
-See [Measure before changing](/guides/performance#measure-before-changing) and [Handle thrown errors](/building-apps/server-functions/mutations-and-responses#handle-thrown-errors).
+[変更前に測定する](/guides/performance#measure-before-changing)と [スローされたエラーを処理する](/building-apps/server-functions/mutations-and-responses#handle-thrown-errors)を参照してください。
 
-### Diagnostic code
+### 診断コード
 
-The bracketed name at the start of a development console entry, such as `[STRICT_READ_UNTRACKED]`.
-The code is stable across releases, the sentence after it says what the runtime observed, and the `in` line names the chain of owners down to the scope that produced it.
+開発時コンソールの各行の先頭にある角括弧付きの名前です。`[STRICT_READ_UNTRACKED]` などです。
+コードはリリース間で安定していて、その後の文はランタイムが観測したことを述べ、`in` の行はそれを生んだスコープまでのオーナーの連鎖を示します。
 
-See [Read a diagnostic](/guides/debugging-reactivity#read-a-diagnostic).
+[診断を読む](/guides/debugging-reactivity#read-a-diagnostic)を参照してください。
