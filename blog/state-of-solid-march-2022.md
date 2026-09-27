@@ -8,11 +8,11 @@
 
 `<div>riots` は、フロントエンドの創造は一つの芸術形式だと考えています。彼らのチームは、フロントエンドチーム向けに最もエキサイティングで先進的なツールをいくつか構築しています。私たちの OpenCollective に月額 100 ドルの支援を約束してくれたことを大変嬉しく思いますが、それだけでなく、チームが優れたデザインシステムを届けるための未来的なツールである Backlight プロジェクトで Solid のサポートも開始してくれました。
 
-[![Backlight](/img/blog/state-of-solid-march-2022/backlight.png)](https://www.backlight.dev/)
+[![Backlight](/blog/images/state-of-solid-march-2022/backlight.png)](https://www.backlight.dev/)
 
 また、増え続ける支援者の仲間として、月額 100 ドルの支援を申し出てくれた `Vercel` を迎えられることも嬉しく思います。Vercel のビジョンは、フロントエンドチームが最高の仕事をできるようにすることです。Solid と Vercel は、その仕事を簡単かつ高速にすることで Web の未来を形作るという似たビジョンを共有しています。他の素晴らしいスポンサーとともに Vercel が味方についていることは、シンプルさとパフォーマンスの両方を第一に据える Web フレームワークを構築する私たちの仕事への真の評価となります。
 
-[![Vercel](/img/blog/state-of-solid-march-2022/vercel.png)](https://www.vercel.com/)
+[![Vercel](/blog/images/state-of-solid-march-2022/vercel.png)](https://www.vercel.com/)
 
 寛大なスポンサーの皆さん、ありがとうございます! 皆さんの支援は、プロジェクトとコミュニティを成長させるための私たちの日々の仕事を評価し、それを可能にしてくれています。
 
@@ -20,13 +20,13 @@
 
 今四半期のコミュニティの成長は目覚ましく、これまでで最も速いペースで成長しています。主要な指標は、ウェブサイト、Twitter、GitHub、Discord のすべてで継続的な週ごとの伸びを示しています。ウェブサイトのトラフィックは主要な指標であり、ユニーク訪問数が週ごとに約 15% の一定割合で増加しています。Discord のメンバー数は 20% 増加し、GitHub のコントリビューター/インタラクションは 60%、Twitter のエンゲージメントとフォロワーの合計は 453% 増加しました。
 
-[![Star History](/img/blog/state-of-solid-march-2022/star-history.png)](https://star-history.com/#solidjs/solid&Date)
+[![Star History](/blog/images/state-of-solid-march-2022/star-history.png)](https://star-history.com/#solidjs/solid&Date)
 
 Solid の GitHub スター数は先日 16,000 を突破し、Inferno.js を追い越して Alpine.js の 20k スターへと向かっています。
 
 今年の State of JS 調査で SolidJS が[開発者満足度で最高評価のフレームワーク](https://2021.stateofjs.com/en-US/libraries/front-end-frameworks/)になったことも後押しとなり、コミュニティの成長は壮観です。これは、私たちが築いてきたコミュニティの健全さの証です。この結果をこれ以上ないほど嬉しく思いますが、Solid の採用がまだ広まっていないことも付記すべきでしょう。次の State of JS のグラフが示すように、満足度は非常に高い一方で、ユーザー数はまだ少ないのです。
 
-[![State of JS](/img/blog/state-of-solid-march-2022/state-of-js.png)](https://2021.stateofjs.com/en-US/libraries/#scatterplot_overview)
+[![State of JS](/blog/images/state-of-solid-march-2022/state-of-js.png)](https://2021.stateofjs.com/en-US/libraries/#scatterplot_overview)
 
 ユーザーベースが拡大しても、Svelte や Vue といった仲間のフレームワークと並んで満足度の競争力は維持されると確信しています。ただし、この調査の方法論では Solid のような小規模プロジェクトが一気にチャートの上位に来やすいことは認めるべきでしょう。調査で支持を示してくださった皆さんに感謝するとともに、この結果を通じて Solid を見つけてくれたすべての新しいユーザーを歓迎します!
 

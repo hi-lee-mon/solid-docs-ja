@@ -169,5 +169,5 @@ type Submission<T, U> = {
 
 ## 関連項目
 
-- [ルートプリロードの型](/reference/solid-router/routes-and-paths#preload)
-- [サーバー統合](/reference/solid-router/server)
+- [ルートプリロードの型](/docs/reference/solid-router/routes-and-paths.md#preload)
+- [サーバー統合](/docs/reference/solid-router/server.md)

@@ -47,12 +47,12 @@ return reload({ revalidate: "todos" });
 
 ## よくある問題
 
-- [フォームは送信されるが、その場に留まらずページがリロードされる](/guides/forms#the-form-submits-but-the-page-reloads-instead-of-staying-put)
+- [フォームは送信されるが、その場に留まらずページがリロードされる](/docs/guides/forms.md#the-form-submits-but-the-page-reloads-instead-of-staying-put)
 
 ## 関連項目
 
-- [ミューテーションとレスポンス](/building-apps/server-functions/mutations-and-responses)
-- [ミドルウェアと API ルート](/building-apps/middleware-and-api-routes)
+- [ミューテーションとレスポンス](/docs/building-apps/server-functions/mutations-and-responses.md)
+- [ミドルウェアと API ルート](/docs/building-apps/middleware-and-api-routes.md)
 
 ## 関連する型
 

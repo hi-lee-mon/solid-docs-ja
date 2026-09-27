@@ -7,7 +7,7 @@ description: "ページ群を共有レイアウトで包み、ページが変わ
 ほとんどのアプリにはセクションがあります。独自のサイドバーを持つアカウント領域、サインインチェックの背後にある管理領域、フィルターバーのある商品カタログです。
 ネストされたルートを使うと、セクションのフレームを一度書くだけで、その中のページを入れ替えられます。
 
-このページでは[Solid Router 概要](/routing/solid-router)のストアにアカウントセクションを追加します。
+このページでは[Solid Router 概要](/docs/routing/solid-router/index.md)のストアにアカウントセクションを追加します。
 
 ## レイアウトとそのページ
 
@@ -106,7 +106,7 @@ Profile から Orders へクリックして、何が起きるか見てみまし�
 その `<nav>` は DOM を保ち、その中の検索ボックスはテキストを保ち、その中で作られたシグナルは値を保ちます。
 変わるのは `<section>` の中身だけです。
 
-![/account/profile と /account/orders の2つのコンポーネントツリー。Router の関数 child と AccountLayout は両方で同じインスタンスで、ページレベル（Profile から Orders）だけが破棄・生成される。](/images/diagrams/nested-routes-what-stays-mounted.svg)
+![/account/profile と /account/orders の2つのコンポーネントツリー。Router の関数 child と AccountLayout は両方で同じインスタンスで、ページレベル（Profile から Orders）だけが破棄・生成される。](/docs/images/diagrams/nested-routes-what-stays-mounted.svg)
 
 ルーターは、ルートのコンポーネントを、そのルート定義がマッチの一部である限り生存させます。
 変化したレベルだけを生成・破棄します。
@@ -165,8 +165,8 @@ export default function RequireSignIn(props: RouteSectionProps) {
 
 :::caution[クライアントサイドのチェックは認可ではない]
 `RequireSignIn` が決めるのは何をレンダーするかであって、リクエストを止めるわけではありません。
-`/account` と `/checkout` の背後にあるサーバー関数は、[セッションと認証](/building-apps/sessions-and-auth)が示すように、それ自身でセッションを確認しなければなりません。さもなければ誰でも直接呼び出せます。
-[保護されたルート](/guides/protected-routes)はこのチェックを、サーバーとブラウザの両方で実行されるリダイレクトに変え、訪問者を後で元の場所に戻します。
+`/account` と `/checkout` の背後にあるサーバー関数は、[セッションと認証](/docs/building-apps/sessions-and-auth.md)が示すように、それ自身でセッションを確認しなければなりません。さもなければ誰でも直接呼び出せます。
+[保護されたルート](/docs/guides/protected-routes.md)はこのチェックを、サーバーとブラウザの両方で実行されるリダイレクトに変え、訪問者を後で元の場所に戻します。
 :::
 
 ## パラメータは下へ流れる
@@ -205,7 +205,7 @@ export default function CollectionProduct(
 ```
 
 ルートコンポーネントの外では、`useParams(Router.paths.collections.products)` が同じ型付きオブジェクトを返します。
-`int` のような[マッチフィルター](/routing/solid-router/route-definitions#filter-parameters)が `paths` の受け付けるものを変えても、実行時のパラメータは常に文字列です。
+`int` のような[マッチフィルター](/docs/routing/solid-router/route-definitions.md#filter-parameters)が `paths` の受け付けるものを変えても、実行時のパラメータは常に文字列です。
 
 ## 各レベルでデータをロードする
 
@@ -228,9 +228,9 @@ export default function CollectionProduct(
 ```
 
 `/collections/mugs/products/blue` へのナビゲーションは両方のリクエストを一度に送ります。
-その後、各コンポーネントは[データロードとミューテーション](/routing/solid-router/data)ページと同様にメモ経由で自分のクエリを読み、その上の `Loading` バウンダリが保留中に何を表示するかを決めます。
+その後、各コンポーネントは[データロードとミューテーション](/docs/routing/solid-router/data.md)ページと同様にメモ経由で自分のクエリを読み、その上の `Loading` バウンダリが保留中に何を表示するかを決めます。
 並列で開始することこそが、コレクションが届いてから `CollectionLayout` の中で商品をフェッチする（ウォーターフォールになる）のではなく、プリロードをネストする理由です。
-一般的な原理は[非同期リアクティビティ](/concepts/async-reactivity#nesting-is-not-a-waterfall)で説明しています。
+一般的な原理は[非同期リアクティビティ](/docs/concepts/async-reactivity.md#nesting-is-not-a-waterfall)で説明しています。
 
 配下のすべてのページが必要とするデータをレイアウトが持つ場合、レイアウトでロードしてコンテキスト経由で渡します:
 
@@ -275,7 +275,7 @@ export default function CollectionLayout(
 
 インポートされたモジュールはルート配列を `default` または `routes` としてエクスポートします。
 型付き `paths` はインポート越しでも機能するため、`paths.admin.users(7)` はビルド時にチェックされます。
-詳細は[ルート定義](/routing/solid-router/route-definitions#load-a-route-subtree-lazily)にあります。
+詳細は[ルート定義](/docs/routing/solid-router/route-definitions.md#load-a-route-subtree-lazily)にあります。
 
 ## よくある問題
 
@@ -312,6 +312,6 @@ export default function CollectionLayout(
 
 ## 次のステップ
 
-- [ナビゲーションと型付きパス](/routing/solid-router/navigation): 型付き `paths`、アクティブ・保留中リンクのスタイル、`RequireSignIn` のようなセクションのナビゲーションガード。
-- [データロードとミューテーション](/routing/solid-router/data): 上のプリロードが開始するものと、レイアウトとそのページ間でキャッシュが結果を共有する仕組み。
-- [ルート定義](/routing/solid-router/route-definitions): パスパターン、マッチフィルター、メタデータ、そしてディレクトリから同じネスト構造を生成するファイルシステムアダプター。
+- [ナビゲーションと型付きパス](/docs/routing/solid-router/navigation.md): 型付き `paths`、アクティブ・保留中リンクのスタイル、`RequireSignIn` のようなセクションのナビゲーションガード。
+- [データロードとミューテーション](/docs/routing/solid-router/data.md): 上のプリロードが開始するものと、レイアウトとそのページ間でキャッシュが結果を共有する仕組み。
+- [ルート定義](/docs/routing/solid-router/route-definitions.md): パスパターン、マッチフィルター、メタデータ、そしてディレクトリから同じネスト構造を生成するファイルシステムアダプター。

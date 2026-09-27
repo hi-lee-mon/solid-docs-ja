@@ -55,5 +55,5 @@ if (isDev) {
 
 ## 関連項目
 
-- [レンダリングと SSR](/concepts/rendering-and-ssr)
-- [レンダリングモードを選ぶ](/guides/choose-a-rendering-mode)
+- [レンダリングと SSR](/docs/concepts/rendering-and-ssr.md)
+- [レンダリングモードを選ぶ](/docs/guides/choose-a-rendering-mode.md)

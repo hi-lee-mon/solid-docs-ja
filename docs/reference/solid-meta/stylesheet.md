@@ -18,7 +18,7 @@ description: >-
   スタイルシートの link 要素を追加します。
 ---
 
-`Stylesheet` は [`<Link rel="stylesheet">`](/reference/solid-meta/link) の糖衣構文です。
+`Stylesheet` は [`<Link rel="stylesheet">`](/docs/reference/solid-meta/link.md) の糖衣構文です。
 
 ## インポート
 
@@ -65,5 +65,5 @@ export default function Dashboard() {
 
 ## 関連項目
 
-- [`Link`](/reference/solid-meta/link)
-- [`Style`](/reference/solid-meta/style)
+- [`Link`](/docs/reference/solid-meta/link.md)
+- [`Style`](/docs/reference/solid-meta/style.md)

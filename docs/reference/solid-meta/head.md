@@ -97,5 +97,5 @@ export default function Article(props: {
 
 ## 関連項目
 
-- [`Meta`](/reference/solid-meta/meta)
-- [`Title`](/reference/solid-meta/title)
+- [`Meta`](/docs/reference/solid-meta/meta.md)
+- [`Title`](/docs/reference/solid-meta/title.md)

@@ -9,7 +9,7 @@ React と Solid は多くのアプリケーション概念を共有していま�
 
 コンポーネント、props、JSX、イベント、コンテキスト、ref、コンポジションに関する知識はそのまま活かせます。
 主な変化は、状態の変更が DOM に届く仕組みです。
-[Thinking in Solid](/guides/thinking-in-solid) は、1 つの機能を最初から最後まで構築する中でその変化を示しています。このページでは概念を 1 つずつ対応付けます。
+[Thinking in Solid](/docs/guides/thinking-in-solid.md) は、1 つの機能を最初から最後まで構築する中でその変化を示しています。このページでは概念を 1 つずつ対応付けます。
 
 ## まず実行モデルを理解する
 
@@ -65,7 +65,7 @@ JSX 内で `doubled()` を呼び出すと、同じ追跡スコープがその中
 リアクティブな読み取りは JSX 内か別の追跡スコープ内に置いてください。
 コンポーネント本体は追跡されずに実行されるため、Solid コンポーネントのトップレベルでの読み取りは 1 回限りの読み取りになります。
 
-追跡、スケジューリング、オーナーシップ、破棄については [リアクティビティ](/concepts/reactivity) を参照してください。
+追跡、スケジューリング、オーナーシップ、破棄については [リアクティビティ](/docs/concepts/reactivity.md) を参照してください。
 
 ## フックを目的別に変換する
 
@@ -76,11 +76,11 @@ Solid のプリミティブは通常の関数呼び出しであり、フック�
 
 各フックは、その役割に応じて変換してください。
 
-- ローカルなスカラー状態は通常 [`createSignal`](/reference/solid-js/reactivity/create-signal) に対応します。
-- オブジェクトやコレクションの状態は [`createStore`](/reference/solid-js/stores/create-store) に対応できます。
-- キャッシュされた派生状態は [`createMemo`](/reference/solid-js/reactivity/create-memo) に対応できます。
-- 命令的な同期処理は [`createEffect`](/reference/solid-js/reactivity/create-effect) に対応できます。
-- サブツリーで共有する状態は [`createContext`](/reference/solid-js/components-context/create-context) と [`useContext`](/reference/solid-js/components-context/use-context) に対応できます。
+- ローカルなスカラー状態は通常 [`createSignal`](/docs/reference/solid-js/reactivity/create-signal.md) に対応します。
+- オブジェクトやコレクションの状態は [`createStore`](/docs/reference/solid-js/stores/create-store.md) に対応できます。
+- キャッシュされた派生状態は [`createMemo`](/docs/reference/solid-js/reactivity/create-memo.md) に対応できます。
+- 命令的な同期処理は [`createEffect`](/docs/reference/solid-js/reactivity/create-effect.md) に対応できます。
+- サブツリーで共有する状態は [`createContext`](/docs/reference/solid-js/components-context/create-context.md) と [`useContext`](/docs/reference/solid-js/components-context/use-context.md) に対応できます。
 - 再利用可能な状態を持つ振る舞いはカスタムプリミティブ、つまり Solid のプリミティブを作成して返す普通の関数にできます。
 
 これらの対応関係は、互換できる実装ではなく関連する責務を示したものです。
@@ -103,7 +103,7 @@ setCount((value) => value + 1);
 Solid は、同期的なフラッシュスコープの外で行われたシグナルやストアへの書き込みをいったん保留します。
 現在の JavaScript タスクが完了した後、マイクロタスクでリアクティブキューをコミットします。
 アプリケーションのイベントハンドラーでは、通常、明示的なフラッシュは必要ありません。
-テストや命令的な連携で、コミットされた状態や DOM を同期的に観測する必要がある場合は [`flush()`](/reference/solid-js/reactivity/flush) を使います。
+テストや命令的な連携で、コミットされた状態や DOM を同期的に観測する必要がある場合は [`flush()`](/docs/reference/solid-js/reactivity/flush.md) を使います。
 
 ## オブジェクトやコレクションの状態を扱う
 
@@ -144,7 +144,7 @@ function rename(name: string) {
 無関係なプロパティの更新では、その読み取り側を再実行する必要はありません。
 
 値全体が 1 つの同一性を持ち、まとめて変更される場合は、オブジェクトにもシグナルが使えます。
-ストアのセッター、プロジェクション、リコンシリエーション、楽観的ストアについては [ストア](/concepts/stores) を参照してください。
+ストアのセッター、プロジェクション、リコンシリエーション、楽観的ストアについては [ストア](/docs/concepts/stores.md) を参照してください。
 
 ## 状態から値を導出する
 
@@ -185,7 +185,7 @@ return (
 
 他のリアクティブな値から計算できる状態は、通常、そのまま導出として表現します。
 2 つ目のシグナルと、2 つの値を同期し続けるエフェクトは必要ありません。
-同期的な導出、非同期の導出、一時的な書き込み可能オーバーライドについては [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects) を参照してください。
+同期的な導出、非同期の導出、一時的な書き込み可能オーバーライドについては [不要なエフェクトを避ける](/docs/guides/avoid-unnecessary-effects.md) を参照してください。
 
 ## props 由来の編集可能な値を保つ
 
@@ -242,7 +242,7 @@ function NameField(props: { name: string }) {
 
 関数形式は「書き込み可能な導出」を意味し、関数自体をシグナルの値として保存するわけではありません。
 ネストしたフォーム状態で同じパターンを使うには、`createStore` の関数形式を使います。
-ストア版や、代わりに独立したローカル状態を選ぶ場合の指針については [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects#use-a-writable-derivation-for-a-local-override) を参照してください。
+ストア版や、代わりに独立したローカル状態を選ぶ場合の指針については [不要なエフェクトを避ける](/docs/guides/avoid-unnecessary-effects.md#use-a-writable-derivation-for-a-local-override) を参照してください。
 
 ## エフェクトを責務別に変換する
 
@@ -369,7 +369,7 @@ return (
 DOM 向けの細部にはいくつか違いがあります。
 
 - `className` の代わりに `class` を使います。
-- Solid の [`class` prop](/reference/solid-web/jsx-properties/class) は文字列、条件付きオブジェクト、ネストした配列を受け付けます。
+- Solid の [`class` prop](/docs/reference/solid-web/jsx-properties/class.md) は文字列、条件付きオブジェクト、ネストした配列を受け付けます。
 - スタイルオブジェクトは `backgroundColor` のような JavaScript 名ではなく、`"background-color"` のような CSS 名を使います。
 - 数値のスタイル値には単位が自動で付きません。
 - エスケープされたテキストのみのコンテンツには `textContent` を使い、`innerHTML` は信頼できる、またはサニタイズ済みのマークアップにだけ使います。
@@ -386,7 +386,7 @@ DOM 向けの細部にはいくつか違いがあります。
 </button>
 ```
 
-それぞれの DOM での振る舞いについては、[`style`](/reference/solid-web/jsx-properties/style)、[`textContent`](/reference/solid-web/jsx-properties/text-content)、[`innerHTML`](/reference/solid-web/jsx-properties/inner-html) の各リファレンスを参照してください。
+それぞれの DOM での振る舞いについては、[`style`](/docs/reference/solid-web/jsx-properties/style.md)、[`textContent`](/docs/reference/solid-web/jsx-properties/text-content.md)、[`innerHTML`](/docs/reference/solid-web/jsx-properties/inner-html.md) の各リファレンスを参照してください。
 
 ## 条件とリストのレンダー
 
@@ -407,7 +407,7 @@ return <>{user() ? <Profile user={user()!} /> : <SignIn />}</>;
 ```
 
 コンパイラは `user()` を追跡し、truthy かどうかの評価が変わったときにアクティブな分岐を更新します。
-明示的なフォールバック、絞り込まれた値、同一性の制御が役立つ場合は [`Show`](/reference/solid-js/components-jsx/show) を使います。
+明示的なフォールバック、絞り込まれた値、同一性の制御が役立つ場合は [`Show`](/docs/reference/solid-js/components-jsx/show.md) を使います。
 
 ```tsx
 import { Show } from "solid-js";
@@ -443,7 +443,7 @@ return (
 ```
 
 `map` は通常の関数呼び出しなので、この式を再評価するとマップされた行の出力が作り直されます。
-リアクティブなリストでは、[`For`](/reference/solid-js/components-jsx/for) が明示的な同一性モードに従って行を保持します。
+リアクティブなリストでは、[`For`](/docs/reference/solid-js/components-jsx/for.md) が明示的な同一性モードに従って行を保持します。
 
 ```tsx
 import { For } from "solid-js";
@@ -459,7 +459,7 @@ React の `key` と Solid の `keyed` 関数は、どちらも行の同一性を
 デフォルトでは `For` はアイテムの同一性を使います。
 代わりに `keyed={false}` で位置による同一性を使うことも、上の例のようなキー関数を使うこともできます。
 
-配列アイテムや同一性を差分比較せずに、ストアに対する位置的なレンダリングを行うには [`Repeat`](/reference/solid-js/components-jsx/repeat) を使います。
+配列アイテムや同一性を差分比較せずに、ストアに対する位置的なレンダリングを行うには [`Repeat`](/docs/reference/solid-js/components-jsx/repeat.md) を使います。
 その `from` と `count` props は、絶対インデックスが重複範囲内に残る行を保持しながら、スライドウィンドウを表現できます。
 
 ## コンテキストで状態を共有する
@@ -584,7 +584,7 @@ Solid は配列を再帰的に平坦化し、各 ref コールバックを順番
 親は `props.ref` を通して要素を受け取り、コンポーネントはラッパーコールバックなしで、ローカルの要素アクセスと追加のディレクティブを組み合わせられます。
 
 要素の振る舞いに、再利用可能なセットアップ、ネイティブイベントのオプション、オーナー付きのリアクティブな処理、クリーンアップが必要な場合は ref ディレクティブを使います。
-そのライフサイクルとコールバックの合成については、[ref とディレクティブ](/concepts/components-and-jsx#refs-and-directives) と [`ref` リファレンス](/reference/solid-web/jsx-properties/ref) を参照してください。
+そのライフサイクルとコールバックの合成については、[ref とディレクティブ](/docs/concepts/components-and-jsx.md#refs-and-directives) と [`ref` リファレンス](/docs/reference/solid-web/jsx-properties/ref.md) を参照してください。
 
 ## 非同期 UI を状態で対応付ける
 
@@ -632,8 +632,8 @@ function Page(props: { id: string }) {
 }
 ```
 
-[`Loading`](/reference/solid-js/components-jsx/loading) は、確定した結果がまだない読み取りを処理します。
-[`Errored`](/reference/solid-js/components-jsx/errored) は、リアクティブグラフを通って伝播するエラーを処理します。
+[`Loading`](/docs/reference/solid-js/components-jsx/loading.md) は、確定した結果がまだない読み取りを処理します。
+[`Errored`](/docs/reference/solid-js/components-jsx/errored.md) は、リアクティブグラフを通って伝播するエラーを処理します。
 
 非同期メモは `Page` で作成されますが、`Loading` は `props.user()` の読み取りの直上である `UserProfile` に置かれています。
 ローディングバウンダリは、「まだ準備できていない（not ready）」と報告できる読み取りのオーナー祖先であることだけが必要です。
@@ -709,7 +709,7 @@ React アプリケーションも、フレームワークのローディング�
 React は実験的な `SuspenseList` API を通じて、複数の Suspense バウンダリの調整を検討してきました。
 React 19 では `SuspenseList` は安定版 API に含まれていませんが、実験的なリリースやフレームワークの抽象化でこの概念に出会うことがあります。
 
-Solid の [`Reveal`](/reference/solid-js/components-jsx/reveal) は、兄弟の `Loading` バウンダリが表示されるタイミングを調整します。
+Solid の [`Reveal`](/docs/reference/solid-js/components-jsx/reveal.md) は、兄弟の `Loading` バウンダリが表示されるタイミングを調整します。
 
 ```tsx
 import { Loading, Reveal } from "solid-js";
@@ -732,7 +732,7 @@ import { Loading, Reveal } from "solid-js";
 - `"natural"` は各領域が自身の処理の確定時に表示されるようにします。
 
 ネストされた `Reveal` グループは、親グループ内の 1 つのスロットとして合成されます。
-順序付け、折りたたまれたフォールバック、グループのメンバーシップについては [バウンダリ](/concepts/boundaries#reveal-order) を参照してください。
+順序付け、折りたたまれたフォールバック、グループのメンバーシップについては [バウンダリ](/docs/concepts/boundaries.md#reveal-order) を参照してください。
 
 ### 更新は暗黙的に調整される
 
@@ -755,13 +755,13 @@ function selectUser(id: string) {
 Solid は現在のコミット済みビューを表示したままにし、その処理が確定したときに参加する書き込みをまとめて表示します。
 この UI 保持の振る舞いが、React のトランジションに最も近いものです。
 
-保持されたビューに更新中のインジケーターが必要な場合は [`isPending`](/reference/solid-js/reactivity/is-pending) を使います。
+保持されたビューに更新中のインジケーターが必要な場合は [`isPending`](/docs/reference/solid-js/reactivity/is-pending.md) を使います。
 この動作は、明示的な `startTransition` 呼び出しではなく、自動的に行われます。
 
-Solid の [`action`](/reference/solid-js/lifecycle-actions/action) は、ジェネレーターベースのミューテーション、楽観的状態、リフレッシュの振る舞いを調整します。
+Solid の [`action`](/docs/reference/solid-js/lifecycle-actions/action.md) は、ジェネレーターベースのミューテーション、楽観的状態、リフレッシュの振る舞いを調整します。
 「アクション」という用語が共通していても、異なるエコシステムの action API が同一の契約を持つことを意味しません。
 
-準備状態、保留された更新、エラー、アクション、楽観的状態、永続的なリフレッシュについては [非同期リアクティビティ](/concepts/async-reactivity) を参照してください。
+準備状態、保留された更新、エラー、アクション、楽観的状態、永続的なリフレッシュについては [非同期リアクティビティ](/docs/concepts/async-reactivity.md) を参照してください。
 
 ## 段階的な移行を計画する
 
@@ -778,8 +778,8 @@ React と Solid の JSX は似ていますが、コンパイルされたコン�
 6. 非同期の読み取り、ローディング UI、エラー、ミューテーションを Solid の非同期モデルに移します。
 7. その子孫の移動が完了したら、React のルートまたはルート境界を廃止します。
 
-Solid プロジェクトの作成には [クイックスタート](/getting-started/quick-start) を使います。
-[ルーティングの概要](/routing/overview) では、ルーターに依存しないアプリケーション境界を説明し、サポートされているルーターへのリンクを示しています。
+Solid プロジェクトの作成には [クイックスタート](/docs/getting-started/quick-start.md) を使います。
+[ルーティングの概要](/docs/routing/overview.md) では、ルーターに依存しないアプリケーション境界を説明し、サポートされているルーターへのリンクを示しています。
 
 ## 移行結果を確認する
 

@@ -134,8 +134,8 @@ expect(button).toHaveTextContent("Clicks: 1");
 ```
 
 クリックイベントはシグナルの更新をステージし、通常の読み取りはバッチが適用されるまで最後にコミットされた値を返し続けます。
-[`flush()`](/reference/solid-js/reactivity/flush) はステージされた値をコミットしてキューにある処理をすべて流し切るため、検証の実行時に DOM は最新の状態になります。
-非同期処理は待ちません。非同期メモのように契約上非同期の振る舞いには、`flush()` ではなく非同期クエリか [`resolve(fn)`](/reference/solid-js/advanced/interop-async/resolve) を使ってください。
+[`flush()`](/docs/reference/solid-js/reactivity/flush.md) はステージされた値をコミットしてキューにある処理をすべて流し切るため、検証の実行時に DOM は最新の状態になります。
+非同期処理は待ちません。非同期メモのように契約上非同期の振る舞いには、`flush()` ではなく非同期クエリか [`resolve(fn)`](/docs/reference/solid-js/advanced/interop-async/resolve.md) を使ってください。
 
 Solid Testing Library はマウント済みコンテナを追跡し、`cleanup` をエクスポートしています。
 テストランナーがグローバルな `afterEach` を公開している場合、cleanup を自動で登録できます。
@@ -394,6 +394,6 @@ jsdom がインストールされていません。
 
 ## 次のステップ
 
-- [リアクティビティのデバッグ](/guides/debugging-reactivity#the-test-sees-the-old-dom): `flush()` の全体像、非同期値の `resolve`、そして `flush()` が許されない唯一の場所。
-- [セッションと認証](/building-apps/sessions-and-auth): 上のサーバーテストが動かしたセッションモジュール。
-- [環境](/building-apps/environment): `virtual:env/server` を読むサーバーコードに、前の節で説明したモジュールリセットが必要な理由。
+- [リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md#the-test-sees-the-old-dom): `flush()` の全体像、非同期値の `resolve`、そして `flush()` が許されない唯一の場所。
+- [セッションと認証](/docs/building-apps/sessions-and-auth.md): 上のサーバーテストが動かしたセッションモジュール。
+- [環境](/docs/building-apps/environment.md): `virtual:env/server` を読むサーバーコードに、前の節で説明したモジュールリセットが必要な理由。

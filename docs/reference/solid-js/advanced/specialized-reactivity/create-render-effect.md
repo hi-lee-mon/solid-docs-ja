@@ -94,5 +94,5 @@ function bindText(el: HTMLElement, source: () => string) {
 
 ## 関連項目
 
-- [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects)
-- [リアクティビティのデバッグ](/guides/debugging-reactivity)
+- [不要なエフェクトを避ける](/docs/guides/avoid-unnecessary-effects.md)
+- [リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md)

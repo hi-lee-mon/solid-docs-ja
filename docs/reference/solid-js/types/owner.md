@@ -35,4 +35,4 @@ interface Owner {
 
 ## さらに学ぶ
 
-- [TypeScript](/guides/typescript)
+- [TypeScript](/docs/guides/typescript.md)

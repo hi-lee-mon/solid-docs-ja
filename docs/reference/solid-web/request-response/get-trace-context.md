@@ -42,10 +42,10 @@ await fetch(url, { headers: { ...getTraceContext()?.entries } });
 
 ## 関連項目
 
-- [信頼されたリクエストコンテキストを読み取る](/building-apps/server-functions/arguments-and-security#read-trusted-request-context)
-- [リクエストをブラウザまで追跡する](/guides/observability#follow-a-request-into-the-browser)
-- [ミューテーションとレスポンス](/building-apps/server-functions/mutations-and-responses)
-- [ミドルウェアと API ルート](/building-apps/middleware-and-api-routes)
+- [信頼されたリクエストコンテキストを読み取る](/docs/building-apps/server-functions/arguments-and-security.md#read-trusted-request-context)
+- [リクエストをブラウザまで追跡する](/docs/guides/observability.md#follow-a-request-into-the-browser)
+- [ミューテーションとレスポンス](/docs/building-apps/server-functions/mutations-and-responses.md)
+- [ミドルウェアと API ルート](/docs/building-apps/middleware-and-api-routes.md)
 
 ## 関連する型
 

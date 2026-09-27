@@ -16,30 +16,30 @@ Vite がそのマニフェストを配信し、各ルーターがルーター固
 
 ### `filesystem-routing`
 
-- [`PageFileSystemRouter`、`FlatFileSystemRouter`、ファイル名ヘルパー](/reference/filesystem-routing/conventions)
-- [`BaseFileSystemRouter`、スキャンユーティリティ、モジュール解析、マニフェスト型](/reference/filesystem-routing/core)
-- [`buildRouteTree`、`stripRouteGroups`、`RouteTreeEntry`](/reference/filesystem-routing/tree)
+- [`PageFileSystemRouter`、`FlatFileSystemRouter`、ファイル名ヘルパー](/docs/reference/filesystem-routing/conventions.md)
+- [`BaseFileSystemRouter`、スキャンユーティリティ、モジュール解析、マニフェスト型](/docs/reference/filesystem-routing/core.md)
+- [`buildRouteTree`、`stripRouteGroups`、`RouteTreeEntry`](/docs/reference/filesystem-routing/tree.md)
 
 ### `filesystem-routing/tree`
 
-スキャナーを読み込まずに、[ツリー構築の関数と型](/reference/filesystem-routing/tree)をエクスポートします。
+スキャナーを読み込まずに、[ツリー構築の関数と型](/docs/reference/filesystem-routing/tree.md)をエクスポートします。
 
 ### `filesystem-routing/vite`
 
-[`fileRoutes(options?)`](/reference/filesystem-routing/vite)、そのオプション型、および低レベルの Vite アダプターヘルパーをエクスポートします。
+[`fileRoutes(options?)`](/docs/reference/filesystem-routing/vite.md)、そのオプション型、および低レベルの Vite アダプターヘルパーをエクスポートします。
 
 ### `filesystem-routing/api`
 
-[API マッチャーと fetch スタイルのミドルウェアアダプター](/reference/filesystem-routing/api)をエクスポートします。
+[API マッチャーと fetch スタイルのミドルウェアアダプター](/docs/reference/filesystem-routing/api.md)をエクスポートします。
 
 ### `filesystem-routing/types`
 
-[`virtual:file-routes`](/reference/filesystem-routing/manifest) 用の ambient 宣言を提供します。
+[`virtual:file-routes`](/docs/reference/filesystem-routing/manifest.md) 用の ambient 宣言を提供します。
 
 ### `virtual:file-routes`
 
 生成されるモジュールは、フラットなマニフェストをデフォルトエクスポートし、ネストされたページエントリーを `pageRoutes` としてエクスポートします。
-[マニフェストモジュール](/reference/filesystem-routing/manifest)を参照してください。
+[マニフェストモジュール](/docs/reference/filesystem-routing/manifest.md)を参照してください。
 
 ## Solid Router との境界
 

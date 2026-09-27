@@ -8,7 +8,7 @@ description: "素の anchor でページ間をリンクし、コンパイラが�
 リンクは `<a>` であり、ルーターは自身の内側にある同一オリジンの anchor へのクリックをクライアントサイドのナビゲーションに変えます。
 この選択がこのページ全体を形づくっています。URL が API であり、ルーターの役割は、正しい URL を構築し、ユーザーがいる URL に反応するのを助けることです。
 
-例は[概要](/routing/solid-router)のストアを引き続き使います。
+例は[概要](/docs/routing/solid-router/index.md)のストアを引き続き使います。
 
 ## リンクは anchor
 
@@ -99,7 +99,7 @@ function CheckoutButton() {
 
 :::tip[行き先はサーバーに決めさせる]
 ナビゲーションで終わるミューテーションに `useNavigate` は不要です。
-サーバー関数やアクションから `redirect(paths.account.orders(id))` を返すと、レスポンスが届いたときに、再検証と同じ更新内でルーターがナビゲートします。その経路は[データ](/routing/solid-router/data#what-revalidates-after-a-mutation)ページで説明しています。
+サーバー関数やアクションから `redirect(paths.account.orders(id))` を返すと、レスポンスが届いたときに、再検証と同じ更新内でルーターがナビゲートします。その経路は[データ](/docs/routing/solid-router/data.md#what-revalidates-after-a-mutation)ページで説明しています。
 :::
 
 ## ロケーションを読み取る
@@ -185,7 +185,7 @@ issues を報告したスキーマはその読み取りではスキップされ�
 
 データの準備に少し時間がかかるページへのリンクをクリックしたときを考えます。
 現在のページは画面に残り、クリックされたリンクは遷移先の準備ができるまで `data-pending` 属性を持ちます。
-これは[非同期リアクティビティ](/concepts/async-reactivity#settled-view-and-in-flight-work)で説明している保留された更新の、目に見える側面です。ローディングスピナーが一切ないアプリでもレスポンシブに感じられるのはそのためです。リンク自体が何かが起きていることを示します。
+これは[非同期リアクティビティ](/docs/concepts/async-reactivity.md#settled-view-and-in-flight-work)で説明している保留された更新の、目に見える側面です。ローディングスピナーが一切ないアプリでもレスポンシブに感じられるのはそのためです。リンク自体が何かが起きていることを示します。
 
 ルーターは処理する anchor に3つの属性を設定します:
 
@@ -290,7 +290,7 @@ anchor が `<Router>` の外側にある、`target` を持つ、または別の�
 
 ## 次のステップ
 
-- [ネストされたルートとレイアウト](/routing/solid-router/nested-routes): セクションナビゲーションがどこに置かれ、リンク間で何がマウントされ続けるか。
-- [データロードとミューテーション](/routing/solid-router/data): ルーターがホバーでプリロードするものと、アクションからの `redirect()`。
-- [状態管理](/guides/state-management#state-in-the-url): どのページ状態が URL に属するべきか。
-- [ナビゲーション API リファレンス](/reference/solid-router/navigation): このページのすべてのプリミティブのシグネチャ。
+- [ネストされたルートとレイアウト](/docs/routing/solid-router/nested-routes.md): セクションナビゲーションがどこに置かれ、リンク間で何がマウントされ続けるか。
+- [データロードとミューテーション](/docs/routing/solid-router/data.md): ルーターがホバーでプリロードするものと、アクションからの `redirect()`。
+- [状態管理](/docs/guides/state-management.md#state-in-the-url): どのページ状態が URL に属するべきか。
+- [ナビゲーション API リファレンス](/docs/reference/solid-router/navigation.md): このページのすべてのプリミティブのシグネチャ。

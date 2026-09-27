@@ -35,7 +35,7 @@ const DEV: Dev | undefined;
 
 ## 詳しくは
 
-- [リアクティビティのデバッグ](/guides/debugging-reactivity)
+- [リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md)
 
 ## 関連する型
 

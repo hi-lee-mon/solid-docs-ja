@@ -45,7 +45,7 @@ function markSafeError<E>(error: E): E;
 
 ### よくある問題
 
-- [`respond()` がクライアントに `Internal Server Error` として届く](/guides/forms#respond-reaches-the-client-as-internal-server-error)
+- [`respond()` がクライアントに `Internal Server Error` として届く](/docs/guides/forms.md#respond-reaches-the-client-as-internal-server-error)
 
 ## `isSafeError`
 
@@ -65,7 +65,7 @@ function isSafeError(value: unknown): value is Error;
 
 ## 関連項目
 
-- [引数とセキュリティ](/building-apps/server-functions/arguments-and-security)
-- [フォーム](/guides/forms)
-- [ミューテーションとレスポンス](/building-apps/server-functions/mutations-and-responses)
-- [ミドルウェアと API ルート](/building-apps/middleware-and-api-routes)
+- [引数とセキュリティ](/docs/building-apps/server-functions/arguments-and-security.md)
+- [フォーム](/docs/guides/forms.md)
+- [ミューテーションとレスポンス](/docs/building-apps/server-functions/mutations-and-responses.md)
+- [ミドルウェアと API ルート](/docs/building-apps/middleware-and-api-routes.md)

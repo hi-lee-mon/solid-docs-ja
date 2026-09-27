@@ -125,9 +125,9 @@ const html = await renderToStream(() => <App />);
 
 ## 関連項目
 
-- [ストリーミングレンダリング](/concepts/rendering-and-ssr#streaming-rendering)
-- [レンダリングと SSR](/concepts/rendering-and-ssr)
-- [レンダリングモードを選ぶ](/guides/choose-a-rendering-mode)
+- [ストリーミングレンダリング](/docs/concepts/rendering-and-ssr.md#streaming-rendering)
+- [レンダリングと SSR](/docs/concepts/rendering-and-ssr.md)
+- [レンダリングモードを選ぶ](/docs/guides/choose-a-rendering-mode.md)
 
 ## 関連型
 

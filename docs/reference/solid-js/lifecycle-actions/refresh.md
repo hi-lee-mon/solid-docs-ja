@@ -94,11 +94,11 @@ const fresh = await refresh(user);
 
 ## よくある問題
 
-- [クリック後に画面が固まったように見える](/guides/debugging-reactivity#the-screen-looks-dead-after-a-click)
+- [クリック後に画面が固まったように見える](/docs/guides/debugging-reactivity.md#the-screen-looks-dead-after-a-click)
 
 ## 関連項目
 
-- [データを最新に保つ](/guides/data-fetching-patterns#keep-data-fresh)
-- [ミューテートしてから再フェッチ](/guides/data-fetching-patterns#mutate-then-refetch)
-- [非同期リアクティビティ](/concepts/async-reactivity)
-- [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects)
+- [データを最新に保つ](/docs/guides/data-fetching-patterns.md#keep-data-fresh)
+- [ミューテートしてから再フェッチ](/docs/guides/data-fetching-patterns.md#mutate-then-refetch)
+- [非同期リアクティビティ](/docs/concepts/async-reactivity.md)
+- [不要なエフェクトを避ける](/docs/guides/avoid-unnecessary-effects.md)

@@ -122,6 +122,6 @@ dispose(); // removes the DOM and disposes the reactive root
 
 ## 関連項目
 
-- [クライアントレンダリング](/concepts/rendering-and-ssr#client-rendering)
-- [レンダリングと SSR](/concepts/rendering-and-ssr)
-- [レンダリングモードを選ぶ](/guides/choose-a-rendering-mode)
+- [クライアントレンダリング](/docs/concepts/rendering-and-ssr.md#client-rendering)
+- [レンダリングと SSR](/docs/concepts/rendering-and-ssr.md)
+- [レンダリングモードを選ぶ](/docs/guides/choose-a-rendering-mode.md)

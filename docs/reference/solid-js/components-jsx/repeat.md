@@ -85,10 +85,10 @@ index からコンテンツへの関数、または各 index で繰り返され�
 
 ## よくある問題
 
-- [並べ替え後に行が誤った index を表示する](/guides/lists#a-row-shows-the-wrong-index-after-reordering)
+- [並べ替え後に行が誤った index を表示する](/docs/guides/lists.md#a-row-shows-the-wrong-index-after-reordering)
 
 ## 関連項目
 
-- [大きなリスト上にウィンドウをレンダーする](/guides/lists#render-a-window-over-a-large-list)
-- [コンポーネントと JSX](/concepts/components-and-jsx)
-- [バウンダリ](/concepts/boundaries)
+- [大きなリスト上にウィンドウをレンダーする](/docs/guides/lists.md#render-a-window-over-a-large-list)
+- [コンポーネントと JSX](/docs/concepts/components-and-jsx.md)
+- [バウンダリ](/docs/concepts/boundaries.md)

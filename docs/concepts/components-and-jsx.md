@@ -8,7 +8,7 @@ Solid のコンポーネントは一度だけ実行される関数です。
 状態をセットアップして JSX を返し、そのコンポーネントの生存期間中に再び呼び出されることはありません。
 コンポーネントが再レンダーされるフレームワークから来た場合、このページを読む間ずっと心に留めておくべき事実がこれです: 以下の props・children・制御フローに関するすべてのルールは、関数本体が二度目に実行されないために存在します。
 
-[リアクティビティ](/concepts/reactivity)のページでは、コンポーネント内の JSX が関数の return 後も更新され続ける仕組みを説明しています。
+[リアクティビティ](/docs/concepts/reactivity.md)のページでは、コンポーネント内の JSX が関数の return 後も更新され続ける仕組みを説明しています。
 このページではコンポーネントが行う残りの部分を扱います: props の受け取り、イベントの処理、DOM への到達、リストや条件のレンダリング、他のコンポーネントとの合成です。
 例はあのページのショッピングカートを引き続き使います。
 
@@ -138,9 +138,9 @@ createComponent(LineItem, {
 
 props は子側からは読み取り専用です。
 子が値を変更する必要があるときは、親が prop として関数を渡し、子はイベントハンドラーからそれを呼び出します（次のセクションの `onSave` がそうです）。
-prop のローカルな編集可能なコピーが必要なときは、[ローカルな上書きに書き込み可能な派生値を使う](/guides/avoid-unnecessary-effects#use-a-writable-derivation-for-a-local-override)を参照してください。
+prop のローカルな編集可能なコピーが必要なときは、[ローカルな上書きに書き込み可能な派生値を使う](/docs/guides/avoid-unnecessary-effects.md#use-a-writable-derivation-for-a-local-override)を参照してください。
 
-コンポーネントの契約の型付けについては、[`Component`、`ParentProps`、`FlowProps` の型](/reference/solid-js/types/component-types)を参照してください。
+コンポーネントの契約の型付けについては、[`Component`、`ParentProps`、`FlowProps` の型](/docs/reference/solid-js/types/component-types.md)を参照してください。
 
 ## イベントの処理
 
@@ -164,7 +164,7 @@ function SaveButton(props: { onSave: () => void }) {
 
 `ref` コールバックは、Solid が要素を作成した後にその要素を受け取ります。
 コールバックを使って要素への参照を保持したり、DOM ノードを必要とする動作を適用したりします。
-[非 Solid コードの統合](/guides/integrate-non-solid-code)では、これをチャート・マップ・Web コンポーネントに適用しています。
+[非 Solid コードの統合](/docs/guides/integrate-non-solid-code.md)では、これをチャート・マップ・Web コンポーネントに適用しています。
 
 ```tsx
 function SearchField() {
@@ -246,7 +246,7 @@ function SearchField(props: { onInput: EventListener }) {
 
 ref 配列を使うと、要素アクセス・再利用可能なディレクティブ・サードパーティ統合を、1つのラッパーコールバックを作らずに合成できます。
 ref コールバックの戻り値は無視されます。クリーンアップは `onSettled` などのオーナーを持つプリミティブを通して登録してください。
-受け付ける値とコールバックの動作については [`ref` リファレンス](/reference/solid-web/jsx-properties/ref)を参照してください。
+受け付ける値とコールバックの動作については [`ref` リファレンス](/docs/reference/solid-web/jsx-properties/ref.md)を参照してください。
 
 ## クラス
 
@@ -283,7 +283,7 @@ function SaveButton(props: {
 
 条件付きのクラス名は、連結や `filter(Boolean)`、`join` で文字列を組み立てるのではなく、オブジェクトに入れてください。
 そうすれば Solid は影響を受けるクラストークンを直接追加・削除できます。
-サポートされる各値の形式は [`class` リファレンス](/reference/solid-web/jsx-properties/class)を参照してください。
+サポートされる各値の形式は [`class` リファレンス](/docs/reference/solid-web/jsx-properties/class.md)を参照してください。
 
 ## children と合成
 
@@ -305,7 +305,7 @@ function Panel(props: ParentProps<{ title: string }>) {
 }
 ```
 
-コンポーネントが children を解決・検査・反復する必要があるときは、[`children` ヘルパー](/reference/solid-js/components-context/children)を使います。
+コンポーネントが children を解決・検査・反復する必要があるときは、[`children` ヘルパー](/docs/reference/solid-js/components-context/children.md)を使います。
 これはアクセサーを返し、反復用の `toArray()` を追加します。
 
 ```tsx
@@ -326,9 +326,9 @@ function Stack(props: ParentProps) {
 値がある1つのサブツリーに属し、複数の子孫がその値を必要とするとき（アプリケーション全体の状態を含む）に使います: `App` のルートにあるプロバイダーはすべてのコンポーネントに届きます。
 モジュールスコープのシグナルやストアよりもこちらを推奨します。
 モジュールスコープの状態はオーナーを持たず、サーバーでは1つのモジュールインスタンスがリクエスト間で共有されます。コンテキスト値はアプリごと、またはリクエストごとに作成されます。
-[コンポーネント間での状態共有](/concepts/reactivity#share-state-between-components)ではプロバイダーと `useX` プリミティブのパターンを示し、[状態管理](/guides/state-management#share-with-context)では `value` に何を入れるか、デフォルトが適切なのはいつかを扱っています。
-[`createContext`](/reference/solid-js/components-context/create-context)はプロバイダーコンポーネントでもあるコンテキストを返します。
-[`useContext`](/reference/solid-js/components-context/use-context)は現在のオーナーに関連付けられた値を読み取ります。
+[コンポーネント間での状態共有](/docs/concepts/reactivity.md#share-state-between-components)ではプロバイダーと `useX` プリミティブのパターンを示し、[状態管理](/docs/guides/state-management.md#share-with-context)では `value` に何を入れるか、デフォルトが適切なのはいつかを扱っています。
+[`createContext`](/docs/reference/solid-js/components-context/create-context.md)はプロバイダーコンポーネントでもあるコンテキストを返します。
+[`useContext`](/docs/reference/solid-js/components-context/use-context.md)は現在のオーナーに関連付けられた値を読み取ります。
 
 ```tsx
 import { createContext, useContext, type ParentProps } from "solid-js";
@@ -353,7 +353,7 @@ function ThemeButton() {
 
 ## リストのレンダリング
 
-行が配列から来る場合は [`For`](/reference/solid-js/components-jsx/for)を使います。
+行が配列から来る場合は [`For`](/docs/reference/solid-js/components-jsx/for.md)を使います。
 デフォルトのキー付きモードでは、同一の同一性を持つアイテムに対してマップされた行を再利用します。
 コールバックは生のアイテムとリアクティブなインデックスアクセサーを受け取ります。
 
@@ -386,7 +386,7 @@ function TodoList() {
 その形式ではアイテムアクセサーと安定した数値インデックスを受け取ります。
 同一性を各アイテムの一部から取るべき場合はキー関数を渡します。その形式ではアイテムとインデックスの両方のアクセサーを提供します。
 
-ストア上の位置ベースのレンダリングには [`Repeat`](/reference/solid-js/components-jsx/repeat)を使います。
+ストア上の位置ベースのレンダリングには [`Repeat`](/docs/reference/solid-js/components-jsx/repeat.md)を使います。
 `Repeat` は配列やアイテムの同一性を差分比較するのではなく、数値範囲から行を作成します。
 各行はストア内の自身の位置を直接読み取るため、ストアの更新は変更されたプロパティを読んでいる式だけに通知できます。
 
@@ -425,11 +425,11 @@ function ActivityLog() {
 }
 ```
 
-[リストのガイド](/guides/lists)では、編集・フィルタリング・選択・サーバー再取得をまたいだ行の同一性の維持を扱っています。
+[リストのガイド](/docs/guides/lists.md)では、編集・フィルタリング・選択・サーバー再取得をまたいだ行の同一性の維持を扱っています。
 
 ## 条件付きコンテンツ
 
-[`Show`](/reference/solid-js/components-jsx/show)は `when` が truthy のとき children をレンダーし、それ以外では `fallback` をレンダーします。
+[`Show`](/docs/reference/solid-js/components-jsx/show.md)は `when` が truthy のとき children をレンダーし、それ以外では `fallback` をレンダーします。
 デフォルトの関数の子の形式では、絞り込まれた値のアクセサーを受け取り、`when` が truthy の間は子を保持します。
 
 ```tsx
@@ -450,7 +450,7 @@ function Account() {
 
 `keyed` を付けると、コールバックは生の絞り込まれた値を受け取り、その値の同一性が変わると子が再マウントされます。
 
-複数の条件が相互に排他的な場合は [`Switch` と `Match`](/reference/solid-js/components-jsx/switch-and-match)を使います。
+複数の条件が相互に排他的な場合は [`Switch` と `Match`](/docs/reference/solid-js/components-jsx/switch-and-match.md)を使います。
 `Switch` は最初に truthy となった `Match` をレンダーし、どれも一致しなければフォールバックをレンダーします。
 関数の子は `Show` と同じキー付き・非キー付きの値のルールに従います。
 
@@ -504,7 +504,7 @@ export function Preview() {
 ```
 
 ソースはネイティブのタグ名や非同期コンポーネントに解決されることもあります。
-[`dynamic()` リファレンス](/reference/solid-web/components/dynamic)を参照してください。
+[`dynamic()` リファレンス](/docs/reference/solid-web/components/dynamic.md)を参照してください。
 
 ## 試してみよう: カートから1行を削除する
 
@@ -575,7 +575,7 @@ function Cart() {
 
 `For` はアイテムの同一性で行を再利用します。
 各更新が同じ行に対して新しいオブジェクトを生成する場合（たとえば読み取りのたびに取得した配列をマップするなど）、すべての行が新規になり `For` がそれらを再構築します。
-アイテムの同一性を安定させるか、`id` を読み取るキー関数を渡すか、[ストア](/concepts/stores)を使って変更が既存のオブジェクトに届くようにしてください。
+アイテムの同一性を安定させるか、`id` を読み取るキー関数を渡すか、[ストア](/docs/concepts/stores.md)を使って変更が既存のオブジェクトに届くようにしてください。
 
 ### 値がセットされているのに `Show` がフォールバックをレンダーする
 
@@ -601,9 +601,9 @@ ref コールバックは追跡されずオーナーも持たないため、そ�
 
 ## 次のステップ
 
-- [ストア](/concepts/stores)はカートそのものを保持します: 各プロパティが個別に追跡されるアイテムの配列で、1つの数量を編集しても行は再構築されません。
-- [非同期リアクティビティ](/concepts/async-reactivity)では、Promise からデータを読み取るコンポーネント、次のビューが読み込まれる間に現在のビューが画面に残る理由、`Loading` が代わりにフォールバックを表示するタイミングを扱います。
-- [バウンダリ](/concepts/boundaries)では `Loading`・`Errored` と、それらをツリーのどこに置くかを説明します。
-- [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects)は、コンポーネントにエフェクトを追加する前に読むべきガイドです。
-- [TypeScript](/guides/typescript)では、このページの props・children・ref・イベントの型付け（ジェネリックコンポーネントを含む）を扱います。
-- [アプリの構造](/building-apps/app-structure)では、書いたコンポーネントの周囲に `App` とドキュメントシェルがどう収まるかを示します。
+- [ストア](/docs/concepts/stores.md)はカートそのものを保持します: 各プロパティが個別に追跡されるアイテムの配列で、1つの数量を編集しても行は再構築されません。
+- [非同期リアクティビティ](/docs/concepts/async-reactivity.md)では、Promise からデータを読み取るコンポーネント、次のビューが読み込まれる間に現在のビューが画面に残る理由、`Loading` が代わりにフォールバックを表示するタイミングを扱います。
+- [バウンダリ](/docs/concepts/boundaries.md)では `Loading`・`Errored` と、それらをツリーのどこに置くかを説明します。
+- [不要なエフェクトを避ける](/docs/guides/avoid-unnecessary-effects.md)は、コンポーネントにエフェクトを追加する前に読むべきガイドです。
+- [TypeScript](/docs/guides/typescript.md)では、このページの props・children・ref・イベントの型付け（ジェネリックコンポーネントを含む）を扱います。
+- [アプリの構造](/docs/building-apps/app-structure.md)では、書いたコンポーネントの周囲に `App` とドキュメントシェルがどう収まるかを示します。

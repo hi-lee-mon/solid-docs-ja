@@ -32,7 +32,7 @@ Router 2 のインスタンスを旧 `<Router>` の内側にマウントしな�
 - `createMemoryHistory`
 
 新しいエントリーポイントは、ファクトリー・ルート定義ヘルパー・素のリンク要素・履歴アダプターです。
-インストールとマウントパターンの全体については [Solid Router のセットアップ](/routing/solid-router/setup) を参照してください。
+インストールとマウントパターンの全体については [Solid Router のセットアップ](/docs/routing/solid-router/setup.md) を参照してください。
 
 ## ルーターインスタンスを作成する
 
@@ -196,7 +196,7 @@ const routes = defineRoutes([
 ```
 
 インポートされるモジュールは、ルート配列を `default` または `routes` としてエクスポートできます。
-レイアウトの生存期間と遅延サブツリーの動作については [ネストされたルートとレイアウト](/routing/solid-router/nested-routes) を参照してください。
+レイアウトの生存期間と遅延サブツリーの動作については [ネストされたルートとレイアウト](/docs/routing/solid-router/nested-routes.md) を参照してください。
 
 ## リンクとリダイレクトのコンポーネントを置き換える
 
@@ -209,7 +209,7 @@ const routes = defineRoutes([
 import { A } from "@solidjs/router";
 
 <nav>
-	<A href="/" end activeClass="selected">
+	<A href="/docs/index.md" end activeClass="selected">
 		Home
 	</A>
 	<A href="/users/42" noScroll>
@@ -280,7 +280,7 @@ function LoginRedirect() {
 
 `useCurrentMatches` は `useRouteMatches` に改名します。
 カスタムリンクコンポーネントがリアクティブな `active`、`current`、`pending` の値を必要とする場合は `useLinkState` を使います。
-その他のリンク要素とナビゲーションのオプションについては [ナビゲーションと型付きパス](/routing/solid-router/navigation) を参照してください。
+その他のリンク要素とナビゲーションのオプションについては [ナビゲーションと型付きパス](/docs/routing/solid-router/navigation.md) を参照してください。
 
 ## パラメーターと検索値に型を付ける
 
@@ -418,7 +418,7 @@ revalidate(getUser.keyFor("42"));
 
 `query` がメソッド宣言のないサーバー関数をラップする場合、サーバー関数トランスポートから GET ラッパーを取得します。
 `query` に渡した素の関数は素の関数のままで、そのトランスポートを読み込みも使用もしません。
-ルーターはトランスポートのメソッドを識別する必要があるとき、関数の [宣言メタデータ](/reference/solid-web/server-functions/metadata) を読み取ります。
+ルーターはトランスポートのメソッドを識別する必要があるとき、関数の [宣言メタデータ](/docs/reference/solid-web/server-functions/metadata.md) を読み取ります。
 
 ### 保留中サブミッションを置き換える
 
@@ -501,7 +501,7 @@ form[aria-busy] button {
 Router 2 は、アクションが結果またはエラーを生成した場合にのみサブミッションを保持します。
 void またはメタデータのみの完了も `.onSettled(...)` に到達します。
 アクションフォームには `method="post"` を維持し、サーバーレンダーされるクライアントアクションには安定した名前を付けてください。
-書き直された [データロードとミューテーション](/routing/solid-router/data#show-what-is-happening) のページでは、この分離を動作する例で順に説明しています。
+書き直された [データロードとミューテーション](/docs/routing/solid-router/data.md#show-what-is-happening) のページでは、この分離を動作する例で順に説明しています。
 
 ### レスポンスヘルパーを移す
 
@@ -533,7 +533,7 @@ const save = action(async (form: FormData) => {
 
 レスポンスのメタデータは、再検証キーとリダイレクトを運びます。
 ルーターはそのメタデータをクエリキャッシュとナビゲーションセッションに適用します。
-キャッシュの生存期間・アクションのバインド・リトライ動作については [データロードとミューテーション](/routing/solid-router/data) を参照してください。
+キャッシュの生存期間・アクションのバインド・リトライ動作については [データロードとミューテーション](/docs/routing/solid-router/data.md) を参照してください。
 
 ## サーバーレンダリングとハイドレーションを移行する
 
@@ -610,7 +610,7 @@ export default {
 サーバー関数のアクションフォームは、JavaScript なしの POST とリダイレクト経路を維持します。
 コアランタイムはスクリプトなしのリクエストを検出し、リダイレクトで戻り、結果をワンショットのフラッシュ Cookie に保存します。
 ルーターはリダイレクト後のサーバーレンダーでその結果を読み取ります。
-カスタムハンドラーの配線については [サーバーレンダリングとハイドレーション](/routing/solid-router/server-rendering) を参照してください。
+カスタムハンドラーの配線については [サーバーレンダリングとハイドレーション](/docs/routing/solid-router/server-rendering.md) を参照してください。
 
 ## ファイルシステムルーティングを移行する
 
@@ -667,7 +667,7 @@ export default function Post(props: RouteProps<typeof route>) {
 コード分割されたマニフェストのコンポーネント参照は、Solid の `lazy` コンポーネントになります。
 マニフェストが `codeSplitting: false` で配信される場合、アダプターは `lazy` ラッパーを付けずに通常のコンポーネントをそのまま渡します。
 
-アダプターの契約については [ファイルシステムルートの変換](/routing/solid-router/route-definitions#convert-a-file-system-manifest) を参照してください。
+アダプターの契約については [ファイルシステムルートの変換](/docs/routing/solid-router/route-definitions.md#convert-a-file-system-manifest) を参照してください。
 
 ## 旧来の TypeScript ワークアラウンドを取り除く
 
@@ -703,7 +703,7 @@ const routes = defineRoutes([
 型付きマッチフィルターは、`Router.paths` が受け取る値を絞り込めます。
 組み込みの `int` フィルターはパスビルダーのパラメーターを `number` にしますが、コンポーネントが受け取る URL パラメーターは引き続き文字列です。
 
-完全なシグネチャーは [ルーターファクトリーのリファレンス](/reference/solid-router/router-factory) と [ルート型のリファレンス](/reference/solid-router/types) を参照してください。
+完全なシグネチャーは [ルーターファクトリーのリファレンス](/docs/reference/solid-router/router-factory.md) と [ルート型のリファレンス](/docs/reference/solid-router/types.md) を参照してください。
 
 ## 削除チェックリスト
 

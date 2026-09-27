@@ -101,11 +101,11 @@ function Show<T>(props: {
 
 ## よくある問題
 
-- [値がセットされているのに `Show` がフォールバックをレンダーする](/concepts/components-and-jsx#show-renders-the-fallback-even-though-the-value-is-set)
-- [ページに値ではなく `function` や `() =>` という文字が表示される](/concepts/reactivity#the-page-shows-the-words-function-or---instead-of-the-value)
+- [値がセットされているのに `Show` がフォールバックをレンダーする](/docs/concepts/components-and-jsx.md#show-renders-the-fallback-even-though-the-value-is-set)
+- [ページに値ではなく `function` や `() =>` という文字が表示される](/docs/concepts/reactivity.md#the-page-shows-the-words-function-or---instead-of-the-value)
 
 ## 関連項目
 
-- [条件付きコンテンツ](/concepts/components-and-jsx#conditional-content)
-- [コンポーネントと JSX](/concepts/components-and-jsx)
-- [バウンダリ](/concepts/boundaries)
+- [条件付きコンテンツ](/docs/concepts/components-and-jsx.md#conditional-content)
+- [コンポーネントと JSX](/docs/concepts/components-and-jsx.md)
+- [バウンダリ](/docs/concepts/boundaries.md)

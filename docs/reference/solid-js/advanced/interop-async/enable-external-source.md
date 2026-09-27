@@ -43,9 +43,9 @@ function enableExternalSource(config: ExternalSourceConfig): void;
 
 ## 関連項目
 
-- [外部ソースをグラフに流し込む](/guides/integrate-non-solid-code#feed-an-outside-source-into-the-graph)
-- [非同期リアクティビティ](/concepts/async-reactivity)
-- [非 Solid コードの統合](/guides/integrate-non-solid-code)
+- [外部ソースをグラフに流し込む](/docs/guides/integrate-non-solid-code.md#feed-an-outside-source-into-the-graph)
+- [非同期リアクティビティ](/docs/concepts/async-reactivity.md)
+- [非 Solid コードの統合](/docs/guides/integrate-non-solid-code.md)
 
 ## 関連する型
 

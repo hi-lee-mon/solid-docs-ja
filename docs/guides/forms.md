@@ -15,13 +15,13 @@ description: "サーバー関数と Solid Router のアクションでフォー�
 4 つ目は、フォームをアドレス帳のエントリーに変え、サーバーが確認する前に一覧に表示されるようにします。
 各パスはそれだけで動作するフォームです。アプリが必要とする段階で止めてください。
 
-このガイドは、[サーバー関数](/building-apps/server-functions)を有効にし、[Solid Router](/routing/solid-router)をマウントした `fullstack` プロジェクトを前提とします。
+このガイドは、[サーバー関数](/docs/building-apps/server-functions/index.md)を有効にし、[Solid Router](/docs/routing/solid-router/index.md)をマウントした `fullstack` プロジェクトを前提とします。
 
 :::pitfall[`action` という名前の関数が 2 つある]
 このガイドでは `@solidjs/router` の `action` を使います。
 これは関数をラップして、フォームがそこへサブミットでき、ルーターがそのサブミッションを追跡できるようにするものです。
 
-`solid-js` も [`action`](/reference/solid-js/lifecycle-actions/action) をエクスポートしています。そちらはジェネレーターをリアクティブなトランザクションとして実行するもので、[ミューテーション](/concepts/mutations)で説明しています。
+`solid-js` も [`action`](/docs/reference/solid-js/lifecycle-actions/action.md) をエクスポートしています。そちらはジェネレーターをリアクティブなトランザクションとして実行するもので、[ミューテーション](/docs/concepts/mutations.md)で説明しています。
 エディターの自動インポートは両方を提示しますが、`<form action={coreAction}>` はコアの `action` が URL を生成しないため型レベルで失敗します。
 ルーターの `action` は内部でコアのものを使っています。
 このページのコードに出てくる `action` はすべてルーターのものです。
@@ -84,7 +84,7 @@ export default function AddressPage() {
 
 :::note[サーバー関数のファイルの置き場所]
 サーバー関数はページの隣ではなく `src/data/` に置きます。
-メソッド検出がオンの場合、`src/routes` 配下のファイルは大文字の HTTP メソッドをエクスポートした時点で [APIルート](/building-apps/middleware-and-api-routes#api-routes)になります。サーバー関数を `src/data` に置いておけば、後からのエクスポートが誤ってそれをルートに変えてしまうことはありません。
+メソッド検出がオンの場合、`src/routes` 配下のファイルは大文字の HTTP メソッドをエクスポートした時点で [APIルート](/docs/building-apps/middleware-and-api-routes.md#api-routes)になります。サーバー関数を `src/data` に置いておけば、後からのエクスポートが誤ってそれをルートに変えてしまうことはありません。
 :::
 
 `action(saveAddress)` はサーバー関数の URL にシリアライズされる値を返すため、`action={submitAddress}` は HTML では通常の `action="..."` 属性としてレンダーされます。
@@ -94,7 +94,7 @@ JavaScript がオンの場合、代わりにルーターがサブミットをイ
 ルーターはサーバー関数クライアントを通じて `saveAddress` を呼び出し、関数がリダイレクトを返すとページ読み込みなしで遷移します。
 どちらの経路も同じ `FormData` で同じ関数を実行します。
 
-[ルーターのサブミッションを追加する](/building-apps/server-functions/mutations-and-responses#add-router-submissions)では、インラインの書き方とその使いどきを説明しています。
+[ルーターのサブミッションを追加する](/docs/building-apps/server-functions/mutations-and-responses.md#add-router-submissions)では、インラインの書き方とその使いどきを説明しています。
 
 ここでは 2 つの細部が機能しています。
 input は非制御（uncontrolled）です: Solid はユーザーが入力している間その値を読み取らず、ブラウザーがサブミット時に `FormData` を組み立てます。
@@ -164,7 +164,7 @@ if (!parsed.success) {
 
 本番ビルドで `Avoid` の版を実行すると、クライアントが受け取るのはフィールドメッセージのない `Internal Server Error` です。ランタイムは、スタックトレースやデータベースエラーが漏れないよう、印のないスローされた `Error` を汎用メッセージに置き換えるためです。
 エンベロープをスローするのは意図的な制御フローです: ランタイムは開発でも本番でも `400` と値を保持します。
-スローする値が意図的に `Error` であるケース向けの `markSafeError` は、[スローされたエラーを処理する](/building-apps/server-functions/mutations-and-responses#handle-thrown-errors)で説明しています。
+スローする値が意図的に `Error` であるケース向けの `markSafeError` は、[スローされたエラーを処理する](/docs/building-apps/server-functions/mutations-and-responses.md#handle-thrown-errors)で説明しています。
 
 スキーマと `valibot` は `"use server"` の本文内でのみ使われるため、クライアントバンドルには入りません。
 `AddressIssues` 型は、次のパスでクライアントが使うためにエクスポートされています。
@@ -246,7 +246,7 @@ export default function AddressPage() {
 `useSubmissions(submitAddress)` は、このアクションの確定済みサブミッションのリアクティブな配列を返します。各要素は送信された `input` と、`result` または `error` のどちらかを持ちます。
 `saveAddress` が `respond()` エンベロープをスローすると、運ばれた値が `submission.error` になり、`issues()` はここからフィールドメッセージを読み取ります。
 リダイレクトを返したサブミッションは一覧に残りません。
-`issues()` は JSX から読み取られるプレーンな派生関数で、[リアクティビティ](/concepts/reactivity)ページのルールに従っています。
+`issues()` は JSX から読み取られるプレーンな派生関数で、[リアクティビティ](/docs/concepts/reactivity.md)ページのルールに従っています。
 
 :::deep-dive[JavaScript なしでエラーがページへ届く仕組み]
 クライアントなしでフォームが投稿されると、サーバー関数ランタイムは `400` をスクリプトへ渡せません。
@@ -300,7 +300,7 @@ export async function addAddress(form: FormData) {
 }
 ```
 
-`toIssues` はパス 2 のループをヘルパーに移したもので、`currentCustomerId()` は[セッションと認証](/building-apps/sessions-and-auth)のセッション読み取りを表しています。
+`toIssues` はパス 2 のループをヘルパーに移したもので、`currentCustomerId()` は[セッションと認証](/docs/building-apps/sessions-and-auth.md)のセッション読み取りを表しています。
 `reload({ revalidate: getAddresses.key })` は、アクション完了時にどのクエリを再フェッチするかをルーターに伝えます。
 
 ページは楽観的ストアを通じて一覧を読み取り、アクションの `.onSubmit` フックから送信されたフィールドをそこへプッシュします:
@@ -360,7 +360,7 @@ export default function AddressPage() {
 不正な郵便番号を投稿すると、`400` が届いた時点でその行は消えます。楽観的書き込みはオーバーレイであり、成功・失敗のどちらでもアクションが確定した時点で Solid が破棄するためです。理由はパス 3 のインラインメッセージが説明します。
 
 `.onSubmit` はアクションの引数（ここでは `FormData`）を受け取り、アクションのトランザクションの最初のステップとして実行されるため、この書き込みは単独でコミットされるのではなくミューテーションと一緒に保持されます。
-[サーバーが確認する前](/routing/solid-router/data#before-the-server-confirms)でこのフックを説明し、[ミューテーション](/concepts/mutations)ではなぜオーバーレイにロールバックコードが不要なのかを説明しています。
+[サーバーが確認する前](/docs/routing/solid-router/data.md#before-the-server-confirms)でこのフックを説明し、[ミューテーション](/docs/concepts/mutations.md)ではなぜオーバーレイにロールバックコードが不要なのかを説明しています。
 
 JavaScript を無効にして同じフォームを送信してください。
 ブラウザーは投稿し、`addAddress` が実行され、`reload` がブラウザーをページへ戻し、サーバーは新しい住所が入った一覧をレンダーします。
@@ -400,7 +400,7 @@ function PostalCodeField() {
 
 `123` と打てばメッセージが現れ、あと 2 桁打てば消えます。
 `value={postalCode()}` がシグナルを input へ書き込み、`onInput` が input をシグナルへ書き戻します。
-メッセージはエフェクトから設定される 2 つ目のシグナルではなく、値のメモです。エフェクト版が実行時に何をするかは[不要なエフェクトを避ける](/guides/avoid-unnecessary-effects#calculate-values-when-they-are-read)で説明しています。
+メッセージはエフェクトから設定される 2 つ目のシグナルではなく、値のメモです。エフェクト版が実行時に何をするかは[不要なエフェクトを避ける](/docs/guides/avoid-unnecessary-effects.md#calculate-values-when-they-are-read)で説明しています。
 input は `name` を維持しているため、同じ `FormData` がサーバー関数へ届き、サーバー側のスキーマも引き続き実行されます。
 
 :::tip[ライブフィードバックが必要なフィールドだけを制御対象にする]
@@ -429,7 +429,7 @@ function AddressForm(props: { address: Address }) {
 第 2 引数は、最初の派生が届く前にストアが開始するシードです。
 編集は `draft` へ書き込まれます。
 `props.address` が変わると（例えば保存と再検証のあと）、ドラフトは新しいソースへリセットされます。
-フィールドごとのバリデーションを含む完全なパターンと、それが置き換えるエフェクトベースのコピーは[ローカルな上書きには書き込み可能な派生を使う](/guides/avoid-unnecessary-effects#use-a-writable-derivation-for-a-local-override)で説明しています。
+フィールドごとのバリデーションを含む完全なパターンと、それが置き換えるエフェクトベースのコピーは[ローカルな上書きには書き込み可能な派生を使う](/docs/guides/avoid-unnecessary-effects.md#use-a-writable-derivation-for-a-local-override)で説明しています。
 
 ## よくある問題
 
@@ -475,7 +475,7 @@ input に `name` 属性がないか、フォームが `method="get"` を使っ�
 
 ## 次のステップ
 
-- [データの読み込みとミューテーション](/routing/solid-router/data): バインド引数向けの `.with()`、ミューテーション後に何が再検証されるか、そしてパス 4 の楽観的パターンのカート版。
-- [プログレッシブエンハンスメント](/building-apps/server-functions/progressive-enhancement): サーバー関数ランタイムがスクリプトなしのリクエストに対して何をするか。ルーターの外にあるフォーム向け。
-- [引数とセキュリティ](/building-apps/server-functions/arguments-and-security): その他の引数エンコーディングと、POST を守る同一オリジンチェック。
-- [セッションと認証](/building-apps/sessions-and-auth): 同じフォームの形をサインインとサインアウトに適用。
+- [データの読み込みとミューテーション](/docs/routing/solid-router/data.md): バインド引数向けの `.with()`、ミューテーション後に何が再検証されるか、そしてパス 4 の楽観的パターンのカート版。
+- [プログレッシブエンハンスメント](/docs/building-apps/server-functions/progressive-enhancement.md): サーバー関数ランタイムがスクリプトなしのリクエストに対して何をするか。ルーターの外にあるフォーム向け。
+- [引数とセキュリティ](/docs/building-apps/server-functions/arguments-and-security.md): その他の引数エンコーディングと、POST を守る同一オリジンチェック。
+- [セッションと認証](/docs/building-apps/sessions-and-auth.md): 同じフォームの形をサインインとサインアウトに適用。

@@ -20,7 +20,7 @@ source_path: "packages/web/server-functions/src/client.ts"
 
 サーバー関数の読み取りが HTTP GET を使えることを宣言します。エンコードされた引数が収まる場合は呼び出しにキャッシュ可能な URL が使われ、収まらない場合は読み取り専用の POST にフォールバックします。
 
-> キャッシュ、URL の制限、HEAD の挙動については[読み取り、ストリーム、ライブデータ](/building-apps/server-functions/reads-and-live-data)を参照してください。
+> キャッシュ、URL の制限、HEAD の挙動については[読み取り、ストリーム、ライブデータ](/docs/building-apps/server-functions/reads-and-live-data.md)を参照してください。
 
 ## インポート
 
@@ -53,9 +53,9 @@ export const getUser = GET(async (id: string) => {
 
 ## よくある問題
 
-- [`action` が関数でない、またはフォーム属性がソースコードとしてレンダーされる](/guides/forms#action-is-not-a-function-or-the-form-attribute-renders-as-source-code)
+- [`action` が関数でない、またはフォーム属性がソースコードとしてレンダーされる](/docs/guides/forms.md#action-is-not-a-function-or-the-form-attribute-renders-as-source-code)
 
 ## 関連項目
 
-- [読み取り、ストリーム、ライブデータ](/building-apps/server-functions/reads-and-live-data)
-- [サーバー関数](/building-apps/server-functions)
+- [読み取り、ストリーム、ライブデータ](/docs/building-apps/server-functions/reads-and-live-data.md)
+- [サーバー関数](/docs/building-apps/server-functions/index.md)

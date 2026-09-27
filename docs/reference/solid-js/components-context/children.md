@@ -63,12 +63,12 @@ function List(props: { children: Element }) {
 
 ## よくある問題
 
-- [親のシグナルが変わっても子が更新されない](/concepts/components-and-jsx#a-child-does-not-update-when-the-parents-signal-changes)
+- [親のシグナルが変わっても子が更新されない](/docs/concepts/components-and-jsx.md#a-child-does-not-update-when-the-parents-signal-changes)
 
 ## 関連項目
 
-- [子要素とコンポジション](/concepts/components-and-jsx#children-and-composition)
-- [コンポーネントと JSX](/concepts/components-and-jsx)
+- [子要素とコンポジション](/docs/concepts/components-and-jsx.md#children-and-composition)
+- [コンポーネントと JSX](/docs/concepts/components-and-jsx.md)
 
 ## 関連する型
 

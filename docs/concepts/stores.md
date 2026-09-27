@@ -4,7 +4,7 @@ version: "2.0"
 description: "カート、フォーム、あらゆるネストされたオブジェクトをストアに保持します。ドラフトでプロパティ1つを更新し、プロジェクションでフィルター済みのビューを導出し、サーバーデータを同じプロキシに読み込みます。"
 ---
 
-[コンポーネントと JSX](/concepts/components-and-jsx) のページのカートは、商品をシグナルに保持していました。
+[コンポーネントと JSX](/docs/concepts/components-and-jsx.md) のページのカートは、商品をシグナルに保持していました。
 ユーザーが数量を編集するまでは、それで十分です。
 数値を1つ変えるだけで、新しいオブジェクトを1つ含む新しい配列を組み立てなければならず、`For` は古い行があった場所に新しいオブジェクトを見ます。その行は破棄されて作り直され、その行の input に入力中だったなら、入力していた input は失われます。
 
@@ -17,7 +17,7 @@ description: "カート、フォーム、あらゆるネストされたオブジ
 
 ## ネストされた状態を作る
 
-[`createStore`](/reference/solid-js/stores/create-store) はオブジェクトまたは配列を受け取り、読み取り専用のプロキシとセッターを返します:
+[`createStore`](/docs/reference/solid-js/stores/create-store.md) はオブジェクトまたは配列を受け取り、読み取り専用のプロキシとセッターを返します:
 
 ```tsx
 import { For, createStore } from "solid-js";
@@ -147,10 +147,10 @@ setCart((draft) => {
 新しい配列が新しいオブジェクトを保持している場合（新鮮なサーバーレスポンスなど）、古いものと対応付けるものはありません。[プロジェクション](#derive-a-store-with-a-projection) の中でキーでリコンサイルするか、`reconcile` を使ってください。
 
 ストアへの書き込みはステージングされ、シグナルへの書き込みと同じバッチで適用されるため、次の行での読み取りはバッチが適用されるまで前の値を見ます。
-[更新が適用されるタイミング](/concepts/reactivity#when-updates-land) で、バッチと `flush()` を呼ぶタイミングを説明しています。
+[更新が適用されるタイミング](/docs/concepts/reactivity.md#when-updates-land) で、バッチと `flush()` を呼ぶタイミングを説明しています。
 
 :::note[Solid 1 のパスセッター]
-[`storePath`](/reference/solid-js/advanced/store-advanced/store-path) は、Solid 1 が使っていたパスと値の形式 `setCart(storePath("coupon", "SAVE10"))` を受け付けます。まだ移行していないコード向けです。
+[`storePath`](/docs/reference/solid-js/advanced/store-advanced/store-path.md) は、Solid 1 が使っていたパスと値の形式 `setCart(storePath("coupon", "SAVE10"))` を受け付けます。まだ移行していないコード向けです。
 新しいコードはドラフトを使います。
 :::
 
@@ -159,7 +159,7 @@ setCart((draft) => {
 プロジェクションは、値が他のリアクティブな値から計算されるストアです。
 メモが値を1つ導出するのに対し、プロジェクションはプロパティが個別に追跡されるオブジェクトや配列を導出し、そのアイテムは計算をまたいで同一性を保ちます。
 
-[`createProjection`](/reference/solid-js/stores/create-projection) は関数とシードを受け取ります。
+[`createProjection`](/docs/reference/solid-js/stores/create-projection.md) は関数とシードを受け取ります。
 関数はシードのドラフトを受け取り、それを変更するか置き換え値を返せます。返された配列は `id` でストアにリコンサイルされます:
 
 ```tsx
@@ -220,10 +220,10 @@ const [cart, setCart] = createStore(async () => api.cart(), {
 
 リクエストはストアが作られたときに開始され、関数が読んだリアクティブな値が変わるたびに再度開始されます。
 各レスポンスは `id` で同じプロキシにリコンサイルされるため、サーバーが変えなかったアイテムは同一性と DOM を保ちます。
-[`Loading`](/concepts/boundaries) バウンダリは最初のレスポンスの前にフォールバックを表示し、[`isPending(() => cart.items)`](/reference/solid-js/reactivity/is-pending) は再フェッチを報告し、[`refresh(cart)`](/reference/solid-js/lifecycle-actions/refresh) はサーバーへ再度問い合わせます。
+[`Loading`](/docs/concepts/boundaries.md) バウンダリは最初のレスポンスの前にフォールバックを表示し、[`isPending(() => cart.items)`](/docs/reference/solid-js/reactivity/is-pending.md) は再フェッチを報告し、[`refresh(cart)`](/docs/reference/solid-js/lifecycle-actions/refresh.md) はサーバーへ再度問い合わせます。
 
 非同期関数では、シードはデフォルトでは最初の答えとして表示されません。読み取り側は非同期メモと同じように最初のレスポンスを待ちます。
-[非同期リアクティビティ](/concepts/async-reactivity) でその待機と、シードを受け入れ可能な最初の答えにする `seedLoadingValue` オプションを説明しています。
+[非同期リアクティビティ](/docs/concepts/async-reactivity.md) でその待機と、シードを受け入れ可能な最初の答えにする `seedLoadingValue` オプションを説明しています。
 
 同じレスポンスを別の形で使う2人目の読み取り側がいる場合にのみ、リクエストを独自のメモに分けてください:
 
@@ -237,7 +237,7 @@ const itemCount = createMemo(() => response().items.length);
 
 ## 楽観的ストア
 
-[`createOptimisticStore`](/reference/solid-js/stores/create-optimistic-store) は同じドラフトセッターを持ち、1つだけ違いがあります。[`action`](/reference/solid-js/lifecycle-actions/action) の内側で行われた書き込みは仮のものです。
+[`createOptimisticStore`](/docs/reference/solid-js/stores/create-optimistic-store.md) は同じドラフトセッターを持ち、1つだけ違いがあります。[`action`](/docs/reference/solid-js/lifecycle-actions/action.md) の内側で行われた書き込みは仮のものです。
 すぐに表示され、アクションが確定すると Solid はそれを取り除き、ストアがソースから導出する値を表示します:
 
 ```ts
@@ -260,7 +260,7 @@ const setQuantity = action(function* (id: string, quantity: number) {
 `setQuantity("mug", 3)` を呼ぶと、input は即座に3を表示します。
 リクエストが完了すると、サーバーから再取得されたカートが仮の値を置き換えます。サーバーが同意したなら見た目は何も変わらず、リクエストが失敗したなら数量はサーバーが持つ値に戻ります。
 
-[ミューテーション](/concepts/mutations) のページでは、上記のクライアントのみのカートから、一度に1つの変更ずつこれを組み立てていきます。
+[ミューテーション](/docs/concepts/mutations.md) のページでは、上記のクライアントのみのカートから、一度に1つの変更ずつこれを組み立てていきます。
 
 ## よくある問題
 
@@ -298,8 +298,8 @@ const setQuantity = action(function* (id: string, quantity: number) {
 
 ## 次のステップ
 
-- [非同期リアクティビティ](/concepts/async-reactivity): `createStore(async () => ...)` が待機している間に読み取り側が見るもの、そして再フェッチ中に現在のカートが画面に残る理由。
-- [ミューテーション](/concepts/mutations): サーバーに対するアクションとしてのカートの `add`・`remove`・`setQuantity`。楽観的オーバーレイと再取得付き。
-- [リスト](/guides/lists): 編集、フィルタリング、選択、そしてサーバー再フェッチをまたいだ行の同一性の維持。このページのストアパターンを使います。
-- [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects): 派生ストアを、別のストアへコピーするエフェクトではなくプロジェクションにすべき場合。
-- [パフォーマンス](/guides/performance#stores-at-scale): 数千行のストアに対するキー付きリコンサイルとプロジェクション。
+- [非同期リアクティビティ](/docs/concepts/async-reactivity.md): `createStore(async () => ...)` が待機している間に読み取り側が見るもの、そして再フェッチ中に現在のカートが画面に残る理由。
+- [ミューテーション](/docs/concepts/mutations.md): サーバーに対するアクションとしてのカートの `add`・`remove`・`setQuantity`。楽観的オーバーレイと再取得付き。
+- [リスト](/docs/guides/lists.md): 編集、フィルタリング、選択、そしてサーバー再フェッチをまたいだ行の同一性の維持。このページのストアパターンを使います。
+- [不要なエフェクトを避ける](/docs/guides/avoid-unnecessary-effects.md): 派生ストアを、別のストアへコピーするエフェクトではなくプロジェクションにすべき場合。
+- [パフォーマンス](/docs/guides/performance.md#stores-at-scale): 数千行のストアに対するキー付きリコンサイルとプロジェクション。

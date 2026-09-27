@@ -11,8 +11,8 @@ Solid 1 からの移行の大半は改名と形の調整です。エフェクト
 
 このページは、Solid 1 のアプリですでに機能する形でデータをフェッチしているチーム向けです。
 よくあるパターンに名前を付け、それぞれを Solid 2 でも変えずに動かし続ける方法を示し、変換したときに何が変わるかを示したうえで、フェッチごとに選択できるようにします。
-これは目的地ではなく経路です。協調する動作は新しいコードにとってよりよいデフォルトであり、その理由は[非同期リアクティビティ](/concepts/async-reactivity)のページで説明しています。
-フェッチ以外のすべては[移行ガイド全般](/migration/from-solid-1)が扱っています。
+これは目的地ではなく経路です。協調する動作は新しいコードにとってよりよいデフォルトであり、その理由は[非同期リアクティビティ](/docs/concepts/async-reactivity.md)のページで説明しています。
+フェッチ以外のすべては[移行ガイド全般](/docs/migration/from-solid-1.md)が扱っています。
 
 ## 何が変わるか
 
@@ -138,13 +138,13 @@ function TabPanel() {
 ```
 
 これは動作し、診断も出力されません。
-エフェクトフェーズからシグナルやストアへ書き込むのは、エフェクトフェーズ本来の役目であり、[`createEffect`](/reference/solid-js/reactivity/create-effect) のリファレンスもアボートのクリーンアップ付きのフェッチを例に使っています。
+エフェクトフェーズからシグナルやストアへ書き込むのは、エフェクトフェーズ本来の役目であり、[`createEffect`](/docs/reference/solid-js/reactivity/create-effect.md) のリファレンスもアボートのクリーンアップ付きのフェッチを例に使っています。
 グラフは `tabData` がリクエスト由来だとは知らないため、何も保留されません。期間への書き込みは即座にコミットされ、パネルはインジケーターを表示し、行はレスポンスが届き次第置き換わります。
 これは Solid 2 の上での Solid 1 の動作です。
 
 これは通過点であり、止まる場所ではありません。
-グラフはこのフェッチを見えていないため、[`isPending`](/reference/solid-js/reactivity/is-pending)、[`refresh`](/reference/solid-js/lifecycle-actions/refresh)、[`Errored`](/reference/solid-js/components-jsx/errored)、サーバーストリーミングは適用されず、ローディングフラグ、キャンセル、古いレスポンスへのガードをあなたが持ち続けることになります。
-[不要なエフェクトを避ける](/guides/avoid-unnecessary-effects)ガイドは新しいコードでこの形を使うことに反対しており、その主張は有効です。
+グラフはこのフェッチを見えていないため、[`isPending`](/docs/reference/solid-js/reactivity/is-pending.md)、[`refresh`](/docs/reference/solid-js/lifecycle-actions/refresh.md)、[`Errored`](/docs/reference/solid-js/components-jsx/errored.md)、サーバーストリーミングは適用されず、ローディングフラグ、キャンセル、古いレスポンスへのガードをあなたが持ち続けることになります。
+[不要なエフェクトを避ける](/docs/guides/avoid-unnecessary-effects.md)ガイドは新しいコードでこの形を使うことに反対しており、その主張は有効です。
 すでに 50 個あるアプリにとっては、これが安全な最初のコミットです。
 
 ### ステップ 2: 変換し、再フェッチの動作を選ぶ
@@ -255,7 +255,7 @@ Solid 1 の再フェッチ時フォールバックが意図した設計だった
 </Loading>
 ```
 
-保留される動作を得るために `startTransition` を使っていた場所では、それを削除してください。その動作は今やデフォルトであり、[`isPending`](/reference/solid-js/reactivity/is-pending) が `useTransition` の保留中フラグの代わりになります。
+保留される動作を得るために `startTransition` を使っていた場所では、それを削除してください。その動作は今やデフォルトであり、[`isPending`](/docs/reference/solid-js/reactivity/is-pending.md) が `useTransition` の保留中フラグの代わりになります。
 
 リソースの他のメンバーの対応は次の通りです。
 
@@ -264,8 +264,8 @@ Solid 1 の再フェッチ時フォールバックが意図した設計だった
 | 初回読み込み時の `user.loading` | `Loading` バウンダリ                                                                                                                                                                |
 | 再フェッチ時の `user.loading`   | `isPending(user)`                                                                                                                                                                   |
 | `user.error`                 | `Errored` バウンダリ                                                                                                                                                                |
-| `refetch()`                  | [`refresh(user)`](/reference/solid-js/lifecycle-actions/refresh)。再読み込みを保留中として表示したい場合は先に [`affects(user)`](/reference/solid-js/lifecycle-actions/affects) を追加 |
-| `mutate(value)`              | [`createOptimistic`](/reference/solid-js/reactivity/create-optimistic) を使う `action`                                                                                              |
+| `refetch()`                  | [`refresh(user)`](/docs/reference/solid-js/lifecycle-actions/refresh.md)。再読み込みを保留中として表示したい場合は先に [`affects(user)`](/docs/reference/solid-js/lifecycle-actions/affects.md) を追加 |
+| `mutate(value)`              | [`createOptimistic`](/docs/reference/solid-js/reactivity/create-optimistic.md) を使う `action`                                                                                              |
 | `user.latest`                | 通常の読み取り                                                                                                                                                                      |
 
 ## パターン: `.loading` 付きの `createResource`（`Suspense` なし）
@@ -317,7 +317,7 @@ Solid 1 のルーターのデータ読み込みはリソースの上に成り立
 `createAsync(() => getUser(params.id))` を `createMemo(() => getUser(params.id))` に、`cache` を `query` に置き換えます。
 ルートナビゲーションは Solid 1 ですでにトランジションの内側で実行されていたため、ナビゲーション中に内容が保持されていたルートはその動作を維持します。
 
-[Solid Router 移行ガイド](/migration/from-solid-router#migrate-data-loading-and-caching)が API の変更を説明しており、[データ読み込みとミューテーション](/routing/solid-router/data)が Solid 2 の `query`、`preload`、再検証を説明しています。
+[Solid Router 移行ガイド](/docs/migration/from-solid-router.md#migrate-data-loading-and-caching)が API の変更を説明しており、[データ読み込みとミューテーション](/docs/routing/solid-router/data.md)が Solid 2 の `query`、`preload`、再検証を説明しています。
 
 ## フェッチごとに決める
 
@@ -330,7 +330,7 @@ Solid 1 のルーターのデータ読み込みはリソースの上に成り立
 | 変わった対象の内容の代わりにプレースホルダー                              | その内容を `<Loading on={key}>` で囲む                    |
 
 最初の 2 行は同じ画面を説明しています。タブは即座にハイライトされ、内容は薄くなり、準備ができたときに内容が入れ替わります。
-[非同期リアクティビティ](/concepts/async-reactivity#what-the-hold-means-for-a-shared-input)にそれぞれの要素が示されています。
+[非同期リアクティビティ](/docs/concepts/async-reactivity.md#what-the-hold-means-for-a-shared-input)にそれぞれの要素が示されています。
 
 ウィジェットへの有用なテスト: 前の期間の数値がスピナー付きで 5 秒間表示されたら、それは問題ないか、間違いか?
 問題ないなら、そのウィジェットは独立しており、`on` でも薄く表示する保留でもどちらでも構いません。

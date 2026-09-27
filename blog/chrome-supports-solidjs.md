@@ -6,7 +6,7 @@ SolidJS とそのシグナルの活用は、この1年でフロントエンド�
 
 きっかけは昨年秋、Chrome チームの [Addy Osmani](https://twitter.com/addyosmani) が [Taste Movies App](https://tastejs.com/movies/) の Solid 版を作るよう勧めてくれたことでした。私たちはこれを機会に、取り組んでいた最新の実験的技術をコミュニティに試してもらいました。結果は私たちの期待すら超えるものでした。クライアントナビゲーション付きの完全なサーバーレンダリングアプリが作られ、Lighthouse のページメトリクスで最高得点を記録し、JavaScript ペイロードは最も普及しているソリューションの1/10でした。
 
-[![ルート一覧の例](/img/blog/chrome-supports-solidjs/devto-article-image.png)](https://dev.to/this-is-learning/client-side-routing-without-the-javascript-3k1i)
+[![ルート一覧の例](/blog/images/chrome-supports-solidjs/devto-article-image.png)](https://dev.to/this-is-learning/client-side-routing-without-the-javascript-3k1i)
 
 これを実現したのは、ネストされたルーティングによるサーバーレンダリング HTML パーシャルと、部分的にハイドレーションされる「アイランド」を組み合わせる手法です。アイランドの小さな JavaScript 配信量と、シングルページアプリケーションが持つ状態保持を組み合わせています。
 

@@ -4,7 +4,7 @@ version: "2.0"
 description: "シグナル・メモ・エフェクト。Solid が読み取りをどう追跡するか、コンポーネントがなぜ1回だけ実行されるのか、値がいつ更新されるのかをどう見分けるか。"
 ---
 
-[クイックスタート](/getting-started/quick-start)では、同じカウンターの2つのバージョンを見ました。
+[クイックスタート](/docs/getting-started/quick-start.md)では、同じカウンターの2つのバージョンを見ました。
 1つは JSX の内側で `count()` を読み取り、クリックのたびに更新されました。
 もう1つはコンポーネント本体で `count()` を読み取り、ボタンはゼロのまま固まり、コンソールはその読み取りが「更新されない」と警告しました。
 
@@ -82,7 +82,7 @@ return <p>Subtotal: ${subtotal()}</p>;
 これで `quantity()` の読み取りは、JSX が `subtotal()` を呼び出すときに、追跡スコープの内側で行われ、小計は更新されます。
 
 一度きりのスナップショットが欲しいこともあります。
-その場合は [`untrack`](/reference/solid-js/reactivity/untrack) で明示します。これは購読せず、警告も出さずに読み取ります:
+その場合は [`untrack`](/docs/reference/solid-js/reactivity/untrack.md) で明示します。これは購読せず、警告も出さずに読み取ります:
 
 ```tsx
 const initialQuantity = untrack(quantity);
@@ -99,7 +99,7 @@ setQuantity((current) => current + 1);
 `setQuantity(quantity() + 1)` はコミット済みの値を読み取るため、同じターン内で他の何かがすでに書き込みを予約（stage）していた場合、2つの書き込みが衝突します。
 「反映（landed）」の意味は[更新のスケジューリング](#when-updates-land)の節で説明しています。
 
-セッターの形式と等価性オプションについては、[`createSignal` リファレンス](/reference/solid-js/reactivity/create-signal)を参照してください。
+セッターの形式と等価性オプションについては、[`createSignal` リファレンス](/docs/reference/solid-js/reactivity/create-signal.md)を参照してください。
 
 :::deep-dive[10行のシグナル]
 実際の実装にはバッチ・等価性チェック・オーナーシップ・非同期が加わりますが、追跡ルールを説明する形はスケッチに収まります:
@@ -157,8 +157,8 @@ const total = createMemo(() => subtotal() * (1 - discount()));
 メモから書き込みたくなったときは、書こうとしていた値自体が派生値です。代わりにそれを返してください。
 
 メモの関数は非同期でも構いません。
-Promise を返すと、メモの読み取り側は結果を待ち、その間に最も近い [`Loading`](/concepts/boundaries) バウンダリがフォールバックを表示します。
-[非同期リアクティビティ](/concepts/async-reactivity)のページで詳しく扱っています。
+Promise を返すと、メモの読み取り側は結果を待ち、その間に最も近い [`Loading`](/docs/concepts/boundaries.md) バウンダリがフォールバックを表示します。
+[非同期リアクティビティ](/docs/concepts/async-reactivity.md)のページで詳しく扱っています。
 
 ## 更新が反映されるタイミング
 
@@ -181,7 +181,7 @@ console.log(quantity()); // 3
 アプリケーションコードがこれに気づくことはめったにありません。
 イベントハンドラーは値を設定して戻り、JSX とメモは追跡スコープ内で値を読み取り、バッチが反映されたときに更新されます。
 この遅延が姿を見せるのは2箇所です。イベント直後に検証するテストと、書き込み直後にシグナルを読み取る命令的なコードです。
-[`flush()`](/reference/solid-js/reactivity/flush) は予約済みの書き込みを同期的に適用します:
+[`flush()`](/docs/reference/solid-js/reactivity/flush.md) は予約済みの書き込みを同期的に適用します:
 
 ```ts
 setQuantity(3);
@@ -196,7 +196,7 @@ console.log(quantity()); // 3
 シグナル・関数・メモはデータを JSX へ向かって運びます。
 エフェクトはデータを Solid の外へ、Solid が所有しないものへ運びます。ブラウザのストレージ、ドキュメントのタイトル、チャートライブラリ、WebSocket などです。
 
-[`createEffect`](/reference/solid-js/reactivity/create-effect) は2つの関数を受け取ります。
+[`createEffect`](/docs/reference/solid-js/reactivity/create-effect.md) は2つの関数を受け取ります。
 1つ目は計算関数（compute function）で、追跡スコープ内で実行され、値を返します。
 2つ目はエフェクト関数（effect function）で、その値を受け取り、命令的な処理を行います。
 これは追跡されず、更新が反映されて DOM がそれを表したあとに実行されます:
@@ -238,7 +238,7 @@ createEffect(
 
 エフェクトを書く前に、その値が代わりに派生関数やメモにできないか確認してください。
 あるシグナルを別のシグナルへコピーするエフェクトは、同じ状態の2つ目のコピーを作ることになり、更新のたびに2つのコピーが一瞬ずれます。
-ガイドの[不要なエフェクトを避ける](/guides/avoid-unnecessary-effects)では、よくあるケースを順に扱っています。派生値、非同期データ、props の編集可能なコピー、イベント駆動の処理です。
+ガイドの[不要なエフェクトを避ける](/docs/guides/avoid-unnecessary-effects.md)では、よくあるケースを順に扱っています。派生値、非同期データ、props の編集可能なコピー、イベント駆動の処理です。
 
 ## オーナーシップ
 
@@ -274,7 +274,7 @@ createEffect(
 
 ### コンポーネント間で状態を共有する
 
-複数のコンポーネントが同じ状態を必要とするときは、ツリー内でそれらすべてを覆うのに十分高い位置のコンポーネントで一度だけ作成し、[コンテキスト](/concepts/components-and-jsx#context)を通じて下へ渡します:
+複数のコンポーネントが同じ状態を必要とするときは、ツリー内でそれらすべてを覆うのに十分高い位置のコンポーネントで一度だけ作成し、[コンテキスト](/docs/concepts/components-and-jsx.md#context)を通じて下へ渡します:
 
 ```tsx
 import {
@@ -311,11 +311,11 @@ export function useCart() {
 これはモジュールスコープでシグナルを作るよりも好ましい方法です。
 モジュールスコープの状態にはオーナーがないため破棄するものがなく、サーバーレンダリング中は1つのモジュールインスタンスがすべてのリクエストで共有され、あるユーザーの状態が別のユーザーのレスポンスへ漏れます。
 コンテキスト値はアプリごとに、サーバーではリクエストごとに作られます。
-[状態管理](/guides/state-management#module-level-state-and-the-server)では、サーバーがモジュールスコープのストアに何をするのか、代わりにどこへ作るべきかを説明しています。
+[状態管理](/docs/guides/state-management.md#module-level-state-and-the-server)では、サーバーがモジュールスコープのストアに何をするのか、代わりにどこへ作るべきかを説明しています。
 
 ### ルート
 
-[`createRoot`](/reference/solid-js/advanced/owner-introspection/create-root) は手動でオーナーを作成し、その disposer（破棄関数）を渡します。
+[`createRoot`](/docs/reference/solid-js/advanced/owner-introspection/create-root.md) は手動でオーナーを作成し、その disposer（破棄関数）を渡します。
 これは、どのコンポーネントの外側でも実行されるコード向けの高度なプリミティブです。テストや、Solid のリアクティビティを別のフレームワークや非 UI プロセスに埋め込むインテグレーションなどです。
 
 ```ts
@@ -421,7 +421,7 @@ function LineItem({ price, quantity }: LineItemProps) {
 ```
 
 props オブジェクトのまま保持し、JSX の内側で `props.price` を読み取ってください。
-[Props](/concepts/components-and-jsx#props) を参照してください。
+[Props](/docs/concepts/components-and-jsx.md#props) を参照してください。
 
 ### シグナルを設定した直後に読み取ると古い値が返る
 
@@ -442,14 +442,14 @@ createEffect(
 
 `subtotal` は派生値です。
 関数またはメモにして、エフェクトと2つ目のシグナルを削除してください。
-[不要なエフェクトを避ける](/guides/avoid-unnecessary-effects)では、コピーをローカルで編集したい場合を含め、バリエーションを扱っています。
+[不要なエフェクトを避ける](/docs/guides/avoid-unnecessary-effects.md)では、コピーをローカルで編集したい場合を含め、バリエーションを扱っています。
 
 ### `createEffect` が `[MISSING_EFFECT_FN]` を throw する
 
 `createEffect` は2つの関数を受け取ります。読み取りを行う計算関数と、結果に作用するエフェクト関数です。
 読み取りと作用を両方する1つの関数は、2つに分割する必要があります。
 その1つの関数が値を計算するだけだったなら、必要だったのは `createMemo` です。
-以前の Solid 向けに書かれたコードはまずここにぶつかります。他に変わったパターンは[マイグレーションガイド](/migration/from-solid-1)に一覧があります。
+以前の Solid 向けに書かれたコードはまずここにぶつかります。他に変わったパターンは[マイグレーションガイド](/docs/migration/from-solid-1.md)に一覧があります。
 
 ## まとめ
 
@@ -463,8 +463,8 @@ createEffect(
 
 ## 次のステップ
 
-- [コンポーネントと JSX](/concepts/components-and-jsx)では、これらのルールを props・イベント・ref・リスト・条件付きコンテンツに適用します。
-- [ストア](/concepts/stores)では、シグナルをネストしたオブジェクトと配列へ拡張し、プロパティごとの追跡を行います。
-- [非同期リアクティビティ](/concepts/async-reactivity)では、メモが Promise を返すときに何が起きるか、そして次の画面が読み込まれる間 Solid がどうやって現在の画面を表示し続けるかを説明しています。
-- [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects)は、アプリで最初の `createEffect` を書く前に読むガイドです。
-- [カスタムプリミティブ](/guides/custom-primitives)では、オーナーに属するセットアップ・エフェクト・クリーンアップを、複数のコンポーネントが呼び出せる `createX` 関数にパッケージ化します。
+- [コンポーネントと JSX](/docs/concepts/components-and-jsx.md)では、これらのルールを props・イベント・ref・リスト・条件付きコンテンツに適用します。
+- [ストア](/docs/concepts/stores.md)では、シグナルをネストしたオブジェクトと配列へ拡張し、プロパティごとの追跡を行います。
+- [非同期リアクティビティ](/docs/concepts/async-reactivity.md)では、メモが Promise を返すときに何が起きるか、そして次の画面が読み込まれる間 Solid がどうやって現在の画面を表示し続けるかを説明しています。
+- [不要なエフェクトを避ける](/docs/guides/avoid-unnecessary-effects.md)は、アプリで最初の `createEffect` を書く前に読むガイドです。
+- [カスタムプリミティブ](/docs/guides/custom-primitives.md)では、オーナーに属するセットアップ・エフェクト・クリーンアップを、複数のコンポーネントが呼び出せる `createX` 関数にパッケージ化します。

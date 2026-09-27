@@ -143,12 +143,12 @@ function why(target: unknown): RerunEvent[];
 
 ## 関連項目
 
-- [更新頻度が高すぎる場合](/guides/debugging-reactivity#something-updates-too-often)
-- [各インタラクションのコスト](/guides/observability#what-each-interaction-cost)
-- [オブザーバビリティアダプターの構築](/guides/observability-adapters)
-- [パフォーマンス](/guides/performance)
-- [クリック後に画面が固まったように見える場合](/guides/debugging-reactivity#the-screen-looks-dead-after-a-click)
-- [リアクティビティのデバッグ](/guides/debugging-reactivity)
+- [更新頻度が高すぎる場合](/docs/guides/debugging-reactivity.md#something-updates-too-often)
+- [各インタラクションのコスト](/docs/guides/observability.md#what-each-interaction-cost)
+- [オブザーバビリティアダプターの構築](/docs/guides/observability-adapters.md)
+- [パフォーマンス](/docs/guides/performance.md)
+- [クリック後に画面が固まったように見える場合](/docs/guides/debugging-reactivity.md#the-screen-looks-dead-after-a-click)
+- [リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md)
 
 ## 関連する型
 

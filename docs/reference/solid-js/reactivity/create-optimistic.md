@@ -100,7 +100,7 @@ const rename = action(function* (next: string) {
 
 ## さらに学ぶ
 
-- [カートをサーバーに移す](/concepts/mutations#move-the-cart-to-the-server)
-- [リアクティビティ](/concepts/reactivity)
-- [非同期リアクティビティ](/concepts/async-reactivity)
-- [リアクティビティのデバッグ](/guides/debugging-reactivity)
+- [カートをサーバーに移す](/docs/concepts/mutations.md#move-the-cart-to-the-server)
+- [リアクティビティ](/docs/concepts/reactivity.md)
+- [非同期リアクティビティ](/docs/concepts/async-reactivity.md)
+- [リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md)

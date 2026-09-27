@@ -78,5 +78,5 @@ export default function Product(props: { name: () => string }) {
 
 ## 関連項目
 
-- [`Meta`](/reference/solid-meta/meta)
-- [`Head`](/reference/solid-meta/head)
+- [`Meta`](/docs/reference/solid-meta/meta.md)
+- [`Head`](/docs/reference/solid-meta/head.md)

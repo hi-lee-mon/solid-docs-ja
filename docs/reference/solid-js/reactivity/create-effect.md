@@ -118,17 +118,17 @@ compute がライブで実行されます。サーバーが作成しなかった
 ## よくある問題
 
 - [`createEffect` が `[MISSING_EFFECT_FN]` をスローする](/concepts/reactivity#createeffect-throws-missing_effect_fn)
-- [エフェクトがある値を別の値にコピーし、コピーが遅れる](/concepts/reactivity#an-effect-copies-one-value-into-another-and-the-copy-lags)
-- [何かが更新されすぎる](/guides/debugging-reactivity#something-updates-too-often)
-- [サーバーでの書き込みが何もしなかった](/guides/debugging-reactivity#a-write-on-the-server-did-nothing)
+- [エフェクトがある値を別の値にコピーし、コピーが遅れる](/docs/concepts/reactivity.md#an-effect-copies-one-value-into-another-and-the-copy-lags)
+- [何かが更新されすぎる](/docs/guides/debugging-reactivity.md#something-updates-too-often)
+- [サーバーでの書き込みが何もしなかった](/docs/guides/debugging-reactivity.md#a-write-on-the-server-did-nothing)
 
 ## さらに学ぶ
 
-- [エフェクト](/concepts/reactivity#effects)
-- [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects)
-- [リアクティビティ](/concepts/reactivity)
-- [非同期リアクティビティ](/concepts/async-reactivity)
-- [リアクティビティのデバッグ](/guides/debugging-reactivity)
+- [エフェクト](/docs/concepts/reactivity.md#effects)
+- [不要なエフェクトを避ける](/docs/guides/avoid-unnecessary-effects.md)
+- [リアクティビティ](/docs/concepts/reactivity.md)
+- [非同期リアクティビティ](/docs/concepts/async-reactivity.md)
+- [リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md)
 
 ## 関連する型
 

@@ -8,9 +8,9 @@ description: "カートの追加・削除・数量変更という書き込みを
 リクエストには 400 ミリ秒かかります。
 その間もカートには新しい行を表示しておく必要があり、レスポンスが届いたらカートはサーバーと一致していなければなりません。サーバーが拒否した場合、その行は再び消えなければなりません。
 
-読み取りには、こうしたことのためのラッパーは不要です。入力を変えればメモが再び問い合わせます。[非同期リアクティビティ](/concepts/async-reactivity)のページで示したとおりです。
+読み取りには、こうしたことのためのラッパーは不要です。入力を変えればメモが再び問い合わせます。[非同期リアクティビティ](/docs/concepts/async-reactivity.md)のページで示したとおりです。
 書き込みは形が異なります。書き込みは往復の前に起こり、往復のあとに突き合わせなければならないからです。
-このページでは、[ストア](/concepts/stores)のページのカートを題材に、その書き込みを一度に1つずつサーバーへ移していきます。
+このページでは、[ストア](/docs/concepts/stores.md)のページのカートを題材に、その書き込みを一度に1つずつサーバーへ移していきます。
 
 ## クライアントのみのカート
 
@@ -95,10 +95,10 @@ export function createCart() {
 `setItems` の呼び出しも変わっていません。同期の書き込みはすでに期待される結果を表していたため、そのまま楽観的な予測になります。
 追加されたのは3つです:
 
-- [`createOptimisticStore(fn, seed)`](/reference/solid-js/stores/create-optimistic-store) は永続的な値を `fn` から導出し、すぐに表示されるものの仮のものである書き込みを受け付けます。
-- [`action`](/reference/solid-js/lifecycle-actions/action) はジェネレーターを1つのトランザクションとして実行します。
+- [`createOptimisticStore(fn, seed)`](/docs/reference/solid-js/stores/create-optimistic-store.md) は永続的な値を `fn` から導出し、すぐに表示されるものの仮のものである書き込みを受け付けます。
+- [`action`](/docs/reference/solid-js/lifecycle-actions/action.md) はジェネレーターを1つのトランザクションとして実行します。
   各 `yield` はその Promise を待ってからトランザクションを復元するため、`yield` の前の書き込みと後の refresh は同じ更新に属します。
-- [`refresh(items)`](/reference/solid-js/lifecycle-actions/refresh) は導出を再実行し、ストアをサーバーが持つ内容と突き合わせます。
+- [`refresh(items)`](/docs/reference/solid-js/lifecycle-actions/refresh.md) は導出を再実行し、ストアをサーバーが持つ内容と突き合わせます。
 
 楽観的な書き込みは、永続的なストアの上に乗るオーバーレイであり、状態の2つ目のコピーではありません。
 Solid はアクションが確定したときにオーバーレイを破棄します。アクションが成功しても失敗しても同じです。
@@ -164,7 +164,7 @@ const add = action(function* (item: CartItem) {
 
 `pending` フラグは行についての情報です。
 ときには、データ全体についての問いであることもあります。「この商品の数量はまさに変わろうとしているか？」
-[`affects(target, key?)`](/reference/solid-js/lifecycle-actions/affects) は、それを囲むアクションの実行中に、ソース・ストア・ストアの1つのプロパティを保留中としてマークします。これにより、そのデータの読み取り側は `isPending` を通じてそれを報告できます:
+[`affects(target, key?)`](/docs/reference/solid-js/lifecycle-actions/affects.md) は、それを囲むアクションの実行中に、ソース・ストア・ストアの1つのプロパティを保留中としてマークします。これにより、そのデータの読み取り側は `isPending` を通じてそれを報告できます:
 
 ```ts
 const setQuantity = action(function* (id: string, quantity: number) {
@@ -184,7 +184,7 @@ const setQuantity = action(function* (id: string, quantity: number) {
 ## サーバーが書き込みをエコーするのを待つ: `until`
 
 トランスポートによっては結果を返しません。リクエストは投げっぱなし（fire-and-forget）で、確認は後からライブソース上に届きます。
-[`until(fn)`](/reference/solid-js/lifecycle-actions/until) は、確定済みデータに対する述語が真になるまでアクションを開いたままにします:
+[`until(fn)`](/docs/reference/solid-js/lifecycle-actions/until.md) は、確定済みデータに対する述語が真になるまでアクションを開いたままにします:
 
 ```ts
 const send = action(function* (text: string) {
@@ -345,7 +345,7 @@ function CartLines() {
 
 アクションの書き込みはアクションが確定するまでそのトランザクション内に保持されるため、`flush()` が表示できるものはありません。
 その呼び出しを取り除き、アクションの Promise が解決したあとに検証してください。
-[リアクティビティのデバッグ](/guides/debugging-reactivity#the-test-sees-the-old-dom)にこの診断の説明があります。
+[リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md#the-test-sees-the-old-dom)にこの診断の説明があります。
 
 ## まとめ
 
@@ -360,8 +360,8 @@ function CartLines() {
 
 ## 次のステップ
 
-- [フォーム](/guides/forms): `<form>` の背後にある同じアクション。プログレッシブエンハンスメント、バリデーション、サーバーから返されるエラーを扱います。
-- [ミューテーションとレスポンス](/building-apps/server-functions/mutations-and-responses): `api.add` を `"use server"` 関数として書き、リダイレクト・ステータス・安全なエラーを返します。
-- [バウンダリ](/concepts/boundaries): `Errored` がアクションが捕捉しないエラーを捕捉する場所と、エラーが起きた領域の回復方法。
-- [データの読み込みとミューテーション](/routing/solid-router/data): Solid Router の `action` と `query` がこれらのプリミティブの上にサブミッション・キャッシュ・再検証を追加します。
-- [状態管理](/guides/state-management): カート・ユーザー・フィルターがどこに置かれるか、そして `createCart()` がプロバイダーの内側で実行される理由。
+- [フォーム](/docs/guides/forms.md): `<form>` の背後にある同じアクション。プログレッシブエンハンスメント、バリデーション、サーバーから返されるエラーを扱います。
+- [ミューテーションとレスポンス](/docs/building-apps/server-functions/mutations-and-responses.md): `api.add` を `"use server"` 関数として書き、リダイレクト・ステータス・安全なエラーを返します。
+- [バウンダリ](/docs/concepts/boundaries.md): `Errored` がアクションが捕捉しないエラーを捕捉する場所と、エラーが起きた領域の回復方法。
+- [データの読み込みとミューテーション](/docs/routing/solid-router/data.md): Solid Router の `action` と `query` がこれらのプリミティブの上にサブミッション・キャッシュ・再検証を追加します。
+- [状態管理](/docs/guides/state-management.md): カート・ユーザー・フィルターがどこに置かれるか、そして `createCart()` がプロバイダーの内側で実行される理由。

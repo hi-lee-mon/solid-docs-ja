@@ -67,7 +67,7 @@ export default manifest;
 ### `virtual:solid-server-function-handler`
 
 `endpoint` と `handleServerFunctionRequest` をエクスポートします。
-[`serverFunctions`](/reference/vite-plugin-solid/server-functions#virtualsolid-server-function-handler) を参照してください。
+[`serverFunctions`](/docs/reference/vite-plugin-solid/server-functions.md#virtualsolid-server-function-handler) を参照してください。
 
 ### `virtual:solid-ssr-handler`
 
@@ -95,7 +95,7 @@ export function handleRequest(
 
 ## start モードの環境モジュール
 
-[`start.env`](/reference/vite-plugin-solid/start#env) が有効な場合、生成される `solid-env.d.ts` は次を宣言します:
+[`start.env`](/docs/reference/vite-plugin-solid/start.md#env) が有効な場合、生成される `solid-env.d.ts` は次を宣言します:
 
 ```ts
 import env, { env as namedEnv } from "virtual:env/client";

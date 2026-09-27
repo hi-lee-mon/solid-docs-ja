@@ -124,12 +124,12 @@ await addTodo("buy milk");
 
 ## よくある問題
 
-- [クリック後に画面が固まったように見える](/guides/debugging-reactivity#the-screen-looks-dead-after-a-click)
-- [エラーが一瞬表示されてから消える](/guides/forms#errors-show-for-a-moment-and-then-vanish)
+- [クリック後に画面が固まったように見える](/docs/guides/debugging-reactivity.md#the-screen-looks-dead-after-a-click)
+- [エラーが一瞬表示されてから消える](/docs/guides/forms.md#errors-show-for-a-moment-and-then-vanish)
 
 ## 関連項目
 
-- [カートをサーバーへ移す](/concepts/mutations#move-the-cart-to-the-server)
-- [ミューテーションとレスポンス](/building-apps/server-functions/mutations-and-responses)
-- [非同期リアクティビティ](/concepts/async-reactivity)
-- [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects)
+- [カートをサーバーへ移す](/docs/concepts/mutations.md#move-the-cart-to-the-server)
+- [ミューテーションとレスポンス](/docs/building-apps/server-functions/mutations-and-responses.md)
+- [非同期リアクティビティ](/docs/concepts/async-reactivity.md)
+- [不要なエフェクトを避ける](/docs/guides/avoid-unnecessary-effects.md)

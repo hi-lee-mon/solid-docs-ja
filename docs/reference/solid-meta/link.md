@@ -84,5 +84,5 @@ export default function Inbox(props: { unread: () => number }) {
 
 ## 関連項目
 
-- [`Stylesheet`](/reference/solid-meta/stylesheet)
-- [`Meta`](/reference/solid-meta/meta)
+- [`Stylesheet`](/docs/reference/solid-meta/stylesheet.md)
+- [`Meta`](/docs/reference/solid-meta/meta.md)

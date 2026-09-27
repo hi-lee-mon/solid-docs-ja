@@ -59,5 +59,5 @@ const initial = await resolve(() => user());
 
 ## 関連項目
 
-- [非同期リアクティビティ](/concepts/async-reactivity)
-- [非 Solid コードの統合](/guides/integrate-non-solid-code)
+- [非同期リアクティビティ](/docs/concepts/async-reactivity.md)
+- [非 Solid コードの統合](/docs/guides/integrate-non-solid-code.md)

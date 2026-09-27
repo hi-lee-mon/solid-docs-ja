@@ -82,8 +82,8 @@ const Chart = clientOnly(() => import("./Chart.jsx"));
 
 ## 関連項目
 
-- [サーバーとクライアントのバウンダリ](/concepts/rendering-and-ssr#server-and-client-boundaries)
-- [サーバー側に置かない](/guides/integrate-non-solid-code#keep-it-off-the-server)
-- [SSR セーフなコード](/guides/ssr-safe-code)
-- [レンダリングと SSR](/concepts/rendering-and-ssr)
-- [レンダリングモードを選ぶ](/guides/choose-a-rendering-mode)
+- [サーバーとクライアントのバウンダリ](/docs/concepts/rendering-and-ssr.md#server-and-client-boundaries)
+- [サーバー側に置かない](/docs/guides/integrate-non-solid-code.md#keep-it-off-the-server)
+- [SSR セーフなコード](/docs/guides/ssr-safe-code.md)
+- [レンダリングと SSR](/docs/concepts/rendering-and-ssr.md)
+- [レンダリングモードを選ぶ](/docs/guides/choose-a-rendering-mode.md)

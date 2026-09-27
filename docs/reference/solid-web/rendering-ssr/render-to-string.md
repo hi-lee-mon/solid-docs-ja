@@ -96,6 +96,6 @@ res.send(`<!doctype html><html><body><div id="root">${html}</div></body></html>`
 
 ## 関連項目
 
-- [同期文字列レンダリング](/concepts/rendering-and-ssr#synchronous-string-rendering)
-- [レンダリングと SSR](/concepts/rendering-and-ssr)
-- [レンダリングモードを選ぶ](/guides/choose-a-rendering-mode)
+- [同期文字列レンダリング](/docs/concepts/rendering-and-ssr.md#synchronous-string-rendering)
+- [レンダリングと SSR](/docs/concepts/rendering-and-ssr.md)
+- [レンダリングモードを選ぶ](/docs/guides/choose-a-rendering-mode.md)

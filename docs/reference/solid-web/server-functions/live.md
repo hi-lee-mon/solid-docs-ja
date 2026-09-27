@@ -20,7 +20,7 @@ source_path: "packages/web/server-functions/src/client.ts"
 
 async iterable が時間とともに変化する1つの値を表すサーバー関数を宣言します。ブラウザは一時的に失敗したストリームを再接続し、`onstatus` を通じて接続状態を公開します。
 
-> ソースの契約、再接続の動作、リアクティブな消費については[読み取り・ストリーム・ライブデータ](/building-apps/server-functions/reads-and-live-data#declare-a-live-source)を参照してください。
+> ソースの契約、再接続の動作、リアクティブな消費については[読み取り・ストリーム・ライブデータ](/docs/building-apps/server-functions/reads-and-live-data.md#declare-a-live-source)を参照してください。
 
 ## インポート
 
@@ -55,8 +55,8 @@ export const stockPrice = live(async function* (symbol: string) {
 
 ## 関連項目
 
-- [読み取り・ストリーム・ライブデータ](/building-apps/server-functions/reads-and-live-data)
-- [サーバー関数](/building-apps/server-functions)
+- [読み取り・ストリーム・ライブデータ](/docs/building-apps/server-functions/reads-and-live-data.md)
+- [サーバー関数](/docs/building-apps/server-functions/index.md)
 
 ## 関連する型
 

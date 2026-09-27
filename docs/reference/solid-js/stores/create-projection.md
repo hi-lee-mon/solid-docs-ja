@@ -103,13 +103,13 @@ const activeUsers = createProjection<User[]>(
 
 ## よくある問題
 
-- [リストの変更時に行がフォーカスやアニメーションを失う](/guides/lists#rows-lose-focus-or-animation-when-the-list-changes)
+- [リストの変更時に行がフォーカスやアニメーションを失う](/docs/guides/lists.md#rows-lose-focus-or-animation-when-the-list-changes)
 
 ## さらに学ぶ
 
-- [プロジェクションでストアを派生する](/concepts/stores#derive-a-store-with-a-projection)
-- [ストア](/concepts/stores)
-- [リスト](/guides/lists)
+- [プロジェクションでストアを派生する](/docs/concepts/stores.md#derive-a-store-with-a-projection)
+- [ストア](/docs/concepts/stores.md)
+- [リスト](/docs/guides/lists.md)
 
 ## 関連する型
 

@@ -117,14 +117,14 @@ function For<T extends readonly any[], U extends JSX.Element>(props: {
 
 ## よくある問題
 
-- [変更のたびにリストがすべての行を再生成する](/concepts/components-and-jsx#a-list-re-creates-every-row-on-each-change)
-- [リストの変更で行がフォーカスやアニメーションを失う](/guides/lists#rows-lose-focus-or-animation-when-the-list-changes)
-- [並べ替え後に行が誤った index を表示する](/guides/lists#a-row-shows-the-wrong-index-after-reordering)
-- [1つの項目を編集するとリスト全体が再構築される](/guides/lists#editing-one-item-rebuilds-the-whole-list)
+- [変更のたびにリストがすべての行を再生成する](/docs/concepts/components-and-jsx.md#a-list-re-creates-every-row-on-each-change)
+- [リストの変更で行がフォーカスやアニメーションを失う](/docs/guides/lists.md#rows-lose-focus-or-animation-when-the-list-changes)
+- [並べ替え後に行が誤った index を表示する](/docs/guides/lists.md#a-row-shows-the-wrong-index-after-reordering)
+- [1つの項目を編集するとリスト全体が再構築される](/docs/guides/lists.md#editing-one-item-rebuilds-the-whole-list)
 
 ## 関連項目
 
-- [リストのレンダリング](/concepts/components-and-jsx#rendering-lists)
-- [リスト](/guides/lists)
-- [コンポーネントと JSX](/concepts/components-and-jsx)
-- [バウンダリ](/concepts/boundaries)
+- [リストのレンダリング](/docs/concepts/components-and-jsx.md#rendering-lists)
+- [リスト](/docs/guides/lists.md)
+- [コンポーネントと JSX](/docs/concepts/components-and-jsx.md)
+- [バウンダリ](/docs/concepts/boundaries.md)

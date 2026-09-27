@@ -4,7 +4,7 @@ version: "2.0"
 description: "行を作り直さずに、リストのレンダリング・編集・フィルター・ソート・選択・ウィンドウ表示を行い、作り直しが起きているときに教えてくれる診断の読み方も学びます。"
 ---
 
-[ストア](/concepts/stores)ページのカートは、すべての行に数量 input があります。
+[ストア](/docs/concepts/stores.md)ページのカートは、すべての行に数量 input があります。
 数量を1つ変えても、入力中の行はそのまま残らなければなりません。input はフォーカスを保ち、行のアニメーションは再生を続け、スクロール位置も維持されます。
 多くの人が最初に書くリストは、変更のたびにすべての行を作り直し、1キー打つと input がフォーカスを失うという症状が出ます。
 
@@ -12,7 +12,7 @@ description: "行を作り直さずに、リストのレンダリング・編集
 リストは小さなミスが最も大きな代償になる場所です。更新ではなく作り直された行は、その DOM・フォーカス・スクロール位置・アニメーションを失い、しかも行ごとにそれが起きるのです。
 
 このガイドは、リストに対して何をしたいかで構成されています。
-[コンポーネントと JSX](/concepts/components-and-jsx#rendering-lists)のページでは `For` と `Repeat` を紹介しています。このページはそれらを上手に使うためのものです。
+[コンポーネントと JSX](/docs/concepts/components-and-jsx.md#rendering-lists)のページでは `For` と `Repeat` を紹介しています。このページはそれらを上手に使うためのものです。
 例にはカートの明細アイテムを使います:
 
 ```ts
@@ -27,7 +27,7 @@ type CartItem = {
 
 ## 配列から行をレンダリングする
 
-[`For`](/reference/solid-js/components-jsx/for)は配列を行にマッピングし、アイテムが戻ってきたときに行を再利用します:
+[`For`](/docs/reference/solid-js/components-jsx/for.md)は配列を行にマッピングし、アイテムが戻ってきたときに行を再利用します:
 
 ```tsx
 import { For } from "solid-js";
@@ -143,7 +143,7 @@ setItems((draft) => draft.filter((item) => item.id !== id));
 ```
 
 削除でセッターから新しい配列を返すのは問題ありません。残ったアイテムは同じプロキシなので、その行は保持されます。
-リスト全体がサーバーから新しく届いて差分で取り込むべき場合は [`reconcile`](/reference/solid-js/stores/reconcile)を使います。
+リスト全体がサーバーから新しく届いて差分で取り込むべき場合は [`reconcile`](/docs/reference/solid-js/stores/reconcile.md)を使います。
 
 ## フィルターとソート
 
@@ -182,7 +182,7 @@ const visible = createMemo(() => {
 この2つは別物で、問題になるのは後者だけです。
 :::
 
-導出リストが大きく複数の読み手から読まれる場合は、[`createProjection`](/reference/solid-js/stores/create-projection)が配列の代わりにストア型の結果を生成するため、個別の行を読む側はリスト全体を購読しなくて済みます。その形は[ストア](/concepts/stores#derive-a-store-with-a-projection)で示しています。
+導出リストが大きく複数の読み手から読まれる場合は、[`createProjection`](/docs/reference/solid-js/stores/create-projection.md)が配列の代わりにストア型の結果を生成するため、個別の行を読む側はリスト全体を購読しなくて済みます。その形は[ストア](/docs/concepts/stores.md#derive-a-store-with-a-projection)で示しています。
 
 ## 行を選択する
 
@@ -213,7 +213,7 @@ function select(id: string) {
 `Prefer` 版では、選択がある行から別の行へ移るときに更新されるのはちょうど2行です。キーを失った行と、キーを得た行です。
 同じストアがそのまま複数選択にも対応します。他のキーを消さずに残せばよいだけです。
 
-選択された id がルートパラメータなど別の場所にすでにある場合は、手書きする代わりに [`createProjection`](/reference/solid-js/stores/create-projection)でそこからストアを導出します:
+選択された id がルートパラメータなど別の場所にすでにある場合は、手書きする代わりに [`createProjection`](/docs/reference/solid-js/stores/create-projection.md)でそこからストアを導出します:
 
 ```tsx
 const isSelected = createProjection<Record<string, boolean>>((draft) => {
@@ -227,7 +227,7 @@ const isSelected = createProjection<Record<string, boolean>>((draft) => {
 `For` はアイテムごとに行を作ります。
 アカウントの全注文履歴のように、長すぎて問題になるリストでは、画面に見えている行だけをレンダリングします。
 
-[`Repeat`](/reference/solid-js/components-jsx/repeat)は、配列を切り出さずに、ストア上の位置の範囲をレンダリングします:
+[`Repeat`](/docs/reference/solid-js/components-jsx/repeat.md)は、配列を切り出さずに、ストア上の位置の範囲をレンダリングします:
 
 ```tsx
 import { Repeat, createSignal, createStore } from "solid-js";
@@ -317,8 +317,8 @@ function OrderHistory(props: { orders: Store<Order[]> }) {
 
 ## 次のステップ
 
-- [コンポーネントと JSX](/concepts/components-and-jsx#rendering-lists): `For` と `Repeat` のコールバックの形。
-- [ストア](/concepts/stores): ドラフトセッター、プロジェクション、リコンサイル。
-- [データフェッチのパターン](/guides/data-fetching-patterns): サーバーからのリスト読み込み、ページネーション、無限スクロール。
-- [リアクティビティのデバッグ](/guides/debugging-reactivity#a-list-rebuilds-rows-for-the-same-records): `UNSTABLE_LIST_IDENTITY` と `IMMUTABLE_UPDATE_IN_STORE` レポートの詳細。
-- [パフォーマンス](/guides/performance#lists): 行1つが変わったときに何が再実行されるかの測り方。
+- [コンポーネントと JSX](/docs/concepts/components-and-jsx.md#rendering-lists): `For` と `Repeat` のコールバックの形。
+- [ストア](/docs/concepts/stores.md): ドラフトセッター、プロジェクション、リコンサイル。
+- [データフェッチのパターン](/docs/guides/data-fetching-patterns.md): サーバーからのリスト読み込み、ページネーション、無限スクロール。
+- [リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md#a-list-rebuilds-rows-for-the-same-records): `UNSTABLE_LIST_IDENTITY` と `IMMUTABLE_UPDATE_IN_STORE` レポートの詳細。
+- [パフォーマンス](/docs/guides/performance.md#lists): 行1つが変わったときに何が再実行されるかの測り方。

@@ -10,7 +10,7 @@ Solid のランタイムはそれらのそれぞれをフックまたはチャ�
 このガイドは、それらのフックの背後にある契約を説明します。何が、いつ、何とともに発火し、リスナーが何をしてよいかを扱います。
 
 :::advanced[ツール作者向け]
-既存のツールを有効にしたいアプリ作者は[オブザーバビリティ](/guides/observability)を参照してください。
+既存のツールを有効にしたいアプリ作者は[オブザーバビリティ](/docs/guides/observability.md)を参照してください。
 このページはツールを作る人向けです。
 :::
 
@@ -33,7 +33,7 @@ Solid のランタイムはそれらのそれぞれをフックまたはチャ�
 
 両方のフックは、ランタイムがそのエラーオブジェクトに最初に出会ったときに、オブジェクトごとに 1 回だけ呼ばれます。
 クライアントフックはエラーバウンダリがフォールバックをレンダリングしたときに発火します。未捕捉のエラーはリアクティブシステムを停止させて `reportError` に届き、これはグローバルハンドラーがすでにカバーしているため、フックはそれを繰り返しません。
-サーバーフックはサーバーランタイムが処理する、あるいは処理に失敗するすべての失敗で発火します。コンテキストの `kind` と `handling` がどちらかを示し、[オブザーバビリティ](/guides/observability#hear-every-failure-the-server-handles)に一覧表があります。
+サーバーフックはサーバーランタイムが処理する、あるいは処理に失敗するすべての失敗で発火します。コンテキストの `kind` と `handling` がどちらかを示し、[オブザーバビリティ](/docs/guides/observability.md#hear-every-failure-the-server-handles)に一覧表があります。
 
 両方のコンテキストは、エラーが投げられた場所 `ownerPath` と捕捉された場所 `boundaryPath` を、ルートから順のラベル配列として持ちます。
 グループ化には結合し、表示には分けたまま使います。
@@ -47,7 +47,7 @@ Solid のランタイムはそれらのそれぞれをフックまたはチャ�
 
 ## レコード: 確定済み・シリアライズ可能・ランタイム内で配送
 
-`OBSERVE.records` は 4 つのレコード型を配送します。詳しくは[オブザーバビリティ](/guides/observability#see-what-the-runtime-did)を参照してください。
+`OBSERVE.records` は 4 つのレコード型を配送します。詳しくは[オブザーバビリティ](/docs/guides/observability.md#see-what-the-runtime-did)を参照してください。
 スパンビルダーを形作る契約は次のとおりです:
 
 - レコードは受け取った時点で完成しています。`at` は `performance.now()` 時計上の値で、継続時間はミリ秒です。
@@ -180,7 +180,7 @@ createRoot(() => {
 
 ## 次のステップ
 
-- [オブザーバビリティ](/guides/observability): アプリ作者が有効にするものと、このページが依拠するエラー箇所とレコード型の一覧表。
-- [`OBSERVE` リファレンス](/reference/solid-js/advanced/diagnostics-dev-hooks/observe): すべてのレコードフィールドとチャネルメソッド。
-- [属性付けリファレンス](/reference/solid-js/advanced/diagnostics-dev-hooks/attribution): インタラクション・ナビゲーション・ホールド・再実行レコードの形。
-- [リアクティビティのデバッグ](/guides/debugging-reactivity): 診断コードとそれぞれの意味。
+- [オブザーバビリティ](/docs/guides/observability.md): アプリ作者が有効にするものと、このページが依拠するエラー箇所とレコード型の一覧表。
+- [`OBSERVE` リファレンス](/docs/reference/solid-js/advanced/diagnostics-dev-hooks/observe.md): すべてのレコードフィールドとチャネルメソッド。
+- [属性付けリファレンス](/docs/reference/solid-js/advanced/diagnostics-dev-hooks/attribution.md): インタラクション・ナビゲーション・ホールド・再実行レコードの形。
+- [リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md): 診断コードとそれぞれの意味。

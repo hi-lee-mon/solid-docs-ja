@@ -4,7 +4,7 @@ version: "2.0"
 description: "あるリアクティブな値を別の値へコピーするエフェクトを見抜き、直接・メモ化・非同期・書き込み可能な派生で置き換え、createEffect は命令的な境界のために残す。"
 ---
 
-[ストア](/concepts/stores) ページのカートでは、明細行の下に小計が表示されます。
+[ストア](/docs/concepts/stores.md) ページのカートでは、明細行の下に小計が表示されます。
 多くの人が最初に書くのは、小計を専用のシグナルに保持し、商品が変わるたびに再計算するエフェクトを追加するバージョンです。
 これは動作しますが、気づきにくい形で誤っています。数量を変更すると、その行は 1 回のフラッシュで更新されるのに対し小計は次のフラッシュで更新されるため、1 フレームの間、ページには新しい数量と古い合計が並んで表示されてしまいます。
 attribution を有効にすると、開発ビルドはこのパターンを `[EFFECT_RELAY_TEAR]` と名付けます。
@@ -12,10 +12,10 @@ attribution を有効にすると、開発ビルドはこのパターンを `[EF
 シグナル・ストア・props・メモ・非同期の計算は、すでに派生値のグラフを形成しています。
 エフェクトが属するのはそのグラフの終端です。確定した結果が Solid の外に出て、Solid が所有しないものを駆動しなければならない場所です。
 
-![リアクティブな入力は派生値を通って宣言的なコンシューマーと終端のエフェクトへ流れます。ユーザー操作や外部からの観測はセッターを介して新しい入力になります。](/images/diagrams/derived-state-effects-sequence.svg)
+![リアクティブな入力は派生値を通って宣言的なコンシューマーと終端のエフェクトへ流れます。ユーザー操作や外部からの観測はセッターを介して新しい入力になります。](/docs/images/diagrams/derived-state-effects-sequence.svg)
 
 このガイドでは、派生を使うべき場所にエフェクトが書かれがちな箇所を順に見て、それぞれが実行時に何をするかを示し、最後に `createEffect` が適切なツールとなる 2 つのケースを紹介します。
-追跡・メモ・エフェクトのフェーズ・スケジューリング・オーナーシップについては [リアクティビティ](/concepts/reactivity) ページで説明しています。
+追跡・メモ・エフェクトのフェーズ・スケジューリング・オーナーシップについては [リアクティビティ](/docs/concepts/reactivity.md) ページで説明しています。
 
 ## 値は読み取られるときに計算する
 
@@ -47,13 +47,13 @@ attribution を有効にしていると、開発ビルドは 2 回目の実行�
 ```
 
 表示される名前は `name` オプションから来ます。名前のないシグナルは `signal` と表示されます。
-このレポートとそのバリエーションについては [リアクティビティのデバッグ](/guides/debugging-reactivity#an-effect-writes-a-signal-that-another-scope-derives-from) で扱っています。
+このレポートとそのバリエーションについては [リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md#an-effect-writes-a-signal-that-another-scope-derives-from) で扱っています。
 
 `Prefer` 側は単なる関数です。
 これは読み取った追跡スコープ内で実行されるため、入力とは独立に古くなることはなく、2 回目の書き込みもスケジュールされません。
 呼び出しは JSX や他の追跡スコープの内側に置いてください。コンポーネント本体は追跡されずに実行されるため、コンポーネントのトップレベルにある `subtotal()` は一度だけ評価される値になります。
 
-複数の読み取り側が結果を共有する場合や、結果が変わらないときに伝播を止めたい場合は [`createMemo`](/reference/solid-js/reactivity/create-memo) を使います。
+複数の読み取り側が結果を共有する場合や、結果が変わらないときに伝播を止めたい場合は [`createMemo`](/docs/reference/solid-js/reactivity/create-memo.md) を使います。
 メモにはノードと比較のコストがかかります。読み取り側が 1 つだけの安価な式なら、関数のほうが小さく済みます。
 メモの計算には副作用を含めないでください。
 
@@ -133,8 +133,8 @@ return (
 );
 ```
 
-保留中のインジケーター、`latest`、リフレッシュについては [非同期リアクティビティ](/concepts/async-reactivity) で扱っています。
-レスポンスがリストやツリーで、再取得をまたいで各アイテムの同一性を保ちたい場合は、[`createStore`](/reference/solid-js/stores/create-store) の関数形式を使います。
+保留中のインジケーター、`latest`、リフレッシュについては [非同期リアクティビティ](/docs/concepts/async-reactivity.md) で扱っています。
+レスポンスがリストやツリーで、再取得をまたいで各アイテムの同一性を保ちたい場合は、[`createStore`](/docs/reference/solid-js/stores/create-store.md) の関数形式を使います。
 
 ## ローカルな上書きには書き込み可能な派生を使う
 
@@ -228,7 +228,7 @@ function AddressForm(props: { address: Address }) {
 
 新しいソースの値でローカルの編集を置き換えるべき場合にこのパターンを使います。
 ローカルの値が独立したライフタイムを持つ場合は、通常のシグナルやストアを使います。
-仮の値がローカルの編集セッションではなく進行中のミューテーションに属する場合は楽観的状態を使います。そのケースは [ミューテーション](/concepts/mutations) で扱っています。
+仮の値がローカルの編集セッションではなく進行中のミューテーションに属する場合は楽観的状態を使います。そのケースは [ミューテーション](/docs/concepts/mutations.md) で扱っています。
 
 ## インタラクションは起きた場所で処理する
 
@@ -261,14 +261,14 @@ const save = action(function* () {
 
 `Avoid` 側を実行して **Save** を 2 回クリックしてみてください。
 1 回目のクリックはクリックの 1 フラッシュ後に保存します。2 回目は何も起きません。すでに `true` を保持しているシグナルに `true` を書き込んでも誰にも通知されず、ボタンが再び機能するにはどこかでフラグをリセットする必要があります。
-`Prefer` 側では、クリックごとに [`action`](/reference/solid-js/lifecycle-actions/action) が実行され、リクエストが 1 つのトランザクションとして実行されます。内部で行われた通常の書き込みは確定まで保留され、楽観的な値はすぐに表示されて確定時に破棄されます。
+`Prefer` 側では、クリックごとに [`action`](/docs/reference/solid-js/lifecycle-actions/action.md) が実行され、リクエストが 1 つのトランザクションとして実行されます。内部で行われた通常の書き込みは確定まで保留され、楽観的な値はすぐに表示されて確定時に破棄されます。
 
 ## 命令的な境界ではエフェクトを使う
 
 確定したリアクティブな値が、Solid が所有しないシステム（サードパーティのウィジェット、購読、テレメトリ、宣言的な JSX 表現を持たないブラウザ API など）を駆動しなければならないときにエフェクトを使います。
-2 フェーズの [`createEffect`](/reference/solid-js/reactivity/create-effect) は、その境界を明示的に保ちます。
+2 フェーズの [`createEffect`](/docs/reference/solid-js/reactivity/create-effect.md) は、その境界を明示的に保ちます。
 1 つ目の関数は追跡して値を返し、2 つ目の関数はその値を受け取って命令的な処理を行い、クリーンアップを返すことができます。
-[Solid 以外のコードの統合](/guides/integrate-non-solid-code#create-the-instance-once-update-it-in-an-effect) では、この形をチャートライブラリに適用しています。
+[Solid 以外のコードの統合](/docs/guides/integrate-non-solid-code.md#create-the-instance-once-update-it-in-an-effect) では、この形をチャートライブラリに適用しています。
 
 守るべきルールは、追跡されるのは 1 つ目の関数だけだということです。
 
@@ -356,7 +356,7 @@ function ProductGallery() {
 `Prefer` 側では、サイズ変更のたびにオブザーバーが発火し、その書き込みはブラウザが報告したものを記録します。リアクティブな値をグラフにコピーし直すわけではありません。
 
 `onSettled` は周囲のレンダーが確定した後にコールバックを一度だけ実行し、返されたクリーンアップはオーナーが破棄されるときに実行されるため、オブザーバーはコンポーネントとともに切断されます。
-このコードが前提とする、オーナーに紐づく DOM のセットアップについては [ref とディレクティブ](/concepts/components-and-jsx#refs-and-directives) で扱っています。
+このコードが前提とする、オーナーに紐づく DOM のセットアップについては [ref とディレクティブ](/docs/concepts/components-and-jsx.md#refs-and-directives) で扱っています。
 
 ## エフェクトを追加する前のチェック
 
@@ -381,19 +381,19 @@ function ProductGallery() {
 
 エフェクトが、派生で生成できるはずのシグナルに書き込んでいます。
 コピーの読み取り側はソースの読み取り側より 1 フラッシュ遅れて更新され、attribution は `[EFFECT_RELAY_TEAR]` を報告します。
-そのシグナルとエフェクトを削除し、値は読み取られる場所で派生してください。レポートの読み方は [リアクティビティのデバッグ](/guides/debugging-reactivity#an-effect-writes-a-signal-that-another-scope-derives-from) で順を追って説明しています。
+そのシグナルとエフェクトを削除し、値は読み取られる場所で派生してください。レポートの読み方は [リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md#an-effect-writes-a-signal-that-another-scope-derives-from) で順を追って説明しています。
 
 ### 変更ごとにエフェクトが 2 回実行される
 
 エフェクトが、直接またはメモ経由で自分が読んでいるものへフィードバックされるシグナルやストアのプロパティに書き込んでいます。
 attribution は `[EFFECT_WRITES_OWN_SOURCE]` を報告します。書き込まれる値はエフェクトの入力の関数なのでメモに置くべきか、その正規化はソースが書き込まれる場所で行うべきです。
-詳しくは [リアクティビティのデバッグ](/guides/debugging-reactivity#an-effect-re-runs-because-of-its-own-write) で扱っています。
+詳しくは [リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md#an-effect-re-runs-because-of-its-own-write) で扱っています。
 
 ### シグナルが変わってもエフェクトが再実行されない
 
 そのシグナルが、追跡されないエフェクト関数の中で読み取られています。
 その読み取りを計算関数に移し、他の値と一緒に返してください。
-その形は [リアクティビティのデバッグ](/guides/debugging-reactivity#is-the-effect-reading-in-the-wrong-phase) で示しています。
+その形は [リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md#is-the-effect-reading-in-the-wrong-phase) で示しています。
 
 ## まとめ
 
@@ -407,7 +407,7 @@ attribution は `[EFFECT_WRITES_OWN_SOURCE]` を報告します。書き込ま�
 
 ## 次のステップ
 
-- [リアクティビティのデバッグ](/guides/debugging-reactivity)：エフェクトが状態を中継したときに発火する診断、`[EFFECT_RELAY_TEAR]` と `[EFFECT_WRITES_OWN_SOURCE]`、およびその読み方。
-- [非同期リアクティビティ](/concepts/async-reactivity)：非同期メモが Promise の保留中に何をするか。エフェクトとフラグのパターンが手作業で実装していた部分です。
-- [データ取得パターン](/guides/data-fetching-patterns)：このページの派生の形を、リクエスト・ページネーション・リフレッシュに適用したもの。
-- [Thinking in Solid](/guides/thinking-in-solid)：React や Vue から来た読者向けに、1 つの機能を端から端まで作る中で同じルールを適用する。
+- [リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md)：エフェクトが状態を中継したときに発火する診断、`[EFFECT_RELAY_TEAR]` と `[EFFECT_WRITES_OWN_SOURCE]`、およびその読み方。
+- [非同期リアクティビティ](/docs/concepts/async-reactivity.md)：非同期メモが Promise の保留中に何をするか。エフェクトとフラグのパターンが手作業で実装していた部分です。
+- [データ取得パターン](/docs/guides/data-fetching-patterns.md)：このページの派生の形を、リクエスト・ページネーション・リフレッシュに適用したもの。
+- [Thinking in Solid](/docs/guides/thinking-in-solid.md)：React や Vue から来た読者向けに、1 つの機能を端から端まで作る中で同じルールを適用する。

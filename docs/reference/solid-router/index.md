@@ -19,11 +19,11 @@ Solid Router は 3 つのパッケージエントリーとして公開されて�
 
 ## リファレンスグループ
 
-- [ルーターファクトリー](/reference/solid-router/router-factory): `createRouter`、`defineRoute`、`defineRoutes`
-- [ルートと型付きパス](/reference/solid-router/routes-and-paths): ルート定義、パスパターン、`int`、インスタンスパス、マッチング
-- [ナビゲーションプリミティブ](/reference/solid-router/navigation): ロケーション、ナビゲーション、マッチング、検索、プリロード、リンク状態、離脱ガード
-- [データ API](/reference/solid-router/data): `query`、`revalidate`、`action`、`useAction`、`useSubmissions`
-- [履歴アダプター](/reference/solid-router/history): ブラウザ・ハッシュ・メモリ履歴
-- [ファイルシステムアダプター](/reference/solid-router/filesystem): `fileRoutes` と `defineFileRoute`
-- [サーバー統合](/reference/solid-router/server): `createFlightDataCollector`
-- [型](/reference/solid-router/types): 公開されているアプリケーション向けの型
+- [ルーターファクトリー](/docs/reference/solid-router/router-factory.md): `createRouter`、`defineRoute`、`defineRoutes`
+- [ルートと型付きパス](/docs/reference/solid-router/routes-and-paths.md): ルート定義、パスパターン、`int`、インスタンスパス、マッチング
+- [ナビゲーションプリミティブ](/docs/reference/solid-router/navigation.md): ロケーション、ナビゲーション、マッチング、検索、プリロード、リンク状態、離脱ガード
+- [データ API](/docs/reference/solid-router/data.md): `query`、`revalidate`、`action`、`useAction`、`useSubmissions`
+- [履歴アダプター](/docs/reference/solid-router/history.md): ブラウザ・ハッシュ・メモリ履歴
+- [ファイルシステムアダプター](/docs/reference/solid-router/filesystem.md): `fileRoutes` と `defineFileRoute`
+- [サーバー統合](/docs/reference/solid-router/server.md): `createFlightDataCollector`
+- [型](/docs/reference/solid-router/types.md): 公開されているアプリケーション向けの型

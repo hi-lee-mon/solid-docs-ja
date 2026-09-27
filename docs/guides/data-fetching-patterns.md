@@ -4,7 +4,7 @@ version: "2.0"
 description: "検索・詳細ページ・ページネーション・共有状態・ダッシュボードのために、ローディングフラグ・リクエストカウンター・AbortController なしでデータを読み込み、各リクエストと各バウンダリをどこに置くかを決めます。"
 ---
 
-[非同期リアクティビティ](/concepts/async-reactivity)のページにある商品ページは、1 つのメモで 1 つの商品を読み込んでいました。
+[非同期リアクティビティ](/docs/concepts/async-reactivity.md)のページにある商品ページは、1 つのメモで 1 つの商品を読み込んでいました。
 ストアフロントではそれ以上のリクエストが発生します。キー入力のたびに発火する検索ボックス、レビューと関連商品も必要な商品ページ、ページをまたぐ注文履歴、複数のコンポーネントが読み取るカートバッジ、リロードなしで最新の状態を保つべきダッシュボードです。
 これらは通常、ローディングフラグ・リクエストカウンター・`AbortController` で書かれます。Solid ではそれぞれが 1 つの計算です。Promise を返す計算は値だからです。
 
@@ -44,7 +44,7 @@ const [orders] = createStore(
 ```
 
 レスポンスは `id` に基づいて同じプロキシへ突き合わせられるため、変化のなかった行はその DOM を保持します。
-どんなときにそれが重要になるかは [ストア](/concepts/stores#fetch-into-a-store) で説明しています。
+どんなときにそれが重要になるかは [ストア](/docs/concepts/stores.md#fetch-into-a-store) で説明しています。
 
 ## 入力しながら検索する
 
@@ -92,13 +92,13 @@ function ProductSearch() {
 `value` バインドのない制御されない入力なら何も不要です。
 
 :::tip[デバウンスはグラフではなくイベントで]
-ハンドラー側の 1 行でグラフはそのまま保てます。[カスタムプリミティブ](/guides/custom-primitives)では同じ考え方を `createDebouncedSignal` としてパッケージ化しています:
+ハンドラー側の 1 行でグラフはそのまま保てます。[カスタムプリミティブ](/docs/guides/custom-primitives.md)では同じ考え方を `createDebouncedSignal` としてパッケージ化しています:
 
 ```tsx
 onInput={debounce((event) => setQuery(event.currentTarget.value), 150)}
 ```
 
-遅延後にシグナルを別のシグナルへコピーするエフェクトとして書くデバウンスは、[不要なエフェクトを避ける](/guides/avoid-unnecessary-effects#calculate-values-when-they-are-read)でコストを示しているリレーパターンです。
+遅延後にシグナルを別のシグナルへコピーするエフェクトとして書くデバウンスは、[不要なエフェクトを避ける](/docs/guides/avoid-unnecessary-effects.md#calculate-values-when-they-are-read)でコストを示しているリレーパターンです。
 :::
 
 ## 1 ページ分の複数のものを読み込む
@@ -129,13 +129,13 @@ function ProductPage(props: { id: string }) {
 ```
 
 各バウンダリは自分のデータがそろった時点で開くため、ヘッダーをレビューより先に表示できます。
-順不同で表示したくない場合は、バウンダリを [`Reveal`](/reference/solid-js/components-jsx/reveal) で囲みます。`order="sequential"` は上から順に表示し、`order="together"` は 3 つすべてがそろうまで待ちます。
+順不同で表示したくない場合は、バウンダリを [`Reveal`](/docs/reference/solid-js/components-jsx/reveal.md) で囲みます。`order="sequential"` は上から順に表示し、`order="together"` は 3 つすべてがそろうまで待ちます。
 
 `props.id` が変わると 3 つのリクエストすべてが再開され、3 つすべてが回答するまで更新は保留されます。その後ページは一体として切り替わります。
 ヘッダーとレビューが同じ商品を説明しなければならない詳細ページでは、通常それが望ましい動作です。
 対象の切り替え時に遅いセクションがほかを遅らせないようにしたい場合は、そのセクションに `on={props.id}` を付けます。更新の保留が外れるため、ほかの 2 つが回答した時点でページは切り替わり、遅いセクションはその切り替え時点から自分のデータが届くまでスケルトンを表示します。
 3 つすべてに `on` を付けると、クリックした瞬間にページが切り替わり、各セクションはそれぞれのデータが届くまでスケルトンを表示します。
-`on` が役立つのはバウンダリの外で同じ変更を待っているものがないときだけだという理由は、[非同期リアクティビティ](/concepts/async-reactivity#show-a-placeholder-again-loading-on)のページで説明しています。
+`on` が役立つのはバウンダリの外で同じ変更を待っているものがないときだけだという理由は、[非同期リアクティビティ](/docs/concepts/async-reactivity.md#show-a-placeholder-again-loading-on)のページで説明しています。
 
 ## 依存するリクエスト
 
@@ -174,7 +174,7 @@ const catalog = createMemo(() => api.brandProducts(product().brandId));
 
 2 段の連鎖は `info` の重要度で記録されコンソールには出ません。2 段は実際のデータ依存の可能性があるからです。3 つ以上は警告になります。
 50ms 未満のリクエストは 1 段として数えられません。
-アトリビューションの有効化とレポートの読み方は [更新が多すぎる場合](/guides/debugging-reactivity#something-updates-too-often) で説明しています。
+アトリビューションの有効化とレポートの読み方は [更新が多すぎる場合](/docs/guides/debugging-reactivity.md#something-updates-too-often) で説明しています。
 
 依存関係が本物である場合は、回避策を講じるのではなくクライアントから取り除きます:
 
@@ -248,8 +248,8 @@ function CartBadge() {
 コンテキスト経由でアクセサーを渡すと読み取りは遅延のままです。コンポーネントが `cart()` を読むまで何もカートを待たず、そのコンポーネントのバウンダリだけが関係します。
 
 :::note[ルート間での共有]
-ルートをまたいで共有するリクエストや、引数による重複排除とキャッシュには、Solid Router の [`query`](/routing/solid-router/data#cache-reads-with-query) を使います。
-同じ引数を持つすべての呼び出し元に同じ実行中の Promise を返し、最後の読み取り側が離れた後も数分間結果を保持し、アクションがそのキーを[再検証](/routing/solid-router/data#revalidate)すると再取得します。
+ルートをまたいで共有するリクエストや、引数による重複排除とキャッシュには、Solid Router の [`query`](/docs/routing/solid-router/data.md#cache-reads-with-query) を使います。
+同じ引数を持つすべての呼び出し元に同じ実行中の Promise を返し、最後の読み取り側が離れた後も数分間結果を保持し、アクションがそのキーを[再検証](/docs/routing/solid-router/data.md#revalidate)すると再取得します。
 :::
 
 ## データを最新に保つ
@@ -269,9 +269,9 @@ onSettled(() => {
 ```
 
 30 秒ごとに数値がその場で更新されます。何も薄くならず、スケルトンも表示されません。
-[`refresh(source)`](/reference/solid-js/lifecycle-actions/refresh) は同じ入力で計算を再実行し、確定した結果の Promise を返します。
+[`refresh(source)`](/docs/reference/solid-js/lifecycle-actions/refresh.md) は同じ入力で計算を再実行し、確定した結果の Promise を返します。
 単体の `refresh` は静かです。現在の答えはまだ問いに合っているため、`isPending` は `false` のまま、保留中のフェーズなしで新しい値が古い値に置き換わります。
-再読み込みを見せたいときは宣言します。`refresh` の前にアクション内で [`affects(stats)`](/reference/solid-js/lifecycle-actions/affects) を呼ぶと、それが届くまで読み取り側が保留中を報告します。
+再読み込みを見せたいときは宣言します。`refresh` の前にアクション内で [`affects(stats)`](/docs/reference/solid-js/lifecycle-actions/affects.md) を呼ぶと、それが届くまで読み取り側が保留中を報告します。
 
 :::deep-dive[refresh が静かで、入力の変更は静かでない理由]
 `isPending` は「変更された入力に対して別の答えが来ている途中か？」という問いに答えます。
@@ -281,11 +281,11 @@ onSettled(() => {
 :::
 
 ポーリングは、サーバーがプッシュできない場合のフォールバックです。
-プッシュできる場合、[`live()` サーバー関数](/building-apps/server-functions/reads-and-live-data#declare-a-live-source)は非同期イテラブルを返し、メモはほかの非同期ソースと同じようにそれを消費して、yield された各値が次の答えになります。
+プッシュできる場合、[`live()` サーバー関数](/docs/building-apps/server-functions/reads-and-live-data.md#declare-a-live-source)は非同期イテラブルを返し、メモはほかの非同期ソースと同じようにそれを消費して、yield された各値が次の答えになります。
 
 ## ミューテーションしてから再取得する
 
-書き込みは [`action`](/reference/solid-js/lifecycle-actions/action) を通します。リクエストと再取得が 1 つの更新に属するようになるためです:
+書き込みは [`action`](/docs/reference/solid-js/lifecycle-actions/action.md) を通します。リクエストと再取得が 1 つの更新に属するようになるためです:
 
 ```tsx
 const addReview = action(function* (productId: string, text: string) {
@@ -295,13 +295,13 @@ const addReview = action(function* (productId: string, text: string) {
 ```
 
 レビューリストはちらつきません。再取得はアクション内で実行され、新しいデータが届いたときにリストは一度だけ更新されます。
-サーバーの確認前に新しいレビューを表示するには、リストを `createOptimisticStore` に保持して `yield` の前に書き込みます。その版は [ミューテーション](/concepts/mutations) で説明しています。
+サーバーの確認前に新しいレビューを表示するには、リストを `createOptimisticStore` に保持して `yield` の前に書き込みます。その版は [ミューテーション](/docs/concepts/mutations.md) で説明しています。
 
-Solid Router では `@solidjs/router` の `action` がサブミッションと `query` 読み取りの自動再検証を追加します。[フォームのガイド](/guides/forms)で使っています。
+Solid Router では `@solidjs/router` の `action` がサブミッションと `query` 読み取りの自動再検証を追加します。[フォームのガイド](/docs/guides/forms.md)で使っています。
 
 ## 失敗を扱う
 
-拒否された Promise は値と同じようにグラフを伝わり、最も近い [`Errored`](/reference/solid-js/components-jsx/errored) バウンダリで止まります。
+拒否された Promise は値と同じようにグラフを伝わり、最も近い [`Errored`](/docs/reference/solid-js/components-jsx/errored.md) バウンダリで止まります。
 失敗を閉じ込めたい場所にバウンダリを配置します:
 
 ```tsx
@@ -323,7 +323,7 @@ Solid Router では `@solidjs/router` の `action` がサブミッションと `
 `reset` はバウンダリが収集したソースを再試行します。入力が変わったときや `refresh` が届いたときにも、バウンダリは自力で回復します。
 
 レスポンスが使えない場合は、`{ success: false }` オブジェクトを返して読み取りのたびに確認するのではなく、リクエストからスローします。
-サーバーでは [`markSafeError`](/reference/solid-web/request-response/safe-errors) がクライアントへ送る意図のあるメッセージをマークします。マークのないエラーは本番環境では汎用メッセージに置き換えられます。
+サーバーでは [`markSafeError`](/docs/reference/solid-web/request-response/safe-errors.md) がクライアントへ送る意図のあるメッセージをマークします。マークのないエラーは本番環境では汎用メッセージに置き換えられます。
 
 ## よくある問題
 
@@ -364,8 +364,8 @@ props やルートから取得できる同じ値を、メモが別のメモの�
 
 ## 次のステップ
 
-- [非同期リアクティビティ](/concepts/async-reactivity): これらのパターンの土台となるモデル。保留される更新と楽観的書き込みを含みます。
-- [サーバー関数](/building-apps/server-functions): `GET` の読み取り、`live` ソース、`"use server"` 関数がワイヤー上で行うこと。
-- [データの読み込みとミューテーション](/routing/solid-router/data): `query`、`preload`、ルーターのアクション。
-- [パフォーマンス](/guides/performance#waterfalls): ファーストペイントが逐次リクエストを待つページの計測。
-- [Solid 1 からのデータフェッチ](/migration/data-fetching-from-solid-1): 同じパターンを反対方向から見たもの。既存コード向け。
+- [非同期リアクティビティ](/docs/concepts/async-reactivity.md): これらのパターンの土台となるモデル。保留される更新と楽観的書き込みを含みます。
+- [サーバー関数](/docs/building-apps/server-functions/index.md): `GET` の読み取り、`live` ソース、`"use server"` 関数がワイヤー上で行うこと。
+- [データの読み込みとミューテーション](/docs/routing/solid-router/data.md): `query`、`preload`、ルーターのアクション。
+- [パフォーマンス](/docs/guides/performance.md#waterfalls): ファーストペイントが逐次リクエストを待つページの計測。
+- [Solid 1 からのデータフェッチ](/docs/migration/data-fetching-from-solid-1.md): 同じパターンを反対方向から見たもの。既存コード向け。

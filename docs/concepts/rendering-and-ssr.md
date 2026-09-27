@@ -46,7 +46,7 @@ onSettled(() => {
 `Prefer` 版ではサーバーが空のカートをレンダリングし、ブラウザーがそれをハイドレートし、`onSettled` コールバックがストレージから内容を埋めます。
 `createEffect` のエフェクト関数と `onSettled` のコールバックはサーバーレンダリング中には実行されません。それらの計算関数は実行されることがあります。
 
-共有コード内でのチェックには、[`isServer`](/reference/solid-web/rendering-ssr/is-server) がビルド時定数です。ブラウザービルドでは `false`、サーバービルドでは `true` をエクスポートするため、バンドラーが到達不能な側を除去できます。
+共有コード内でのチェックには、[`isServer`](/docs/reference/solid-web/rendering-ssr/is-server.md) がビルド時定数です。ブラウザービルドでは `false`、サーバービルドでは `true` をエクスポートするため、バンドラーが到達不能な側を除去できます。
 
 ```tsx
 import { isServer } from "@solidjs/web";
@@ -56,7 +56,7 @@ if (!isServer) {
 }
 ```
 
-マップやリッチテキストエディターのようにサーバーで実行できないコンポーネント全体には、[`clientOnly`](/reference/solid-web/rendering-ssr/client-only) を使います。
+マップやリッチテキストエディターのようにサーバーで実行できないコンポーネント全体には、[`clientOnly`](/docs/reference/solid-web/rendering-ssr/client-only.md) を使います。
 サーバーはそのフォールバックをレンダリングし、インポートを開始しません。ブラウザーはフォールバックをハイドレートし、モジュールとハイドレーションの確定を待ってから、コンポーネントに入れ替えます:
 
 ```tsx
@@ -75,12 +75,12 @@ export function StoreLocator() {
 :::caution[モジュールスコープの状態はすべてのリクエストで共有される]
 サーバーでは1つのモジュールインスタンスがすべてのリクエストに応答するため、モジュールスコープのシグナルやストアはあるユーザーの状態を別のユーザーのレスポンスへ漏らします。
 状態はコンポーネントかコンテキストプロバイダーの内側で作ってください。これらはブラウザーではアプリごとに1回、サーバーではリクエストごとに1回実行されます。
-[状態管理](/guides/state-management#module-level-state-and-the-server) でこのパターンと、サーバーがモジュールスコープ版をどう扱うかを示しています。
+[状態管理](/docs/guides/state-management.md#module-level-state-and-the-server) でこのパターンと、サーバーがモジュールスコープ版をどう扱うかを示しています。
 :::
 
 ## クライアントレンダリング
 
-[`render`](/reference/solid-web/rendering-ssr/render) はツリーを DOM コンテナにマウントし、そのツリーとリアクティブスコープを解体する破棄関数を返します:
+[`render`](/docs/reference/solid-web/rendering-ssr/render.md) はツリーを DOM コンテナにマウントし、そのツリーとリアクティブスコープを解体する破棄関数を返します:
 
 ```tsx
 import { render } from "@solidjs/web";
@@ -103,7 +103,7 @@ const dispose = render(() => <App />, root);
 
 ## サーバー HTML のハイドレーション
 
-[`hydrate`](/reference/solid-web/rendering-ssr/hydrate) は、`renderToString` または `renderToStream` からの HTML をすでに保持しているコンテナに対する `render` です。
+[`hydrate`](/docs/reference/solid-web/rendering-ssr/hydrate.md) は、`renderToString` または `renderToStream` からの HTML をすでに保持しているコンテナに対する `render` です。
 既存のノードを引き継ぎ、それらを作り直さずにイベントハンドラーとリアクティブバインディングを取り付けます:
 
 ```tsx
@@ -144,7 +144,7 @@ onSettled(() => setRenderedAt(Date.now()));
 `Avoid` 版は開発環境で `Hydration tag mismatch for key "...": expected <time> but found` のような警告を記録し、その後に代わりに見つかった `<p>` が続きます。そしてその領域のクライアントのバインディングは間違ったノードに取り付けられます。
 `Prefer` 版はクリーンにハイドレートし、ブラウザーが引き継いだ後にテキストを更新します。
 テキストだけが異なる値（`<p>{Date.now()}</p>` など）は警告を出しません。ハイドレーションはサーバーのテキストノードをそのまま採用するため、リアクティブな更新が置き換えるまでページはサーバーの値を表示し続けます。
-[SSR セーフなコード](/guides/ssr-safe-code#values-that-differ-on-every-run) でこれらのケースと各警告の読み方を解説しています。
+[SSR セーフなコード](/docs/guides/ssr-safe-code.md#values-that-differ-on-every-run) でこれらのケースと各警告の読み方を解説しています。
 
 アプリケーションがドキュメント全体を所有している場合は、アプリケーションマークアップの前に `HydrationScript` を1回含めます。
 これはハイドレーションサポートを初期化し、クライアントバンドルがハイドレートする前に発火したデリゲートされたイベントを記録するため、読み込み中のクリックが失われません。
@@ -160,7 +160,7 @@ hydrate(() => <Account />, accountRoot, { renderId: "account" });
 
 ## 同期的な文字列レンダリング
 
-[`renderToString`](/reference/solid-web/rendering-ssr/render-to-string) はコンポーネントツリーを同期的に実行し、HTML 文字列を返します。
+[`renderToString`](/docs/reference/solid-web/rendering-ssr/render-to-string.md) はコンポーネントツリーを同期的に実行し、HTML 文字列を返します。
 ツリーが同期的に完了できる場合、または保留中の部分がフォールバックをレスポンスに含めてよい `Loading` バウンダリの内側にある場合に使います:
 
 ```tsx
@@ -180,7 +180,7 @@ const html = renderToString(() => (
 
 ## ストリーミングレンダリング
 
-[`renderToStream`](/reference/solid-web/rendering-ssr/render-to-stream) はまず同期のシェルを出力し、次に各 `Loading` バウンダリのコンテンツが確定するたびにフラグメントを出力します:
+[`renderToStream`](/docs/reference/solid-web/rendering-ssr/render-to-stream.md) はまず同期のシェルを出力し、次に各 `Loading` バウンダリのコンテンツが確定するたびにフラグメントを出力します:
 
 ```tsx
 import { renderToStream } from "@solidjs/web";
@@ -200,7 +200,7 @@ export function handleRequest(): Response {
 上に `Loading` バウンダリのない非同期読み取りは、確定するまでシェルをブロックします。
 バウンダリの内側では、シェルはフォールバックを載せ、後のフラグメントがそれを置き換えます。
 つまり `Loading` の配置はクライアントだけでなくサーバーの決定でもあります。商品詳細の周りのバウンダリは、商品クエリがまだ実行中の間に、ヘッダー・ナビゲーション・フッターをブラウザーへ届けます。
-[バウンダリ](/concepts/boundaries) で配置と、`Reveal` がフラグメントをどう並べるかを解説しています。
+[バウンダリ](/docs/concepts/boundaries.md) で配置と、`Reveal` がフラグメントをどう並べるかを解説しています。
 
 ## ドキュメントを所有するのは誰か
 
@@ -248,14 +248,14 @@ const documentHtml = `<!doctype html>
 ```
 
 レンダラーは HTML 生成と head の受け渡しを処理します。
-サーバーアダプター、ルーティング、レスポンス生成、デプロイはアプリケーション層の仕事です。[アプリの構造](/building-apps/app-structure) で CLI テンプレートがそれらをどう配線するかを示しています。
+サーバーアダプター、ルーティング、レスポンス生成、デプロイはアプリケーション層の仕事です。[アプリの構造](/docs/building-apps/app-structure.md) で CLI テンプレートがそれらをどう配線するかを示しています。
 
 ## ハイドレーションの制御
 
 これらの制御は、ハイドレーションの所有権をサーバーとクライアントで分けます。
 サーバーレンダリングされたマーケティングページにインタラクティブな島が1つあるなど、両者が意図的にドキュメントの異なる部分を管理する場合にのみ使ってください。
 
-[`NoHydration`](/reference/solid-js/advanced/manual-hydration/no-hydration) は、ハイドレーションキーやシリアライズされた状態なしで、その子をサーバー上にレンダリングします。
+[`NoHydration`](/docs/reference/solid-js/advanced/manual-hydration/no-hydration.md) は、ハイドレーションキーやシリアライズされた状態なしで、その子をサーバー上にレンダリングします。
 クライアントのハイドレーション中、Solid はそのサブツリーをスキップし、その DOM を触れないままにします:
 
 ```tsx
@@ -266,7 +266,7 @@ import { NoHydration } from "solid-js";
 </NoHydration>;
 ```
 
-[`Hydration`](/reference/solid-js/advanced/manual-hydration/hydration) は `NoHydration` 領域の内側でハイドレーションを再有効化し、サーバー上で新しいハイドレーション id 名前空間を開始します。
+[`Hydration`](/docs/reference/solid-js/advanced/manual-hydration/hydration.md) は `NoHydration` 領域の内側でハイドレーションを再有効化し、サーバー上で新しいハイドレーション id 名前空間を開始します。
 それをハイドレートするクライアントルートの `renderId` と同じ id を渡してください:
 
 ```tsx
@@ -300,7 +300,7 @@ hydrate(() => <Account />, accountRoot, { renderId: "account" });
 ### コンソールに `Hydration tag mismatch`・`Hydration structure mismatch`・`Hydration key miss`
 
 サーバーとクライアントが同じ領域に異なる要素をレンダリングしました。別のタグを選ぶ `isServer` の条件分岐はタグ不一致を報告し、`Math.random()` に依存する条件の `Show` や、リクエストとブラウザーで異なるデータはテンプレート内の構造不一致を報告します。
-両側で同じ構造をレンダリングし、ブラウザー専用の値はハイドレーション後に埋めてください。[ハイドレーション警告の読み方](/guides/ssr-safe-code#reading-the-hydration-warnings)で各メッセージが何をチェックするかを説明しています。
+両側で同じ構造をレンダリングし、ブラウザー専用の値はハイドレーション後に埋めてください。[ハイドレーション警告の読み方](/docs/guides/ssr-safe-code.md#reading-the-hydration-warnings)で各メッセージが何をチェックするかを説明しています。
 メッセージが名前空間に言及するキーミスは、サブツリーがサーバーが使ったのとは異なる `renderId` でハイドレートされたことを意味します。[ハイドレーションの制御](#controlling-hydration)を参照してください。
 
 ### ページはレンダリングされるが最初のクリックが何もしない
@@ -325,8 +325,8 @@ hydrate(() => <Account />, accountRoot, { renderId: "account" });
 
 ## 次のステップ
 
-- [レンダリングモードを選ぶ](/guides/choose-a-rendering-mode): start-mode のプロジェクトがこれらの API のどれを使うか、そして静的シェル・ストリーミング SSR・プリレンダリングの選び方。
-- [アプリの構造](/building-apps/app-structure): `render`・`hydrate`・`renderToStream` を代わりに呼ぶ生成済みエントリー。
-- [バウンダリ](/concepts/boundaries): `Loading` の配置が、シェルにストリーミングされるものと後で届くものをどう決めるか。
-- [head とメタデータ](/building-apps/head-and-metadata): コンポーネントで宣言されたタイトルとメタタグが、両側でドキュメントの head に届く仕組み。
-- [SSR セーフなコード](/guides/ssr-safe-code): 両方の場所で実行されるコードのチェックリストと、各ハイドレーション警告の読み方。
+- [レンダリングモードを選ぶ](/docs/guides/choose-a-rendering-mode.md): start-mode のプロジェクトがこれらの API のどれを使うか、そして静的シェル・ストリーミング SSR・プリレンダリングの選び方。
+- [アプリの構造](/docs/building-apps/app-structure.md): `render`・`hydrate`・`renderToStream` を代わりに呼ぶ生成済みエントリー。
+- [バウンダリ](/docs/concepts/boundaries.md): `Loading` の配置が、シェルにストリーミングされるものと後で届くものをどう決めるか。
+- [head とメタデータ](/docs/building-apps/head-and-metadata.md): コンポーネントで宣言されたタイトルとメタタグが、両側でドキュメントの head に届く仕組み。
+- [SSR セーフなコード](/docs/guides/ssr-safe-code.md): 両方の場所で実行されるコードのチェックリストと、各ハイドレーション警告の読み方。

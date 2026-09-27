@@ -102,11 +102,11 @@ const Profile = lazy(() => import("./Profile"));
 
 ## よくある問題
 
-- [クリック後に画面が無反応に見える](/guides/debugging-reactivity#the-screen-looks-dead-after-a-click)
+- [クリック後に画面が無反応に見える](/docs/guides/debugging-reactivity.md#the-screen-looks-dead-after-a-click)
 
 ## 関連項目
 
-- [ローディングバウンダリ](/concepts/boundaries#loading-boundaries)
-- [`Loading` の `on` でプレースホルダーを再表示](/concepts/async-reactivity#show-a-placeholder-again-loading-on)
-- [コンポーネントと JSX](/concepts/components-and-jsx)
-- [バウンダリ](/concepts/boundaries)
+- [ローディングバウンダリ](/docs/concepts/boundaries.md#loading-boundaries)
+- [`Loading` の `on` でプレースホルダーを再表示](/docs/concepts/async-reactivity.md#show-a-placeholder-again-loading-on)
+- [コンポーネントと JSX](/docs/concepts/components-and-jsx.md)
+- [バウンダリ](/docs/concepts/boundaries.md)

@@ -109,7 +109,7 @@ configureServerErrors({
 
 フックはリクエストスコープ内で実行されるため、その中で `getRequestEvent()` が使えます。
 `renderToStream(App, { onError })` と `renderToString(App, { onError })` はリクエスト単位のフックを取り、そのリクエストではグローバルなフックより優先されます。
-モニタリング SDK の `init()` は、パッチを当てるモジュールが読み込まれる前に実行しなければなりません。プラグインでホストされるアプリでは、プラグインの [`start.instrument`](/building-apps/app-structure#loading-instrumentation-first) オプションがその指定場所で、上のモジュールがその形になります。
+モニタリング SDK の `init()` は、パッチを当てるモジュールが読み込まれる前に実行しなければなりません。プラグインでホストされるアプリでは、プラグインの [`start.instrument`](/docs/building-apps/app-structure.md#loading-instrumentation-first) オプションがその指定場所で、上のモジュールがその形になります。
 
 :::danger[戻り値はワイヤーに乗る]
 フックは投げられたままのエラーを受け取ります。
@@ -209,7 +209,7 @@ OBSERVE?.records.subscribe("boundary", (event) => {
 ## 各インタラクションに何がかかったか
 
 属性付けエンジンは冒頭の 2 つ目の問い — クリックが遅く感じられたが、それは何を待っていたのか — に答えます。
-これは[リアクティビティのデバッグ](/guides/debugging-reactivity#something-updates-too-often)が開発時に使うのと同じエンジンで、observe ビルドでは有効にすると本番でも動きます:
+これは[リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md#something-updates-too-often)が開発時に使うのと同じエンジンで、observe ビルドでは有効にすると本番でも動きます:
 
 ```ts
 import { attribution } from "solid-js/attribution";
@@ -291,7 +291,7 @@ createRoot(() => {
 
 ## 次のステップ
 
-- [オブザーバビリティアダプターを作る](/guides/observability-adapters): エラーモニターやトレーシング SDK のために、ツール作者が依拠する契約。
-- [リアクティビティのデバッグ](/guides/debugging-reactivity): 開発時にコンソールで読む同じレコードと、それらが供給する診断。
-- [引数とセキュリティ](/building-apps/server-functions/arguments-and-security): サーバー関数がリクエストから信頼してよいもの（転送するトレースを含む）。
-- [バウンダリ](/concepts/boundaries): フックが知る前に `Errored` と `Loading` が失敗に対して行うこと。
+- [オブザーバビリティアダプターを作る](/docs/guides/observability-adapters.md): エラーモニターやトレーシング SDK のために、ツール作者が依拠する契約。
+- [リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md): 開発時にコンソールで読む同じレコードと、それらが供給する診断。
+- [引数とセキュリティ](/docs/building-apps/server-functions/arguments-and-security.md): サーバー関数がリクエストから信頼してよいもの（転送するトレースを含む）。
+- [バウンダリ](/docs/concepts/boundaries.md): フックが知る前に `Errored` と `Loading` が失敗に対して行うこと。

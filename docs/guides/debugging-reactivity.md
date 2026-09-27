@@ -58,7 +58,7 @@ warning はコンソールに記録されます。コードは動きますが、
 見ているコンポーネントが名指しされている場合、シグナル・メモ・ストアのプロパティ・prop のいずれかがコンポーネント本体で読み取られています。
 本体は一度だけ実行されます。追跡されるのは JSX 式・メモの関数・エフェクトの計算関数・`createSignal` と `createStore` の関数形式です。
 読み取りをそこへ移すか、計算を関数で包んで JSX からその関数を呼んでください。
-詳しい説明は [リアクティビティ](/concepts/reactivity) のページにあります。
+詳しい説明は [リアクティビティ](/docs/concepts/reactivity.md) のページにあります。
 
 props を分割代入した場合も同じ警告が出て、直し方も同じです。
 
@@ -89,7 +89,7 @@ setCart((draft) => {
 
 素のシグナルに保持されたオブジェクトでは逆の失敗になります。
 `items().push(item)` は配列を実際に変更しますが、シグナルの値は同じ配列のままなので誰にも通知されません。`setItems((current) => [...current, item])` なら、シグナルに報告すべき新しい値を渡せます。
-ネストされた更新については [ストア](/concepts/stores) のページを参照してください。
+ネストされた更新については [ストア](/docs/concepts/stores.md) のページを参照してください。
 
 ### エフェクトが誤ったフェーズで読み取っていないか?
 
@@ -122,7 +122,7 @@ Promise を返したメモは、その Promise が確定するまで値を持ち
 `Loading` バウンダリ内の JSX で読み取ればフォールバックが表示されますが、コンポーネント本体で読み取ると `[PENDING_ASYNC_UNTRACKED_READ]` が投げられます。
 コンソールに `[ASYNC_OUTSIDE_LOADING_BOUNDARY]` が表示される場合、読み取りは追跡されていますが保留中状態を受け止めるものがなく、ルート全体が待たされます。
 読み取りの上にバウンダリを追加してください。
-[バウンダリ](/concepts/boundaries) を参照してください。
+[バウンダリ](/docs/concepts/boundaries.md) を参照してください。
 
 ## 更新が多すぎる場合
 
@@ -190,7 +190,7 @@ for (const event of why(total)) {
 
 `setItems(await fetchItems())` は全アイテムを新しいオブジェクトに置き換えるため、アイテムを読んでいるすべての行が作り直されます。
 `reconcile` を使うストアで新しいデータを既存オブジェクトにマージすれば、変更されたプロパティだけが読み手に通知します。
-[ストア](/concepts/stores) を参照してください。
+[ストア](/docs/concepts/stores.md) を参照してください。
 
 同じ失敗のストア版はスプレッドによるコピーです:
 
@@ -217,7 +217,7 @@ setCart((draft) => {
 リストはオブジェクトの同一性でキー付けされており、再取得が同じレコードに新しいオブジェクトを渡したため、すべての行の DOM と状態が捨てられて作り直されました。
 レコードの id でリストにキーを付けるか、データをストアに reconcile してオブジェクトの同一性を保つか、上流で id によりキャッシュしてください。
 リストにすでにキー関数があるのに警告が出る場合、メッセージは代わりにキー関数を指します。呼び出しごとに新しいもの（インデックスやオブジェクトなど）を返しているのです。
-[リストのガイド](/guides/lists#keep-row-identity-across-updates) に両方の直し方があります。
+[リストのガイド](/docs/guides/lists.md#keep-row-identity-across-updates) に両方の直し方があります。
 
 ### エフェクトが別スコープの派生元となるシグナルに書き込んでいる
 
@@ -225,7 +225,7 @@ setCart((draft) => {
 アトリビューションはこれをグラフから証明し、`[EFFECT_RELAY_TEAR]` と報告します。読み手は1つの根本的変更に対して2回実行されました。1回目はソースが変わったフラッシュで、2回目はエフェクトが中継した後です。その間のフレームは、新しいソースと古いコピーが並んだ画面を見せました。
 エフェクトが入力をそのままコピーし、対象シグナルに書き込むものが他にない場合、その値は1フラッシュ遅れで維持される派生状態です。メモにして、エフェクトは削除してください。
 書き込みがレイアウトや時計のようなグラフ外のものを読んでいる場合、メッセージはその旨を伝えます。この場合の tear は計測のコストであり、エフェクトは残します。
-[不要なエフェクトを避ける](/guides/avoid-unnecessary-effects#let-external-observations-become-new-inputs) では、このケースを `onSettled` で書いた例と、派生に置き換えられる例を順に説明しています。
+[不要なエフェクトを避ける](/docs/guides/avoid-unnecessary-effects.md#let-external-observations-become-new-inputs) では、このケースを `onSettled` で書いた例と、派生に置き換えられる例を順に説明しています。
 
 ### エフェクトが自分の書き込みで再実行されている
 
@@ -259,7 +259,7 @@ was held — the interaction was dead for 640ms.
 - アクション内で期待される結果を `createOptimistic` や `createOptimisticStore` に書き込む。
 - その処理が UI の読んでいるデータを変更する場合は `affects(source)` を宣言する。
 
-それぞれの説明は [非同期リアクティビティ](/concepts/async-reactivity#another-answer-is-coming-ispending) にあります。
+それぞれの説明は [非同期リアクティビティ](/docs/concepts/async-reactivity.md#another-answer-is-coming-ispending) にあります。
 
 まだコンテンツを表示していない `Loading` バウンダリや、`on` の値が変わったバウンダリは別の状況です。読み取りは保留に入る代わりにフォールバックを表示するため、報告すべき `SILENT_HOLD` はありません。
 すでにコンテンツを表示したバウンダリは、他と同じように保留に入ります。
@@ -278,7 +278,7 @@ was held — the interaction was dead for 640ms.
 
 ルーターは、ナビゲーションが引き起こす保留に、マッチしたルートパターン（`/products/mug` ではなく `/products/:id`）で名前を付けられます。これにより、これらのテーブルで発生がまとめて集約されます。
 これは、ロケーションへの書き込みを `OBSERVE.attribution.withOrigin({ kind: "navigation", name, to, params }, write)` で包むことで実現します。これはルーター非依存で、アトリビューションの他の部分はルーティングを知りません。
-[attribution リファレンス](/reference/solid-js/advanced/diagnostics-dev-hooks/attribution#navigationref) には `NavigationRef` のフィールドと、書き込み時点でマッチが確定していないルーターが後からフィールドを埋める方法が説明されています。
+[attribution リファレンス](/docs/reference/solid-js/advanced/diagnostics-dev-hooks/attribution.md#navigationref) には `NavigationRef` のフィールドと、書き込み時点でマッチが確定していないルーターが後からフィールドを埋める方法が説明されています。
 :::
 
 ## テストが古い DOM を見る
@@ -294,10 +294,10 @@ expect(button).toHaveTextContent("Clicks: 1");
 
 `flush` は `solid-js` から import します。
 アプリケーションコードが呼ぶことは通常ありません。呼ぶのはテストや命令的な統合です。
-テスト環境の残りのセットアップは [テスト](/guides/testing) ガイドを参照してください。
+テスト環境の残りのセットアップは [テスト](/docs/guides/testing.md) ガイドを参照してください。
 
 `flush()` はキューに溜まった書き込みを流しますが、非同期処理は待ちません。
-テスト内の非同期メモのように、追跡スコープの外から1つのリアクティブ式を await するには [`resolve(fn)`](/reference/solid-js/advanced/interop-async/resolve) を使います。最初に確定した値で resolve するか、式のエラーで reject します:
+テスト内の非同期メモのように、追跡スコープの外から1つのリアクティブ式を await するには [`resolve(fn)`](/docs/reference/solid-js/advanced/interop-async/resolve.md) を使います。最初に確定した値で resolve するか、式のエラーで reject します:
 
 ```ts
 const product = await resolve(() => productMemo());
@@ -342,8 +342,8 @@ Handle errors with createErrorBoundary/<Errored> or treat this as a crash.
 ```
 
 この後、リロードするまでページ上の何も更新されなくなります。
-失敗しうるツリーの部分を [`Errored`](/reference/solid-js/components-jsx/errored) バウンダリで包んでください。障害がそこに閉じ込められ、アプリの残りは動き続けます。
-配置場所は [バウンダリ](/concepts/boundaries) で説明しています。
+失敗しうるツリーの部分を [`Errored`](/docs/reference/solid-js/components-jsx/errored.md) バウンダリで包んでください。障害がそこに閉じ込められ、アプリの残りは動き続けます。
+配置場所は [バウンダリ](/docs/concepts/boundaries.md) で説明しています。
 
 ## テストでリグレッションをチェックする
 
@@ -407,9 +407,9 @@ test("adding an item recomputes the total once", async () => {
 
 ## 次のステップ
 
-- [リアクティビティ](/concepts/reactivity): 診断が強制するルール。
-- [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects): ほとんどの書き込み配置警告への対処法。誤った版と正しい版を並べて示しています。
-- [ストア](/concepts/stores): プロパティごとの追跡、`reconcile`、書き込みパスが重要な理由。
-- [パフォーマンス](/guides/performance): 余分な実行が遅さにもつながる場合、各アトリビューションテーブルが指す調整ポイント。
-- [オブザーバビリティ](/guides/observability): プロダクションの observe ビルドで同じ記録とエラーフックを使う方法。
-- [テスト](/guides/testing): 診断が動作するテスト環境。
+- [リアクティビティ](/docs/concepts/reactivity.md): 診断が強制するルール。
+- [不要なエフェクトを避ける](/docs/guides/avoid-unnecessary-effects.md): ほとんどの書き込み配置警告への対処法。誤った版と正しい版を並べて示しています。
+- [ストア](/docs/concepts/stores.md): プロパティごとの追跡、`reconcile`、書き込みパスが重要な理由。
+- [パフォーマンス](/docs/guides/performance.md): 余分な実行が遅さにもつながる場合、各アトリビューションテーブルが指す調整ポイント。
+- [オブザーバビリティ](/docs/guides/observability.md): プロダクションの observe ビルドで同じ記録とエラーフックを使う方法。
+- [テスト](/docs/guides/testing.md): 診断が動作するテスト環境。

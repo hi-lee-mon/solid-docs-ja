@@ -69,10 +69,10 @@ const reload = action(function* () {
 
 ## よくある問題
 
-- [クリック後に画面が固まったように見える](/guides/debugging-reactivity#the-screen-looks-dead-after-a-click)
+- [クリック後に画面が固まったように見える](/docs/guides/debugging-reactivity.md#the-screen-looks-dead-after-a-click)
 
 ## 関連項目
 
-- [データを変更中としてマークする：`affects`](/concepts/mutations#mark-data-as-changing-affects)
-- [非同期リアクティビティ](/concepts/async-reactivity)
-- [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects)
+- [データを変更中としてマークする：`affects`](/docs/concepts/mutations.md#mark-data-as-changing-affects)
+- [非同期リアクティビティ](/docs/concepts/async-reactivity.md)
+- [不要なエフェクトを避ける](/docs/guides/avoid-unnecessary-effects.md)

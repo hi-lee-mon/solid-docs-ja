@@ -44,5 +44,5 @@ enableRichArguments();
 
 ## 関連項目
 
-- [引数とセキュリティ](/building-apps/server-functions/arguments-and-security)
-- [サーバー関数](/building-apps/server-functions)
+- [引数とセキュリティ](/docs/building-apps/server-functions/arguments-and-security.md)
+- [サーバー関数](/docs/building-apps/server-functions/index.md)

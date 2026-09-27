@@ -8,7 +8,7 @@ description: "ストアフロント内の any アノテーションを、props�
 どれも、当時は意味が分からなかったエラーメッセージを黙らせるために書かれたものです。
 
 このガイドでは、その 6 箇所を順に見て、それぞれにどのエクスポートされた型が対応するのか、間違った型を使ったときに型チェッカーが何を報告するのかを示します。
-[型リファレンスのページ](/reference/solid-js/types/component-types)にエクスポートの一覧があり、[コンポーネントと JSX](/concepts/components-and-jsx#children-and-composition)で `ParentProps` を紹介しています。
+[型リファレンスのページ](/docs/reference/solid-js/types/component-types.md)にエクスポートの一覧があり、[コンポーネントと JSX](/docs/concepts/components-and-jsx.md#children-and-composition)で `ParentProps` を紹介しています。
 このガイドはそこから出発し、それらのページで作ったカートページと商品ページの中で各型を示します。
 
 ## セットアップ
@@ -101,7 +101,7 @@ function Button(
 
 `merge` の後、`props.variant` は `undefined` が取り除かれた `"primary" | "ghost"` になります。
 `omit` の後、`rest.label` は型エラーになるので、コンポーネントが消費したものが `<button>` に漏れ出すことはありません。
-どちらもリアクティビティを保持します。これが分割代入やスプレッドの代わりにこれらを使う理由です。[`merge`](/reference/solid-js/stores/merge)と[`omit`](/reference/solid-js/stores/omit)のリファレンスにシグネチャがあります。
+どちらもリアクティビティを保持します。これが分割代入やスプレッドの代わりにこれらを使う理由です。[`merge`](/docs/reference/solid-js/stores/merge.md)と[`omit`](/docs/reference/solid-js/stores/omit.md)のリファレンスにシグネチャがあります。
 
 :::pitfall[分割代入は型チェックを通っても壊れる]
 
@@ -119,7 +119,7 @@ function LineItem(props: { quantity: number }) {
 
 `Avoid` 側は警告なくコンパイルされます。パラメータの分割代入は普通の TypeScript だからです。
 実行時には、親の次の `quantity` はその行に届かず、開発環境ではコンポーネント名とともに `[STRICT_READ_UNTRACKED]` が出力されます。
-型は `props` の形を記述するもので、いつ読み取られるかは記述しません。コンパイラが生成するゲッターについては [Props](/concepts/components-and-jsx#props) を参照してください。
+型は `props` の形を記述するもので、いつ読み取られるかは記述しません。コンパイラが生成するゲッターについては [Props](/docs/concepts/components-and-jsx.md#props) を参照してください。
 :::
 
 ## 要素と children の型
@@ -155,7 +155,7 @@ function ProductLoader(
 コールバックのパラメータは宣言から型付けされるので、`product().name` は補完が効き、`product().nmae` はエラーになります。
 関数ではなく要素を渡すと、チェッカーは `Type 'Element' is not assignable to type '(product: Accessor<Product>) => Element'` と報告します。
 
-コンポーネントが children を調べる必要がある場合、[`children`](/reference/solid-js/components-context/children)ヘルパーは `ChildrenReturn` を返します。これは `ResolvedElement[]` を返す `toArray()` を持つ `Accessor<ResolvedChildren>` です。
+コンポーネントが children を調べる必要がある場合、[`children`](/docs/reference/solid-js/components-context/children.md)ヘルパーは `ChildrenReturn` を返します。これは `ResolvedElement[]` を返す `toArray()` を持つ `Accessor<ResolvedChildren>` です。
 どちらの型も `solid-js` からエクスポートされています。
 
 ## シグナル・メモ・セッター
@@ -175,7 +175,7 @@ const product = createMemo(() => getProduct(props.id)); // SourceAccessor<Produc
 ```
 
 `product()` は `Promise<Product>` ではなく `Product` です。
-計算関数は Promise を返すことができ、メモの型は確定後の値になります。Promise が保留中の間に読み取り側に見えるものについては、[非同期リアクティビティ](/concepts/async-reactivity#a-memo-that-returns-a-promise)を参照してください。
+計算関数は Promise を返すことができ、メモの型は確定後の値になります。Promise が保留中の間に読み取り側に見えるものについては、[非同期リアクティビティ](/docs/concepts/async-reactivity.md#a-memo-that-returns-a-promise)を参照してください。
 
 アクセサーが props として渡される方法は 2 通りあり、それらを混同したときのエラーはこのページで最も多いものです。
 
@@ -195,7 +195,7 @@ function Results(props: { query: string }) {
 
 `Avoid` 側は `Type 'SourceAccessor<string>' is not assignable to type 'string'` と報告されます。
 `Prefer` 側はリアクティブのままです。動的な属性は `props` 上のゲッターにコンパイルされるので、`Results` 内の `props.query` は使われる場所で `query()` を読み直します。
-prop を `Accessor<T>` と型付けするのは、プリミティブに渡したり読み取りを遅らせたりするために、子が関数そのものを必要とする場合だけです。どちらの形式も受け取れるようにする方法は[カスタムプリミティブ](/guides/custom-primitives)ガイドで説明しています。
+prop を `Accessor<T>` と型付けするのは、プリミティブに渡したり読み取りを遅らせたりするために、子が関数そのものを必要とする場合だけです。どちらの形式も受け取れるようにする方法は[カスタムプリミティブ](/docs/guides/custom-primitives.md)ガイドで説明しています。
 
 `Setter<T>` は、`props: { value: Accessor<number>; setValue: Setter<number> }` のように下へ渡されるセッターを型付けします。子は値でもアップデーターでも呼び出せます。
 
@@ -229,8 +229,8 @@ setCart(reconcile(await getCart()));
 `Store<Cart>` は `Cart` なので、`<CartLines items={cart.items} />` のように `Cart` や `CartItem[]` が期待される場所には、キャストなしでプロキシを渡せます。
 `reconcile(value)` は `(state: Cart) => Cart` を返します。これはセッターが受け取るものと正確に一致します。
 
-関数形式の `createStore(async () => getCart(), seed)` はシードと戻り値で型付けされ、[`createProjection`](/reference/solid-js/stores/create-projection)はそのシード型の `Store<T>` を返します。
-ドラフトが実行時に何をするかは、[ストア](/concepts/stores#update-with-a-draft)を参照してください。
+関数形式の `createStore(async () => getCart(), seed)` はシードと戻り値で型付けされ、[`createProjection`](/docs/reference/solid-js/stores/create-projection.md)はそのシード型の `Store<T>` を返します。
+ドラフトが実行時に何をするかは、[ストア](/docs/concepts/stores.md#update-with-a-draft)を参照してください。
 
 ## イベントと ref
 
@@ -275,7 +275,7 @@ let input!: HTMLInputElement;
 `!` は、その変数が読まれる前に代入されることを宣言します。すべての読み取りがイベントハンドラーか `onSettled` の中で行われるならこの条件は満たされます。どちらも要素が存在した後に実行されるからです。
 
 要素を公開するコンポーネントは、`solid-js` の `Ref<T>` prop（`T | ((val: T) => void) | undefined | Ref<T>[]`）を受け取り、それをそのまま `ref` に渡します。
-この属性が受け取るものの一覧は、[`ref` のリファレンス](/reference/solid-web/jsx-properties/ref)を参照してください。
+この属性が受け取るものの一覧は、[`ref` のリファレンス](/docs/reference/solid-web/jsx-properties/ref.md)を参照してください。
 
 ## サーバー関数とルーター
 
@@ -301,7 +301,7 @@ export async function deleteAccount() {
 
 `redirect()` は `Response` を返します。
 throw された場合は戻り値の型は変わらず、`await getCart()` は `Cart` のままです。return された場合は結果が `Cart | Response` に広がり、これは普通のコードが関数を直接呼んだときに受け取るものと一致します。
-どの呼び出し側がリダイレクトに従うかは、[呼び出し側のリダイレクト](/building-apps/server-functions/mutations-and-responses#redirect-the-caller)を参照してください。
+どの呼び出し側がリダイレクトに従うかは、[呼び出し側のリダイレクト](/docs/building-apps/server-functions/mutations-and-responses.md#redirect-the-caller)を参照してください。
 
 Solid Router はルートテーブルから型を導出します。
 `defineRoutes` はパスのリテラルを保持し、`RouteComponent<typeof Router.paths.products>` は `props.params.id` を `string` と型付けし、`PathParamsOf<typeof Router.paths.products>` は `{ id: string }` です。
@@ -317,7 +317,7 @@ type ProductParams = PathParamsOf<typeof Router.paths.products>; // { id: string
 ```
 
 orders ルートに `matchFilters: { id: int }` がある場合、`Router.paths.account.orders("latest")` は `Argument of type 'string' is not assignable to parameter of type 'number'` と報告します。
-`defineRoute`、フィルター、検索スキーマについては、[ルートを定義時点で型付けする](/routing/solid-router/route-definitions#type-a-route-at-its-definition)と[検索パラメータの型付け](/routing/solid-router/navigation#type-search-parameters)を参照してください。
+`defineRoute`、フィルター、検索スキーマについては、[ルートを定義時点で型付けする](/docs/routing/solid-router/route-definitions.md#type-a-route-at-its-definition)と[検索パラメータの型付け](/docs/routing/solid-router/navigation.md#type-search-parameters)を参照してください。
 
 ## ジェネリックなコンポーネント
 
@@ -359,7 +359,7 @@ prop 型が値を期待する場所にアクセサーが渡されています。
 
 子が `props` を分割代入したか、prop をローカル変数にコピーしています。
 TypeScript はどちらも許可します。開発環境では `[STRICT_READ_UNTRACKED]` が出力されます。
-JSX の中で `props.name` を読んでください。[Props](/concepts/components-and-jsx#props) を参照。
+JSX の中で `props.name` を読んでください。[Props](/docs/concepts/components-and-jsx.md#props) を参照。
 
 ### `'Price' components don't accept text as child elements`
 
@@ -389,7 +389,7 @@ JSX の中で `props.name` を読んでください。[Props](/concepts/componen
 
 ## 次のステップ
 
-- [コンポーネントと JSX](/concepts/components-and-jsx): このページの props、children、ref の型の背後にある実行時の動作。
-- [カスタムプリミティブ](/guides/custom-primitives): `createX` 関数で値またはアクセサーを受け取り、アクセサーを返す。
-- [ルート定義](/routing/solid-router/route-definitions): `defineRoute`、マッチフィルター、遅延ロードされるルートテーブル。すべてパスリテラルから型付けされます。
-- [サーバー関数](/building-apps/server-functions): 引数のエンコードとバリデーション。`unknown` の引数が型を得るのはここです。
+- [コンポーネントと JSX](/docs/concepts/components-and-jsx.md): このページの props、children、ref の型の背後にある実行時の動作。
+- [カスタムプリミティブ](/docs/guides/custom-primitives.md): `createX` 関数で値またはアクセサーを受け取り、アクセサーを返す。
+- [ルート定義](/docs/routing/solid-router/route-definitions.md): `defineRoute`、マッチフィルター、遅延ロードされるルートテーブル。すべてパスリテラルから型付けされます。
+- [サーバー関数](/docs/building-apps/server-functions/index.md): 引数のエンコードとバリデーション。`unknown` の引数が型を得るのはここです。

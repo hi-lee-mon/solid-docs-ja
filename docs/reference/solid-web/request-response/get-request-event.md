@@ -42,9 +42,9 @@ const userId = event?.locals.userId;
 
 ## 関連項目
 
-- [セッションと認証](/building-apps/sessions-and-auth)
-- [ミドルウェアと API ルート](/building-apps/middleware-and-api-routes)
-- [ミューテーションとレスポンス](/building-apps/server-functions/mutations-and-responses)
+- [セッションと認証](/docs/building-apps/sessions-and-auth.md)
+- [ミドルウェアと API ルート](/docs/building-apps/middleware-and-api-routes.md)
+- [ミューテーションとレスポンス](/docs/building-apps/server-functions/mutations-and-responses.md)
 
 ## 関連する型
 

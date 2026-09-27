@@ -14,7 +14,7 @@ Solid が提供するのは、これらの回答の土台となる HTTP 交換�
 ほとんどのアプリで必要なのは真ん中の 2 つのセクションです: 署名付き Cookie セッションと、すべてのサーバー関数での認可チェックです。
 その前の短い 2 つのセクションは、何が Solid の担当で何がライブラリの担当かを説明します。別のライブラリを選ぶ場合に参照してください。
 
-このページは[サーバー関数](/building-apps/server-functions)を有効にした `fullstack` プロジェクトを前提とします。セッションはサーバー上で読み取られ、ほとんどの読み取りはサーバー関数または[ミドルウェア](/building-apps/middleware-and-api-routes)内で行われるためです。
+このページは[サーバー関数](/docs/building-apps/server-functions/index.md)を有効にした `fullstack` プロジェクトを前提とします。セッションはサーバー上で読み取られ、ほとんどの読み取りはサーバー関数または[ミドルウェア](/docs/building-apps/middleware-and-api-routes.md)内で行われるためです。
 
 ## プラットフォームが提供するもの
 
@@ -107,7 +107,7 @@ export async function clearSession(): Promise<void> {
 
 このファイルの 3 つの決定は意図的なものです。
 Cookie の属性は明示的に設定されています。ライブラリのデフォルトがアプリケーションの要件に合わない可能性があるためです。
-署名シークレットは `virtual:env/server` から取得します。これは[環境](/building-apps/environment)によりブラウザバンドルから締め出されています。リストの先頭のシークレットが新しい Cookie に署名し、リスト内のすべてのシークレットが既存の Cookie を検証するため、ローテーションは新しいシークレットを先頭に追加し、`maxAge` 経過後に古いものを落とすことです。
+署名シークレットは `virtual:env/server` から取得します。これは[環境](/docs/building-apps/environment.md)によりブラウザバンドルから締め出されています。リストの先頭のシークレットが新しい Cookie に署名し、リスト内のすべてのシークレットが既存の Cookie を検証するため、ローテーションは新しいシークレットを先頭に追加し、`maxAge` 経過後に古いものを落とすことです。
 ペイロードは独自の `exp` を持ちます。ブラウザの `Max-Age` はブラウザへの要求にすぎず、クライアントは期限切れの古い Cookie を自由に再生できるためです。
 
 :::caution[書き込みはこのリクエストが読んだものを変えない]
@@ -150,7 +150,7 @@ export async function signOut() {
 サインインフォームを送信すると、レスポンスはセッション Cookie が添付された `/account` へのリダイレクトになります。
 Cookie 書き込みとスローされた `redirect()` は同じレスポンスに乗ります。start モードはイベント由来の `Set-Cookie` 値を、ページレスポンス・ミドルウェアレスポンス・API レスポンス・サーバー関数レスポンスのすべてに畳み込みます。
 資格情報失敗のエラーは `markSafeError` でラップされ、そのメッセージがフォームに届くようにします。素の `Error` をスローすると本番環境では `Internal Server Error` に置き換えられます。
-[ミューテーションとレスポンス](/building-apps/server-functions/mutations-and-responses)では `redirect()`、`reload()`、そしてどのスローされたエラーがブラウザに届くかを説明します。
+[ミューテーションとレスポンス](/docs/building-apps/server-functions/mutations-and-responses.md)では `redirect()`、`reload()`、そしてどのスローされたエラーがブラウザに届くかを説明します。
 
 ## サーバーで認可する
 
@@ -175,7 +175,7 @@ export async function getOrders() {
 ```
 
 サーバー関数は HTTP エンドポイントであるため、`Avoid` 版はリクエストボディに顧客 id を入れた任意の呼び出し元に、その顧客の注文を返してしまいます。
-[引数とセキュリティ](/building-apps/server-functions/arguments-and-security)では、呼び出し元が制御できるものとリクエストイベントが保証するものを説明します。
+[引数とセキュリティ](/docs/building-apps/server-functions/arguments-and-security.md)では、呼び出し元が制御できるものとリクエストイベントが保証するものを説明します。
 
 呼び出し元が制御する引数も同様に検証し、その後で特定レコードへのアクセスを認可します:
 
@@ -233,7 +233,7 @@ export async function renameAccount(form: FormData) {
 
 ### ミドルウェアで一度だけ認証する
 
-多くのエントリーポイントが同じ回答を必要とするとき、[ミドルウェア](/building-apps/middleware-and-api-routes#add-a-middleware)でセッションを一度だけ読み、結果を `event.locals` に置けます:
+多くのエントリーポイントが同じ回答を必要とするとき、[ミドルウェア](/docs/building-apps/middleware-and-api-routes.md#add-a-middleware)でセッションを一度だけ読み、結果を `event.locals` に置けます:
 
 ```ts
 // src/middleware.ts
@@ -317,8 +317,8 @@ Solid はどちらの場合も同じリクエスト・レスポンスの継ぎ�
 
 ## 次のステップ
 
-- [引数とセキュリティ](/building-apps/server-functions/arguments-and-security): なぜ識別情報がリクエストイベントから来なければならず、サーバー関数の引数からは絶対に取ってはいけないのか。
-- [ミューテーションとレスポンス](/building-apps/server-functions/mutations-and-responses): サインイン・サインアウト後の `redirect()` と `reload()`、そしてどのエラーがブラウザに届くか。
-- [ミドルウェアと API ルート](/building-apps/middleware-and-api-routes): すべてのリクエストが `event.locals.userId` を見られるように、セッション読み取りをどこに置くか。
-- [環境](/building-apps/environment): ブラウザに同梱される場合にビルドが失敗するよう `SESSION_SECRET` を宣言する。
-- [保護されたルート](/guides/protected-routes): このページのサーバー関数チェックの前段に置くルートガードとミドルウェア。
+- [引数とセキュリティ](/docs/building-apps/server-functions/arguments-and-security.md): なぜ識別情報がリクエストイベントから来なければならず、サーバー関数の引数からは絶対に取ってはいけないのか。
+- [ミューテーションとレスポンス](/docs/building-apps/server-functions/mutations-and-responses.md): サインイン・サインアウト後の `redirect()` と `reload()`、そしてどのエラーがブラウザに届くか。
+- [ミドルウェアと API ルート](/docs/building-apps/middleware-and-api-routes.md): すべてのリクエストが `event.locals.userId` を見られるように、セッション読み取りをどこに置くか。
+- [環境](/docs/building-apps/environment.md): ブラウザに同梱される場合にビルドが失敗するよう `SESSION_SECRET` を宣言する。
+- [保護されたルート](/docs/guides/protected-routes.md): このページのサーバー関数チェックの前段に置くルートガードとミドルウェア。

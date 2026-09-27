@@ -15,7 +15,7 @@ source_ref: "0.50.0-next.40"
 source_path: "packages/runtime/src/client.d.ts"
 ---
 
-`HeadTag` は [`useHead`](/reference/solid-web/head/use-head) の 1 つのタグを記述します。
+`HeadTag` は [`useHead`](/docs/reference/solid-web/head/use-head.md) の 1 つのタグを記述します。
 
 ## インポート
 
@@ -74,5 +74,5 @@ useHead(description);
 
 ## 関連項目
 
-- [`useHead`](/reference/solid-web/head/use-head)
-- [Head とメタデータ](/building-apps/head-and-metadata)
+- [`useHead`](/docs/reference/solid-web/head/use-head.md)
+- [Head とメタデータ](/docs/building-apps/head-and-metadata.md)

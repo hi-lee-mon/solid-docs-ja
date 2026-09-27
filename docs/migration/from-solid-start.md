@@ -23,9 +23,9 @@ SolidStart ではなく、SolidStart のランタイムも提供しません。
 
 コードを独立した Solid 2 ターゲットへ移す際に、プラットフォームの移行を適用します:
 
-1. [Solid 1 からの移行](/migration/from-solid-1)で、コアのリアクティビティ、ライフサイクル、バウンダリ、レンダリングを移行します。
-2. ソースが Solid Router を使っている場合は、[Solid Router からの移行](/migration/from-solid-router)でルート定義とルーター API を移行します。
-3. ソースが Solid Meta を使っている場合は、[Solid Meta 0.x からの移行](/migration/from-solid-meta)で head 管理を移行します。
+1. [Solid 1 からの移行](/docs/migration/from-solid-1.md)で、コアのリアクティビティ、ライフサイクル、バウンダリ、レンダリングを移行します。
+2. ソースが Solid Router を使っている場合は、[Solid Router からの移行](/docs/migration/from-solid-router.md)でルート定義とルーター API を移行します。
+3. ソースが Solid Meta を使っている場合は、[Solid Meta 0.x からの移行](/docs/migration/from-solid-meta.md)で head 管理を移行します。
 4. このページの SolidStart 抽出手順を、エントリ、サーバー関数、ミドルウェア、セッション、デプロイに適用します。
 
 変更されたランタイム API を確認するまでは、Solid 1 のコンポーネントコードをターゲットへコピーしないでください。
@@ -190,7 +190,7 @@ export default defineConfig({
 - ホストのビルドとサーブの所有権はデプロイ境界の後ろに移します。
   Nitro のオプションを `start` に置かないでください。
 
-完全なオプション契約は [`StartOptions` リファレンス](/reference/vite-plugin-solid/start)を参照してください。
+完全なオプション契約は [`StartOptions` リファレンス](/docs/reference/vite-plugin-solid/start.md)を参照してください。
 
 ### プラグインにエントリを生成させる
 
@@ -280,13 +280,13 @@ export const Router = createRouter({
 
 `routes/users.tsx` と `routes/users/` を組み合わせると、レイアウトとネストされたページが作られます。
 ルートグループも利用できますが、次のルートを移す前に生成されたすべてのパスを比較してください。
-[ファイルシステムルートの規約](/reference/filesystem-routing/conventions)と [Solid Router のルート変換](/routing/solid-router/route-definitions#convert-a-file-system-manifest)を参照してください。
+[ファイルシステムルートの規約](/docs/reference/filesystem-routing/conventions.md)と [Solid Router のルート変換](/docs/routing/solid-router/route-definitions.md#convert-a-file-system-manifest)を参照してください。
 
 TanStack Router の場合は、ピン留めされた `fullstack-tanstack` テンプレートから始めます。
 そのルータープラグインは `src/routes` を所有し、`routeTree.gen.ts` を生成します。
 SSR では、`start.setup` が生成されたエントリのレンダー前にリクエスト固有のルーターを作成して読み込みます。
 SolidStart のルーターサーバーやクライアントエントリのプロトコルは再利用しません。
-[TanStack Router 統合](/routing/tanstack)を参照してください。
+[TanStack Router 統合](/docs/routing/tanstack/index.md)を参照してください。
 
 ### ルートモジュールを段階的に移す
 
@@ -305,7 +305,7 @@ SolidStart のルーターサーバーやクライアントエントリのプロ
 
 SolidStart 1 のルートコードが最も変わるのはデータバウンダリです。
 `createAsync(() => getUser(params.id))` は `createMemo(() => getUser(params.id))` になり、データを返していたルートの `load` は `void` でクエリを開始しコンポーネントに読み取らせる `preload` になり、`useSubmission(action).pending` はフォームの `aria-busy`、楽観的ストア、エラー用の `useSubmissions` に分かれます。
-[Solid Router 1 からの移行](/migration/from-solid-router#migrate-data-loading-and-caching)にそれぞれの変更前後が示され、[データ読み込みとミューテーション](/routing/solid-router/data)で結果の形を学べます。
+[Solid Router 1 からの移行](/docs/migration/from-solid-router.md#migrate-data-loading-and-caching)にそれぞれの変更前後が示され、[データ読み込みとミューテーション](/docs/routing/solid-router/data.md)で結果の形を学べます。
 
 ### サーバー関数を移す
 
@@ -341,7 +341,7 @@ export async function findUser(id: string) {
 
 サーバー関数はプラグイン内のトランスポートプリミティブです。
 ルーターのキャッシュ、サブミッション、再検証、シングルフライトの動作には、対応するルーター統合が必要です。
-[サーバー関数](/building-apps/server-functions)を参照してください。
+[サーバー関数](/docs/building-apps/server-functions/index.md)を参照してください。
 
 ### 環境の扱いを再構築する
 
@@ -414,7 +414,7 @@ SolidStart の `@solidjs/start/env` 型参照はコピーしないでくださ�
 サーバーモジュールは、サーバー起動時に `process.env` からサーバーの値を読み取り検証します。
 クライアントの値は検証され、ブラウザーバンドルに埋め込まれます。
 `.env.example` はコピーしますが、ローカルのシークレットをソース管理へコミットしないでください。
-[環境](/building-apps/environment)を参照してください。
+[環境](/docs/building-apps/environment.md)を参照してください。
 
 ### セッションと認証を書き直す
 
@@ -435,7 +435,7 @@ SolidStart のセッションヘルパーや認証システムは提供しませ
 
 認可は保護されたすべてのサーバー関数と API ハンドラー内に保持します。
 ミドルウェアは `event.locals` に値を設定できますが、UI を隠すことやページリクエストのチェックは、他のサーバーエントリポイントを認可しません。
-[セッションと認証](/building-apps/sessions-and-auth)を参照してください。
+[セッションと認証](/docs/building-apps/sessions-and-auth.md)を参照してください。
 
 ### ミドルウェアと API ルートを書き直す
 
@@ -480,7 +480,7 @@ export const GET: APIHandler = ({ request, params }) => {
 メソッドのみのモジュールはページを持たない API ルートです。
 モジュールはページをデフォルトエクスポートし、かつメソッドをエクスポートすることもできます。
 ハンドラーの結果とフォールバックのルールは SolidStart と同一ではないため、`HEAD`、存在しないメソッド、`undefined` の結果、ルートパラメーター、cookie、エラーを再テストしてください。
-[ミドルウェアと API ルート](/building-apps/middleware-and-api-routes)を参照してください。
+[ミドルウェアと API ルート](/docs/building-apps/middleware-and-api-routes.md)を参照してください。
 
 ### デプロイ境界を再構築する
 
@@ -509,7 +509,7 @@ Node の場合は `start: { node: true }` を設定します。ビルドは `dis
 
 `start.external: true` は、ホスト統合がサーバービルドの配線と HTTP サーブの両方を所有する場合のみ設定します。
 プラグインは引き続き、生成されるエントリ、クライアントマニフェスト、仮想ハンドラーを提供します。
-[デプロイ](/building-apps/deployment)を参照してください。
+[デプロイ](/docs/building-apps/deployment.md)を参照してください。
 
 ### 削除されたフレームワーク機能を解決する
 

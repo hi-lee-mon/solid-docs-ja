@@ -4,7 +4,7 @@
 
 JetBrains の素晴らしい皆さんが、月額 500 ドルで SolidJS のスポンサーになることを決定したことを発表できることを誇りに思います。WebStorm や IntelliJ のようなインテリジェントな開発ツールや IDE で知られており、Nest や XState などのプロジェクトへのオープンソース支援も行っています。
 
-[![JetBrains](/img/blog/state-of-solid-july-2022/solid-jetbrains-sponsor.jpg)](https://www.jetbrains.com/)
+[![JetBrains](/blog/images/state-of-solid-july-2022/solid-jetbrains-sponsor.jpg)](https://www.jetbrains.com/)
 
 Solid コアチームはこの素晴らしい評価を光栄に思っています。また、月額スポンサーとして `Netlify`（500 ドル）、`Vercel`（100 ドル）、`Builder`（100 ドル）、`<div>riots`（100 ドル）がいることも幸運です。
 
@@ -14,7 +14,7 @@ SolidJS への資金は、ドメイン登録、イベントやミートアップ
 
 SolidJS は OSAwards 2022 の Breakthrough of the Year Award を受賞しました!
 
-[![OpenSource Awards](/img/blog/state-of-solid-july-2022/osawards-breakthrough.jpeg)](https://osawards.com/javascript/2022)
+[![OpenSource Awards](/blog/images/state-of-solid-july-2022/osawards-breakthrough.jpeg)](https://osawards.com/javascript/2022)
 
 Solid は受賞を求めてきたわけではなく、オープンソースの世界では賞は珍しいものです。この種の評価は、祝うと同時に振り返るきっかけとなります。Vite（2021 年）、Deno と Svelte（2020 年）、Strapi（2019 年）もこの賞を受賞しており、プロジェクトとコミュニティとしての Solid の歩みを裏付けるものです。
 
@@ -26,17 +26,17 @@ Solid は受賞を求めてきたわけではなく、オープンソースの�
 
 以下は、最近の Community Meeting からそのまま引用したグラフです:
 
-![コミュニティの統計](/img/blog/state-of-solid-july-2022/community-stats.png)
+![コミュニティの統計](/blog/images/state-of-solid-july-2022/community-stats.png)
 
 基本指標は、ウェブサイトとソーシャルメディア全体での成長を示しています。Solid を耳にし、話題にし、試す人が増えています。
 
 オープンソース特有の重要な指標として GitHub Stars があります。これはユーザーが GitHub 上のオープンソースプロジェクトにフラグを立てられるものです。Solid は 20k スターという大きなマイルストーンを突破しました:
 
-![GitHub Stars](/img/blog/state-of-solid-july-2022/github-star-chart.png)
+![GitHub Stars](/blog/images/state-of-solid-july-2022/github-star-chart.png)
 
 何よりも私たちが注目している指標は NPM のダウンロード数です。これが Solid の利用状況を最もよく表しています。この四半期だけでダウンロード数は最大 31% 増加しました。Solid の採用が進むにつれ、この数字はさらに伸びると予想しています。
 
-![NPM ダウンロード数](/img/blog/state-of-solid-july-2022/npm-downloads.png)
+![NPM ダウンロード数](/blog/images/state-of-solid-july-2022/npm-downloads.png)
 
 まとめると、今四半期の成長は素晴らしいものでした!
 
@@ -44,7 +44,7 @@ Solid は受賞を求めてきたわけではなく、オープンソースの�
 
 今四半期、コアチームは対面イベントの開催を通じてコミュニティメンバーと直接関わる取り組みを強化しました。ニューヨークとサンフランシスコで 2 回のミートアップを開催しました。
 
-![6 月と 7 月のミートアップ](/img/blog/state-of-solid-july-2022/june-july-meetup.png)
+![6 月と 7 月のミートアップ](/blog/images/state-of-solid-july-2022/june-july-meetup.png)
 
 ミートアップによって、オンラインのつながりを超えたコミュニティを育てることができます。他の Solider に会い、アドバイスや経験を共有し、プロジェクトとコミュニティとして私たちがどこへ向かうのかを語り合う機会です。
 
@@ -100,13 +100,13 @@ Solid チームは成長しています!
 
 Nikhil Saraf が SolidStart チームリーダーとして加わったことを発表できることを誇りに思います。Nikhil は自称「devtools マニア」で、可能な限りチームの開発者体験を向上させようと常に努力しています。
 
-![Nikhil Saraf](/img/blog/state-of-solid-july-2022/team-nikhil.png)
+![Nikhil Saraf](/blog/images/state-of-solid-july-2022/team-nikhil.png)
 
 彼を迎えられることを嬉しく思います!
 
 新しいチームメンバーの加入に加えて、Solid はコアの責任の分散と、可能な限りコミュニティのチームメンバーを迎え入れることに注力しています。ドキュメントチームは拡大し、Infrastructure と Growth の 2 つの新しいチームを設立しました。
 
-![Growth チーム](/img/blog/state-of-solid-july-2022/community-teams.png)
+![Growth チーム](/blog/images/state-of-solid-july-2022/community-teams.png)
 
 # Ryan が Netlify に入社
 
@@ -114,7 +114,7 @@ Nikhil Saraf が SolidStart チームリーダーとして加わったことを�
 
 Netlify はすでに Solid プロジェクトの素晴らしいサポーターです。Ryan がスタッフに加わったことで、強力なインフラの構築と、より広いオープンソースコミュニティの支援という彼らの使命へのさらなる注力が示されています。
 
-![Growth チーム](/img/blog/state-of-solid-july-2022/ryan-netlify.jpeg)
+![Growth チーム](/blog/images/state-of-solid-july-2022/ryan-netlify.jpeg)
 
 詳細は彼の記事で読むことができます: [When Netlify asks you to full-time OSS, you say yes!](https://dev.to/ryansolid/when-netlify-asks-you-to-full-time-oss-you-say-yes-5ccf)
 

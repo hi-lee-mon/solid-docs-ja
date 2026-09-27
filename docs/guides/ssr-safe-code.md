@@ -8,7 +8,7 @@ description: "ブラウザー API、実行ごとに変わる値、クライア�
 その行を移すとクラッシュは直りましたが、今度はブラウザーのコンソールがセールバナーからの `Hydration structure mismatch` 警告で埋まりました。サーバーはレンダリングしたのに、ブラウザーはしないと判断したバナーです。
 
 どちらの問題も形は同じです。1つのコンポーネントソースがサーバーとブラウザーの両方で実行され、場所によって異なる答えを返す行がどちらかを壊します。
-このモデルについては [レンダリングと SSR](/concepts/rendering-and-ssr) で説明しています。
+このモデルについては [レンダリングと SSR](/docs/concepts/rendering-and-ssr.md) で説明しています。
 このガイドはコードのためのチェックリストです。各行がどこで実行されるか、サーバーで実行できない行はどれか、一致していなければならない値はどれか、そして食い違ったときに警告をどう読むかを扱います。
 
 ## 各行がどこで実行されるか
@@ -73,16 +73,16 @@ export function CartSummary() {
 
 `"use server"` 関数は逆のケースです。
 その本体はどちらの経路でもサーバーで実行されます。ブラウザーでは呼び出しが HTTP リクエストになり、サーバーレンダー中はリクエストイベントのもとで同じプロセス内で実行されます。
-両経路については [呼び出しは何になるか](/building-apps/server-functions#what-the-call-becomes) で説明しています。
+両経路については [呼び出しは何になるか](/docs/building-apps/server-functions/index.md#what-the-call-becomes) で説明しています。
 
 人を驚かせるのはモジュールスコープです。
 ファイル先頭の `const` はサーバーエントリーがロードされたときに1回だけ評価され、その後はすべてのリクエストで共有されるため、そこに置かれたシグナルやストアは全訪問者にとって1つのオブジェクトになります。
-それがカートに何をもたらすか、そして代わりにどこでストアを作成するかは、[モジュールレベルの状態とサーバー](/guides/state-management#module-level-state-and-the-server) を参照してください。
+それがカートに何をもたらすか、そして代わりにどこでストアを作成するかは、[モジュールレベルの状態とサーバー](/docs/guides/state-management.md#module-level-state-and-the-server) を参照してください。
 
 :::caution[サーバーレンダー中に呼ばれたセッターは、効果のないデータとして残る]
 サーバーレンダーは入力から HTML への1パスです。
 サーバー上でコンポーネント本体の `setOpen(true)` を呼んでも何も更新されず、開発環境では最初に起きたときに `[SERVER_WRITE]` 警告が出力されます。
-その警告と、あるべき書き込みの姿については [サーバーでの書き込みが何もしなかった](/guides/debugging-reactivity#a-write-on-the-server-did-nothing) を参照してください。
+その警告と、あるべき書き込みの姿については [サーバーでの書き込みが何もしなかった](/docs/guides/debugging-reactivity.md#a-write-on-the-server-did-nothing) を参照してください。
 :::
 
 ## ブラウザー API
@@ -120,10 +120,10 @@ function CartDrawer() {
 `Avoid` 版を `ssr: true` で実行すると、ドロワーが HTML を生成する前にサーバーレンダーがスローします。
 `Prefer` 版では、サーバーが `class="drawer"` をレンダリングし、ブラウザーが同じマークアップをハイドレートし、`onSettled` コールバックがメディアクエリを読んでクラスを1回更新します。
 ウィンドウのリサイズではリスナーを通じて再度更新され、返されたクリーンアップがドロワーの破棄時にリスナーを外します。
-[カスタムプリミティブ](/guides/custom-primitives#clean-up-what-you-start) ではこれを再利用可能な `createMediaQuery` にしています。
+[カスタムプリミティブ](/docs/guides/custom-primitives.md#clean-up-what-you-start) ではこれを再利用可能な `createMediaQuery` にしています。
 
 サーバーコードと共有するフォーマット関数のように、オーナーのない場所から呼ばれるヘルパーもあります。
-そうした場面では、`@solidjs/web` の [`isServer`](/reference/solid-web/rendering-ssr/is-server) がビルド時定数として使えます。サーバービルドでは `true`、ブラウザービルドでは `false` になるため、バンドラーが実行できない側の分岐を取り除きます:
+そうした場面では、`@solidjs/web` の [`isServer`](/docs/reference/solid-web/rendering-ssr/is-server.md) がビルド時定数として使えます。サーバービルドでは `true`、ブラウザービルドでは `false` になるため、バンドラーが実行できない側の分岐を取り除きます:
 
 ```ts
 import { isServer } from "@solidjs/web";
@@ -137,8 +137,8 @@ export function prefersReducedMotion() {
 `isServer` はクラッシュを止めますが、2つのレンダーを一致させはしません。
 この種のヘルパーはサーバーでは `false`、ブラウザーでは `true` になり得るので、その結果はどの要素が存在するかを決める JSX の中ではなく、エフェクト関数か `onSettled` の中で使ってください。
 
-地図や、インポート時に `window` に触れるライブラリを使うリッチテキストエディターのように安全にできないコンポーネントには、[`clientOnly`](/reference/solid-web/rendering-ssr/client-only) がサーバーでフォールバックをレンダリングし、ハイドレーション後にコンポーネントへ入れ替えます。
-`{ lazy: true }` オプションを含めて、[サーバーから切り離す](/guides/integrate-non-solid-code#keep-it-off-the-server) で扱っています。
+地図や、インポート時に `window` に触れるライブラリを使うリッチテキストエディターのように安全にできないコンポーネントには、[`clientOnly`](/docs/reference/solid-web/rendering-ssr/client-only.md) がサーバーでフォールバックをレンダリングし、ハイドレーション後にコンポーネントへ入れ替えます。
+`{ lazy: true }` オプションを含めて、[サーバーから切り離す](/docs/guides/integrate-non-solid-code.md#keep-it-off-the-server) で扱っています。
 
 ## 実行ごとに変わる値
 
@@ -174,7 +174,7 @@ import { Show } from "solid-js";
 
 id も実行ごとに変わる値のもう1つの代表的なものです。
 チェックアウトの住所フォームは生成した id で各入力にラベルを付けますが、カウンターや `Math.random()` はサーバーとブラウザーに異なる文字列を与えます。
-[`createUniqueId`](/reference/solid-js/components-context/create-unique-id) は、両側でコンポーネントのオーナーツリー内の位置から id を導きます:
+[`createUniqueId`](/docs/reference/solid-js/components-context/create-unique-id.md) は、両側でコンポーネントのオーナーツリー内の位置から id を導きます:
 
 ```tsx
 import { createUniqueId } from "solid-js";
@@ -216,7 +216,7 @@ function SaleCountdown(props: { endsAt: number; serverNow: number }) {
 ## サーバーが持っていないデータ
 
 カートの下書きは `localStorage` にあり、それはブラウザーにしか存在しません。
-サーバーは見えるカート、つまり空のカートをレンダリングし、ブラウザーがハイドレーション後に下書きを埋めます。読み取りに `onSettled`、書き込みに `createEffect` を使うそのプリミティブは [Solid の外部と同期する](/guides/custom-primitives#sync-with-something-outside-solid) にあります。
+サーバーは見えるカート、つまり空のカートをレンダリングし、ブラウザーがハイドレーション後に下書きを埋めます。読み取りに `onSettled`、書き込みに `createEffect` を使うそのプリミティブは [Solid の外部と同期する](/docs/guides/custom-primitives.md#sync-with-something-outside-solid) にあります。
 代償として、3点入っている訪問者にも空のカートを見せる最初のフレームが生じます。
 
 サーバーが本物のカートをレンダリングすべきときは、データをサーバーが読める場所へ移します。
@@ -238,7 +238,7 @@ export async function getCart(): Promise<{ items: CartItem[] }> {
 
 これでコンポーネント内の `createStore(() => getCart(), { items: [] as CartItem[] })` はサーバーで3点をレンダリングし、ブラウザーも同じ関数に問い合わせて同じ答えを得ます。
 `database.carts.get` はアプリケーションが使うストレージの代役です。
-顧客を識別する署名付き Cookie については [セッションと認証](/building-apps/sessions-and-auth) を参照してください。顧客がサインインした後は、ミドルウェアが設定する `event.locals.userId` が Cookie の読み取りに取って代わります。
+顧客を識別する署名付き Cookie については [セッションと認証](/docs/building-apps/sessions-and-auth.md) を参照してください。顧客がサインインした後は、ミドルウェアが設定する `event.locals.userId` が Cookie の読み取りに取って代わります。
 
 最初のフレームを誰が必要とするかで選んでください。
 今のブラウザーだけが気にする下書きはハイドレーションまで待てますが、共有リンク・クローラー・低速な回線が見るべきカートはサーバーに置きます。
@@ -294,7 +294,7 @@ export async function getCart(): Promise<{ items: CartItem[] }> {
 
 クライアントが、サーバーがその id で出力していないテンプレートルートをレンダリングしました。
 メッセージは起きたことを続けて説明します: `A detached element was created instead; its subtree will not appear in the document or become interactive.`
-`Show when={!isServer}` や実行ごとに変わる値のようなブラウザーだけで実行される分岐、あるいはサーバーが使ったのとは別の `renderId` でハイドレートされたサブツリーを探してください。メッセージはそのケースを明示し、[ハイドレーションの制御](/concepts/rendering-and-ssr#controlling-hydration) がそれを扱っています。
+`Show when={!isServer}` や実行ごとに変わる値のようなブラウザーだけで実行される分岐、あるいはサーバーが使ったのとは別の `renderId` でハイドレートされたサブツリーを探してください。メッセージはそのケースを明示し、[ハイドレーションの制御](/docs/concepts/rendering-and-ssr.md#controlling-hydration) がそれを扱っています。
 
 ### `Hydration completed with N unclaimed server-rendered node(s):`
 
@@ -311,7 +311,7 @@ export async function getCart(): Promise<{ items: CartItem[] }> {
 
 モジュール本体で `window` を読むライブラリは、どのコンポーネントが実行されるより前、インポート時に失敗します。
 それを使うコンポーネントを `clientOnly` で包むか、インポートを `onSettled` コールバックの中へ移してブラウザーだけで実行されるようにしてください。
-[サーバーから切り離す](/guides/integrate-non-solid-code#keep-it-off-the-server) に両方の形と、動的インポートが必要とする `disposed` ガードが示されています。
+[サーバーから切り離す](/docs/guides/integrate-non-solid-code.md#keep-it-off-the-server) に両方の形と、動的インポートが必要とする `disposed` ガードが示されています。
 
 ## よくある問題
 
@@ -355,7 +355,7 @@ id がカウンターや `Math.random()` から来ているため、サーバー
 
 ## 次のステップ
 
-- [レンダリングと SSR](/concepts/rendering-and-ssr): `render`、`hydrate`、`renderToStream` の呼び出し、`Loading` バウンダリによるストリーミング、`HydrationScript`。
-- [Solid 以外のコードを統合する](/guides/integrate-non-solid-code): `clientOnly`、`onSettled` 内の動的インポート、自分の DOM を所有するライブラリのための ref。
-- [レンダリングモードを選ぶ](/guides/choose-a-rendering-mode): ストアフロントにそもそもサーバーが必要かどうか、そして各モードがコードに求めるもの。
-- [保護されたルート](/guides/protected-routes): サーバーが見るサインイン済みユーザーが何をレンダリングするかを決める、アカウント領域。
+- [レンダリングと SSR](/docs/concepts/rendering-and-ssr.md): `render`、`hydrate`、`renderToStream` の呼び出し、`Loading` バウンダリによるストリーミング、`HydrationScript`。
+- [Solid 以外のコードを統合する](/docs/guides/integrate-non-solid-code.md): `clientOnly`、`onSettled` 内の動的インポート、自分の DOM を所有するライブラリのための ref。
+- [レンダリングモードを選ぶ](/docs/guides/choose-a-rendering-mode.md): ストアフロントにそもそもサーバーが必要かどうか、そして各モードがコードに求めるもの。
+- [保護されたルート](/docs/guides/protected-routes.md): サーバーが見るサインイン済みユーザーが何をレンダリングするかを決める、アカウント領域。

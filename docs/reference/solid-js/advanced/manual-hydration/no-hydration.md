@@ -53,4 +53,4 @@ function NoHydration(props: { children: JSX.Element }): JSX.Element;
 
 ## 関連項目
 
-- [ハイドレーションの制御](/concepts/rendering-and-ssr#controlling-hydration)
+- [ハイドレーションの制御](/docs/concepts/rendering-and-ssr.md#controlling-hydration)

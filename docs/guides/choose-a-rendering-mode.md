@@ -14,7 +14,7 @@ start モードのプロジェクトのレンダリング方法は 3 つあり�
 
 :::tip[先に答えが知りたい場合]
 [3 つの質問で決定](#a-decision-in-three-questions) では、トレードオフを読まずにモードを選べます。
-各モードの仕組みは [アプリの構造](/building-apps/app-structure) と [レンダリングと SSR](/concepts/rendering-and-ssr) で説明しています。
+各モードの仕組みは [アプリの構造](/docs/building-apps/app-structure.md) と [レンダリングと SSR](/docs/concepts/rendering-and-ssr.md) で説明しています。
 :::
 
 ## 3 つのモード
@@ -52,7 +52,7 @@ solid({ start: true, ssr: true });
 
 デプロイするのは `dist/client` に加えて `dist/server` のリクエストハンドラーです。
 ホストはそのハンドラーを Node、Fetch ベースのランタイム、またはプロバイダーのアダプター上で実行します。
-選択肢については [デプロイ](/building-apps/deployment) で扱っています。
+選択肢については [デプロイ](/docs/building-apps/deployment.md) で扱っています。
 
 ### ビルド時のプリレンダリング
 
@@ -134,7 +134,7 @@ onSettled(() => {
 `Avoid` 側を `ssr: true` で実行すると、サーバーレンダリングは `ReferenceError: localStorage is not defined` で失敗します。
 ブラウザ専用のコードはエフェクト関数や `onSettled` に移すか、`isServer` でガードするか、`clientOnly` でコンポーネントを読み込みます。
 サーバーとクライアントで初期出力も一致しなければなりません。一致しないとハイドレーションがサーバーレンダリングされたノードを引き継げません。
-[サーバーとクライアントの境界](/concepts/rendering-and-ssr#server-and-client-boundaries) に、このペアの完全版とともにツールの一覧があります。
+[サーバーとクライアントの境界](/docs/concepts/rendering-and-ssr.md#server-and-client-boundaries) に、このペアの完全版とともにツールの一覧があります。
 
 テンプレートはどのモードでもこのテストに通るように書かれているため、`basic` から始めて後から `ssr: true` に切り替えるプロジェクトは通常変更不要です。
 ブラウザ専用コードが蓄積したプロジェクトでは変更が必要になります。
@@ -171,13 +171,13 @@ onSettled(() => {
 
 モジュールやコンポーネント本体がブラウザ API を読んでおり、`ssr: true` によりそのコードがサーバーでも実行されるようになりました。
 その読み取りをエフェクト関数や `onSettled` コールバックに移すか、`isServer` でガードするか、コンポーネントを `clientOnly` でラップしてください。
-それぞれの選択肢は [サーバーとクライアントの境界](/concepts/rendering-and-ssr#server-and-client-boundaries) で説明しています。
+それぞれの選択肢は [サーバーとクライアントの境界](/docs/concepts/rendering-and-ssr.md#server-and-client-boundaries) で説明しています。
 
 ### コンソールの `Hydration tag mismatch` または `Hydration structure mismatch`
 
 サーバーとブラウザが同じ領域に異なる構造をレンダリングしたため、クライアントは期待したノードを引き継げず、バインディングが誤ったノードにアタッチされました。
 よくある原因は、別の要素を選ぶ `isServer` の条件分岐（タグの不一致として報告されます）、ランダムな値に依存する条件を持つ `Show`、リクエスト時とブラウザで異なるデータです。
-両側で同じ構造をレンダリングし、ブラウザ専用の値はハイドレーション後に埋めてください。[サーバー HTML のハイドレーション](/concepts/rendering-and-ssr#hydrating-server-html) にこのペアがあり、[SSR セーフなコード](/guides/ssr-safe-code) で修正方法を一行ずつ解説しています。
+両側で同じ構造をレンダリングし、ブラウザ専用の値はハイドレーション後に埋めてください。[サーバー HTML のハイドレーション](/docs/concepts/rendering-and-ssr.md#hydrating-server-html) にこのペアがあり、[SSR セーフなコード](/docs/guides/ssr-safe-code.md) で修正方法を一行ずつ解説しています。
 
 ### 静的ホストでサーバー関数の呼び出しが失敗する
 
@@ -202,8 +202,8 @@ onSettled(() => {
 
 ## 次のステップ
 
-- [アプリの構造](/building-apps/app-structure)：各モードが生成するものと、`App`・`Document` の規約がどこに関わるか。
-- [デプロイ](/building-apps/deployment)：SSR ハンドラー向けのホストとアダプター。
-- [レンダリングと SSR](/concepts/rendering-and-ssr)：各モードの背後にある `render`、`hydrate`、`renderToStream` の呼び出し。
-- [バウンダリ](/concepts/boundaries)：`Loading` の配置がシェルに何をストリーミングさせるかをどう決めるか。
-- [SSR セーフなコード](/guides/ssr-safe-code)：`window is not defined` と各ハイドレーション警告への修正を詳しく。
+- [アプリの構造](/docs/building-apps/app-structure.md)：各モードが生成するものと、`App`・`Document` の規約がどこに関わるか。
+- [デプロイ](/docs/building-apps/deployment.md)：SSR ハンドラー向けのホストとアダプター。
+- [レンダリングと SSR](/docs/concepts/rendering-and-ssr.md)：各モードの背後にある `render`、`hydrate`、`renderToStream` の呼び出し。
+- [バウンダリ](/docs/concepts/boundaries.md)：`Loading` の配置がシェルに何をストリーミングさせるかをどう決めるか。
+- [SSR セーフなコード](/docs/guides/ssr-safe-code.md)：`window is not defined` と各ハイドレーション警告への修正を詳しく。

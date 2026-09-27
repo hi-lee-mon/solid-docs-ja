@@ -107,7 +107,7 @@ export default defineConfig({
 ```
 
 どちらの props も、関数や追跡対象の値を渡すとリアクティブに読み取られます。
-[`class`](/reference/solid-web/jsx-properties/class) と [`style`](/reference/solid-web/jsx-properties/style) のリファレンスページでは、ストアとの相互作用を含めてオブジェクト形式を詳しく説明しています。
+[`class`](/docs/reference/solid-web/jsx-properties/class.md) と [`style`](/docs/reference/solid-web/jsx-properties/style.md) のリファレンスページでは、ストアとの相互作用を含めてオブジェクト形式を詳しく説明しています。
 
 ## 画像とその他のファイル
 
@@ -146,7 +146,7 @@ import themeHref from "./theme.css?url";
 それ以外はすべて import します。
 
 遅延ルートモジュールが import したスタイルシートは、そのモジュールのチャンクと一緒に読み込まれます。
-JavaScript が届く前にスタイルが当たっていなければならないページでは、常に読み込まれるモジュールから CSS を import するか、[head メタデータ](/building-apps/head-and-metadata)を通して `<link>` を追加します。
+JavaScript が届く前にスタイルが当たっていなければならないページでは、常に読み込まれるモジュールから CSS を import するか、[head メタデータ](/docs/building-apps/head-and-metadata.md)を通して `<link>` を追加します。
 
 :::deep-dive[ストリーミング SSR でスタイルが行き着く先]
 本番では、`App` と `Document` から到達可能な CSS がアセットファイルにビルドされ、生成されたハンドラーがドキュメントの head にそれらの `<link rel="stylesheet">` タグを書き込むため、ブラウザーが最初に受け取る HTML にはすでにスタイルへの参照が含まれています。
@@ -176,7 +176,7 @@ CSS モジュールに切り替えるか、セレクターをページ単位の�
 ### `public/` のファイルが本番で 404 になる
 
 ホストがそのパスに対して `dist/client` を配信していません。
-[デプロイ](/building-apps/deployment#a-public-file-404s-in-production)で、各ホストが静的ファイルをどうマッピングするかを説明しています。
+[デプロイ](/docs/building-apps/deployment.md#a-public-file-404s-in-production)で、各ホストが静的ファイルをどうマッピングするかを説明しています。
 
 ## まとめ
 
@@ -190,6 +190,6 @@ CSS モジュールに切り替えるか、セレクターをページ単位の�
 
 ## 次のステップ
 
-- [head とメタデータ](/building-apps/head-and-metadata): ページが自分で追加するスタイルシートリンクやその他の head タグ。
-- [デプロイ](/building-apps/deployment): ビルドされたアセットの出力先と、各ホストが `dist/client` をどう配信するか。
-- [`class`](/reference/solid-web/jsx-properties/class) と [`style`](/reference/solid-web/jsx-properties/style): オブジェクト・配列形式と、ストアとの相互作用。
+- [head とメタデータ](/docs/building-apps/head-and-metadata.md): ページが自分で追加するスタイルシートリンクやその他の head タグ。
+- [デプロイ](/docs/building-apps/deployment.md): ビルドされたアセットの出力先と、各ホストが `dist/client` をどう配信するか。
+- [`class`](/docs/reference/solid-web/jsx-properties/class.md) と [`style`](/docs/reference/solid-web/jsx-properties/style.md): オブジェクト・配列形式と、ストアとの相互作用。

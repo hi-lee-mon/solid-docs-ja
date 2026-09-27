@@ -73,11 +73,11 @@ function Errored(props: {
 
 ## よくある問題
 
-- [エラー後にすべての更新が止まった](/guides/debugging-reactivity#every-update-stopped-after-an-error)
+- [エラー後にすべての更新が止まった](/docs/guides/debugging-reactivity.md#every-update-stopped-after-an-error)
 
 ## 関連項目
 
-- [エラーバウンダリ](/concepts/boundaries#error-boundaries)
-- [reject される処理：`Errored`](/concepts/async-reactivity#work-rejects-errored)
-- [コンポーネントと JSX](/concepts/components-and-jsx)
-- [バウンダリ](/concepts/boundaries)
+- [エラーバウンダリ](/docs/concepts/boundaries.md#error-boundaries)
+- [reject される処理：`Errored`](/docs/concepts/async-reactivity.md#work-rejects-errored)
+- [コンポーネントと JSX](/docs/concepts/components-and-jsx.md)
+- [バウンダリ](/docs/concepts/boundaries.md)

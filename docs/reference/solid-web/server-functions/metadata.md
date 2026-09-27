@@ -102,8 +102,8 @@ function isServerFunction(
 
 ## 関連項目
 
-- [メタデータとトランスポート](/building-apps/server-functions/metadata-and-transport)
-- [サーバー関数](/building-apps/server-functions)
+- [メタデータとトランスポート](/docs/building-apps/server-functions/metadata-and-transport.md)
+- [サーバー関数](/docs/building-apps/server-functions/index.md)
 
 ## 関連する型
 

@@ -88,7 +88,7 @@ export default function Page() {
 
 ### 同じ identity を持つ複数のタグ
 
-意図的なセットは [`<Head>`](/reference/solid-meta/head) でラップすると、共存しつつ一単位として上書きされます:
+意図的なセットは [`<Head>`](/docs/reference/solid-meta/head.md) でラップすると、共存しつつ一単位として上書きされます:
 
 ```tsx
 <Head>
@@ -99,5 +99,5 @@ export default function Page() {
 
 ## 関連項目
 
-- [`Head`](/reference/solid-meta/head)
-- [`Title`](/reference/solid-meta/title)
+- [`Head`](/docs/reference/solid-meta/head.md)
+- [`Title`](/docs/reference/solid-meta/title.md)

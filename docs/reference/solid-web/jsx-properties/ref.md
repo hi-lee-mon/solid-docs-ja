@@ -78,4 +78,4 @@ ref コールバックは追跡されず、リアクティブオーナーなし�
 ref コールバック内でオーナーを持つリアクティブプリミティブを作成したり、クリーンアップ関数を返したりしないでください。
 
 再利用可能なディレクティブがセットアップとクリーンアップを必要とする場合は、オーナーを持つファクトリー内でそれらのプリミティブを作成し、要素を受け取るコールバックだけを返してください。
-完全なパターンは [ref とディレクティブ](/concepts/components-and-jsx#refs-and-directives) を、ref を通じて駆動するチャート・マップ・Web コンポーネントの例は [非 Solid コードの統合](/guides/integrate-non-solid-code) を参照してください。
+完全なパターンは [ref とディレクティブ](/docs/concepts/components-and-jsx.md#refs-and-directives) を、ref を通じて駆動するチャート・マップ・Web コンポーネントの例は [非 Solid コードの統合](/docs/guides/integrate-non-solid-code.md) を参照してください。

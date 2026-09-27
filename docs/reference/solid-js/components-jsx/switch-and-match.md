@@ -143,9 +143,9 @@ function Match<T>(props: {
 
 ## 関連項目
 
-- [条件付きコンテンツ](/concepts/components-and-jsx#conditional-content)
-- [コンポーネントと JSX](/concepts/components-and-jsx)
-- [バウンダリ](/concepts/boundaries)
+- [条件付きコンテンツ](/docs/concepts/components-and-jsx.md#conditional-content)
+- [コンポーネントと JSX](/docs/concepts/components-and-jsx.md)
+- [バウンダリ](/docs/concepts/boundaries.md)
 
 ## 関連する型
 

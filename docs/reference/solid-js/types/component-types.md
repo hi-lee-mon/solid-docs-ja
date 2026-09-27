@@ -154,6 +154,6 @@ type VoidProps<P extends Record<string, any> = {}> = P & { children?: never };
 
 ## さらに学ぶ
 
-- [コンポーネントの props を型付けする](/guides/typescript#type-component-props)
-- [イベントと ref](/guides/typescript#events-and-refs)
-- [TypeScript](/guides/typescript)
+- [コンポーネントの props を型付けする](/docs/guides/typescript.md#type-component-props)
+- [イベントと ref](/docs/guides/typescript.md#events-and-refs)
+- [TypeScript](/docs/guides/typescript.md)

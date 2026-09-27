@@ -40,10 +40,10 @@ export function Product(props: { id: string }) {
 
 ブラウザーでページを読み込んでネットワークタブを開くと、その呼び出しは `/_server/data/<id>` への `POST` で、ボディには `["mug"]` が乗り、レスポンスには関数が返した商品がそのまま入っています。
 クライアントバンドルを `database` で検索しても、見つかりません。
-コンポーネントは変わりません。`getProduct` は両側で Promise を返すため、[非同期リアクティビティ](/concepts/async-reactivity)のルールがそのまま適用されます。
+コンポーネントは変わりません。`getProduct` は両側で Promise を返すため、[非同期リアクティビティ](/docs/concepts/async-reactivity.md)のルールがそのまま適用されます。
 
 サーバー関数はルーターなしでも動作します。
-Solid Router の `query()` と `action()` はその上にキャッシュ、送信、再検証を追加するもので、そのレイヤーは[データ読み込みとミューテーション](/routing/solid-router/data)で説明しています。
+Solid Router の `query()` と `action()` はその上にキャッシュ、送信、再検証を追加するもので、そのレイヤーは[データ読み込みとミューテーション](/docs/routing/solid-router/data.md)で説明しています。
 
 ## サーバー関数を有効にする
 
@@ -165,7 +165,7 @@ export const listOrders = withAccount(async (userId) => {
 :::note[2 種類のラッパー]
 `withAccount` のようなモジュールレベルのラッパーはサーバー側実装の内部で実行されるため、すべての呼び出し経路に適用されます。
 `GET()`、`live()`、`withMeta()` のような宣言ラッパーは、関数レベルの `"use server"` 参照を外側から包みます。これらは参照の呼び出され方を設定するもので、サーバーサイドのポリシーを実行することはありません。
-この違いがバリデーションにとって何を意味するかは、[引数とセキュリティ](/building-apps/server-functions/arguments-and-security#validate-caller-controlled-values)で説明しています。
+この違いがバリデーションにとって何を意味するかは、[引数とセキュリティ](/docs/building-apps/server-functions/arguments-and-security.md#validate-caller-controlled-values)で説明しています。
 :::
 
 ## 呼び出しは何になるか
@@ -180,7 +180,7 @@ curl -X POST 'https://shop.example/_server/<id>?args=%5B%22mug%22%5D' \
 ```
 
 このリクエストは `getProduct("mug")` を実行し、商品を JSON ボディとして返します。
-すべてのサーバー関数がこの方法で到達可能です。だからこそ[引数とセキュリティ](/building-apps/server-functions/arguments-and-security)ではすべての引数を信頼できないものとして扱います。
+すべてのサーバー関数がこの方法で到達可能です。だからこそ[引数とセキュリティ](/docs/building-apps/server-functions/arguments-and-security.md)ではすべての引数を信頼できないものとして扱います。
 
 サーバーサイドレンダリング中は、同じ `getProduct(props.id)` 呼び出しでも HTTP リクエストは発生しません。
 実装は現在のサーバープロセス内で、ページリクエストから派生した `serverOnly: true` のリクエストイベントのもと、呼び出しごとの `locals` のコピーとともに実行されます。
@@ -199,7 +199,7 @@ curl -X POST 'https://shop.example/_server/<id>?args=%5B%22mug%22%5D' \
 
 関数が `redirect()` または `reload()` を返し、呼び出し元がルーターのアクションではなく素のコードだった場合です。
 クライアントのトランスポートは、ナビゲーションや再検証のメタデータを持つレスポンスをそのまま呼び出し元に返します。ナビゲーションを所有するインテグレーションがそれを適用できるようにするためです。
-Solid Router の `action()` 経由で関数を呼び出すか、値を返して呼び出し元に行き先を決めさせてください。両方の方法を[ミューテーションとレスポンス](/building-apps/server-functions/mutations-and-responses#redirect-the-caller)で説明しています。
+Solid Router の `action()` 経由で関数を呼び出すか、値を返して呼び出し元に行き先を決めさせてください。両方の方法を[ミューテーションとレスポンス](/docs/building-apps/server-functions/mutations-and-responses.md#redirect-the-caller)で説明しています。
 
 ### ビルドが `server functions cannot capture non-top-level variables` で失敗する
 
@@ -222,7 +222,7 @@ Solid Router の `action()` 経由で関数を呼び出すか、値を返して�
 
 リクエストイベントがスコープにない状態でサーバーコードが関数を呼びました。モジュールレベルの呼び出し、スケジュールされたジョブ、イベントを提供しなかったテストなどです。
 プロセス内呼び出しは現在のリクエストからイベントを派生させるため、リクエストが必要です。
-レンダー、ミドルウェア、別のサーバー関数から呼び出すか、テストでは [`provideRequestEvent`](/reference/solid-web/request-response/provide-request-event) でイベントを提供してください。
+レンダー、ミドルウェア、別のサーバー関数から呼び出すか、テストでは [`provideRequestEvent`](/docs/reference/solid-web/request-response/provide-request-event.md) でイベントを提供してください。
 
 ## まとめ
 
@@ -236,7 +236,7 @@ Solid Router の `action()` 経由で関数を呼び出すか、値を返して�
 
 ## 次のステップ
 
-- [読み取り・ストリーム・ライブデータ](/building-apps/server-functions/reads-and-live-data): HTTP キャッシュが保存できる読み取りを宣言し、他の買い物客が変更したときも在庫レベルとの接続を保ちます。
-- [引数とセキュリティ](/building-apps/server-functions/arguments-and-security): 呼び出し元が何を送れるか、トランスポートが何をエンコードできるか、そしてすべてのリクエストをバリデーション・認可する方法。
-- [ミューテーションとレスポンス](/building-apps/server-functions/mutations-and-responses): カートのミューテーションからリダイレクト・リロード・400 を返し、スローされたエラーが何を明かすかを制御します。
-- [データ読み込みとミューテーション](/routing/solid-router/data): 同じ関数を `query()` と `action()` で包んで、キャッシュ・送信・再検証を利用します。
+- [読み取り・ストリーム・ライブデータ](/docs/building-apps/server-functions/reads-and-live-data.md): HTTP キャッシュが保存できる読み取りを宣言し、他の買い物客が変更したときも在庫レベルとの接続を保ちます。
+- [引数とセキュリティ](/docs/building-apps/server-functions/arguments-and-security.md): 呼び出し元が何を送れるか、トランスポートが何をエンコードできるか、そしてすべてのリクエストをバリデーション・認可する方法。
+- [ミューテーションとレスポンス](/docs/building-apps/server-functions/mutations-and-responses.md): カートのミューテーションからリダイレクト・リロード・400 を返し、スローされたエラーが何を明かすかを制御します。
+- [データ読み込みとミューテーション](/docs/routing/solid-router/data.md): 同じ関数を `query()` と `action()` で包んで、キャッシュ・送信・再検証を利用します。

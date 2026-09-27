@@ -71,7 +71,7 @@ async function attachCustomer(
 ```
 
 `getRequestEvent()` はこのリクエストのイベントを返します。ページのレンダーはそれを直接参照し、サーバー関数は同じ `locals` を持つ派生コピーとして参照するため、ここで設定した `locals.userId` は受け渡しなしでサーバー関数から読めます。
-[セッションと認証](/building-apps/sessions-and-auth)で作成する `getSession()` は、その同じイベントから署名済みクッキーを読み取ります。
+[セッションと認証](/docs/building-apps/sessions-and-auth.md)で作成する `getSession()` は、その同じイベントから署名済みクッキーを読み取ります。
 
 ### 続行してからレスポンスを変える
 
@@ -129,7 +129,7 @@ export default [
 
 リクエストは配列を下り、レスポンスはそれを上って戻ります。
 
-![4つのミドルウェアが並び、その後にページのレンダー。リクエストの矢印が左から右へ各ミドルウェアを通り、レスポンスの矢印がそれらを通って戻る。requireHttps は next を呼ばずに Response を返してチェーンを止められる。attachCustomer は入り方向で locals を設定し、以降のすべてのステップから見える。securityHeaders は戻り方向でレスポンスにヘッダーを設定する。](/images/diagrams/middleware-chain.svg)
+![4つのミドルウェアが並び、その後にページのレンダー。リクエストの矢印が左から右へ各ミドルウェアを通り、レスポンスの矢印がそれらを通って戻る。requireHttps は next を呼ばずに Response を返してチェーンを止められる。attachCustomer は入り方向で locals を設定し、以降のすべてのステップから見える。securityHeaders は戻り方向でレスポンスにヘッダーを設定する。](/docs/images/diagrams/middleware-chain.svg)
 
 `securityHeaders` は入り方向では `attachCustomer` より先に実行され、戻り方向ではそのレスポンスを受け取ります。
 セッションを読むミドルウェアは `locals.userId` を必要とするものより前に置き、API ルートが顧客を必要とするなら API ハンドラーはその後に置きます。
@@ -158,8 +158,8 @@ async function catchErrors(_request: Request, next: () => Promise<Response>) {
 ```
 
 実際のエラーはログに記録し、汎用的なボディを返します。
-例外メッセージはデータベース・ファイルシステム・トークンの詳細を含み得ます。レスポンスに入れてよいテキストを持つエラーは、アプリが安全とマークしたものだけです。サーバー関数については[ミューテーションとレスポンス](/building-apps/server-functions/mutations-and-responses#handle-thrown-errors)を参照してください。
-本番ビルドでは生成されるページレンダーもデフォルトのエラーバウンダリで囲まれます。このミドルウェアがエラーを所有する場合は、[アプリ構造](/building-apps/app-structure#common-problems)にあるように `start.errorBoundary: false` を設定してください。
+例外メッセージはデータベース・ファイルシステム・トークンの詳細を含み得ます。レスポンスに入れてよいテキストを持つエラーは、アプリが安全とマークしたものだけです。サーバー関数については[ミューテーションとレスポンス](/docs/building-apps/server-functions/mutations-and-responses.md#handle-thrown-errors)を参照してください。
+本番ビルドでは生成されるページレンダーもデフォルトのエラーバウンダリで囲まれます。このミドルウェアがエラーを所有する場合は、[アプリ構造](/docs/building-apps/app-structure.md#common-problems)にあるように `start.errorBoundary: false` を設定してください。
 
 ## API ルート
 
@@ -281,7 +281,7 @@ Solid のサーバーランタイムが公開する契約は、fetch スタイ�
 
 ## 次のステップ
 
-- [セッションと認証](/building-apps/sessions-and-auth): 最も一般的なミドルウェアで、セッションクッキーを `event.locals` に読み込みます。
-- [サーバー関数](/building-apps/server-functions): 同じリクエストイベントの下で実行されるため、ここで設定した状態が見えます。
-- [保護されたルート](/guides/protected-routes#middleware-for-whole-sections): ミドルウェアからセクション全体へのサインインリダイレクトと、ミドルウェアに見えないものです。
-- [デプロイ](/building-apps/deployment): このチェーンが前段となるリクエストハンドラーがどこで実行されるか、ホストが `dist/client` をどう提供するかです。
+- [セッションと認証](/docs/building-apps/sessions-and-auth.md): 最も一般的なミドルウェアで、セッションクッキーを `event.locals` に読み込みます。
+- [サーバー関数](/docs/building-apps/server-functions/index.md): 同じリクエストイベントの下で実行されるため、ここで設定した状態が見えます。
+- [保護されたルート](/docs/guides/protected-routes.md#middleware-for-whole-sections): ミドルウェアからセクション全体へのサインインリダイレクトと、ミドルウェアに見えないものです。
+- [デプロイ](/docs/building-apps/deployment.md): このチェーンが前段となるリクエストハンドラーがどこで実行されるか、ホストが `dist/client` をどう提供するかです。

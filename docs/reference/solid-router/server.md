@@ -90,5 +90,5 @@ type ServerFunctionOutcome;
 
 ## 関連項目
 
-- [データ API](/reference/solid-router/data)
-- [`createRouter`](/reference/solid-router/router-factory#createrouter)
+- [データ API](/docs/reference/solid-router/data.md)
+- [`createRouter`](/docs/reference/solid-router/router-factory.md#createrouter)

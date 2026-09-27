@@ -40,4 +40,4 @@ function snapshot<T>(value: T): T;
 
 ## 関連項目
 
-- [ストア](/concepts/stores)
+- [ストア](/docs/concepts/stores.md)

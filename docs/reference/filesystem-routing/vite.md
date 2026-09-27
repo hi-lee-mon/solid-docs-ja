@@ -79,7 +79,7 @@ Vite ルートからの相対パスでルートディレクトリを指定しま
 
 デフォルトのファイル名からパスへの変換関数をオーバーライドします。
 `undefined` を返すとそのファイルをスキップします。
-[`FileSystemRouterConfig`](/reference/filesystem-routing/core#filesystemrouterconfig)を参照してください。
+[`FileSystemRouterConfig`](/docs/reference/filesystem-routing/core.md#filesystemrouterconfig)を参照してください。
 
 ### `toRoute`
 
@@ -159,7 +159,7 @@ import routes, { pageRoutes } from "virtual:file-routes";
 
 `routes` はフラットなマニフェストです。
 `pageRoutes` は、マニフェストパスでネストされ、URL パスからルートグループが取り除かれたページエントリーを含みます。
-[マニフェストモジュール](/reference/filesystem-routing/manifest)を参照してください。
+[マニフェストモジュール](/docs/reference/filesystem-routing/manifest.md)を参照してください。
 
 ルートソース ID は `?pick=` クエリを使い、各 ref が選択されたエクスポートのみを含むようにします。
 JavaScript と TypeScript の ID は `lang.<extension>` マーカーで終わるため、拡張子ベースの Vite プラグインもそれらにマッチします。

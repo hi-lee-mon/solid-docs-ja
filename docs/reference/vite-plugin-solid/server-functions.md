@@ -11,7 +11,7 @@ source_path: "src/server-functions/index.ts"
 
 `serverFunctions` はスタンドアロンの `"use server"` コンパイラプラグインを提供します。
 `solidPlugin` の `serverFunctions` オプションは同じコンパイラを使い、エンドポイントミドルウェアもインストールできます。
-アプリケーションでの使い方は[サーバー関数ガイド](/building-apps/server-functions)、生成されるランタイムは [`@solidjs/web/server-functions` リファレンス](/reference/solid-web/server-functions)を参照してください。
+アプリケーションでの使い方は[サーバー関数ガイド](/docs/building-apps/server-functions/index.md)、生成されるランタイムは [`@solidjs/web/server-functions` リファレンス](/docs/reference/solid-web/server-functions/index.md)を参照してください。
 
 ## インポート
 
@@ -109,7 +109,7 @@ interface ServerFunctionsFilter {
 
 ディスパッチがホスト管理の場合、ホストは `virtual:solid-server-function-handler` をロードします。
 クライアントコードからのみ参照される関数をディスパッチ前に登録する必要がある場合、ホストのサーバーエントリーはマニフェストもインポートすべきです。
-ホストは [`configureServerFunctionsServer()`](/reference/solid-web/server-functions/host-configuration) を通じて、リクエストスコープ、オリジンチェック、呼び出しポリシー、結果の処理を設定できます。
+ホストは [`configureServerFunctionsServer()`](/docs/reference/solid-web/server-functions/host-configuration.md) を通じて、リクエストスコープ、オリジンチェック、呼び出しポリシー、結果の処理を設定できます。
 
 ### `configure`
 

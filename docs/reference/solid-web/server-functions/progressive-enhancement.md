@@ -23,7 +23,7 @@ source_path: "packages/web/server-functions/src/server.ts"
 
 クライアントランタイムなしで行われたブラウザのフォーム送信に対するデフォルトのレスポンスハンドラーを作成します。
 
-> フォームの動作とルーターの所有権の境界については[プログレッシブエンハンスメント](/building-apps/server-functions/progressive-enhancement)を参照してください。
+> フォームの動作とルーターの所有権の境界については[プログレッシブエンハンスメント](/docs/building-apps/server-functions/progressive-enhancement.md)を参照してください。
 
 ## インポート
 
@@ -48,13 +48,13 @@ function createNoJSHandler(
 
 ## よくある問題
 
-- [フォームは送信されるが、ページがその場に留まらずリロードされる](/guides/forms#the-form-submits-but-the-page-reloads-instead-of-staying-put)
-- [サーバー関数が空のオブジェクトを受け取る](/guides/forms#the-server-function-receives-an-empty-object)
+- [フォームは送信されるが、ページがその場に留まらずリロードされる](/docs/guides/forms.md#the-form-submits-but-the-page-reloads-instead-of-staying-put)
+- [サーバー関数が空のオブジェクトを受け取る](/docs/guides/forms.md#the-server-function-receives-an-empty-object)
 
 ## 関連項目
 
-- [プログレッシブエンハンスメント](/building-apps/server-functions/progressive-enhancement)
-- [フォーム](/guides/forms)
+- [プログレッシブエンハンスメント](/docs/building-apps/server-functions/progressive-enhancement.md)
+- [フォーム](/docs/guides/forms.md)
 
 ## 関連する型
 

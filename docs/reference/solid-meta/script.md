@@ -89,5 +89,5 @@ export default function Product(props: {
 
 ## 関連項目
 
-- [`Style`](/reference/solid-meta/style)
-- [`Head`](/reference/solid-meta/head)
+- [`Style`](/docs/reference/solid-meta/style.md)
+- [`Head`](/docs/reference/solid-meta/head.md)

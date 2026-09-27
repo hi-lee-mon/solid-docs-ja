@@ -42,10 +42,10 @@ function configureServerErrors(config: ServerErrorsConfig): void;
 
 ## 関連項目
 
-- [サーバーが処理するすべての障害を検知する](/guides/observability#hear-every-failure-the-server-handles)
-- [オブザーバビリティアダプターを構築する](/guides/observability-adapters)
-- [ミューテーションとレスポンス](/building-apps/server-functions/mutations-and-responses)
-- [ミドルウェアと API ルート](/building-apps/middleware-and-api-routes)
+- [サーバーが処理するすべての障害を検知する](/docs/guides/observability.md#hear-every-failure-the-server-handles)
+- [オブザーバビリティアダプターを構築する](/docs/guides/observability-adapters.md)
+- [ミューテーションとレスポンス](/docs/building-apps/server-functions/mutations-and-responses.md)
+- [ミドルウェアと API ルート](/docs/building-apps/middleware-and-api-routes.md)
 
 ## 関連型
 

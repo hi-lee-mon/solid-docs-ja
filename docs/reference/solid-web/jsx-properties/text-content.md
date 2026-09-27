@@ -64,7 +64,7 @@ return <output textContent={`Count: ${count()}`} />;
 ```
 
 サーバーレンダリングでも値はエスケープされます。
-値に、ブラウザがパースすべき信頼されたまたはサニタイズ済みのマークアップが含まれる場合のみ [`innerHTML`](/reference/solid-web/jsx-properties/inner-html) を使ってください。
+値に、ブラウザがパースすべき信頼されたまたはサニタイズ済みのマークアップが含まれる場合のみ [`innerHTML`](/docs/reference/solid-web/jsx-properties/inner-html.md) を使ってください。
 
 ## 子要素
 

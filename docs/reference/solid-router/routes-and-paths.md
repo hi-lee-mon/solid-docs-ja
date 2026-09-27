@@ -199,6 +199,6 @@ declare module "@solidjs/router" {
 
 ## 関連項目
 
-- [`defineRoute` と `defineRoutes`](/reference/solid-router/router-factory)
-- [ナビゲーションプリミティブ](/reference/solid-router/navigation)
-- [ファイルシステムアダプター](/reference/solid-router/filesystem)
+- [`defineRoute` と `defineRoutes`](/docs/reference/solid-router/router-factory.md)
+- [ナビゲーションプリミティブ](/docs/reference/solid-router/navigation.md)
+- [ファイルシステムアダプター](/docs/reference/solid-router/filesystem.md)

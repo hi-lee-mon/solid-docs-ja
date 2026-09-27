@@ -47,7 +47,7 @@ export default defineConfig({
 
 変わるのは、コードが前提にしてよいことです。
 コンポーネントとモジュールのコードはブラウザーだけでなく Node でも実行されるようになるため、モジュールスコープでの `window` や `localStorage` の読み取りは、`ReferenceError: window is not defined` でサーバーレンダリングを停止させます。
-[レンダリングと SSR](/concepts/rendering-and-ssr#server-and-client-boundaries) では、ブラウザー専用コードの置き場所と、ハイドレーションのためにサーバーとクライアントの出力を一致させる方法を示しています。
+[レンダリングと SSR](/docs/concepts/rendering-and-ssr.md#server-and-client-boundaries) では、ブラウザー専用コードの置き場所と、ハイドレーションのためにサーバーとクライアントの出力を一致させる方法を示しています。
 
 ## `fullstack` をデプロイする
 
@@ -62,11 +62,11 @@ const response = await handleRequest(request);
 
 `fullstack` テンプレートは `start: { node: true }` を設定するため、ビルドは `dist/server/node.js` も書き出します。これは同じものの Node 版で、`dist/client` を配信し、残りを `handleRequest` に渡して、`PORT` でリッスンします。
 fetch ネイティブなプラットフォームでは、`handleRequest` をホストのリクエストエントリーポイントに対応付け、その静的アセットサービスを `dist/client` に向けてください。
-Workers・Deno・Bun はそれぞれ独自のモジュール・アセット・環境の設定を持ちます。[デプロイ](/building-apps/deployment) で解説しています。
+Workers・Deno・Bun はそれぞれ独自のモジュール・アセット・環境の設定を持ちます。[デプロイ](/docs/building-apps/deployment.md) で解説しています。
 
 ## 次のステップ
 
-- [クイックスタート](/getting-started/quick-start): まだなら、`basic` プロジェクトを作成して最初の変更を加えます。
-- [アプリの構造](/building-apps/app-structure): `App.tsx` と `Document.tsx` が何をするのか、そしてプラグインが各形状に生成するエントリー。
-- [レンダリングモードを選ぶ](/guides/choose-a-rendering-mode): クライアントレンダリングのシェル、ストリーミング SSR、プリレンダリングのトレードオフ。
-- [デプロイ](/building-apps/deployment): `fullstack` のリクエストハンドラー向けのプラットフォーム固有のセットアップ。
+- [クイックスタート](/docs/getting-started/quick-start.md): まだなら、`basic` プロジェクトを作成して最初の変更を加えます。
+- [アプリの構造](/docs/building-apps/app-structure.md): `App.tsx` と `Document.tsx` が何をするのか、そしてプラグインが各形状に生成するエントリー。
+- [レンダリングモードを選ぶ](/docs/guides/choose-a-rendering-mode.md): クライアントレンダリングのシェル、ストリーミング SSR、プリレンダリングのトレードオフ。
+- [デプロイ](/docs/building-apps/deployment.md): `fullstack` のリクエストハンドラー向けのプラットフォーム固有のセットアップ。

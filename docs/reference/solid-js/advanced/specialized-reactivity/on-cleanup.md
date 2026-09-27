@@ -28,7 +28,7 @@ source_path: "packages/signals/src/signals.ts"
 使いたくなる2つのケースには、より適した形のツールがあります:
 
 - **コンポーネントのライフサイクル（マウント/アンマウント、リスナー、
-  インターバル）:** [onSettled](/reference/solid-js/lifecycle-actions/on-settled) を使い、クリーンアップ関数を **return**
+  インターバル）:** [onSettled](/docs/reference/solid-js/lifecycle-actions/on-settled.md) を使い、クリーンアップ関数を **return**
   してください。セットアップと後始末が1つのブロックに対になって保たれます。
   これは 1.x の `onMount` + `onCleanup` の組み合わせを置き換えるものです。
 - **エフェクト実行に紐づくクリーンアップ:** `onCleanup` は `createEffect` の
@@ -82,7 +82,7 @@ function bindToOwner<T extends { dispose(): void }>(owner: Owner, resource: T): 
 
 ## 関連項目
 
-- [始めたものをクリーンアップする](/guides/custom-primitives#clean-up-what-you-start)
-- [オーナーシップ](/concepts/reactivity#ownership)
-- [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects)
-- [リアクティビティのデバッグ](/guides/debugging-reactivity)
+- [始めたものをクリーンアップする](/docs/guides/custom-primitives.md#clean-up-what-you-start)
+- [オーナーシップ](/docs/concepts/reactivity.md#ownership)
+- [不要なエフェクトを避ける](/docs/guides/avoid-unnecessary-effects.md)
+- [リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md)

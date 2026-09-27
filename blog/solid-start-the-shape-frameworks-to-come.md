@@ -22,7 +22,7 @@ SolidStart の基本部分は特定の規約にあなたを縛り付けません
 
 SolidStart にはファイルシステムルーティングがあります。`[]` でパラメーターを渡すという、Nuxt と似た規約を採用しています。ただし私たちは `()` も使っており、Route Groups、名前付き index ルート、ネストからの脱出といった、より強力なことを実現します。基本的に、括弧の間に置いたものはマッチングからは除外されますが、ルートの構造には依然として影響します。
 
-![ルート構造のスクリーンショット](/img/blog/solid-start-the-shape-frameworks-to-come/routes-tree.png)
+![ルート構造のスクリーンショット](/blog/images/solid-start-the-shape-frameworks-to-come/routes-tree.png)
 
 ファイルシステムから得られた設定はアプリケーションに戻され、選択したルーターで使えます。`FileRoutes` をコンポーネントとしても通常の関数としても呼び出せば、SolidStart が生成した設定を取得できます。
 
@@ -96,7 +96,7 @@ function Posts() {
 
 この機能を使って、Solid Router の API でシングルフライトミューテーションのようなことを実現しています。更新の後、サーバーが次ページのデータのフェッチを開始し、クライアントがリダイレクトを処理している間に同じレスポンスでストリームで送り返せます。これと、並列化されたロード・キャッシュパターン、Solid のノンブロッキング非同期により、不要なウォーターフォールをほぼ排除しました。
 
-![シングルフライトミューテーションを示す図](/img/blog/solid-start-the-shape-frameworks-to-come/single-flight.png)
+![シングルフライトミューテーションを示す図](/blog/images/solid-start-the-shape-frameworks-to-come/single-flight.png)
 
 [Notes サンプル](https://github.com/solidjs/solid-start/tree/main/examples/notes)で実際の動作を確認できます。
 

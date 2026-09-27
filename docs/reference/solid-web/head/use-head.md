@@ -101,6 +101,6 @@ useHead(() =>
 
 ## 関連項目
 
-- [`HeadTag`](/reference/solid-web/head/head-tag)
-- [Head とメタデータ](/building-apps/head-and-metadata)
-- [`Head`](/reference/solid-meta/head)
+- [`HeadTag`](/docs/reference/solid-web/head/head-tag.md)
+- [Head とメタデータ](/docs/building-apps/head-and-metadata.md)
+- [`Head`](/docs/reference/solid-meta/head.md)

@@ -46,7 +46,7 @@ export async function createProduct(input: CreateProductInput) {
 :::deep-dive[ワイヤー上のエンベロープ]
 `respond()` は `ResponseEnvelope` を返します。これはメタデータを運ぶ `Response` と、呼び出し元が受け取るべき `value` を保持するオブジェクトです。
 サーバー関数ハンドラーはそのレスポンスのステータスとヘッダーを引き継ぎ、値をボディとしてエンコードします。
-再検証を適用するルーターのようにエンベロープを認識する必要があるインテグレーションコードは、[`isResponseEnvelope()`](/reference/solid-web/request-response/respond) を使います。このチェックは登録済みシンボルなので、バンドルにランタイムのコピーが2つ含まれていても機能します。
+再検証を適用するルーターのようにエンベロープを認識する必要があるインテグレーションコードは、[`isResponseEnvelope()`](/docs/reference/solid-web/request-response/respond.md) を使います。このチェックは登録済みシンボルなので、バンドルにランタイムのコピーが2つ含まれていても機能します。
 アプリケーションコードがエンベロープに直接触れることはありません。
 :::
 
@@ -101,7 +101,7 @@ export async function addToCart(productId: string, quantity: number) {
 `revalidate` を省略すると、すべてのキャッシュされた読み取りの再取得を要求します。
 
 コアはキーを `X-Revalidate` ヘッダーで運び、キャッシュ自体は定義しません。
-Solid Router はこのヘッダーを読み取って自身のクエリキャッシュと照合します。マッチングの仕組みは[ミューテーション後に何が再検証されるか](/routing/solid-router/data#what-revalidates-after-a-mutation)で説明しています。
+Solid Router はこのヘッダーを読み取って自身のクエリキャッシュと照合します。マッチングの仕組みは[ミューテーション後に何が再検証されるか](/docs/routing/solid-router/data.md#what-revalidates-after-a-mutation)で説明しています。
 `respond()` と `redirect()` も同じ `revalidate` オプションを受け付けます。値も返すミューテーションや、遷移も行うミューテーション向けです。
 
 ## スローされたエラーを処理する
@@ -151,7 +151,7 @@ throw markSafeError(new Error("This coupon has expired"));
 
 ブランドによって、メッセージと自身のプロパティが本番環境で境界を越えられるようになります。
 自分で作成していないエラーにブランドを付けてはいけません。ドライバーやサードパーティクライアント由来のエラーは、プロパティに何が入っているかわかりません。
-インテグレーションコードは [`isSafeError()`](/reference/solid-web/request-response/safe-errors) でブランドを検査できます。
+インテグレーションコードは [`isSafeError()`](/docs/reference/solid-web/request-response/safe-errors.md) でブランドを検査できます。
 
 :::pitfall[400 を return すると呼び出しが成功になる]
 呼び出し元を reject させるのは throw された結果だけです。
@@ -197,14 +197,14 @@ export const addToCartAction = action(addToCart);
 ```
 
 `<form method="post" action={addToCartAction}>` をレンダーすると、フォームは JavaScript が読み込まれる前からその関数の URL に POST されます。ハイドレーション後はルーターが submit をインターセプトし、トランスポート越しに関数を呼び出して `reload` を適用します。
-ルーターは実行中のフォームに `aria-busy` を付け、確定するとサブミッションを記録します。その `error` は throw されたエンベロープの値であり、[フォームガイド](/guides/forms)がこれを読み取ってフィールドの横にメッセージを表示します。
+ルーターは実行中のフォームに `aria-busy` を付け、確定するとサブミッションを記録します。その `error` は throw されたエンベロープの値であり、[フォームガイド](/docs/guides/forms.md)がこれを読み取ってフィールドの横にメッセージを表示します。
 
 上記のようにサーバー関数は名前付きエクスポートのままにして別途ラップしてください。そうすれば、テストや API ルートがフォームなしで `addToCart` を呼び出せます。
-フォーム専用の関数であれば、本体をインラインで `action(async (form: FormData) => { "use server"; ... })` と書けます。[データロードとミューテーション](/routing/solid-router/data#mutate-with-actions)ページではこの形を一貫して使っており、どちらも同じように動作します。
+フォーム専用の関数であれば、本体をインラインで `action(async (form: FormData) => { "use server"; ... })` と書けます。[データロードとミューテーション](/docs/routing/solid-router/data.md#mutate-with-actions)ページではこの形を一貫して使っており、どちらも同じように動作します。
 
 :::note[どちらの action か]
 ここでの `action` は `@solidjs/router` のものです。
-`solid-js` にも [`action`](/reference/solid-js/lifecycle-actions/action) があり、こちらはジェネレーターをリアクティブなトランザクションとして実行するもので URL を持ちません。[ミューテーション](/concepts/mutations)で説明しています。
+`solid-js` にも [`action`](/docs/reference/solid-js/lifecycle-actions/action.md) があり、こちらはジェネレーターをリアクティブなトランザクションとして実行するもので URL を持ちません。[ミューテーション](/docs/concepts/mutations.md)で説明しています。
 フォームに必要なのはルーターのほうです。
 :::
 
@@ -245,7 +245,7 @@ return されたエンベロープはステータスに関係なく呼び出し�
 
 ## 次のステップ
 
-- [プログレッシブエンハンスメント](/building-apps/server-functions/progressive-enhancement): JavaScript が読み込まれる前に送信される同じ「カートに追加」フォームと、ランタイムが 303 に対して行うこと。
-- [フォーム](/guides/forms): チェックアウトの住所フォーム。throw された 400 をインラインのフィールドメッセージとして表示します。
-- [メタデータとトランスポート](/building-apps/server-functions/metadata-and-transport): すべての呼び出しにヘッダーを付ける方法と、実行中の呼び出しをキャンセルする方法。
-- [ミューテーション](/concepts/mutations): ミューテーションのクライアント側。楽観的な状態と `solid-js` のリアクティブな `action` を扱います。
+- [プログレッシブエンハンスメント](/docs/building-apps/server-functions/progressive-enhancement.md): JavaScript が読み込まれる前に送信される同じ「カートに追加」フォームと、ランタイムが 303 に対して行うこと。
+- [フォーム](/docs/guides/forms.md): チェックアウトの住所フォーム。throw された 400 をインラインのフィールドメッセージとして表示します。
+- [メタデータとトランスポート](/docs/building-apps/server-functions/metadata-and-transport.md): すべての呼び出しにヘッダーを付ける方法と、実行中の呼び出しをキャンセルする方法。
+- [ミューテーション](/docs/concepts/mutations.md): ミューテーションのクライアント側。楽観的な状態と `solid-js` のリアクティブな `action` を扱います。

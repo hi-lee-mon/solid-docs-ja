@@ -11,7 +11,7 @@ description: "Solid の状態からチャートライブラリ、地図、Web �
 これらはどれもシグナルを知りません。
 どれも Solid に求めるものは同じ4つです。存在した時点での DOM ノード、インスタンスを一度だけ作成する場所、確定した値をライブラリへ流し込むエフェクト、そしてコンポーネントと一緒に解体するクリーンアップです。
 このガイドでは、その4つと、状態が流れる2つの方向（Solid からライブラリへ、ライブラリから Solid へ）を順に見ていきます。
-動作するようになったら、その結果をパッケージ化する方法は[カスタムプリミティブ](/guides/custom-primitives)ガイドで説明しています。
+動作するようになったら、その結果をパッケージ化する方法は[カスタムプリミティブ](/docs/guides/custom-primitives.md)ガイドで説明しています。
 
 ## DOM ノードを取得する
 
@@ -31,7 +31,7 @@ function OrderTotalsChart(props: { totals: number[] }) {
 `Avoid` 版を実行するとライブラリは `undefined` で例外を投げます。コンポーネント本体は上から下へ実行され、`<canvas>` が作られるのは `return` 文の中だからです。
 要素が存在するのは JSX が評価された後です。`ref` コールバックはその瞬間、周囲のレンダーがまだ構築されている最中に実行されます。
 
-[`ref` リファレンス](/reference/solid-web/jsx-properties/ref)に受け付ける形式の一覧があり、[ref とディレクティブ](/concepts/components-and-jsx#refs-and-directives)ではディレクティブファクトリーが要素のセットアップを引き受ける仕組みを示しています。
+[`ref` リファレンス](/docs/reference/solid-web/jsx-properties/ref.md)に受け付ける形式の一覧があり、[ref とディレクティブ](/docs/concepts/components-and-jsx.md#refs-and-directives)ではディレクティブファクトリーが要素のセットアップを引き受ける仕組みを示しています。
 このページのすべての統合に関係する事実が2つあります。`ref` コールバックは追跡されずオーナーなしで実行されるため、エフェクトを作ったりクリーンアップを登録したりする場所ではないということ。そして、要素がドキュメント内にある必要があるセットアップは、最初のレンダーが確定した後に実行される `onSettled` に置くということです。
 
 ## インスタンスは一度だけ作成し、エフェクトで更新する
@@ -70,9 +70,9 @@ function OrderTotalsChart(props: { totals: number[] }) {
 `Avoid` 版を実行すると、チャートは最初の合計を描画してそれ以降変わりません。`onSettled` はコールバックを一度だけ実行し、その中の読み取りを追跡しないからです。
 `Prefer` 版では、新しい `totals` 配列がコンピュート関数を再実行し、更新が適用された後にエフェクト関数がその値をライブラリへ渡します。
 
-この分担はドキュメント全体の方針に従っています。ティアダウンを返す一回限りのセットアップには [`onSettled`](/reference/solid-js/lifecycle-actions/on-settled) を、Solid の外に出さなければならない確定値ごとの処理には [`createEffect`](/reference/solid-js/reactivity/create-effect) のエフェクト関数を使います。
+この分担はドキュメント全体の方針に従っています。ティアダウンを返す一回限りのセットアップには [`onSettled`](/docs/reference/solid-js/lifecycle-actions/on-settled.md) を、Solid の外に出さなければならない確定値ごとの処理には [`createEffect`](/docs/reference/solid-js/reactivity/create-effect.md) のエフェクト関数を使います。
 どちらもサーバーレンダリング中は実行されないので、`chart-lib` をサーバーでインポートできる限り、このコンポーネントはサーバーでレンダリングしても安全です。できない場合は[サーバーから切り離す](#keep-it-off-the-server)を参照してください。
-すべての入力をコンピュート関数に置くべき理由は[命令的バウンダリではエフェクトを使う](/guides/avoid-unnecessary-effects#use-an-effect-at-an-imperative-boundary)で説明しています。
+すべての入力をコンピュート関数に置くべき理由は[命令的バウンダリではエフェクトを使う](/docs/guides/avoid-unnecessary-effects.md#use-an-effect-at-an-imperative-boundary)で説明しています。
 
 分析スクリプトも同じ形ですが、DOM ノードはありません:
 
@@ -92,7 +92,7 @@ function PageViews() {
 }
 ```
 
-`/account` から `/account/orders` へ移動すると `pageView` が新しいパスで一度呼ばれます。[ロケーションを読む](/routing/solid-router/navigation#read-the-location)で説明しているとおり、`location.pathname` はリアクティブです。
+`/account` から `/account/orders` へ移動すると `pageView` が新しいパスで一度呼ばれます。[ロケーションを読む](/docs/routing/solid-router/navigation.md#read-the-location)で説明しているとおり、`location.pathname` はリアクティブです。
 
 ## Web コンポーネント
 
@@ -123,7 +123,7 @@ function DeliveryDate(props: {
 サーバーは HTML に属性を出力しますが `prop:` バインディングはスキップします。プロパティへの代入は、ブラウザが要素をレンダリングまたはハイドレートする時点で行われます。
 
 `onDatechange` は名前を小文字にして、`addEventListener` で `datechange` のリスナーを追加します。
-大文字やハイフンを含むイベント名はこの方法では書けません。[ref とディレクティブ](/concepts/components-and-jsx#refs-and-directives)にある `listen` ファクトリーにならい、正確な名前で `addEventListener` を呼ぶディレクティブを使います。
+大文字やハイフンを含むイベント名はこの方法では書けません。[ref とディレクティブ](/docs/concepts/components-and-jsx.md#refs-and-directives)にある `listen` ファクトリーにならい、正確な名前で `addEventListener` を呼ぶディレクティブを使います。
 `onInput` や `onClick` のように Solid がデリゲーションするイベントはレンダールート上のリスナーで処理されるため、そうした名前のイベントを発行するカスタム要素は、ハンドラーを実行させるには `bubbles: true` で発行しなければなりません。
 
 TypeScript は `<date-picker>` を知りません。
@@ -149,7 +149,7 @@ declare module "@solidjs/web" {
 Solid のコンテンツを、Solid が作っていない DOM ノードへ移したい状況が2つあります。
 
 1つ目は、祖先から脱出しなければならないサブツリーです。たとえば、オーバーフローをクリップする地図ライブラリのコンテナの中にある確認ダイアログです。
-[`Portal`](/reference/solid-web/components/portal)は子要素を別の要素（デフォルトでは `document.body`）へレンダリングします。子要素はコンポーネントのリアクティブスコープに留まったままです:
+[`Portal`](/docs/reference/solid-web/components/portal.md)は子要素を別の要素（デフォルトでは `document.body`）へレンダリングします。子要素はコンポーネントのリアクティブスコープに留まったままです:
 
 ```tsx
 import { Show, type ParentProps } from "solid-js";
@@ -171,7 +171,7 @@ function AddedToCart(props: ParentProps<{ open: boolean }>) {
 データはポータルの上位でフェッチして渡し込んでください。
 
 2つ目はその逆で、別のフレームワークやサーバーテンプレートが所有するページの中に、Solid にしたい領域が1つある場合です。
-[`render`](/reference/solid-web/rendering-ssr/render)はツリーをノードにマウントし、破棄関数（disposer）を返します:
+[`render`](/docs/reference/solid-web/rendering-ssr/render.md)はツリーをノードにマウントし、破棄関数（disposer）を返します:
 
 ```ts
 import { render } from "@solidjs/web";
@@ -185,7 +185,7 @@ dispose();
 ```
 
 `dispose` はリアクティブルートを破棄し、ルートが追加したデリゲーションイベントリスナーを削除し、コンテナを空にします。
-`render` は `MiniCart` 内のすべてのプリミティブがぶら下がるオーナーを作り、DOM を新たにレンダリングします。サーバーがすでにレンダリングした領域には、代わりに [`hydrate`](/reference/solid-web/rendering-ssr/hydrate)を使います。
+`render` は `MiniCart` 内のすべてのプリミティブがぶら下がるオーナーを作り、DOM を新たにレンダリングします。サーバーがすでにレンダリングした領域には、代わりに [`hydrate`](/docs/reference/solid-web/rendering-ssr/hydrate.md)を使います。
 
 ## 外部ソースをグラフに流し込む
 
@@ -210,11 +210,11 @@ export function createStock(productId: Accessor<string>) {
 
 プッシュのたびに `stock()` を読んでいるものすべてが更新されます。商品を変えると、前のサブスクリプションのアンサブスクライブ関数（エフェクト関数が返したもの）が、新しいサブスクリプションが開かれる前に実行されます。
 
-この書き込みが許されるのは、別のリアクティブな値をコピーするのではなく、観測を記録しているからです。その線引きは[外部の観測を新しい入力にする](/guides/avoid-unnecessary-effects#let-external-observations-become-new-inputs)で説明しています。
+この書き込みが許されるのは、別のリアクティブな値をコピーするのではなく、観測を記録しているからです。その線引きは[外部の観測を新しい入力にする](/docs/guides/avoid-unnecessary-effects.md#let-external-observations-become-new-inputs)で説明しています。
 ライブラリから受け取る `Map`・クラスインスタンス・`Date` は1つの値としてシグナルに入れます。プレーンなオブジェクトや配列にはストアを使います。
 
 :::advanced[リアクティブシステム全体を橋渡しする]
-外部ソースそれ自体が MobX のようなリアクティブシステムで、その値を Solid の計算の中で直接読み取る場合は、[`enableExternalSource`](/reference/solid-js/advanced/interop-async/enable-external-source)でアプリ全体に一度だけアダプターを登録します。
+外部ソースそれ自体が MobX のようなリアクティブシステムで、その値を Solid の計算の中で直接読み取る場合は、[`enableExternalSource`](/docs/reference/solid-js/advanced/interop-async/enable-external-source.md)でアプリ全体に一度だけアダプターを登録します。
 `factory` は各計算の関数と `trigger` を受け取り、外部ライブラリの追跡下でその関数を実行する `track` と `dispose` を返します。
 Solid はすべての計算をアダプターで包み、`trigger` が呼ばれたら計算を再実行し、計算が破棄されるときに `dispose` を呼びます。
 複数回呼び出した場合はチェーンになり、それぞれが前のアダプターを包みます。
@@ -224,7 +224,7 @@ Solid はすべての計算をアダプターで包み、`trigger` が呼ばれ�
 ## サーバーから切り離す
 
 地図ライブラリはインポート時に `window` を読むため、サーバーでレンダリングするコンポーネントからインポートすると、コンポーネントのコードが走る前に失敗します。
-[`clientOnly`](/reference/solid-web/rendering-ssr/client-only)は動的インポートを受け取り、ブラウザでのみレンダリングされるコンポーネントを返します:
+[`clientOnly`](/docs/reference/solid-web/rendering-ssr/client-only.md)は動的インポートを受け取り、ブラウザでのみレンダリングされるコンポーネントを返します:
 
 ```tsx
 import { clientOnly } from "@solidjs/web";
@@ -273,7 +273,7 @@ function StoreMap(props: { center: [number, number] }) {
 ```
 
 このコールバックはブラウザでのみ実行され、`disposed` フラグは、インポートが解決する前にコンポーネントがページから消えた場合をカバーします。
-[SSR 安全なコード](/guides/ssr-safe-code)ガイドでは、`isServer` をはじめとするブラウザ専用コードの書き方を網羅しています。
+[SSR 安全なコード](/docs/guides/ssr-safe-code.md)ガイドでは、`isServer` をはじめとするブラウザ専用コードの書き方を網羅しています。
 
 ## よくある問題
 
@@ -303,7 +303,7 @@ function StoreMap(props: { center: [number, number] }) {
 
 ref コールバックはオーナーなしで実行されます。
 セットアップはコンポーネント本体の `onSettled`、あるいはコールバックを返すディレクティブファクトリーに移してください。
-[ref コールバック内のエフェクトや onCleanup が実行されない](/concepts/components-and-jsx#an-effect-or-oncleanup-inside-a-ref-callback-never-runs)を参照してください。
+[ref コールバック内のエフェクトや onCleanup が実行されない](/docs/concepts/components-and-jsx.md#an-effect-or-oncleanup-inside-a-ref-callback-never-runs)を参照してください。
 
 ## まとめ
 
@@ -317,7 +317,7 @@ ref コールバックはオーナーなしで実行されます。
 
 ## 次のステップ
 
-- [カスタムプリミティブ](/guides/custom-primitives): チャート・フィード・地図を `createX` 関数にパッケージ化します。このページが依拠したオーナーとクリーンアップのルールを使います。
-- [SSR 安全なコード](/guides/ssr-safe-code): 両側で動くコードの完全なチェックリスト。ライブラリ出力によるハイドレーションの不一致も含みます。
-- [レンダリングと SSR](/concepts/rendering-and-ssr): `render`・`hydrate`、そしてレンダリング関数の中での `clientOnly` の位置づけ。
-- [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects): エフェクトが適切な道具になる2つのケース。このページはその両方を使いました。
+- [カスタムプリミティブ](/docs/guides/custom-primitives.md): チャート・フィード・地図を `createX` 関数にパッケージ化します。このページが依拠したオーナーとクリーンアップのルールを使います。
+- [SSR 安全なコード](/docs/guides/ssr-safe-code.md): 両側で動くコードの完全なチェックリスト。ライブラリ出力によるハイドレーションの不一致も含みます。
+- [レンダリングと SSR](/docs/concepts/rendering-and-ssr.md): `render`・`hydrate`、そしてレンダリング関数の中での `clientOnly` の位置づけ。
+- [不要なエフェクトを避ける](/docs/guides/avoid-unnecessary-effects.md): エフェクトが適切な道具になる2つのケース。このページはその両方を使いました。

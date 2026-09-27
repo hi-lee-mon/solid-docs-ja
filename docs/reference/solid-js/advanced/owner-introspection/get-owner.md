@@ -51,9 +51,9 @@ function defer<T>(fn: () => T) {
 
 ## 関連項目
 
-- [コンポーネント外で実行する](/guides/custom-primitives#run-outside-a-component)
-- [オーナーシップ](/concepts/reactivity#ownership)
-- [カスタムプリミティブ](/guides/custom-primitives)
+- [コンポーネント外で実行する](/docs/guides/custom-primitives.md#run-outside-a-component)
+- [オーナーシップ](/docs/concepts/reactivity.md#ownership)
+- [カスタムプリミティブ](/docs/guides/custom-primitives.md)
 
 ## 関連する型
 

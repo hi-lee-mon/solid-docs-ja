@@ -55,5 +55,5 @@ export default function App() {
 
 ## 関連項目
 
-- [`Link`](/reference/solid-meta/link)
-- [`Meta`](/reference/solid-meta/meta)
+- [`Link`](/docs/reference/solid-meta/link.md)
+- [`Meta`](/docs/reference/solid-meta/meta.md)

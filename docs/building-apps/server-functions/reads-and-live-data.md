@@ -4,7 +4,7 @@ version: "2.0"
 description: "HTTP キャッシュが保存できる商品の読み取りを宣言し、サーバー関数から注文イベントをストリームし、別の買い物客が変更しても在庫数の接続を維持します。"
 ---
 
-[サーバー関数](/building-apps/server-functions)ページの商品ページは「残り 3 点」と表示しています。
+[サーバー関数](/docs/building-apps/server-functions/index.md)ページの商品ページは「残り 3 点」と表示しています。
 別の買い物客が 1 点購入すると、誰かがリロードするまでこのページの数値は誤ったままです。
 同じページは訪問のたびに商品レコードを取得していますが、サーバー関数呼び出しはデフォルトで `POST` であるため、ブラウザとサーバーの間にあるどのキャッシュもその回答を記憶できません。
 
@@ -94,7 +94,7 @@ export const getCatalog = GET(async () => {
 ```
 
 1 分以内にカタログを 2 回訪れると、2 回目のリクエストはサーバーに届かずブラウザキャッシュから応答されます。
-`GET` は `POST` 呼び出しを保護する同一オリジンチェックもスキップします。宣言された読み取りは契約上どのオリジンから実行しても安全だからです。詳細は[同一オリジン保護](/building-apps/server-functions/arguments-and-security#same-origin-protection)を参照してください。
+`GET` は `POST` 呼び出しを保護する同一オリジンチェックもスキップします。宣言された読み取りは契約上どのオリジンから実行しても安全だからです。詳細は[同一オリジン保護](/docs/building-apps/server-functions/arguments-and-security.md#same-origin-protection)を参照してください。
 `GET()` の宣言は、安全で冪等な読み取りに限ってください。
 
 ## ストリームを返す
@@ -273,7 +273,7 @@ live ソースは開いているストリーム経由で更新されるため、
 
 ## 次のステップ
 
-- [引数とセキュリティ](/building-apps/server-functions/arguments-and-security): 呼び出し元が読み取りの引数に何を入れられるか、そしてなぜ読み取りがそれらを検証しなければならないか。
-- [非同期リアクティビティ](/concepts/async-reactivity): `GET()` 読み取りや live ソースがまだ回答していない間に商品ページが何を表示するか。
-- [データ取得パターン](/guides/data-fetching-patterns): これらの読み取りを土台にした、入力中検索・ページネーション・データの鮮度維持。
-- [データロードとミューテーション](/routing/solid-router/data): Solid Router でのキャッシュとルートプリロードのために読み取りを `query()` でラップする。
+- [引数とセキュリティ](/docs/building-apps/server-functions/arguments-and-security.md): 呼び出し元が読み取りの引数に何を入れられるか、そしてなぜ読み取りがそれらを検証しなければならないか。
+- [非同期リアクティビティ](/docs/concepts/async-reactivity.md): `GET()` 読み取りや live ソースがまだ回答していない間に商品ページが何を表示するか。
+- [データ取得パターン](/docs/guides/data-fetching-patterns.md): これらの読み取りを土台にした、入力中検索・ページネーション・データの鮮度維持。
+- [データロードとミューテーション](/docs/routing/solid-router/data.md): Solid Router でのキャッシュとルートプリロードのために読み取りを `query()` でラップする。

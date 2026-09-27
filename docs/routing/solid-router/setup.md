@@ -19,7 +19,7 @@ pnpm add @solidjs/router@next
 ```
 
 ルートツリーを定義し、モジュールスコープでルーターを作成します。
-これは [イントロダクション](/routing/solid-router#one-app-three-pages) と同じ `src/router.ts` です。
+これは [イントロダクション](/docs/routing/solid-router/index.md#one-app-three-pages) と同じ `src/router.ts` です。
 
 ```tsx
 // src/router.ts
@@ -37,7 +37,7 @@ export const Router = createRouter({
 export const { paths } = Router;
 ```
 
-[`createRouter`](/reference/solid-router/router-factory#createrouter) はプロバイダーコンポーネントと、アプリケーション全体で共有される静的なルーティングインスタンスの両方を返します。
+[`createRouter`](/docs/reference/solid-router/router-factory.md#createrouter) はプロバイダーコンポーネントと、アプリケーション全体で共有される静的なルーティングインスタンスの両方を返します。
 インスタンスのメンバーである `routes`・`config`・`paths`・`match()` は、個々の訪問者の現在位置ではなくルートツリーを表します。
 セッション固有の状態は、プロバイダー内のルーティングプリミティブから取得します。
 
@@ -98,7 +98,7 @@ export const Router = createRouter({
 ```
 
 `Avoid` 版を実行すると、開発環境は `Mounting a router inside another router is not supported. Compose route trees in one createRouter config instead.` と警告します。2つのルーターがそれぞれナビゲーションを支配しようとするため、リンククリックで古いコンテンツが表示されることがあります。
-[遅延ルートサブツリー](/routing/solid-router/route-definitions#load-a-route-subtree-lazily) が、セクションが独自のルートファイルを持つための方法です。
+[遅延ルートサブツリー](/docs/routing/solid-router/route-definitions.md#load-a-route-subtree-lazily) が、セクションが独自のルートファイルを持つための方法です。
 :::
 
 ### start モードなしでマウントする
@@ -145,7 +145,7 @@ export const Router = createRouter({
 :::advanced[サーバーと対になるオプション]
 `singleFlight` と `actionBase` が意味を持つのは `fullstack` プロジェクトだけです。
 前者はミューテーションレスポンスから `query` キャッシュへ値をシードするコンシューマーをオフにし、後者はサーバー関数エンドポイントが `/_server` から移された場合にそれと一致させる必要があります。
-両方とも [サーバーレンダリングとハイドレーション](/routing/solid-router/server-rendering#one-round-trip-for-a-mutation) で説明しています。
+両方とも [サーバーレンダリングとハイドレーション](/docs/routing/solid-router/server-rendering.md#one-round-trip-for-a-mutation) で説明しています。
 :::
 
 ## よくある問題
@@ -159,7 +159,7 @@ export const Router = createRouter({
 
 そのアンカーは `<Router>` の外側にあるか、`target` や `rel="external"` を持つか、別のオリジンを指しています。
 `explicitLinks: true` の場合は、`link` 属性が欠けています。
-ルーターがアンカーをそのまま素通りさせる属性の一覧は [ナビゲーションと型付きパス](/routing/solid-router/navigation#links-are-anchors) にあります。
+ルーターがアンカーをそのまま素通りさせる属性の一覧は [ナビゲーションと型付きパス](/docs/routing/solid-router/navigation.md#links-are-anchors) にあります。
 
 ## まとめ
 
@@ -172,6 +172,6 @@ export const Router = createRouter({
 
 ## 次のステップ
 
-- [ルート定義](/routing/solid-router/route-definitions): 渡した `routes` 配列のパスパターン・パラメーターフィルター・メタデータ・遅延サブツリー。
-- [ネストルートとレイアウト](/routing/solid-router/nested-routes): 内側のページが変わってもマウントされたままになるレイアウト。
-- [ナビゲーションと型付きパス](/routing/solid-router/navigation): リンク、型付き `paths`、検索パラメーター。
+- [ルート定義](/docs/routing/solid-router/route-definitions.md): 渡した `routes` 配列のパスパターン・パラメーターフィルター・メタデータ・遅延サブツリー。
+- [ネストルートとレイアウト](/docs/routing/solid-router/nested-routes.md): 内側のページが変わってもマウントされたままになるレイアウト。
+- [ナビゲーションと型付きパス](/docs/routing/solid-router/navigation.md): リンク、型付き `paths`、検索パラメーター。

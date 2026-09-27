@@ -181,7 +181,7 @@ export default function Counter() {
 
 クリックハンドラーは今、値ではなく関数を `setCount` に渡しています。
 新しい値が古い値に依存するときはこの形が安全です: 別の書き込みがすでにキューに入っていても、最新の値を受け取ります。
-違いは[リアクティビティ](/concepts/reactivity#signals)で説明しています。
+違いは[リアクティビティ](/docs/concepts/reactivity.md#signals)で説明しています。
 
 次に、意図的に動かないものを試します。
 読み取りを JSX の外に移します:
@@ -203,7 +203,7 @@ Move it into a tracking scope (JSX, a memo, or an effect's compute function).
 これが、Solid の残りすべてを理解可能にする唯一のルールです。
 コンポーネント本体は一度だけ実行されるため、そこで読み取った値はスナップショットです。
 JSX、メモ、またはエフェクトの計算関数の内側での読み取りは追跡され、追跡された読み取りは更新されます。
-その理由と、それでもコンポーネント本体で値が必要な場合の対処法は[リアクティビティ](/concepts/reactivity)のページで説明しています。
+その理由と、それでもコンポーネント本体で値が必要な場合の対処法は[リアクティビティ](/docs/concepts/reactivity.md)のページで説明しています。
 続ける前に、読み取りを JSX の内側に戻してください。
 
 ### 試してみる: リセットボタン
@@ -283,23 +283,23 @@ describe("<Counter />", () => {
 `npm test` で実行します。
 ステップの入力欄を残した場合でも、`getByRole("button")` は依然として唯一のボタンを見つけます。
 `flush()` 呼び出しが重要です: Solid はイベントハンドラーが戻った後に DOM 更新をバッチで適用するため、`fireEvent.click` の直後にアサートするテストは古いテキストを見ることになります。
-[テストガイド](/guides/testing)ではこれと他の環境を扱っています。
+[テストガイド](/docs/guides/testing.md)ではこれと他の環境を扱っています。
 
 `npm run build` を実行します。
 出力は `dist/client` の静的ファイル群で、各ルートがそれぞれのチャンクに入ります。
 そのディレクトリーは任意の静的ホストにデプロイできます。
 後でサーバーレンダリングやサーバー関数が必要になったら、`vite.config.ts` で `start: true` の隣に `ssr: true` を追加します。書いたファイルはそのまま引き継がれます。
-[プロジェクトの形状](/getting-started/project-shapes)では `bare`、`basic`、`fullstack` を比較しています。
+[プロジェクトの形状](/docs/getting-started/project-shapes.md)では `bare`、`basic`、`fullstack` を比較しています。
 
 ## 次のステップ
 
 ルーティング、自分で変更したコンポーネント、そして合格するテストを備えたアプリができました。
 理解したいことに応じて次のページを選びます:
 
-- モデルを最初から最後まで: [Thinking in Solid](/guides/thinking-in-solid) では商品検索ページを作りながら、各ステップで React や Vue の開発者なら代わりに何を使うかを説明します。
-- モデルを1概念ずつ: [リアクティビティ](/concepts/reactivity)では、追跡、メモ、エフェクト、そして更新がいつ反映されるかを、上で見た警告から説明します。
-- コンポーネント: [コンポーネントと JSX](/concepts/components-and-jsx)では、コンポーネントが一度だけ実行される理由、props がどうリアクティブであり続けるか、`Show` と `For` がどう条件分岐と `map` を置き換えるかを説明します。
-- プラットフォーム: [アプリの構造](/building-apps/app-structure)では、start モードが何を生成するか、`App` と `Document` がどう組み合わさるか、サーバーレンダリングをどう有効にするかを説明します。
-- ルーター: [Solid Router](/routing/solid-router) では、ルート定義、レイアウト、ナビゲーション、データ読み込みを扱います。
+- モデルを最初から最後まで: [Thinking in Solid](/docs/guides/thinking-in-solid.md) では商品検索ページを作りながら、各ステップで React や Vue の開発者なら代わりに何を使うかを説明します。
+- モデルを1概念ずつ: [リアクティビティ](/docs/concepts/reactivity.md)では、追跡、メモ、エフェクト、そして更新がいつ反映されるかを、上で見た警告から説明します。
+- コンポーネント: [コンポーネントと JSX](/docs/concepts/components-and-jsx.md)では、コンポーネントが一度だけ実行される理由、props がどうリアクティブであり続けるか、`Show` と `For` がどう条件分岐と `map` を置き換えるかを説明します。
+- プラットフォーム: [アプリの構造](/docs/building-apps/app-structure.md)では、start モードが何を生成するか、`App` と `Document` がどう組み合わさるか、サーバーレンダリングをどう有効にするかを説明します。
+- ルーター: [Solid Router](/docs/routing/solid-router/index.md) では、ルート定義、レイアウト、ナビゲーション、データ読み込みを扱います。
 
 行き詰まったら [Discord チャットルーム](https://discord.com/invite/solidjs)で尋ねてください。

@@ -26,7 +26,7 @@ import type {
 - `RouterProps` はサーバー専用の `url` とルートのレンダープロップ `children` を含みます。
 - `DefinedRoute<S, T, F, C, Sch>` は `defineRoute` の保持される戻り値の型です。
 
-シグネチャは[ルーターファクトリー](/reference/solid-router/router-factory)を参照してください。
+シグネチャは[ルーターファクトリー](/docs/reference/solid-router/router-factory.md)を参照してください。
 
 ## ルート定義
 
@@ -115,7 +115,7 @@ Solid Router は共有型では Standard Schema の Promise を受け入れま�
 - `LinkState` は `useLinkState` が返します。
 - `BeforeLeaveEventArgs` は `useBeforeLeave` に渡されます。
 
-シグネチャは[ナビゲーションプリミティブ](/reference/solid-router/navigation)を参照してください。
+シグネチャは[ナビゲーションプリミティブ](/docs/reference/solid-router/navigation.md)を参照してください。
 
 ## 履歴統合
 
@@ -124,7 +124,7 @@ Solid Router は共有型では Standard Schema の Promise を受け入れま�
 - `RouterIntegration` はルーターコアが使用するシグナルとユーティリティの契約です。
 - `RouterUtils` はオプションの履歴レンダリング・パース・走査・離脱ガード・パラメータ・クエリアダプターを含みます。
 
-サポートされている組み込みアダプターは[履歴アダプター](/reference/solid-router/history)を参照してください。
+サポートされている組み込みアダプターは[履歴アダプター](/docs/reference/solid-router/history.md)を参照してください。
 
 ## データ
 
@@ -132,7 +132,7 @@ Solid Router は共有型では Standard Schema の Promise を受け入れま�
 - `Action<T, U, V>` は `action` が返します。
 - `Submission<T, U>` は確定したアクションのレコードです。
 
-シグネチャは[データ API](/reference/solid-router/data)を参照してください。
+シグネチャは[データ API](/docs/reference/solid-router/data.md)を参照してください。
 
 ## その他のパッケージエントリー
 
@@ -151,4 +151,4 @@ Solid Router は共有型では Standard Schema の Promise を受け入れま�
 - `CollectFlightDataHook`
 - `ServerFunctionOutcome`
 
-[ファイルシステムアダプター](/reference/solid-router/filesystem)と[サーバー統合](/reference/solid-router/server)のページを参照してください。
+[ファイルシステムアダプター](/docs/reference/solid-router/filesystem.md)と[サーバー統合](/docs/reference/solid-router/server.md)のページを参照してください。

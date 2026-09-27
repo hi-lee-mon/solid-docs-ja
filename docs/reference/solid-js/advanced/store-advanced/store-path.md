@@ -99,7 +99,7 @@ setState(storePath("user", "nickname", storePath.DELETE));
 
 ## 関連項目
 
-- [ストア](/concepts/stores)
+- [ストア](/docs/concepts/stores.md)
 
 ## 関連する型
 

@@ -79,7 +79,7 @@ interface Options {
 - **デフォルト:** `false`
 
 ハイドレーション可能なクライアント出力と SSR 出力を有効にします。
-[`start`](/reference/vite-plugin-solid/start) と併用する場合、`ssr: true` はクライアント start モードではなく SSR start モードを選択します。
+[`start`](/docs/reference/vite-plugin-solid/start.md) と併用する場合、`ssr: true` はクライアント start モードではなく SSR start モードを選択します。
 オブジェクト値は設定時に拒否されます。
 
 ### `start`
@@ -89,7 +89,7 @@ interface Options {
 
 start モードを有効にします。
 `true` と `{}` は同等です。
-[`StartOptions`](/reference/vite-plugin-solid/start) を参照してください。
+[`StartOptions`](/docs/reference/vite-plugin-solid/start.md) を参照してください。
 
 ### `compiler`
 
@@ -169,7 +169,7 @@ type SolidOptions = Omit<JsxCompilerOptions, "filename" | "sourceMap">;
 
 `"use server"` コンパイルを有効にします。
 `true` はすべてのデフォルトを使います。
-[`ServerFunctionsOptions`](/reference/vite-plugin-solid/server-functions) を参照してください。
+[`ServerFunctionsOptions`](/docs/reference/vite-plugin-solid/server-functions.md) を参照してください。
 
 ## トランスフォーム出力
 

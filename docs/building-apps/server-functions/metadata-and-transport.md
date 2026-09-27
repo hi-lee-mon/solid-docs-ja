@@ -232,6 +232,6 @@ export async function loadAccount() {
 
 ## 次のステップ
 
-- [プログレッシブエンハンスメント](/building-apps/server-functions/progressive-enhancement): 各サーバー関数が公開する URL と、JavaScript の読み込み前にフォームがそこへ POST する仕組み。
-- [Vite プラグインのサーバー関数オプション](/reference/vite-plugin-solid/server-functions): このページのクライアント設定と対になるホスト側の設定。
-- [デプロイ](/building-apps/deployment): アプリがプロバイダーの後ろで動くとき、カスタムエンドポイントをどこにルーティングしなければならないか。
+- [プログレッシブエンハンスメント](/docs/building-apps/server-functions/progressive-enhancement.md): 各サーバー関数が公開する URL と、JavaScript の読み込み前にフォームがそこへ POST する仕組み。
+- [Vite プラグインのサーバー関数オプション](/docs/reference/vite-plugin-solid/server-functions.md): このページのクライアント設定と対になるホスト側の設定。
+- [デプロイ](/docs/building-apps/deployment.md): アプリがプロバイダーの後ろで動くとき、カスタムエンドポイントをどこにルーティングしなければならないか。

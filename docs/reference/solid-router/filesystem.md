@@ -107,5 +107,5 @@ interface FileRouteEagerRef<M = Record<string, unknown>> {
 
 ## 関連項目
 
-- [ルート定義](/reference/solid-router/routes-and-paths)
-- [ファイルシステムルーティングガイド](/routing/solid-router/route-definitions#convert-a-file-system-manifest)
+- [ルート定義](/docs/reference/solid-router/routes-and-paths.md)
+- [ファイルシステムルーティングガイド](/docs/routing/solid-router/route-definitions.md#convert-a-file-system-manifest)

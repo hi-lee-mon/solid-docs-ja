@@ -9,7 +9,7 @@ description: "Loading・Errored・Reveal を適切なサブツリーに配置し
 バウンダリがまったくなければ、処理されなかったエラーがリアクティブシステムを停止させ、ページ上のすべてが二度と更新されなくなります。
 
 バウンダリは、保留中または失敗した読み取りがページのどれだけの範囲に影響するかを決めます。
-[`Loading`](/reference/solid-js/components-jsx/loading) はサブツリー内の非同期読み取りに値がない間フォールバックをレンダーし、[`Errored`](/reference/solid-js/components-jsx/errored) はサブツリーがエラーを投げたときにフォールバックをレンダーし、[`Reveal`](/reference/solid-js/components-jsx/reveal) は兄弟領域が現れる順序を決めます。
+[`Loading`](/docs/reference/solid-js/components-jsx/loading.md) はサブツリー内の非同期読み取りに値がない間フォールバックをレンダーし、[`Errored`](/docs/reference/solid-js/components-jsx/errored.md) はサブツリーがエラーを投げたときにフォールバックをレンダーし、[`Reveal`](/docs/reference/solid-js/components-jsx/reveal.md) は兄弟領域が現れる順序を決めます。
 それぞれをどこに置くかが、このページで扱う設計上の判断です。
 
 ```tsx
@@ -60,7 +60,7 @@ function ProductPanel() {
 ## `Loading` バウンダリ
 
 `Loading` は、サブツリー内で読み取られた非同期の値が最初の答えを返していない間、`fallback` をレンダーします。
-一度コンテンツを表示した後は、以降の更新中もそのコンテンツを表示し続けます。[非同期リアクティビティ](/concepts/async-reactivity#settled-view-and-in-flight-work)のページで説明しているように、入力への変更は保留され、現在の画面はそのまま残り、準備ができた時点で新しいコンテンツに置き換わります。
+一度コンテンツを表示した後は、以降の更新中もそのコンテンツを表示し続けます。[非同期リアクティビティ](/docs/concepts/async-reactivity.md#settled-view-and-in-flight-work)のページで説明しているように、入力への変更は保留され、現在の画面はそのまま残り、準備ができた時点で新しいコンテンツに置き換わります。
 更新が進行中であることをユーザーに見せたい場合は、コンテンツ内で `isPending` を使います。
 
 フォールバックが置き換えるべき最小の領域を囲むようにバウンダリを置き、読み込み中にユーザーが必要とするコントロールはその外側に残します:
@@ -92,7 +92,7 @@ function ProductPanel() {
 
 `on` は、その領域が更新を待たせる理由でなくなるようにするだけで、更新をコミットさせるものではありません。
 同じ商品を読み取る見出しや `on` のない兄弟領域のように、バウンダリの外側にも新しい商品を待つものがある場合、更新は保留されたままになり、バウンダリはスケルトンを表示しません。
-新しい対象を読み取るものをすべて囲むか、各兄弟に `on` 付きの独自のバウンダリを与えてください。[非同期リアクティビティ](/concepts/async-reactivity#show-a-placeholder-again-loading-on)のページに両方のケースがあります。
+新しい対象を読み取るものをすべて囲むか、各兄弟に `on` 付きの独自のバウンダリを与えてください。[非同期リアクティビティ](/docs/concepts/async-reactivity.md#show-a-placeholder-again-loading-on)のページに両方のケースがあります。
 
 :::pitfall[on に値ではなくアクセサーを渡す]
 `on` は更新をまたいで `!==` で比較されるため、プリミティブを渡してください。配列を渡すのではなく、複数の入力を1つの文字列に結合します。
@@ -135,7 +135,7 @@ function ProductPanel() {
 :::caution[フォールバック内のエラーはバウンダリの外側]
 `Errored` のフォールバックをレンダーしている最中に投げられたエラーは、そのバウンダリでは捕捉されません。
 親の `Errored` がそれを捕捉できます。
-上にバウンダリがなければ、処理されなかったエラーはリアクティブシステムを停止させます。開発環境では `[REACTIVITY_HALTED]` として報告されます。その報告については[リアクティビティのデバッグ](/guides/debugging-reactivity#every-update-stopped-after-an-error)で説明しています。
+上にバウンダリがなければ、処理されなかったエラーはリアクティブシステムを停止させます。開発環境では `[REACTIVITY_HALTED]` として報告されます。その報告については[リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md#every-update-stopped-after-an-error)で説明しています。
 :::
 
 ## Reveal の順序
@@ -216,10 +216,10 @@ function ProductPage() {
 上のコンポーネントは3つのプリミティブから作られています。
 アプリケーションコードでこれらを使う必要はありません。カスタムバウンダリコンポーネントやレンダラー統合のために存在します。
 
-- [`createLoadingBoundary(fn, fallback, options?)`](/reference/solid-js/advanced/jsx-component-primitives/create-loading-boundary) は、追跡される `fn` とフォールバックを切り替えるアクセサーを返します。
+- [`createLoadingBoundary(fn, fallback, options?)`](/docs/reference/solid-js/advanced/jsx-component-primitives/create-loading-boundary.md) は、追跡される `fn` とフォールバックを切り替えるアクセサーを返します。
   プリミティブは JSX の props を受け取らないため、その `on` オプションはアクセサーを取ります。
-- [`createErrorBoundary(fn, fallback)`](/reference/solid-js/advanced/jsx-component-primitives/create-error-boundary) はアクセサーを返し、フォールバックにエラーのアクセサーとリセット関数を渡します。
-- [`createRevealOrder(fn, options?)`](/reference/solid-js/advanced/jsx-component-primitives/create-reveal-order) は `fn` をリビールコントローラーの下で実行します。その `order` と `collapsed` オプションはアクセサーです。
+- [`createErrorBoundary(fn, fallback)`](/docs/reference/solid-js/advanced/jsx-component-primitives/create-error-boundary.md) はアクセサーを返し、フォールバックにエラーのアクセサーとリセット関数を渡します。
+- [`createRevealOrder(fn, options?)`](/docs/reference/solid-js/advanced/jsx-component-primitives/create-reveal-order.md) は `fn` をリビールコントローラーの下で実行します。その `order` と `collapsed` オプションはアクセサーです。
 
 ```tsx
 import { createErrorBoundary, createLoadingBoundary } from "solid-js";
@@ -252,7 +252,7 @@ function StatusBoundary(props: {
 
 `Loading` バウンダリが遅い領域より上にあります。
 フォールバックを表示すべき領域までバウンダリを下げ、ページの残りはその外側に残してください。
-リクエストは元の場所に置いたままで構いません。フェッチとバウンダリが独立して配置される理由は[非同期リアクティビティ](/concepts/async-reactivity#fetch-high-block-low)のページで説明しています。
+リクエストは元の場所に置いたままで構いません。フェッチとバウンダリが独立して配置される理由は[非同期リアクティビティ](/docs/concepts/async-reactivity.md#fetch-high-block-low)のページで説明しています。
 
 ### 新しい項目を選んでも古い項目が画面に残る
 
@@ -287,7 +287,7 @@ function StatusBoundary(props: {
 
 ## 次のステップ
 
-- [レンダリングと SSR](/concepts/rendering-and-ssr): `Loading` バウンダリが、初期の HTML シェルに入れるものと後でストリーミングするものをどう決めるか。
-- [ミューテーション](/concepts/mutations): `action` が自分で捕捉すべきエラーと、`Errored` に届かせるべきエラー。
-- [サーバー関数](/building-apps/server-functions): これらのバウンダリが扱うエラーや再接続を持つ、読み取りとライブソース。
-- [Solid Router](/routing/solid-router): 初回ページロードにフォールバックを持たせるための `props.children` の周りへの `Loading` バウンダリの置き方、そして後のナビゲーションがなければ現在のページを維持する理由。
+- [レンダリングと SSR](/docs/concepts/rendering-and-ssr.md): `Loading` バウンダリが、初期の HTML シェルに入れるものと後でストリーミングするものをどう決めるか。
+- [ミューテーション](/docs/concepts/mutations.md): `action` が自分で捕捉すべきエラーと、`Errored` に届かせるべきエラー。
+- [サーバー関数](/docs/building-apps/server-functions/index.md): これらのバウンダリが扱うエラーや再接続を持つ、読み取りとライブソース。
+- [Solid Router](/docs/routing/solid-router/index.md): 初回ページロードにフォールバックを持たせるための `props.children` の周りへの `Loading` バウンダリの置き方、そして後のナビゲーションがなければ現在のページを維持する理由。

@@ -142,7 +142,7 @@ function SaveButton() {
 
 ## 関連項目
 
-- [命令的な境界でエフェクトを使う](/guides/avoid-unnecessary-effects#use-an-effect-at-an-imperative-boundary)
-- [オーナーシップ](/concepts/reactivity#ownership)
-- [非同期リアクティビティ](/concepts/async-reactivity)
-- [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects)
+- [命令的な境界でエフェクトを使う](/docs/guides/avoid-unnecessary-effects.md#use-an-effect-at-an-imperative-boundary)
+- [オーナーシップ](/docs/concepts/reactivity.md#ownership)
+- [非同期リアクティビティ](/docs/concepts/async-reactivity.md)
+- [不要なエフェクトを避ける](/docs/guides/avoid-unnecessary-effects.md)

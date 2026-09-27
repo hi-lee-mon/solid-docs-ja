@@ -4,14 +4,14 @@ version: "2.0"
 description: "preload でルートのデータを早期に開始し、query で読み取りをキャッシュ・共有し、action でミューテーションを送信し、楽観的な状態を表示し、何を再検証するかを制御します。"
 ---
 
-[イントロダクション](/routing/solid-router)の商品ページは、メモの中で商品をフェッチしていました。
+[イントロダクション](/docs/routing/solid-router/index.md)の商品ページは、メモの中で商品をフェッチしていました。
 それでも動きますが、3つの点でまだ不十分です：リクエストはページコンポーネントが実行されるまで始まりません。リスト内の `ProductCard` と `Product` ページは同じ商品を二度フェッチします。そして **Add to cart** フォームには、カートが変わったことを伝える手段がありません。
 
 ルーターのデータAPIはそれぞれに1つずつ答えを用意します：`preload` はページのコンポーネントが存在する前にリクエストを開始し、`query` は2つの読み手に1つのリクエストを共有させ、`action` はミューテーションをラップして JavaScript なしでもフォームとして動作させ、完了時にキャッシュを再検証します。
 このページはストアの続きです：商品ページとカートです。
 
 :::note[すべて任意です]
-Solid Router のアプリは、素の非同期メモでデータを読み込み、素のサーバー関数でフォームを送信することもでき、その場合は[非同期リアクティビティ](/concepts/async-reactivity)のページだけで足ります。
+Solid Router のアプリは、素の非同期メモでデータを読み込み、素のサーバー関数でフォームを送信することもでき、その場合は[非同期リアクティビティ](/docs/concepts/async-reactivity.md)のページだけで足ります。
 以下の各要素はそれぞれ独立して価値があるので、目の前のページが必要とするものだけを取り入れてください。
 :::
 
@@ -60,11 +60,11 @@ export default function Product(
 商品リンクにホバーすると、クリックの前にネットワークタブにリクエストが現れます。
 クリックすると、名前がすでにある状態で見出しがレンダーされます。
 
-![リンクへのホバーからクリック、コンポーネントの実行までのタイムライン。preload はホバー時にクエリを呼び出し、コンポーネント内のメモは同じクエリを読み取り、両者は最も早い呼び出しで開始された1つのキャッシュ済みリクエストに到達します。](/images/diagrams/router-three-data-pieces.svg)
+![リンクへのホバーからクリック、コンポーネントの実行までのタイムライン。preload はホバー時にクエリを呼び出し、コンポーネント内のメモは同じクエリを読み取り、両者は最も早い呼び出しで開始された1つのキャッシュ済みリクエストに到達します。](/docs/images/diagrams/router-three-data-pieces.svg)
 
 要素2を削除してもページは動きます。リクエストはメモが最初に実行されるタイミングで、数ミリ秒遅れて始まるだけです。
 要素1を削除してもページは動きます。ただし同じ商品を必要とする2つのコンポーネントがそれぞれフェッチすることになります。
-ファイルシステムアダプターでは、要素2はルートモジュールの `route` エクスポートに移ります。[ファイルシステムマニフェストの変換](/routing/solid-router/route-definitions#convert-a-file-system-manifest)を参照してください。
+ファイルシステムアダプターでは、要素2はルートモジュールの `route` エクスポートに移ります。[ファイルシステムマニフェストの変換](/docs/routing/solid-router/route-definitions.md#convert-a-file-system-manifest)を参照してください。
 
 ## コンポーネントが実行される前に処理を始める
 
@@ -146,7 +146,7 @@ getProduct.keyFor("mug"); // 'product["mug"]'
   その後は、何かが読み取っている間エントリーは生き続け、最後の読み手がいなくなってから数分後に掃き出されます。
   ブラウザの戻る・進むは保持されたエントリーを再利用できるので、ページに戻るのは通常一瞬です。
 
-`fullstack` プロジェクトでは `query` の中の関数は通常[サーバー関数](/building-apps/server-functions)です。
+`fullstack` プロジェクトでは `query` の中の関数は通常[サーバー関数](/docs/building-apps/server-functions/index.md)です。
 その関数に宣言されたメソッドがない場合、`query` はそれを `GET` として宣言するので、その読み取りはブラウザや CDN がキャッシュでき、ミューテーションの経路を通りません。
 
 クエリは他の非同期値と同じく、メモ経由で読み取ります：
@@ -156,7 +156,7 @@ const product = createMemo(() => getProduct(props.params.id));
 ```
 
 `props.params.id` が変わると、メモは新しい id で `getProduct` を呼び出します。これはキャッシュミスとなり新しいリクエストになります。
-読み込み中も古い商品は画面に残ります。その挙動とそこから得られる選択肢は[非同期リアクティビティ](/concepts/async-reactivity#settled-view-and-in-flight-work)で説明しています。
+読み込み中も古い商品は画面に残ります。その挙動とそこから得られる選択肢は[非同期リアクティビティ](/docs/concepts/async-reactivity.md#settled-view-and-in-flight-work)で説明しています。
 
 ### 再検証
 
@@ -202,7 +202,7 @@ export const addToCart = action(async (form: FormData) => {
 });
 ```
 
-`currentSessionId()` はセッション層が提供するもののプレースホルダーです。[セッションと認証](/building-apps/sessions-and-auth)では署名付き Cookie ベースの実装を示しています。
+`currentSessionId()` はセッション層が提供するもののプレースホルダーです。[セッションと認証](/docs/building-apps/sessions-and-auth.md)では署名付き Cookie ベースの実装を示しています。
 
 続いてフォームです：
 
@@ -224,11 +224,11 @@ JavaScript がある場合は、ルーターが送信をインターセプトし
 フォームが契約であることから、2つのルールが導かれます：
 
 - アクションは `POST` フォームのみを受け付けます。`GET` フォームは `Only POST forms are supported for Actions` をスローします。
-  `GET` フォームが記述するのはミューテーションではなく URL です。検索やフィルターには[型付き検索パラメータ](/routing/solid-router/navigation#type-search-parameters)を持つルートを使ってください。
+  `GET` フォームが記述するのはミューテーションではなく URL です。検索やフィルターには[型付き検索パラメータ](/docs/routing/solid-router/navigation.md#type-search-parameters)を持つルートを使ってください。
 - アクションが必要とするものはすべて、フォームの中にあるか、アクションにバインドされている必要があります。
   hidden input が素直な方法で、`.with()` が型付きの方法です。
 
-[フォームのガイド](/guides/forms)では、この形で、バリデーションメッセージや JavaScript なしの場合の結果を含む完全なフォームを構築します。
+[フォームのガイド](/docs/guides/forms.md)では、この形で、バリデーションメッセージや JavaScript なしの場合の結果を含む完全なフォームを構築します。
 
 ### `.with()` で引数をバインドする
 
@@ -317,7 +317,7 @@ function AddToCartForm(props: { productId: string }) {
 リダイレクトしたり何も返さなかった送信はリストに残りません。それらも観測したい場合は `.onSettled` を使います。
 
 このメッセージがブラウザに届くのは、`addToCart` が `markSafeError` を通してスローしたからです。
-素の `throw new Error(...)` は本番環境では `Internal Server Error` として届くので、データベースやインフラの詳細は漏れません。`markSafeError` と、バリデーションの問題を `respond()` でスローする代替手段については[ミューテーションとレスポンス](/building-apps/server-functions/mutations-and-responses)を参照してください。
+素の `throw new Error(...)` は本番環境では `Internal Server Error` として届くので、データベースやインフラの詳細は漏れません。`markSafeError` と、バリデーションの問題を `respond()` でスローする代替手段については[ミューテーションとレスポンス](/docs/building-apps/server-functions/mutations-and-responses.md)を参照してください。
 
 ### サーバーが確認する前
 
@@ -367,7 +367,7 @@ function CartPanel() {
 ハイドレーション後は、ルーターが送信をインターセプトし、アクションのトランザクションの最初のステップとして `.onSubmit` フックを実行し、呼び出しを送り、再検証されたデータを予測の上に突き合わせます。
 楽観的レイヤーは、すでに動作するフォームの上にハイドレーション済みページが追加するものです。サーバー関数と HTML はどちらの場合も同じです。
 
-[ミューテーション](/concepts/mutations)では楽観的モデルを深く説明しています。ここでは同じモデルを、ルーターがアクションを提供する形で使っています。
+[ミューテーション](/docs/concepts/mutations.md)では楽観的モデルを深く説明しています。ここでは同じモデルを、ルーターがアクションを提供する形で使っています。
 
 ## コードからアクションを呼び出す
 
@@ -406,7 +406,7 @@ return redirect(paths.cart, { revalidate: getCart.key }); // navigate, then reva
 ルーターはレスポンスのリダイレクトと再検証メタデータを1つの更新内で適用します。
 共有レイアウトのカート数のようにナビゲーションを越えて生き残る読み手は、その更新内で再フェッチし、値が揃うまでコミットを保留するので、新しいページが古いカートで描画されることはありません。
 ルーターのシングルフライトコレクターが組み込まれた `fullstack` プロジェクトでは、サーバーはさらに一歩進んで、新しいクエリ結果をミューテーションのレスポンスに含めます。そのためクライアントは二度目の往復をせず、ペイロードからキャッシュを初期化できます。
-セットアップは[サーバーレンダリングとハイドレーション](/routing/solid-router/server-rendering#one-round-trip-for-a-mutation)を参照してください。
+セットアップは[サーバーレンダリングとハイドレーション](/docs/routing/solid-router/server-rendering.md#one-round-trip-for-a-mutation)を参照してください。
 :::
 
 ## よくある問題
@@ -444,7 +444,7 @@ return redirect(paths.cart, { revalidate: getCart.key }); // navigate, then reva
 
 ## 次のステップ
 
-- [フォーム](/guides/forms)：ルーターアクションを使った完全なフォーム。JavaScript なしの場合からインラインバリデーションまで。
-- [サーバーレンダリングとハイドレーション](/routing/solid-router/server-rendering)：クエリ結果のハイドレーションとシングルフライトのミューテーション。
-- [データフェッチのパターン](/guides/data-fetching-patterns)：検索、ページネーション、共有、ポーリング、失敗の扱い。ルーターあり・なし両方。
-- [保護されたルート](/guides/protected-routes#redirect-before-render)：ページが描画される前に未ログインの訪問者をリダイレクトする `preload` と `query`。
+- [フォーム](/docs/guides/forms.md)：ルーターアクションを使った完全なフォーム。JavaScript なしの場合からインラインバリデーションまで。
+- [サーバーレンダリングとハイドレーション](/docs/routing/solid-router/server-rendering.md)：クエリ結果のハイドレーションとシングルフライトのミューテーション。
+- [データフェッチのパターン](/docs/guides/data-fetching-patterns.md)：検索、ページネーション、共有、ポーリング、失敗の扱い。ルーターあり・なし両方。
+- [保護されたルート](/docs/guides/protected-routes.md#redirect-before-render)：ページが描画される前に未ログインの訪問者をリダイレクトする `preload` と `query`。

@@ -11,7 +11,7 @@ description: "繰り返し登場するリアクティブなセットアップを
 
 カスタムプリミティブとは、そうした行をひとまとめにする関数です。シグナル・メモ・エフェクトを作成し、コンポーネントが読み取る必要のあるものを返します。
 そのような関数をどこで呼んでもよいかについて、Solid にはすべてのプリミティブがすでに従っているルール以外の決まりはありません。このガイドはそのルールについてのものです。
-追跡・エフェクト・オーナーシップについては [リアクティビティ](/concepts/reactivity) ページで説明しています。このページはそれらを前提とします。
+追跡・エフェクト・オーナーシップについては [リアクティビティ](/docs/concepts/reactivity.md) ページで説明しています。このページはそれらを前提とします。
 
 ## プリミティブはオーナーの内側で実行される関数
 
@@ -67,7 +67,7 @@ function SearchBox() {
 このプリミティブが機能するのは、呼び出される場所のおかげです。
 `SearchBox` は一度だけ実行され、その実行中、Solid はそのコンポーネントを現在のオーナーとして記録します。
 `onCleanup` はその時点のオーナーに取り付けられるため、このクリーンアップは `SearchBox` に属し、それが破棄されるときに実行されます。
-オーナーツリーについては [オーナーシップ](/concepts/reactivity#ownership) で説明しています。プリミティブのルールは、`createX` 関数はコンポーネント本体、あるいはそこから呼ばれる別のプリミティブの中で呼び出され、それより後で呼ばれることはない、というものです。
+オーナーツリーについては [オーナーシップ](/docs/concepts/reactivity.md#ownership) で説明しています。プリミティブのルールは、`createX` 関数はコンポーネント本体、あるいはそこから呼ばれる別のプリミティブの中で呼び出され、それより後で呼ばれることはない、というものです。
 本体の内側では単なる関数呼び出しです。`if` の中でもループの中でも、早期リターンの後でも構いません。最初の実行と呼び出し順が一致しなければならない 2 回目の実行は存在しないからです。
 
 :::pitfall[イベントハンドラーからプリミティブを呼び出す]
@@ -128,12 +128,12 @@ function Orders() {
 ウィンドウを 60rem をまたいでリサイズすると、ページはテーブルとカードを切り替えます。
 ページを離れると `change` リスナーは削除されます。
 
-[`onSettled`](/reference/solid-js/lifecycle-actions/on-settled) は、コンポーネントの最初のレンダーが確定した後にコールバックを一度だけ実行し、コールバックが返すクリーンアップはオーナーが破棄されるときに実行されます。
+[`onSettled`](/docs/reference/solid-js/lifecycle-actions/on-settled.md) は、コンポーネントの最初のレンダーが確定した後にコールバックを一度だけ実行し、コールバックが返すクリーンアップはオーナーが破棄されるときに実行されます。
 ブラウザに触れるセットアップの置き場所はここです。コールバックはサーバーレンダリング中に実行されないからです。
 `matches` は両側で `false` で始まるため、サーバーはカードをレンダーし、ブラウザはクエリが一致すればハイドレーション後にテーブルへ切り替わります。
-その最初のフレームが重要な場合の対処は [SSR セーフなコード](/guides/ssr-safe-code) ガイドで扱っています。
+その最初のフレームが重要な場合の対処は [SSR セーフなコード](/docs/guides/ssr-safe-code.md) ガイドで扱っています。
 
-レンダー後にセットアップするものがなく、解放するだけでよい場合は、デバウンスがタイマーに対して行ったように [`onCleanup`](/reference/solid-js/advanced/specialized-reactivity/on-cleanup) を使います。
+レンダー後にセットアップするものがなく、解放するだけでよい場合は、デバウンスがタイマーに対して行ったように [`onCleanup`](/docs/reference/solid-js/advanced/specialized-reactivity/on-cleanup.md) を使います。
 これは現在のオーナーにコールバックを登録するだけで、それ以外のことはしません。
 
 :::caution[クリーンアップは onSettled から返す。内側で登録しない]
@@ -190,10 +190,10 @@ export function createMediaQuery(query: MaybeAccessor<string>) {
 
 親で `breakpoint` を変更すると、古いリスナーは削除され、新しいクエリ用の `MediaQueryList` が作成され、`wide` はそれに答えます。
 
-入力が変わり得るようになったため、セットアップは `onSettled` から [`createEffect`](/reference/solid-js/reactivity/create-effect) に移りました。
+入力が変わり得るようになったため、セットアップは `onSettled` から [`createEffect`](/docs/reference/solid-js/reactivity/create-effect.md) に移りました。
 計算関数が入力を読み取り、エフェクト関数がブラウザでの処理を行ってそのクリーンアップを返します。Solid は次のエフェクト実行の前と破棄時にそのクリーンアップを実行します。
 `onSettled` と同様、エフェクト関数はサーバーレンダリング中に実行されません。
-[`Accessor<T>`](/reference/solid-js/types/reactive-types) はシグナルのゲッターや任意の `() => T` の型なので、呼び出し側はシグナル、メモ、または props を参照するアロー関数を渡せます。
+[`Accessor<T>`](/docs/reference/solid-js/types/reactive-types.md) はシグナルのゲッターや任意の `() => T` の型なので、呼び出し側はシグナル、メモ、または props を参照するアロー関数を渡せます。
 
 単純な `T` を受け取るのは、`createDebouncedSignal` の `initial` のように、プリミティブが設計上一度だけ読み取る値に限ってください。
 そのようなパラメータには、一度きりの読み取りであることが分かる名前を付けてください。
@@ -215,7 +215,7 @@ return matches;
 `Prefer` 側は関数を返し、JSX 内の `wide()` がその JSX をシグナルに購読させます。
 
 プリミティブが追加の振る舞いを持つシグナルである場合は `[value, setValue] as const` というタプルを返し、呼び出し側が `createSignal` と同じように分割代入できるようにします。
-値やアクションが複数ある場合は、[コンポーネント間で状態を共有する](/concepts/reactivity#share-state-between-components) で `createCart` が行っているように、アクセサーと関数のオブジェクトを返します。
+値やアクションが複数ある場合は、[コンポーネント間で状態を共有する](/docs/concepts/reactivity.md#share-state-between-components) で `createCart` が行っているように、アクセサーと関数のオブジェクトを返します。
 ストアのプロキシはすでにライブビューなので、プリミティブはストアをそのまま返すことができます。
 
 ## プリミティブ内の非同期
@@ -250,8 +250,8 @@ function ProductTitle(props: { id: string }) {
 
 このプリミティブに非同期特有の部分はありません。
 メモはコンポーネントのオーナーの下で作成され、呼び出し側の JSX がそれを読み取るため、その読み取りの上にある最も近い `Loading` バウンダリが応答します。
-最初の読み込み・保留される更新・`isPending` については [非同期リアクティビティ](/concepts/async-reactivity) で説明しています。
-再取得をまたいで項目の同一性を保つべきリストには、代わりに `createStore` の関数形式を返してください。[ストアへのフェッチ](/concepts/stores#fetch-into-a-store) でその方法を示しています。
+最初の読み込み・保留される更新・`isPending` については [非同期リアクティビティ](/docs/concepts/async-reactivity.md) で説明しています。
+再取得をまたいで項目の同一性を保つべきリストには、代わりに `createStore` の関数形式を返してください。[ストアへのフェッチ](/docs/concepts/stores.md#fetch-into-a-store) でその方法を示しています。
 
 ## Solid の外部と同期する
 
@@ -288,13 +288,13 @@ export function createCartDraft() {
 マグを追加してリフレッシュしても、マグはまだカートに残っています。
 
 `onSettled` はハイドレーション後にストレージを一度だけ読み取り、保存されていた項目をセッターのドラフト経由でストアに書き込みます。
-[`deep`](/reference/solid-js/advanced/store-advanced/deep) は計算関数をストアのすべての階層に購読させ、そのプレーンなビューを返すため、どの項目を変更してもエフェクトが再実行されます。
+[`deep`](/docs/reference/solid-js/advanced/store-advanced/deep.md) は計算関数をストアのすべての階層に購読させ、そのプレーンなビューを返すため、どの項目を変更してもエフェクトが再実行されます。
 `defer: true` はエフェクトの最初の実行をスキップするため、空のシード値がストレージに書き込まれることはなく、変更だけが書き込まれます。
 
 `onSettled` コールバックもエフェクト関数も、サーバーレンダリング中には実行されません。
 サーバーは空のカートをレンダーし、ブラウザはハイドレーション後に下書きを埋めます。
-本体自身が行わなければならないチェックには、`@solidjs/web` の [`isServer`](/reference/solid-web/rendering-ssr/is-server) を使います。これはビルド時定数で、サーバービルドでは `true`、ブラウザビルドでは `false` です。
-両側で最初のフレームが異なる場合については [SSR セーフなコード](/guides/ssr-safe-code) ガイドで扱っています。
+本体自身が行わなければならないチェックには、`@solidjs/web` の [`isServer`](/docs/reference/solid-web/rendering-ssr/is-server.md) を使います。これはビルド時定数で、サーバービルドでは `true`、ブラウザビルドでは `false` です。
+両側で最初のフレームが異なる場合については [SSR セーフなコード](/docs/guides/ssr-safe-code.md) ガイドで扱っています。
 
 ## コンポーネントの外で実行する
 
@@ -330,11 +330,11 @@ export function createPageViews(path: Accessor<string>) {
 
 アカウント領域内を移動すると、モジュールの読み込み後に各パスが報告されます。読み込み前にアカウント領域を離れた場合は何も作成されません。
 
-[`getOwner`](/reference/solid-js/advanced/owner-introspection/get-owner) は本体の実行中にコンポーネントのオーナーを捕捉します。
-[`runWithOwner`](/reference/solid-js/advanced/owner-introspection/run-with-owner) は後からそのオーナーに再入するため、コールバック内で作成されたエフェクトはコンポーネントとともに破棄されます。
-[`isDisposed`](/reference/solid-js/advanced/owner-introspection/is-disposed) は、すでにページを離れたコンポーネントに対してコールバックをガードします。
+[`getOwner`](/docs/reference/solid-js/advanced/owner-introspection/get-owner.md) は本体の実行中にコンポーネントのオーナーを捕捉します。
+[`runWithOwner`](/docs/reference/solid-js/advanced/owner-introspection/run-with-owner.md) は後からそのオーナーに再入するため、コールバック内で作成されたエフェクトはコンポーネントとともに破棄されます。
+[`isDisposed`](/docs/reference/solid-js/advanced/owner-introspection/is-disposed.md) は、すでにページを離れたコンポーネントに対してコールバックをガードします。
 
-コンポーネントがまったく存在しない場合、[`createRoot`](/reference/solid-js/advanced/owner-introspection/create-root) がオーナーを作成し、その破棄関数を返します。
+コンポーネントがまったく存在しない場合、[`createRoot`](/docs/reference/solid-js/advanced/owner-introspection/create-root.md) がオーナーを作成し、その破棄関数を返します。
 
 ```ts
 import { createRoot } from "solid-js";
@@ -349,7 +349,7 @@ dispose();
 ```
 
 これはプリミティブ自体のテストや、`render` 呼び出しのないコードに Solid のリアクティビティを組み込むインテグレーションで使います。
-アプリケーションコードで必要になることはないはずです。複数のコンポーネントが共有する状態はモジュールスコープのルートではなく [コンテキスト](/concepts/components-and-jsx#context) に置きます。
+アプリケーションコードで必要になることはないはずです。複数のコンポーネントが共有する状態はモジュールスコープのルートではなく [コンテキスト](/docs/concepts/components-and-jsx.md#context) に置きます。
 
 ## よくある問題
 
@@ -374,7 +374,7 @@ dispose();
 
 `window`・`matchMedia`・`localStorage` に触れるセットアップがプリミティブの本体にあります。
 サーバーで実行されない `onSettled` コールバックかエフェクト関数に移すか、`isServer` でガードしてください。
-完全なチェックリストは [SSR セーフなコード](/guides/ssr-safe-code) ガイドにあります。
+完全なチェックリストは [SSR セーフなコード](/docs/guides/ssr-safe-code.md) ガイドにあります。
 
 ## まとめ
 
@@ -388,7 +388,7 @@ dispose();
 
 ## 次のステップ
 
-- [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects): プリミティブが返す値のどれをメモにすべきか、そしてそのエフェクトが存在すべきでないものなのはどんなときか。
-- [Solid 以外のコードを統合する](/guides/integrate-non-solid-code): 同じオーナーとクリーンアップのルールを、チャートライブラリ・地図・Web コンポーネントに適用する。
-- [SSR セーフなコード](/guides/ssr-safe-code): サーバーとブラウザで最初のフレームが異なるプリミティブのためのチェックリスト。
-- [TypeScript](/guides/typescript): `Accessor`・`Setter`・`MaybeAccessor` のパラメータと戻り値の型付け。
+- [不要なエフェクトを避ける](/docs/guides/avoid-unnecessary-effects.md): プリミティブが返す値のどれをメモにすべきか、そしてそのエフェクトが存在すべきでないものなのはどんなときか。
+- [Solid 以外のコードを統合する](/docs/guides/integrate-non-solid-code.md): 同じオーナーとクリーンアップのルールを、チャートライブラリ・地図・Web コンポーネントに適用する。
+- [SSR セーフなコード](/docs/guides/ssr-safe-code.md): サーバーとブラウザで最初のフレームが異なるプリミティブのためのチェックリスト。
+- [TypeScript](/docs/guides/typescript.md): `Accessor`・`Setter`・`MaybeAccessor` のパラメータと戻り値の型付け。

@@ -14,7 +14,7 @@ description: "fullstack-tanstack プロジェクトシェイプと同様に、So
 ルーター自体の API、ルートファイル、`<Link>`、ローダー、検索パラメータなどについては [TanStack Router のドキュメント](https://tanstack.com/router/latest/docs/framework/solid/overview)を参照してください。Solid の下でもそこに書かれている内容は変わりません。
 
 :::note[まだルーターを選んでいない場合]
-[ルーターを選ぶ](/routing/overview#pick-a-router) でこのシェイプと Solid Router を比較しています。
+[ルーターを選ぶ](/docs/routing/overview.md#pick-a-router) でこのシェイプと Solid Router を比較しています。
 要約すると、TanStack Query や TanStack の規約を共有したいならこちらを選びます。そうでなければ、他のテンプレートと共通のファイルシステム規約と、JavaScript なしで動作するフォームを備えた Solid Router が適しています。
 :::
 
@@ -83,7 +83,7 @@ function UserPage() {
 
 読み取りは Solid の非同期モデルを通ります。
 `user.data.name` は `isLoading` ガードなしで直接読み取られ、再フェッチ中は `isPending(() => user.data)` がセクションを薄くします。
-これらは Solid の他の部分と同じプリミティブです。[非同期リアクティビティ](/concepts/async-reactivity) で説明しています。
+これらは Solid の他の部分と同じプリミティブです。[非同期リアクティビティ](/docs/concepts/async-reactivity.md) で説明しています。
 
 `invalidateQueries` はありません。
 `rename.mutate` が確定した時点で、キャッシュにはすでに名前変更後のユーザーと親の一覧が入っています。
@@ -164,7 +164,7 @@ export async function renameUser(input: { id: string; name: string }) {
 テンプレートはこの宣言を使ってシングルフライトの収集範囲を絞り込みます。何も返さないミューテーションは範囲指定なしの動作になり、ページのローダーを再実行してその結果をすべて送信します。
 
 ここでのフォームはスクリプト駆動（`onSubmit` が `mutate` を呼ぶ）で、TanStack で一般的な形です。
-JavaScript なしで動作する必要があるフォームには、`fullstack` シェイプの Solid Router アクションがサポートされた手段です。[プログレッシブエンハンスメント](/building-apps/server-functions/progressive-enhancement) では、ルーターに関係なくサーバー関数ランタイムがスクリプトなしの `POST` に対して何を行うかを説明しています。
+JavaScript なしで動作する必要があるフォームには、`fullstack` シェイプの Solid Router アクションがサポートされた手段です。[プログレッシブエンハンスメント](/docs/building-apps/server-functions/progressive-enhancement.md) では、ルーターに関係なくサーバー関数ランタイムがスクリプトなしの `POST` に対して何を行うかを説明しています。
 
 ## リクエストごとにサーバーが行うこと
 
@@ -283,7 +283,7 @@ registerFlightDataSource(FLIGHT_DATA_SOURCE, (event, outcome) => {
 - TanStack 自身の SSR プロトコル（`RouterServer`、`RouterClient`、`$_TSR` ストリームハンドラー）は HTML ストリームを自分で所有することを前提としており、start モードではプラグインがそれを所有します。
   このテンプレートはそのプロトコルを使いません。上で説明したハイドレーションレジストリ経由の転送が、この構成におけるネイティブな経路です。
 - `src/router.tsx` の `disableGlobalCatchBoundary: true` は回避策ではなく設計上の選択です。
-  SSR 中の `redirect()` を含むエラーは、ルーターの `ErrorComponent` で止まらず、ルーターを通り越してアプリ自身の [バウンダリ](/concepts/boundaries) とストリームハンドラーまでバブルアップします。
+  SSR 中の `redirect()` を含むエラーは、ルーターの `ErrorComponent` で止まらず、ルーターを通り越してアプリ自身の [バウンダリ](/docs/concepts/boundaries.md) とストリームハンドラーまでバブルアップします。
   ルートレベルの `errorComponent` と `pendingComponent` は引き続き機能します。
 
 ## まとめ
@@ -298,7 +298,7 @@ registerFlightDataSource(FLIGHT_DATA_SOURCE, (event, outcome) => {
 
 ## 次のステップ
 
-- [サーバー関数](/building-apps/server-functions): `queryOptions` と `useMutation` に包まれた読み取りとミューテーション、`GET` が重要な理由を含みます。
-- [ルーターを統合する](/routing/integrate-a-router): このテンプレートの基盤である `start.setup` とフライトデータのフック。別のルーターにこのパターンを適用する際に参照してください。
-- [レンダリングモードを選ぶ](/guides/choose-a-rendering-mode): `ssr: false` の構成、つまり静的シェルと API サーバーの組み合わせはこのシェイプでも使えます。
-- [ミドルウェアと API ルート](/building-apps/middleware-and-api-routes): `src/api` のハンドラーと、このシェイプで `src/routes` の外に置く理由。
+- [サーバー関数](/docs/building-apps/server-functions/index.md): `queryOptions` と `useMutation` に包まれた読み取りとミューテーション、`GET` が重要な理由を含みます。
+- [ルーターを統合する](/docs/routing/integrate-a-router.md): このテンプレートの基盤である `start.setup` とフライトデータのフック。別のルーターにこのパターンを適用する際に参照してください。
+- [レンダリングモードを選ぶ](/docs/guides/choose-a-rendering-mode.md): `ssr: false` の構成、つまり静的シェルと API サーバーの組み合わせはこのシェイプでも使えます。
+- [ミドルウェアと API ルート](/docs/building-apps/middleware-and-api-routes.md): `src/api` のハンドラーと、このシェイプで `src/routes` の外に置く理由。

@@ -66,7 +66,7 @@ const productRoute = defineRoute({
 親から継承したパラメーターは `string | undefined` として引き続きアクセスできます。
 
 `preload` が返すものは何でも、コンポーネントの `props.data` の型になります。
-ルートがマッチした時点で一度だけキャプチャされるため、非同期データでは [データロードとミューテーション](/routing/solid-router/data) ページのパターンに従います。つまり `preload` で `void` を付けてクエリを開始し、コンポーネント内でメモを通して読み取ることで、`params` に対してリアクティブなままにします。
+ルートがマッチした時点で一度だけキャプチャされるため、非同期データでは [データロードとミューテーション](/docs/routing/solid-router/data.md) ページのパターンに従います。つまり `preload` で `void` を付けてクエリを開始し、コンポーネント内でメモを通して読み取ることで、`params` に対してリアクティブなままにします。
 
 別モジュールで宣言されたコンポーネントには、パスウィットネスでアノテーションを付けます。
 
@@ -248,14 +248,14 @@ export default function Product(props: RouteProps<typeof route>) {
 ```
 
 ルートファイル内ではパターンはファイル名に存在するため、型付けの対象となる `paths` ノードがありません。
-[`defineFileRoute`](/reference/solid-router/filesystem) に渡す文字列がその代わりを務め、`preload` の params に型を付け、`matchFilters` を検証し、その設定をコンポーネントの `RouteProps` ウィットネスとして兼用させます。
+[`defineFileRoute`](/docs/reference/solid-router/filesystem.md) に渡す文字列がその代わりを務め、`preload` の params に型を付け、`matchFilters` を検証し、その設定をコンポーネントの `RouteProps` ウィットネスとして兼用させます。
 実行時の真実の源（source of truth）はマニフェストのパスのままなので、ファイルを移動したらその文字列も一緒に更新してください。
 
 :::deep-dive[アダプターがマニフェストをどう処理するか]
 マニフェストが生成したリテラル型を持つ場合、ルートパス・フィルター・検索スキーマは `Router.paths` に引き継がれるため、`paths.products("mug")` には手書きの配列の場合と同じように型が付きます。
 コード分割されたマニフェストのコンポーネントは Solid の `lazy` コンポーネントになります。
 `codeSplitting: false` でビルドされたマニフェストから即時配信されるコンポーネントは、`lazy` ラッパーなしでそのまま渡されます。
-`route` エクスポートはマニフェストが指すモジュールから読み取られます。手書きのルートツリーはこれを読みません。そのため、[イントロダクション](/routing/solid-router#load-data-for-a-page) ページでは preload が `src/router.ts` のルートオブジェクトに置かれています。
+`route` エクスポートはマニフェストが指すモジュールから読み取られます。手書きのルートツリーはこれを読みません。そのため、[イントロダクション](/docs/routing/solid-router/index.md#load-data-for-a-page) ページでは preload が `src/router.ts` のルートオブジェクトに置かれています。
 :::
 
 ## まとめ
@@ -270,6 +270,6 @@ export default function Product(props: RouteProps<typeof route>) {
 
 ## 次のステップ
 
-- [ネストルートとレイアウト](/routing/solid-router/nested-routes): `children` を持つルートが、マッチしたページの周りにレイアウトをレンダリングする方法と、マウントされたままになるもの。
-- [ナビゲーションと型付きパス](/routing/solid-router/navigation): これらの定義が生み出す型付き `paths` と、スキーマ付きの検索パラメーター。
-- [データロードとミューテーション](/routing/solid-router/data): `preload` に何を置くか、そしてコンポーネントがそれをどう読み取るか。
+- [ネストルートとレイアウト](/docs/routing/solid-router/nested-routes.md): `children` を持つルートが、マッチしたページの周りにレイアウトをレンダリングする方法と、マウントされたままになるもの。
+- [ナビゲーションと型付きパス](/docs/routing/solid-router/navigation.md): これらの定義が生み出す型付き `paths` と、スキーマ付きの検索パラメーター。
+- [データロードとミューテーション](/docs/routing/solid-router/data.md): `preload` に何を置くか、そしてコンポーネントがそれをどう読み取るか。

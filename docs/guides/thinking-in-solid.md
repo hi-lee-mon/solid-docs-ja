@@ -8,7 +8,7 @@ description: "ストアフロントの商品検索をエンドツーエンドで
 React や Vue でこれを作ったことがあれば、すでに頭の中に設計があります。クエリ用の状態、メモ化したフィルター、フェッチを行うエフェクト、ローディングフラグ、そしてリクエスト成功後の状態更新です。
 
 このガイドでは同じページを Solid で構築し、各ステップでその設計のどの部分が持ち越せないかを説明します。
-[クイックスタート](/getting-started/quick-start)では、ここでのすべてが従う唯一のルールを示しました。コンポーネントは 1 回だけ実行され、更新されるのは JSX・メモ・エフェクトの計算関数の内部で行われた読み取りです。
+[クイックスタート](/docs/getting-started/quick-start.md)では、ここでのすべてが従う唯一のルールを示しました。コンポーネントは 1 回だけ実行され、更新されるのは JSX・メモ・エフェクトの計算関数の内部で行われた読み取りです。
 
 ## マークアップから始める
 
@@ -56,7 +56,7 @@ export default function Search() {
 React ではコンポーネント関数がそのままレンダーであり、状態が変わるたびに先頭から再実行されます。
 Vue では `setup` 関数は 1 回だけ実行されますが、読み取ったリアクティブな状態が変わるとテンプレートが再レンダーされます。
 Solid では 2 回目の実行を想定する必要はありません。関数はページをセットアップして JSX を返し、それ以降はその JSX 内の各式が自分自身を最新の状態に保ちます。
-これを実現するためにコンパイラが JSX をどう処理するかは [コンポーネントと JSX](/concepts/components-and-jsx#how-jsx-executes) で説明しています。
+これを実現するためにコンパイラが JSX をどう処理するかは [コンポーネントと JSX](/docs/concepts/components-and-jsx.md#how-jsx-executes) で説明しています。
 
 ## 変化する状態を追加する
 
@@ -119,12 +119,12 @@ export default function Search() {
 `createSignal` は 1 つの単位として読み取られ・置き換えられる値を保持し、そのゲッターは呼び出して使います（`query()`）。
 `createStore` は部分ごとに読み取られるオブジェクトや配列を保持し、そのプロパティは値として読み取ります（`filter.category`）。
 React のプリミティブは `useState` の 1 つだけで、オブジェクトか文字列かの問題は各更新でどれだけコピーするかという話になります。Vue には `ref` と `reactive` があり、それぞれシグナルとストアにほぼ対応します。
-ドラフトセッターとプロパティ単位の追跡については [ストア](/concepts/stores) で詳しく説明しています。
+ドラフトセッターとプロパティ単位の追跡については [ストア](/docs/concepts/stores.md) で詳しく説明しています。
 
 :::note[読み取りがどこで起きるかがモデルのすべてです]
 JSX 内の `query()` は、そのテキストノードだけをシグナルに購読させます。
 同じ呼び出しをコンポーネント本体で行うとセットアップ時に 1 回だけ実行され、文は二度と変わりません。そのような場合、開発ビルドは `[STRICT_READ_UNTRACKED]` を出力します。
-追跡スコープについては [リアクティビティ](/concepts/reactivity#signals) で説明しています。これは React や Vue の開発者が新たに身につける必要のある唯一の概念です。
+追跡スコープについては [リアクティビティ](/docs/concepts/reactivity.md#signals) で説明しています。これは React や Vue の開発者が新たに身につける必要のある唯一の概念です。
 :::
 
 ## それ以外はすべて派生させる
@@ -161,7 +161,7 @@ const count = () => filtered().length;
 
 `Avoid` 版を実行して 1 文字入力してみます。
 コントロール下の文はキー入力が引き起こしたフラッシュで更新されます。エフェクトはそのフラッシュの後に実行されて `filtered` に書き込むため、リストは次のフラッシュで更新されます。その結果、1 フレームの間、ページには新しいクエリと古いリストが並んで表示されます。
-attribution を有効にすると、開発ビルドはこのパターンを `[EFFECT_RELAY_TEAR]` と名付けます。そのレポートと、同じ問題が取る他の形については [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects#calculate-values-when-they-are-read) を参照してください。
+attribution を有効にすると、開発ビルドはこのパターンを `[EFFECT_RELAY_TEAR]` と名付けます。そのレポートと、同じ問題が取る他の形については [不要なエフェクトを避ける](/docs/guides/avoid-unnecessary-effects.md#calculate-values-when-they-are-read) を参照してください。
 
 `Prefer` 版には 2 つ目のコピーはありません。
 `createMemo` は関数を追跡スコープ内で実行するため、`matches` 内で行われる `query()`・`filter.category`・`filter.inStockOnly` の読み取りがそのまま依存関係リストになります。書くべき配列はなく、同期を保つべきものもありません。
@@ -169,10 +169,10 @@ React の `useMemo` では `[query, filter]` を明示する必要があり、�
 
 `count` はメモではなく素の関数です。
 読み取り側が 1 つだけなので、読み取り場所で再計算してもコストはかかりません。メモにはノードと等値チェックのコストがかかり、複数の読み取り側が結果を共有するときにそのコストが報われます。
-この使い分けについては [派生値](/concepts/reactivity#derived-values) で説明しています。
+この使い分けについては [派生値](/docs/concepts/reactivity.md#derived-values) で説明しています。
 
 このメモは、カタログが保持しているのと同じ商品オブジェクトをフィルタリングして返します。
-`For` はオブジェクトの同一性で行をキー付けするため、結果に残った商品は同じ `<li>` を保ちます。派生したコレクションが実行のたびに新しいオブジェクトから構築される場合は、代わりに [プロジェクション](/concepts/stores#derive-a-store-with-a-projection) を使って `id` で行を照合します。
+`For` はオブジェクトの同一性で行をキー付けするため、結果に残った商品は同じ `<li>` を保ちます。派生したコレクションが実行のたびに新しいオブジェクトから構築される場合は、代わりに [プロジェクション](/docs/concepts/stores.md#derive-a-store-with-a-projection) を使って `id` で行を照合します。
 
 ## サーバーから読み取る
 
@@ -247,7 +247,7 @@ export default function Search() {
 メモが Promise を返す。変更はそれだけです。
 `results()` の読み取り側が見るのは `Promise` でも `undefined` でもなく `Product[]` です。まだ準備できていない値を読み取った式は待機し、その間に何をレンダーするかは最も近い `Loading` バウンダリが決めます。
 古くなった実行への答えは破棄されるため、リクエストカウンターも `AbortController` も必要ありません。
-キーストロークから答えが届くまでの間に何が起きるかは [非同期リアクティビティ](/concepts/async-reactivity) で説明しています。古いリストを保持したまま `value` に新しいテキストを表示する制御付き入力向けの `latest` もそこで扱っています。
+キーストロークから答えが届くまでの間に何が起きるかは [非同期リアクティビティ](/docs/concepts/async-reactivity.md) で説明しています。古いリストを保持したまま `value` に新しいテキストを表示する制御付き入力向けの `latest` もそこで扱っています。
 
 React ではこの節は、フェッチ・結果の状態・ローディング状態・古いレスポンスを無視するフラグを持つ `useEffect` か、それら 4 つを隠すデータフェッチングライブラリになります。
 Vue では同じ組の ref を伴う、クエリへの `watch` になります。
@@ -255,11 +255,11 @@ Solid ではリクエスト自体が派生値であり、ローディング状�
 
 :::tip[クエリが空ならリクエストもなし]
 `if (!text) return []` は確定済みの値を同期的に返すため、ボックスが空ならフォールバックが表示されることも、サーバーへの問い合わせもありません。
-ガードは、すべてのリアクティブな入力を読み取った後・呼び出しの前に置きます。関数自体が `async` のときに順序が重要になる理由は [最初の await の前にすべての入力を読み取る](/concepts/async-reactivity#read-every-input-before-the-first-await) で説明しています。
+ガードは、すべてのリアクティブな入力を読み取った後・呼び出しの前に置きます。関数自体が `async` のときに順序が重要になる理由は [最初の await の前にすべての入力を読み取る](/docs/concepts/async-reactivity.md#read-every-input-before-the-first-await) で説明しています。
 :::
 
 サーバーレンダリング中は、同じ `searchProducts(text, current)` 呼び出しが HTTP リクエストなしで現在のプロセス内で実行されます。ブラウザではサーバー関数エンドポイントへの `POST` になります。
-転送の仕組みと呼び出し側が送れるものについては [サーバー関数](/building-apps/server-functions) で説明しています。
+転送の仕組みと呼び出し側が送れるものについては [サーバー関数](/docs/building-apps/server-functions/index.md) で説明しています。
 
 ## 書き戻す
 
@@ -325,9 +325,9 @@ export default function Search() {
 `addToCart` が解決すると `refresh(cartCount)` がサーバーへ再問い合わせし、バッジはサーバーが持つ値を表示します。両者が一致していれば、見た目は何も変わりません。
 リクエストが拒否された場合、バッジは 2 に戻ります。そのためのコードを書く必要はありません。
 
-`yield` の前の書き込みが暫定的なのは、[`createOptimistic`](/reference/solid-js/reactivity/create-optimistic) の値に対する [`action`](/reference/solid-js/lifecycle-actions/action) 内で行われるからです。即座に表示され、アクションが確定すると Solid がそれを破棄します。
+`yield` の前の書き込みが暫定的なのは、[`createOptimistic`](/docs/reference/solid-js/reactivity/create-optimistic.md) の値に対する [`action`](/docs/reference/solid-js/lifecycle-actions/action.md) 内で行われるからです。即座に表示され、アクションが確定すると Solid がそれを破棄します。
 ジェネレーターの本体が、往復をまたいで書き込みと再取得を 1 つのトランザクションに保つ仕組みです。
-[ミューテーション](/concepts/mutations) では `createOptimisticStore` を使ってカート全体にこの仕組みを組み立て、アクション内の素の `await` がなぜトランザクションから外れてしまうかを説明しています。
+[ミューテーション](/docs/concepts/mutations.md) では `createOptimisticStore` を使ってカート全体にこの仕組みを組み立て、アクション内の素の `await` がなぜトランザクションから外れてしまうかを説明しています。
 
 React ではこれは、状態更新・リクエスト・そして 2 回目の状態更新または `catch` でのロールバック、あるいはトランジション内の `useOptimistic` です。
 Vue では同じ手順を手で書くことになります。
@@ -336,7 +336,7 @@ Solid では、同期的な書き込みがすでに期待される結果を表�
 :::caution[カウントは検索ページではなくカートのものです]
 `cartCount` と `add` は `Search` 内で作成されるため、ユーザーがページを離れると破棄され、次の訪問で再作成されます。
 ヘッダーはすべてのページで同じカウントを表示するため、この値はツリーのより上位で 1 回だけ作成し、コンテキストを通じて共有すべきです。
-[状態管理](/guides/state-management) でその移動を行います。
+[状態管理](/docs/guides/state-management.md) でその移動を行います。
 :::
 
 ## 起きなかったこと
@@ -354,7 +354,7 @@ Solid では、同期的な書き込みがすでに期待される結果を表�
 - 状態が変わっても再実行されたコンポーネントはありませんでした。
   変更された値を読み取る各 JSX 式が、それぞれ個別に更新されました。
 
-追加すべき習慣は [クイックスタート](/getting-started/quick-start#make-a-change) で示した 1 つだけです。リアクティブな値は JSX・メモ・エフェクトの計算関数の中で読み取り、シグナルは読み取るときに呼び出します。
+追加すべき習慣は [クイックスタート](/docs/getting-started/quick-start.md#make-a-change) で示した 1 つだけです。リアクティブな値は JSX・メモ・エフェクトの計算関数の中で読み取り、シグナルは読み取るときに呼び出します。
 
 ## よくある問題
 
@@ -362,7 +362,7 @@ Solid では、同期的な書き込みがすでに期待される結果を表�
 
 行コンポーネントが props を分割代入しています（`function Row({ product })`）。
 分割代入は各 prop をコンポーネント本体で 1 回だけ読み取るため、その行は作成時の値で凍結されます。
-`props` は分割せずに保持し、JSX 内で `props.product.name` を読み取ります。これを可能にするコンパイル済みゲッターについては [Props](/concepts/components-and-jsx#props) を参照してください。
+`props` は分割せずに保持し、JSX 内で `props.product.name` を読み取ります。これを可能にするコンパイル済みゲッターについては [Props](/docs/concepts/components-and-jsx.md#props) を参照してください。
 
 ### `props.query is not a function`
 
@@ -373,12 +373,12 @@ Solid では、同期的な書き込みがすでに期待される結果を表�
 ### 値があるべき場所に `() => ` や `function` と表示される
 
 シグナルが呼び出されないまま JSX に置かれたか、文字列に連結されています。
-`{query}` ではなく `{query()}` と書きます。バリエーションについては [リアクティビティ](/concepts/reactivity#the-page-shows-the-words-function-or---instead-of-the-value) を参照してください。
+`{query}` ではなく `{query()}` と書きます。バリエーションについては [リアクティビティ](/docs/concepts/reactivity.md#the-page-shows-the-words-function-or---instead-of-the-value) を参照してください。
 
 ### リストが上の文より 1 キーストローク遅れる
 
 上の `Avoid` 版のように、エフェクトが派生値をシグナルにコピーしています。
-そのシグナルとエフェクトを削除し、リストをメモにします。診断手順は [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects#the-copied-value-is-one-step-behind-the-source) で説明しています。
+そのシグナルとエフェクトを削除し、リストをメモにします。診断手順は [不要なエフェクトを避ける](/docs/guides/avoid-unnecessary-effects.md#the-copied-value-is-one-step-behind-the-source) で説明しています。
 
 ## まとめ
 
@@ -392,7 +392,7 @@ Solid では、同期的な書き込みがすでに期待される結果を表�
 
 ## 次のステップ
 
-- [状態管理](/guides/state-management): カートのカウント・サインイン中のユーザー・現在のフィルターをどこに置くべきか、そしてモジュールスコープの状態を使わずに共有する方法。
-- [データフェッチングパターン](/guides/data-fetching-patterns): 制御付き入力を使った検索ボックス、ページあたり複数のリクエスト、ページネーション、再取得。
-- [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects): 派生が属する場所にエフェクトが書かれがちなすべての箇所と、エフェクトが適切な 2 つのケース。
-- [React からの移行](/migration/from-react): 既存のコードベース向けのフック単位の対応表。
+- [状態管理](/docs/guides/state-management.md): カートのカウント・サインイン中のユーザー・現在のフィルターをどこに置くべきか、そしてモジュールスコープの状態を使わずに共有する方法。
+- [データフェッチングパターン](/docs/guides/data-fetching-patterns.md): 制御付き入力を使った検索ボックス、ページあたり複数のリクエスト、ページネーション、再取得。
+- [不要なエフェクトを避ける](/docs/guides/avoid-unnecessary-effects.md): 派生が属する場所にエフェクトが書かれがちなすべての箇所と、エフェクトが適切な 2 つのケース。
+- [React からの移行](/docs/migration/from-react.md): 既存のコードベース向けのフック単位の対応表。

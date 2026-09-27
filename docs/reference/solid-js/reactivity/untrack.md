@@ -77,12 +77,12 @@ createEffect(
 
 ## よくある問題
 
-- [何かが更新されない](/guides/debugging-reactivity#something-does-not-update)
-- [何かが更新されすぎる](/guides/debugging-reactivity#something-updates-too-often)
+- [何かが更新されない](/docs/guides/debugging-reactivity.md#something-does-not-update)
+- [何かが更新されすぎる](/docs/guides/debugging-reactivity.md#something-updates-too-often)
 
 ## さらに学ぶ
 
-- [エフェクト](/concepts/reactivity#effects)
-- [リアクティビティ](/concepts/reactivity)
-- [非同期リアクティビティ](/concepts/async-reactivity)
-- [リアクティビティのデバッグ](/guides/debugging-reactivity)
+- [エフェクト](/docs/concepts/reactivity.md#effects)
+- [リアクティビティ](/docs/concepts/reactivity.md)
+- [非同期リアクティビティ](/docs/concepts/async-reactivity.md)
+- [リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md)

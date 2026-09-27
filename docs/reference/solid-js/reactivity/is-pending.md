@@ -65,11 +65,11 @@ const results = createMemo(() => searchProducts(query()));
 
 ## よくある問題
 
-- [クリック後に画面が固まったように見える](/guides/debugging-reactivity#the-screen-looks-dead-after-a-click)
+- [クリック後に画面が固まったように見える](/docs/guides/debugging-reactivity.md#the-screen-looks-dead-after-a-click)
 
 ## さらに学ぶ
 
-- [次の答えが来ます: `isPending`](/concepts/async-reactivity#another-answer-is-coming-ispending)
-- [リアクティビティ](/concepts/reactivity)
-- [非同期リアクティビティ](/concepts/async-reactivity)
-- [リアクティビティのデバッグ](/guides/debugging-reactivity)
+- [次の答えが来ます: `isPending`](/docs/concepts/async-reactivity.md#another-answer-is-coming-ispending)
+- [リアクティビティ](/docs/concepts/reactivity.md)
+- [非同期リアクティビティ](/docs/concepts/async-reactivity.md)
+- [リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md)

@@ -5,7 +5,7 @@ description: "Solid が同梱していないルーターを start モードに�
 ---
 
 このページは、Solid Router や TanStack Router 以外のルーターを start モードに組み込む人、あるいはそうしたルーターの Solid アダプターを書く人向けです。
-サポート対象のルーターのどちらかを使うアプリケーション開発者には不要です。[ルーティング概要](/routing/overview)と各ルーター自身のページが、それらが関わるすべてをカバーしています。
+サポート対象のルーターのどちらかを使うアプリケーション開発者には不要です。[ルーティング概要](/docs/routing/overview.md)と各ルーター自身のページが、それらが関わるすべてをカバーしています。
 
 このページが扱う状況: ルーターはブラウザーでは問題なくレンダーされるのに、最初のサーバーレンダーされるリクエストで、間違った URL にマッチしてしまう、ルートを読み込むためのリクエストスコープのインスタンスがない、あるいは Solid Router なら1回で済む往復をミューテーションが2回行ってしまう、というものです。
 関係するのはプラットフォームの2つの部分、リクエストパイプラインとサーバー関数トランスポートで、それぞれがルーター中立の小さな接地面を公開しています。
@@ -49,7 +49,7 @@ export default async function setup(event: RequestEvent) {
 
 コンポーネントを返すと、生成されるエントリーは `Document` 内で `App` の代わりにそれをレンダーします。何も返さなければ `<App />` がそのままレンダーされます。
 ハイドレーションが一致するよう、ブラウザー側の `App` は対応するルーターツリーを生成しなければなりません。
-[TanStack Router](/routing/tanstack#what-the-server-does-per-request) のページには、ルーターからのリダイレクトや `404` をレスポンスへコピーする方法を含む、完全な `setup.tsx` が示されています。
+[TanStack Router](/docs/routing/tanstack/index.md#what-the-server-does-per-request) のページには、ルーターからのリダイレクトや `404` をレスポンスへコピーする方法を含む、完全な `setup.tsx` が示されています。
 
 :::caution[このフックが実行される場所とされない場所]
 `start.setup` は、生成されたサーバーエントリーが SSR リクエストをレンダーするときだけ実行されます。
@@ -60,7 +60,7 @@ export default async function setup(event: RequestEvent) {
 
 独立した `start.middleware` オプションは、ページレンダー、サーバー関数呼び出し、APIルート、JavaScript なしのフォーム送信の前段に、fetch スタイルのチェーンを組み込みます。
 チェーンと `start.setup` は同じリクエストイベントを受け取るため、ミドルウェアが `event.locals` に格納した値（セッションなど）は、setup フックが構築するルーターインスタンスから見えます。
-チェーン自体は[ミドルウェアと APIルート](/building-apps/middleware-and-api-routes)で説明しています。
+チェーン自体は[ミドルウェアと APIルート](/docs/building-apps/middleware-and-api-routes.md)で説明しています。
 
 ## シングルフライトミューテーションを統合する
 
@@ -114,7 +114,7 @@ Solid Router は `@solidjs/router/server` から `createFlightDataCollector` を
 
 TanStack Router の統合は、代わりに名前付きソースを登録します。
 その `QueryClientProvider` はマウントされている間 `"sq"` として購読し、サーバーフックはターゲット URL 用のルーターを構築してそのローダーを新しい `QueryClient` へ実行し、ペイロードはクライアントが TanStack 自身の `hydrate` でハイドレートする、デハイドレートされた TanStack Query キャッシュです。
-[Solid が所有しないルーターでのシングルフライト](/routing/tanstack#single-flight-on-a-router-solid-does-not-own)でそのコードを順にたどれます。
+[Solid が所有しないルーターでのシングルフライト](/docs/routing/tanstack/index.md#single-flight-on-a-router-solid-does-not-own)でそのコードを順にたどれます。
 :::
 
 ## よくある問題
@@ -152,7 +152,7 @@ TanStack Router の統合は、代わりに名前付きソースを登録しま�
 
 ## 次のステップ
 
-- [TanStack Router](/routing/tanstack): これらのフックの上に構築された完全な統合。setup モジュールとフライトデータソースの全体が載っています。
-- [メタデータとトランスポート](/building-apps/server-functions/metadata-and-transport): シングルフライトのエンベロープを含め、サーバー関数のリクエストとレスポンスがワイヤー上でどう見えるか。
-- [アプリ構造](/building-apps/app-structure): 生成されるエントリーと `Document`、および代わりにエントリーを自作するべき場合。
-- [ミドルウェアと APIルート](/building-apps/middleware-and-api-routes): setup フックの前に実行される `start.middleware` チェーン。
+- [TanStack Router](/docs/routing/tanstack/index.md): これらのフックの上に構築された完全な統合。setup モジュールとフライトデータソースの全体が載っています。
+- [メタデータとトランスポート](/docs/building-apps/server-functions/metadata-and-transport.md): シングルフライトのエンベロープを含め、サーバー関数のリクエストとレスポンスがワイヤー上でどう見えるか。
+- [アプリ構造](/docs/building-apps/app-structure.md): 生成されるエントリーと `Document`、および代わりにエントリーを自作するべき場合。
+- [ミドルウェアと APIルート](/docs/building-apps/middleware-and-api-routes.md): setup フックの前に実行される `start.middleware` チェーン。

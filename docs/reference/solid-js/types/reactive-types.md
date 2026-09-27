@@ -76,7 +76,7 @@ type Signal<T> = [get: SourceAccessor<T>, set: Setter<T>];
 
 ## `SourceAccessor`
 
-`createSignal` と `createMemo` が返すゲッターです。`Refreshable` ブランドを持つ `Accessor<T>` で、これによって [`refresh()`](/reference/solid-js/lifecycle-actions/refresh) がそれを受け取れるようになります。プレーンな `Accessor<T>` のパラメータは `SourceAccessor<T>` を受け取れますが、その逆は成り立ちません。
+`createSignal` と `createMemo` が返すゲッターです。`Refreshable` ブランドを持つ `Accessor<T>` で、これによって [`refresh()`](/docs/reference/solid-js/lifecycle-actions/refresh.md) がそれを受け取れるようになります。プレーンな `Accessor<T>` のパラメータは `SourceAccessor<T>` を受け取れますが、その逆は成り立ちません。
 
 ### 型シグネチャ
 
@@ -86,5 +86,5 @@ type SourceAccessor<T> = Refreshable<Accessor<T>>;
 
 ## さらに学ぶ
 
-- [シグナル・メモ・セッター](/guides/typescript#signals-memos-and-setters)
-- [TypeScript](/guides/typescript)
+- [シグナル・メモ・セッター](/docs/guides/typescript.md#signals-memos-and-setters)
+- [TypeScript](/docs/guides/typescript.md)

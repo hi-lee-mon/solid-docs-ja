@@ -80,13 +80,13 @@ flush(() => {
 
 ## よくある問題
 
-- [テストで古い DOM が見える](/guides/debugging-reactivity#the-test-sees-the-old-dom)
-- [シグナルをセットした直後に読み取ると古い値が返る](/concepts/reactivity#reading-a-signal-right-after-setting-it-gives-the-old-value)
+- [テストで古い DOM が見える](/docs/guides/debugging-reactivity.md#the-test-sees-the-old-dom)
+- [シグナルをセットした直後に読み取ると古い値が返る](/docs/concepts/reactivity.md#reading-a-signal-right-after-setting-it-gives-the-old-value)
 
 ## さらに学ぶ
 
-- [更新が反映されるタイミング](/concepts/reactivity#when-updates-land)
-- [テスト](/guides/testing)
-- [リアクティビティ](/concepts/reactivity)
-- [非同期リアクティビティ](/concepts/async-reactivity)
-- [リアクティビティのデバッグ](/guides/debugging-reactivity)
+- [更新が反映されるタイミング](/docs/concepts/reactivity.md#when-updates-land)
+- [テスト](/docs/guides/testing.md)
+- [リアクティビティ](/docs/concepts/reactivity.md)
+- [非同期リアクティビティ](/docs/concepts/async-reactivity.md)
+- [リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md)

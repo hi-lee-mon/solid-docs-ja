@@ -117,8 +117,8 @@ function Button() {
 
 ## 関連項目
 
-- [コンテキスト](/concepts/components-and-jsx#context)
-- [コンポーネントと JSX](/concepts/components-and-jsx)
+- [コンテキスト](/docs/concepts/components-and-jsx.md#context)
+- [コンポーネントと JSX](/docs/concepts/components-and-jsx.md)
 
 ## 関連する型
 

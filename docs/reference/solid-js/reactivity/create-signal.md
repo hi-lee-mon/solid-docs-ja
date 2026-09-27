@@ -119,16 +119,16 @@ setUser({ ...user(), name: "Alice" }); // temporary local edit
 
 ## よくある問題
 
-- [値ではなく `function` や `() =>` という文字がページに表示される](/concepts/reactivity#the-page-shows-the-words-function-or---instead-of-the-value)
-- [値が一度だけレンダーされて更新されない](/concepts/reactivity#a-value-renders-once-and-never-updates)
-- [シグナルをセットした直後に読み取ると古い値が返る](/concepts/reactivity#reading-a-signal-right-after-setting-it-gives-the-old-value)
+- [値ではなく `function` や `() =>` という文字がページに表示される](/docs/concepts/reactivity.md#the-page-shows-the-words-function-or---instead-of-the-value)
+- [値が一度だけレンダーされて更新されない](/docs/concepts/reactivity.md#a-value-renders-once-and-never-updates)
+- [シグナルをセットした直後に読み取ると古い値が返る](/docs/concepts/reactivity.md#reading-a-signal-right-after-setting-it-gives-the-old-value)
 
 ## さらに学ぶ
 
-- [シグナル](/concepts/reactivity#signals)
-- [リアクティビティ](/concepts/reactivity)
-- [非同期リアクティビティ](/concepts/async-reactivity)
-- [リアクティビティのデバッグ](/guides/debugging-reactivity)
+- [シグナル](/docs/concepts/reactivity.md#signals)
+- [リアクティビティ](/docs/concepts/reactivity.md)
+- [非同期リアクティビティ](/docs/concepts/async-reactivity.md)
+- [リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md)
 
 ## 関連する型
 

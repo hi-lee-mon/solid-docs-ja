@@ -69,8 +69,8 @@ return <CurrentPage />;
 
 ## 関連項目
 
-- [動的コンポーネント](/concepts/components-and-jsx#dynamic-components)
-- [コンポーネントと JSX](/concepts/components-and-jsx)
+- [動的コンポーネント](/docs/concepts/components-and-jsx.md#dynamic-components)
+- [コンポーネントと JSX](/docs/concepts/components-and-jsx.md)
 
 ## 関連する型
 

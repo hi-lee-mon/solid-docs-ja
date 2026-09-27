@@ -70,4 +70,4 @@ const view = repeat(count, i => `Item ${i}`, { fallback: () => "empty" });
 
 ## 関連項目
 
-- [プリミティブ形式](/concepts/boundaries#primitive-forms)
+- [プリミティブ形式](/docs/concepts/boundaries.md#primitive-forms)

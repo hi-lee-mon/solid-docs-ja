@@ -83,9 +83,9 @@ async function exportReport() {
 
 ## 関連項目
 
-- [サーバーが書き込みをエコーするのを待つ：`until`](/concepts/mutations#wait-for-the-server-to-echo-the-write-until)
-- [非同期リアクティビティ](/concepts/async-reactivity)
-- [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects)
+- [サーバーが書き込みをエコーするのを待つ：`until`](/docs/concepts/mutations.md#wait-for-the-server-to-echo-the-write-until)
+- [非同期リアクティビティ](/docs/concepts/async-reactivity.md)
+- [不要なエフェクトを避ける](/docs/guides/avoid-unnecessary-effects.md)
 
 ## 関連する型
 

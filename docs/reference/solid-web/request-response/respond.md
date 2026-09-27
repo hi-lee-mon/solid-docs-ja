@@ -61,8 +61,8 @@ return respond(user, {
 
 ### よくある問題
 
-- [`respond()` がクライアントに `Internal Server Error` として届く](/guides/forms#respond-reaches-the-client-as-internal-server-error)
-- [エラーが一瞬表示されて消える](/guides/forms#errors-show-for-a-moment-and-then-vanish)
+- [`respond()` がクライアントに `Internal Server Error` として届く](/docs/guides/forms.md#respond-reaches-the-client-as-internal-server-error)
+- [エラーが一瞬表示されて消える](/docs/guides/forms.md#errors-show-for-a-moment-and-then-vanish)
 
 ## `isResponseEnvelope`
 
@@ -82,9 +82,9 @@ function isResponseEnvelope(value: unknown): value is ResponseEnvelope;
 
 ## 関連項目
 
-- [ミューテーションとレスポンス](/building-apps/server-functions/mutations-and-responses)
-- [フォーム](/guides/forms)
-- [ミドルウェアと API ルート](/building-apps/middleware-and-api-routes)
+- [ミューテーションとレスポンス](/docs/building-apps/server-functions/mutations-and-responses.md)
+- [フォーム](/docs/guides/forms.md)
+- [ミドルウェアと API ルート](/docs/building-apps/middleware-and-api-routes.md)
 
 ## 関連する型
 

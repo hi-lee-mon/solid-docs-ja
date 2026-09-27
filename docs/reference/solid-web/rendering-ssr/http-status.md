@@ -99,6 +99,6 @@ function NotFound() {
 
 ## 関連項目
 
-- [ドキュメントを所有するのは誰か](/concepts/rendering-and-ssr#who-owns-the-document)
-- [レンダリングと SSR](/concepts/rendering-and-ssr)
-- [レンダリングモードを選ぶ](/guides/choose-a-rendering-mode)
+- [ドキュメントを所有するのは誰か](/docs/concepts/rendering-and-ssr.md#who-owns-the-document)
+- [レンダリングと SSR](/docs/concepts/rendering-and-ssr.md)
+- [レンダリングモードを選ぶ](/docs/guides/choose-a-rendering-mode.md)

@@ -44,9 +44,9 @@ function configureClientErrors(config: ClientErrorsConfig): void;
 
 ## 詳しくは
 
-- [バウンダリが捕捉したエラーを受け取る](/guides/observability#hear-the-errors-your-boundaries-catch)
-- [オブザーバビリティアダプターを作る](/guides/observability-adapters)
-- [リアクティビティのデバッグ](/guides/debugging-reactivity)
+- [バウンダリが捕捉したエラーを受け取る](/docs/guides/observability.md#hear-the-errors-your-boundaries-catch)
+- [オブザーバビリティアダプターを作る](/docs/guides/observability-adapters.md)
+- [リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md)
 
 ## 関連する型
 

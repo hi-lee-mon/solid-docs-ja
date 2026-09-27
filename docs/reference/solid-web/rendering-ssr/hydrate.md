@@ -76,6 +76,6 @@ const dispose = hydrate(() => <App />, document.getElementById("root")!);
 
 ## 関連項目
 
-- [サーバー HTML のハイドレーション](/concepts/rendering-and-ssr#hydrating-server-html)
-- [レンダリングと SSR](/concepts/rendering-and-ssr)
-- [レンダリングモードを選ぶ](/guides/choose-a-rendering-mode)
+- [サーバー HTML のハイドレーション](/docs/concepts/rendering-and-ssr.md#hydrating-server-html)
+- [レンダリングと SSR](/docs/concepts/rendering-and-ssr.md)
+- [レンダリングモードを選ぶ](/docs/guides/choose-a-rendering-mode.md)

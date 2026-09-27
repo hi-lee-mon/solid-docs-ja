@@ -4,11 +4,11 @@ version: "2.0"
 description: "データ・ルート・リクエストの各レイヤーでアカウント領域にサインイン済みの顧客を要求し、サインアウトした訪問者をサーバーとブラウザーの両方でサインインへリダイレクトさせ、元の行き先へ送り返します。"
 ---
 
-[ネストされたルートとレイアウト](/routing/solid-router/nested-routes)のアカウント領域には `/account`、`/account/orders`、`/account/addresses` の3つのページがあります。
+[ネストされたルートとレイアウト](/docs/routing/solid-router/nested-routes.md)のアカウント領域には `/account`、`/account/orders`、`/account/addresses` の3つのページがあります。
 サインアウトした訪問者がそこへ辿り着く経路は3通りです: ブックマークや共有リンク（ページ全体のリクエスト）、ヘッダーの **Account** リンク（クライアントサイドナビゲーション）、そして `getOrders` を直接呼ぶスクリプト（何もレンダーしません）。
 どれも最終的に `/sign-in` に到達する必要があり、サインイン後の訪問者はアカウントホームではなく、要求したページに着地すべきです。
 
-[セッションと認証](/building-apps/sessions-and-auth)では Cookie、`getSession()`、`event.locals.userId` を設定するミドルウェアを構築しました。
+[セッションと認証](/docs/building-apps/sessions-and-auth.md)では Cookie、`getSession()`、`event.locals.userId` を設定するミドルウェアを構築しました。
 このガイドでは、それらの部品をすべてのレイヤーで成立するガードへ組み立て、アカウント領域を実例として使います。
 
 ## 3つのレイヤー、1つの判定
@@ -54,11 +54,11 @@ export const getOrders = query(async () => {
 ```
 
 セッション Cookie なしで HTTP クライアントから関数の URL へ `getOrders` を呼ぶと、注文データを含まないリダイレクトが返ってきます。
-`locals.userId` は[ミドルウェアで一度だけ認証する](/building-apps/sessions-and-auth#authenticate-once-in-middleware)の `attachCustomer` ミドルウェアが設定するもので、呼び出し元が渡すことはできません。識別情報が引数ではなくイベントから来るのはこのためです。
-チェックそのものは[サーバーで認可する](/building-apps/sessions-and-auth#authorize-on-the-server)が扱っています。このページが追加するのは、アカウントページが読み書きするすべての関数にそれを入れるというルールだけです。
+`locals.userId` は[ミドルウェアで一度だけ認証する](/docs/building-apps/sessions-and-auth.md#authenticate-once-in-middleware)の `attachCustomer` ミドルウェアが設定するもので、呼び出し元が渡すことはできません。識別情報が引数ではなくイベントから来るのはこのためです。
+チェックそのものは[サーバーで認可する](/docs/building-apps/sessions-and-auth.md#authorize-on-the-server)が扱っています。このページが追加するのは、アカウントページが読み書きするすべての関数にそれを入れるというルールだけです。
 
 `getCurrentUser` はスローせず `null` を返します。サインアウトした訪問者はヘッダーが表示すべき通常の状態だからです。
-両方を `query` でラップすると、ヘッダーと下記のルートガードがレンダーごとに1つのリクエストを共有し、[クエリは一度だけレンダーされる](/routing/solid-router/server-rendering#queries-render-once)で説明しているように、サーバーレンダーされた結果を2回目のフェッチなしでハイドレートできます。
+両方を `query` でラップすると、ヘッダーと下記のルートガードがレンダーごとに1つのリクエストを共有し、[クエリは一度だけレンダーされる](/docs/routing/solid-router/server-rendering.md#queries-render-once)で説明しているように、サーバーレンダーされた結果を2回目のフェッチなしでハイドレートできます。
 
 ## パスなしルートでルートをまとめる
 
@@ -112,7 +112,7 @@ export default function RequireUser(props: RouteSectionProps) {
 `/sign-in` はグループの子ではなく兄弟です。ガードの内側にあるサインインページは自分自身へリダイレクトしてしまいます。
 
 preload とコンポーネントは同じキーを読むため、グループへの進入でリクエストは1回で済みます。
-`/account` から `/account/orders` への移動でもパスなしルートはマウントされたままです。これは[URL セグメントを持たないレイアウト](/routing/solid-router/nested-routes#layouts-without-a-url-segment)のレイアウトがページ間でマウントされ続けるのと同じ仕組みです。メモは新しいパスで再実行され、キャッシュされた `getCurrentUser` の結果に対して再度チェックします。
+`/account` から `/account/orders` への移動でもパスなしルートはマウントされたままです。これは[URL セグメントを持たないレイアウト](/docs/routing/solid-router/nested-routes.md#layouts-without-a-url-segment)のレイアウトがページ間でマウントされ続けるのと同じ仕組みです。メモは新しいパスで再実行され、キャッシュされた `getCurrentUser` の結果に対して再度チェックします。
 
 ## レンダー前にリダイレクトする
 
@@ -143,7 +143,7 @@ export const requireUser = query(async (next: string) => {
 `query` は、ラップされた関数がスローした値を返された値と同じように扱います。
 その値がリダイレクトの `Response` であれば（プロセス内でスローされた場合でも、サーバー関数トランスポート経由で届いた場合でも）、ルーターはそのヘッダーをリクエストイベントのレスポンスへコピーし、ターゲットを読み取ります。
 同一オリジンのターゲットは `replace: true` を伴うルーターの `navigate` 呼び出しになります。
-サーバーでは、`navigate` がリクエストイベントにその `Location` を伴う 302 を記録し、読み取りは `undefined` で解決されるためレンダーを完了できます。シェルがフラッシュされる前に設定された `Location` はレスポンス全体をボディのないリダイレクトに変え、フラッシュ後に設定されたものは `window.location` を設定するスクリプトとしてストリームに追記されます。これは[ストリーミングレンダラー](/concepts/rendering-and-ssr#streaming-rendering)が説明しているとおりです。
+サーバーでは、`navigate` がリクエストイベントにその `Location` を伴う 302 を記録し、読み取りは `undefined` で解決されるためレンダーを完了できます。シェルがフラッシュされる前に設定された `Location` はレスポンス全体をボディのないリダイレクトに変え、フラッシュ後に設定されたものは `window.location` を設定するスクリプトとしてストリームに追記されます。これは[ストリーミングレンダラー](/docs/concepts/rendering-and-ssr.md#streaming-rendering)が説明しているとおりです。
 ブラウザーでは読み取りは永久に保留中のままです。ナビゲーションがそれを待っていたすべてをアンマウントするためです。アカウントページが値を受け取ることはありません。`undefined` も含めて。
 リダイレクト上のすべての `X-Revalidate` キーはナビゲーションの前に無効化されるため、行き先は新しいデータをフェッチします。
 :::
@@ -210,7 +210,7 @@ export async function signIn(form: FormData) {
 
 `/sign-in?next=%2Faccount%2Forders` に到達して有効な資格情報を送信すると、ルーターは新しいセッション Cookie をレスポンスに載せて `/account/orders` へナビゲートします。JavaScript が無い場合でも、ブラウザーはリダイレクトをたどって同じアドレスへ向かいます。
 `useSearchParams()` が値をデコードするため `search.next` は `/account/orders` になり、隠し input がそれをポストを通じて運びます。
-この読み取りの型なし版とスキーマ型付き版は[検索パラメータの型付け](/routing/solid-router/navigation#type-search-parameters)が扱っています。資格情報チェックとセッション書き込みは[サインインとサインアウト](/building-apps/sessions-and-auth#sign-in-and-sign-out)の範囲です。
+この読み取りの型なし版とスキーマ型付き版は[検索パラメータの型付け](/docs/routing/solid-router/navigation.md#type-search-parameters)が扱っています。資格情報チェックとセッション書き込みは[サインインとサインアウト](/docs/building-apps/sessions-and-auth.md#sign-in-and-sign-out)の範囲です。
 
 `safeNext` が受け入れる形は1つだけです: 単一の `/` で始まる、このオリジン上のパスです。
 それ以外はすべてアカウントホームへフォールバックします。
@@ -259,8 +259,8 @@ export default [
 ```
 
 Cookie なしで `/account/orders` をリクエストすると、サーバーは `Location: /sign-in?next=%2Faccount%2Forders` を伴う `302` で応答し、コンポーネントは一切実行されません。
-`attachCustomer` は[セッションと認証](/building-apps/sessions-and-auth#authenticate-once-in-middleware)のミドルウェアです。ミドルウェアの順序は配列の順序なので、これは配列の先頭に来なければなりません。
-`next()` を呼ばずに `Response` を返す方法は[チェーンを止める](/building-apps/middleware-and-api-routes#stop-the-chain)が扱っています。
+`attachCustomer` は[セッションと認証](/docs/building-apps/sessions-and-auth.md#authenticate-once-in-middleware)のミドルウェアです。ミドルウェアの順序は配列の順序なので、これは配列の先頭に来なければなりません。
+`next()` を呼ばずに `Response` を返す方法は[チェーンを止める](/docs/building-apps/middleware-and-api-routes.md#stop-the-chain)が扱っています。
 
 このレイヤーはルートガードの代わりではなく、併用します。
 これが追加するのは、ページ全体リクエストに対する本物のリダイレクトステータスです: ルートガードのリダイレクトは、シェルがフラッシュされた後に着地すると、フォールバックがすでにペイントされた後で、ストリーム末尾のスクリプトとしてブラウザーに届きます。
@@ -311,7 +311,7 @@ export function Header() {
 サインアウトした状態で商品ページを読み込むと、ヘッダーは `/sign-in?next=%2Fproducts%2Fmug` へのリンクを持つ **Sign in** を表示します。そのリンクはサーバーがレンダーし、ブラウザーはハイドレーション中にシリアライズされた `current-user` の結果を再フェッチせずに採用するため、読み込み時にリクエストも状態変化も起こりません。
 サインインすると名前が現れます。`redirect(paths())` をスローするルーター `action` でサインアウトすると、アクション完了時にすべてのキャッシュ済みクエリが無効化されるため、`getCurrentUser` が再実行され、ページ全体の読み込みなしにヘッダーは **Sign in** を表示します。
 
-ヘッダーがユーザーのコピーではなくビューを保持する理由は[サーバー上の状態](/guides/state-management#state-on-the-server)が説明しています。
+ヘッダーがユーザーのコピーではなくビューを保持する理由は[サーバー上の状態](/docs/guides/state-management.md#state-on-the-server)が説明しています。
 `Header` はルーターの関数形式の子要素の内側でレンダーされるため、`useLocation()` と `query` の読み取りの両方にバインド先のルーターがあります。
 
 ## よくある問題
@@ -320,7 +320,7 @@ export function Header() {
 
 サインインルートがパスなしガードルートの子になっているため、ガードが自分の守るページへリダイレクトしています。
 `/sign-in` をグループの隣へ移してください。
-ルートが正しいのにループするなら、次のリクエストでセッション Cookie が返ってきていません。[セッションと認証](/building-apps/sessions-and-auth#common-problems)に比較すべき Cookie 属性の一覧があります。
+ルートが正しいのにループするなら、次のリクエストでセッション Cookie が返ってきていません。[セッションと認証](/docs/building-apps/sessions-and-auth.md#common-problems)に比較すべき Cookie 属性の一覧があります。
 連鎖するクライアントサイドリダイレクトは 100 回で停止し、ルーターから `Too many redirects` が返ります。
 
 ### アカウントページがペイントされてからサインインページに置き換わる
@@ -332,7 +332,7 @@ export function Header() {
 ### サーバー関数がサインアウトした呼び出し元に注文を返す
 
 関数自身にチェックがありません。ルートガード、隠されたリンク、ミドルウェアのプレフィックスがページを守っていても関数は守っていません。
-[サーバーで認可する](/building-apps/sessions-and-auth#authorize-on-the-server)が示すように、関数内で `getRequestEvent()?.locals.userId` を読み、無ければ `redirect()` または `respond()` をスローしてください。
+[サーバーで認可する](/docs/building-apps/sessions-and-auth.md#authorize-on-the-server)が示すように、関数内で `getRequestEvent()?.locals.userId` を読み、無ければ `redirect()` または `respond()` をスローしてください。
 
 ### サインイン後、訪問者が別サイトに着地する
 
@@ -351,7 +351,7 @@ export function Header() {
 
 ## 次のステップ
 
-- [セッションと認証](/building-apps/sessions-and-auth): このガイドが読むイベントに `userId` を置く Cookie、`getSession()`、ミドルウェア。
-- [ミドルウェアと API ルート](/building-apps/middleware-and-api-routes): `requireAccountSession` ミドルウェアが参加するチェーンと、API ルートを同じ方法で守るやり方。
-- [フォーム](/guides/forms): サインインフォームのインラインバリデーションメッセージと保留中の状態。
-- [SSR セーフなコード](/guides/ssr-safe-code): `RequireUser` のように両側で実行されるコードのためのチェックリスト。
+- [セッションと認証](/docs/building-apps/sessions-and-auth.md): このガイドが読むイベントに `userId` を置く Cookie、`getSession()`、ミドルウェア。
+- [ミドルウェアと API ルート](/docs/building-apps/middleware-and-api-routes.md): `requireAccountSession` ミドルウェアが参加するチェーンと、API ルートを同じ方法で守るやり方。
+- [フォーム](/docs/guides/forms.md): サインインフォームのインラインバリデーションメッセージと保留中の状態。
+- [SSR セーフなコード](/docs/guides/ssr-safe-code.md): `RequireUser` のように両側で実行されるコードのためのチェックリスト。

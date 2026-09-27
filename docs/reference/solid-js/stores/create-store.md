@@ -141,16 +141,16 @@ const [users] = createStore(
 
 ## よくある問題
 
-- [`items.push(item)` が効かない](/guides/lists#itemspushitem-does-nothing)
-- [1つの要素を編集するとリスト全体が再構築される](/guides/lists#editing-one-item-rebuilds-the-whole-list)
-- [更新されない](/guides/debugging-reactivity#something-does-not-update)
+- [`items.push(item)` が効かない](/docs/guides/lists.md#itemspushitem-does-nothing)
+- [1つの要素を編集するとリスト全体が再構築される](/docs/guides/lists.md#editing-one-item-rebuilds-the-whole-list)
+- [更新されない](/docs/guides/debugging-reactivity.md#something-does-not-update)
 
 ## さらに学ぶ
 
-- [ネストした状態を作る](/concepts/stores#create-nested-state)
-- [ドラフトで更新する](/concepts/stores#update-with-a-draft)
-- [ストア](/concepts/stores)
-- [リスト](/guides/lists)
+- [ネストした状態を作る](/docs/concepts/stores.md#create-nested-state)
+- [ドラフトで更新する](/docs/concepts/stores.md#update-with-a-draft)
+- [ストア](/docs/concepts/stores.md)
+- [リスト](/docs/guides/lists.md)
 
 ## 関連する型
 

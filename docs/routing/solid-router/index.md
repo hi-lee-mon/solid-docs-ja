@@ -8,7 +8,7 @@ description: "Solid Router で小さなルーティング付きストアを作�
 必要なのは、`/products/mug` にある商品ページ、その下でページが切り替わってもそのまま残るヘッダー、ドキュメントを再読み込みしないリンク、そしてページがレンダーされた後ではなくリンクがクリックされた時点で読み込みを開始する商品データです。
 
 Solid Router は `basic` と `fullstack` のプロジェクト形式に同梱されるルーターで、`@solidjs/router` として公開されています。
-利用は任意です。Solid アプリケーションは[別のルーター](/routing/overview#pick-a-router)を使っても、ルーターなしでも構いません。
+利用は任意です。Solid アプリケーションは[別のルーター](/docs/routing/overview.md#pick-a-router)を使っても、ルーターなしでも構いません。
 このページでは上記のストアを4つのステップで構築します。アプリケーションが日常的に触れる部分を使い、各パートの詳細は後続のページで扱います。
 
 ## 1つのアプリ、3つのページ
@@ -77,7 +77,7 @@ URL は `/products/mug` に変わり、`<main>` の中身が入れ替わりま�
 :::note[フォールバックが初回読み込み時にしか出ない理由]
 ユーザーがまだデータを読み込み中のページへのリンクをクリックしたとき、Solid はフォールバックに切り替える代わりに現在のページを画面に残し、保留中のリンクに印を付けます。
 フォールバックが現れるのは初回読み込みのように、保持できる前のページがない場合だけです。
-仕組みは[非同期リアクティビティ](/concepts/async-reactivity)で説明しています。保留中状態へのスタイル付けは[アクティブなリンクと保留中のリンクを表示する](/routing/solid-router/navigation#show-active-and-pending-links)を参照してください。
+仕組みは[非同期リアクティビティ](/docs/concepts/async-reactivity.md)で説明しています。保留中状態へのスタイル付けは[アクティブなリンクと保留中のリンクを表示する](/docs/routing/solid-router/navigation.md#show-active-and-pending-links)を参照してください。
 :::
 
 ## ページで URL を読み取る
@@ -119,9 +119,9 @@ export default function Product(
 }
 ```
 
-`Avoid` 版を実行すると、`/products/bowl` へ移動した後も見出しは「Product mug」のままです。開発環境では `Product` を指名する `[STRICT_READ_UNTRACKED]` が出力され、これは[リアクティビティのデバッグ](/guides/debugging-reactivity#is-the-read-inside-a-tracking-scope)で扱っています。
+`Avoid` 版を実行すると、`/products/bowl` へ移動した後も見出しは「Product mug」のままです。開発環境では `Product` を指名する `[STRICT_READ_UNTRACKED]` が出力され、これは[リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md#is-the-read-inside-a-tracking-scope)で扱っています。
 これは Solid のどこでも同じルールです。値を使う場所で読み取れば、コンポーネントを再実行する必要はありません。
-詳しい説明は[リアクティビティ](/concepts/reactivity)のページにあります。
+詳しい説明は[リアクティビティ](/docs/concepts/reactivity.md)のページにあります。
 
 ## ページのデータを読み込む
 
@@ -186,7 +186,7 @@ export default function Product(
 Promise が保留中の間メモも保留中であり、ユーザーに何を見せるかは `App` の `Loading` バウンダリが決めます。
 後述のファイルシステムアダプターでは、同じ `preload` はルートモジュールの `route` エクスポートに移ります。
 
-`fullstack` プロジェクトでは `query` の中の関数は通常[サーバー関数](/building-apps/server-functions)なので、上の fetch はブラウザに送られない直接のデータベース呼び出しになります。
+`fullstack` プロジェクトでは `query` の中の関数は通常[サーバー関数](/docs/building-apps/server-functions/index.md)なので、上の fetch はブラウザに送られない直接のデータベース呼び出しになります。
 
 ## ファイルシステムアダプターの位置づけ
 
@@ -206,13 +206,13 @@ export const { paths } = Router;
 
 `src/routes/products/[id].tsx` は `/products/:id` に、`src/routes/[...404].tsx` はキャッチオールになり、`products/` ディレクトリの隣にある `products.tsx` はその内側すべてのレイアウトになります。
 これらのページにある他の内容はすべてそのまま適用されます。アダプターが生成するのはルートオブジェクトだけです。
-`preload` やその他のルートフィールドをルートファイルのどこに書くかは、[ファイルシステムマニフェストの変換](/routing/solid-router/route-definitions#convert-a-file-system-manifest)を参照してください。
+`preload` やその他のルートフィールドをルートファイルのどこに書くかは、[ファイルシステムマニフェストの変換](/docs/routing/solid-router/route-definitions.md#convert-a-file-system-manifest)を参照してください。
 
 :::deep-dive[パッケージの各エントリーの役割]
 `@solidjs/router` にはルーターファクトリー、ルートとナビゲーションのプリミティブ、履歴アダプター、クエリ、アクションが含まれ、ほとんどのアプリケーションがインポートするのはこのエントリーだけです。
 `@solidjs/router/fs` は `file-routes` マニフェストをルート定義に変換します。
-`@solidjs/router/server` はサーバー関数ハンドラー向けのシングルフライトのデータコレクターを提供し、[サーバーレンダリングとハイドレーション](/routing/solid-router/server-rendering)のページでそのセットアップを行います。
-3つすべてのシグネチャとオプションの詳細は [Solid Router API リファレンス](/reference/solid-router)にあります。
+`@solidjs/router/server` はサーバー関数ハンドラー向けのシングルフライトのデータコレクターを提供し、[サーバーレンダリングとハイドレーション](/docs/routing/solid-router/server-rendering.md)のページでそのセットアップを行います。
+3つすべてのシグネチャとオプションの詳細は [Solid Router API リファレンス](/docs/reference/solid-router/index.md)にあります。
 :::
 
 ## まとめ
@@ -229,9 +229,9 @@ export const { paths } = Router;
 
 Solid Router が初めてならこの順で読み進め、必要なものがあればそこへ直接進んでください：
 
-1. [セットアップ](/routing/solid-router/setup)：ルーターをまだ持たないプロジェクトへの追加と、`base`・履歴・プリロードのオプション。
-2. [ルート定義](/routing/solid-router/route-definitions)：パスパターン、パラメータフィルター、ルートのメタデータ、遅延サブツリー、ファイルシステムマニフェスト。
-3. [ネストされたルートとレイアウト](/routing/solid-router/nested-routes)：ページが切り替わってもマウントされたままになる独自フレームを持つアカウントセクション。
-4. [ナビゲーションと型付きパス](/routing/solid-router/navigation)：`paths`、`useNavigate`、スキーマ付き検索パラメータ、アクティブ・保留中リンク、離脱ガード。
-5. [データ読み込みとミューテーション](/routing/solid-router/data)：`preload`、`query`、`action`、楽観的更新、ミューテーション後の再検証。
-6. [サーバーレンダリングとハイドレーション](/routing/solid-router/server-rendering)：アプリをサーバーでレンダーするときにサーバーが追加するものと、ミューテーションが1回の往復で新しいデータを返す仕組み。
+1. [セットアップ](/docs/routing/solid-router/setup.md)：ルーターをまだ持たないプロジェクトへの追加と、`base`・履歴・プリロードのオプション。
+2. [ルート定義](/docs/routing/solid-router/route-definitions.md)：パスパターン、パラメータフィルター、ルートのメタデータ、遅延サブツリー、ファイルシステムマニフェスト。
+3. [ネストされたルートとレイアウト](/docs/routing/solid-router/nested-routes.md)：ページが切り替わってもマウントされたままになる独自フレームを持つアカウントセクション。
+4. [ナビゲーションと型付きパス](/docs/routing/solid-router/navigation.md)：`paths`、`useNavigate`、スキーマ付き検索パラメータ、アクティブ・保留中リンク、離脱ガード。
+5. [データ読み込みとミューテーション](/docs/routing/solid-router/data.md)：`preload`、`query`、`action`、楽観的更新、ミューテーション後の再検証。
+6. [サーバーレンダリングとハイドレーション](/docs/routing/solid-router/server-rendering.md)：アプリをサーバーでレンダーするときにサーバーが追加するものと、ミューテーションが1回の往復で新しいデータを返す仕組み。

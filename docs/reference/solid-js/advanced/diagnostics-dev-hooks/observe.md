@@ -36,9 +36,9 @@ const OBSERVE: Observe | undefined;
 
 ## 関連項目
 
-- [オブザーバビリティ](/guides/observability)
-- [オブザーバビリティアダプターの構築](/guides/observability-adapters)
-- [リアクティビティのデバッグ](/guides/debugging-reactivity)
+- [オブザーバビリティ](/docs/guides/observability.md)
+- [オブザーバビリティアダプターの構築](/docs/guides/observability-adapters.md)
+- [リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md)
 
 ## 関連する型
 

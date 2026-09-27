@@ -41,7 +41,7 @@ function isWrappable<T>(obj: T | NotWrappable): obj is T;
 
 ## 関連項目
 
-- [ストア](/concepts/stores)
+- [ストア](/docs/concepts/stores.md)
 
 ## 関連する型
 

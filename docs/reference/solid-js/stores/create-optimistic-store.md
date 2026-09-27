@@ -125,7 +125,7 @@ const removeTodo = action(function* (id: string) {
 
 ## さらに学ぶ
 
-- [楽観的ストア](/concepts/stores#optimistic-stores)
-- [カートをサーバーに移す](/concepts/mutations#move-the-cart-to-the-server)
-- [ストア](/concepts/stores)
-- [リスト](/guides/lists)
+- [楽観的ストア](/docs/concepts/stores.md#optimistic-stores)
+- [カートをサーバーに移す](/docs/concepts/mutations.md#move-the-cart-to-the-server)
+- [ストア](/docs/concepts/stores.md)
+- [リスト](/docs/guides/lists.md)

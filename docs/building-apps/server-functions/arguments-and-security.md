@@ -185,7 +185,7 @@ export async function updateAccountName(input: unknown) {
 
 `Avoid` の例では、登録されるサーバー関数は内側のアロー関数であり、HTTP ディスパッチは id でそれを呼び出します。
 `validated` が実行されるのは、ブラウザー内やレンダー中など、エクスポートされた参照を持つコード経由の呼び出しだけです。そのため `curl` リクエストはチェックされないままデータベースへ届きます。
-モジュールレベルの `"use server"` モジュール内のラッパーは事情が異なります。そこではラッパーの戻り値が登録されるためです。その形は[サーバー関数](/building-apps/server-functions#declare-a-server-module)のページで説明しています。
+モジュールレベルの `"use server"` モジュール内のラッパーは事情が異なります。そこではラッパーの戻り値が登録されるためです。その形は[サーバー関数](/docs/building-apps/server-functions/index.md#declare-a-server-module)のページで説明しています。
 
 ## 信頼できるリクエストコンテキストを読む
 
@@ -204,7 +204,7 @@ export async function currentUserId() {
 }
 ```
 
-署名付き Cookie を読み、どのサーバー関数が実行されるよりも先に `event.locals.userId` を設定するミドルウェアは、[セッションと認証](/building-apps/sessions-and-auth)で説明しています。
+署名付き Cookie を読み、どのサーバー関数が実行されるよりも先に `event.locals.userId` を設定するミドルウェアは、[セッションと認証](/docs/building-apps/sessions-and-auth.md)で説明しています。
 
 アイデンティティはこうした値の 1 つであり、決して引数にはしません:
 
@@ -246,7 +246,7 @@ export async function fetchInventory(sku: string) {
 }
 ```
 
-[`getTraceContext()`](/reference/solid-web/request-response/get-trace-context) はリクエスト内のどの読み取りでも同じオブジェクトを返すため、外向きリクエストを組み立てる場所で呼んでください。
+[`getTraceContext()`](/docs/reference/solid-web/request-response/get-trace-context.md) はリクエスト内のどの読み取りでも同じオブジェクトを返すため、外向きリクエストを組み立てる場所で呼んでください。
 `traceparent` が入ってこなかった場合、ランタイムが独自のトレースを開始するため、ヘッダーは常に正しい形式になります。トレーシングしていない下流のサービスはそれを無視します。
 クライアント上やリクエストの外では、この関数は `undefined` を返し、スプレッドは何も追加しません。
 
@@ -278,7 +278,7 @@ export async function fetchInventory(sku: string) {
 
 リクエストに `Sec-Fetch-Site`、`Origin`、`Referer` ヘッダーがなかったか、別のオリジンを指すものが含まれていました。
 正規のスクリプトはサイトに一致する `Origin` ヘッダーを送ります。
-それができないサーバー間連携は、独自のチェックと `allowRequestsWithoutOriginCheck` を設定したホストの後ろで動かします。[ホスト構成](/reference/solid-web/server-functions/host-configuration)を参照してください。
+それができないサーバー間連携は、独自のチェックと `allowRequestsWithoutOriginCheck` を設定したホストの後ろで動かします。[ホスト構成](/docs/reference/solid-web/server-functions/host-configuration.md)を参照してください。
 
 ### 開発中はバリデーションが動くのに素のリクエストがすり抜ける
 
@@ -289,7 +289,7 @@ HTTP ディスパッチは登録された関数を直接呼び出します。
 ### `getRequestEvent()` が `undefined` を返す
 
 スコープにリクエストがない状態で関数が実行されました。モジュール読み込み時、タイマーから、イベントを提供しなかったテスト内などです。
-レンダー、ミドルウェア、HTTP リクエストから呼ばれたサーバー関数には必ずイベントがあります。テストでは [`provideRequestEvent`](/reference/solid-web/request-response/provide-request-event) で提供してください。
+レンダー、ミドルウェア、HTTP リクエストから呼ばれたサーバー関数には必ずイベントがあります。テストでは [`provideRequestEvent`](/docs/reference/solid-web/request-response/provide-request-event.md) で提供してください。
 
 ## まとめ
 
@@ -302,6 +302,6 @@ HTTP ディスパッチは登録された関数を直接呼び出します。
 
 ## 次のステップ
 
-- [ミューテーションとレスポンス](/building-apps/server-functions/mutations-and-responses): バリデーション済みの書き込みの後に何を返すか、そして上の 400 がどう呼び出し元に届くか。
-- [セッションと認証](/building-apps/sessions-and-auth): 署名付き Cookie から `userId` を `event.locals` に置くミドルウェア。
-- [フォーム](/guides/forms): チェックアウトの住所フォーム。ブラウザーとサーバー関数の両方でバリデーションします。
+- [ミューテーションとレスポンス](/docs/building-apps/server-functions/mutations-and-responses.md): バリデーション済みの書き込みの後に何を返すか、そして上の 400 がどう呼び出し元に届くか。
+- [セッションと認証](/docs/building-apps/sessions-and-auth.md): 署名付き Cookie から `userId` を `event.locals` に置くミドルウェア。
+- [フォーム](/docs/guides/forms.md): チェックアウトの住所フォーム。ブラウザーとサーバー関数の両方でバリデーションします。

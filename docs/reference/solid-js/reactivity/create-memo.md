@@ -98,17 +98,17 @@ const user = createMemo(async () => {
 
 ## よくある問題
 
-- [値が一度だけレンダーされて更新されない](/concepts/reactivity#a-value-renders-once-and-never-updates)
-- [エフェクトがある値を別の値にコピーし、コピーが遅れる](/concepts/reactivity#an-effect-copies-one-value-into-another-and-the-copy-lags)
-- [何かが更新されすぎる](/guides/debugging-reactivity#something-updates-too-often)
+- [値が一度だけレンダーされて更新されない](/docs/concepts/reactivity.md#a-value-renders-once-and-never-updates)
+- [エフェクトがある値を別の値にコピーし、コピーが遅れる](/docs/concepts/reactivity.md#an-effect-copies-one-value-into-another-and-the-copy-lags)
+- [何かが更新されすぎる](/docs/guides/debugging-reactivity.md#something-updates-too-often)
 
 ## さらに学ぶ
 
-- [派生値](/concepts/reactivity#derived-values)
-- [Promise を返すメモ](/concepts/async-reactivity#a-memo-that-returns-a-promise)
-- [リアクティビティ](/concepts/reactivity)
-- [非同期リアクティビティ](/concepts/async-reactivity)
-- [リアクティビティのデバッグ](/guides/debugging-reactivity)
+- [派生値](/docs/concepts/reactivity.md#derived-values)
+- [Promise を返すメモ](/docs/concepts/async-reactivity.md#a-memo-that-returns-a-promise)
+- [リアクティビティ](/docs/concepts/reactivity.md)
+- [非同期リアクティビティ](/docs/concepts/async-reactivity.md)
+- [リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md)
 
 ## 関連する型
 

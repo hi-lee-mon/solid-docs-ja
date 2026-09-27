@@ -9,7 +9,7 @@ Solid Meta 1.0 は、Solid 2.0 の組み込み head レジストリの上の薄�
 
 ::::caution[Solid 2 が必要です]
 Solid Meta 1.0 は Solid 2 を必要とし、単体では Solid 1 アプリケーションをアップグレードできません。
-Solid Meta 1.0 をインストールする前に、[Solid 1 から](/migration/from-solid-1)でアプリケーションのランタイムを移行してください。
+Solid Meta 1.0 をインストールする前に、[Solid 1 から](/docs/migration/from-solid-1.md)でアプリケーションのランタイムを移行してください。
 ::::
 
 ## 移行手順
@@ -34,7 +34,7 @@ export default function App() {
 ### サーバーの配管処理を削除する
 
 0.x のサーバーフロー、`MetaProvider` に `tags={[]}` の配列を渡し、`renderTags(tags)` をテンプレートに差し込む流れはなくなりました。
-`renderToString` / `renderToStream` でドキュメントをレンダーすると、重複排除で残ったタグが自動的に `<head>` に差し込まれ、[`Loading` バウンダリ](/concepts/boundaries)の下で登録されたタグはパッチとしてクライアントにストリーミングされます。
+`renderToString` / `renderToStream` でドキュメントをレンダーすると、重複排除で残ったタグが自動的に `<head>` に差し込まれ、[`Loading` バウンダリ](/docs/concepts/boundaries.md)の下で登録されたタグはパッチとしてクライアントにストリーミングされます。
 HTML ドキュメントを自分で組み立てる場合は、代わりに `onHead` レンダーオプションで head マークアップを受け取ってください。
 
 ### タグ重複のセマンティクスを確認する
@@ -42,7 +42,7 @@ HTML ドキュメントを自分で組み立てる場合は、代わりに `onHe
 0.x では、他の属性が異なれば同じ `name` の `<Meta>` タグを複数保持できました。
 1.x では `name`/`property`/`http-equiv`（`media` による修飾付き）で重複排除され、後のものが勝ちます。
 
-複数の `og:image` を共存させたいような意図的なセットでは、それらを [`<Head>`](/reference/solid-meta/head) で囲んでください:
+複数の `og:image` を共存させたいような意図的なセットでは、それらを [`<Head>`](/docs/reference/solid-meta/head.md) で囲んでください:
 
 ```tsx
 <Head>
@@ -73,7 +73,7 @@ useHead({ tag: "meta", props: { name: "description", content: () => desc() } });
 
 ### 新しい機能
 
-- [`<Script>`](/reference/solid-meta/script) は新機能です。JSON-LD やその他の head スクリプトに `useHead` の抜け道は不要になりました。
-- [`<Head>`](/reference/solid-meta/head) は子タグを、リアクティブなメンバーシップを持つ 1 つの置換セットにグループ化します。
+- [`<Script>`](/docs/reference/solid-meta/script.md) は新機能です。JSON-LD やその他の head スクリプトに `useHead` の抜け道は不要になりました。
+- [`<Head>`](/docs/reference/solid-meta/head.md) は子タグを、リアクティブなメンバーシップを持つ 1 つの置換セットにグループ化します。
 - アイコン（`rel="icon"` / `rel="apple-touch-icon"`）は置換可能です。`href` を差し替えると、蓄積されるのではなくファビコンが置き換わり、アンマウントすると以前のものに戻ります。
 - 異なる `media` クエリを持つ `theme-color` のバリアントは共存します。

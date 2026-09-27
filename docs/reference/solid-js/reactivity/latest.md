@@ -56,11 +56,11 @@ const preview = () => latest(user);
 
 ## よくある問題
 
-- [クリック後に画面が固まったように見える](/guides/debugging-reactivity#the-screen-looks-dead-after-a-click)
+- [クリック後に画面が固まったように見える](/docs/guides/debugging-reactivity.md#the-screen-looks-dead-after-a-click)
 
 ## さらに学ぶ
 
-- [入力を今すぐ表示: `latest`](/concepts/async-reactivity#show-the-input-now-latest)
-- [リアクティビティ](/concepts/reactivity)
-- [非同期リアクティビティ](/concepts/async-reactivity)
-- [リアクティビティのデバッグ](/guides/debugging-reactivity)
+- [入力を今すぐ表示: `latest`](/docs/concepts/async-reactivity.md#show-the-input-now-latest)
+- [リアクティビティ](/docs/concepts/reactivity.md)
+- [非同期リアクティビティ](/docs/concepts/async-reactivity.md)
+- [リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md)

@@ -95,5 +95,5 @@ function App() {
 
 ## 関連項目
 
-- [ローディングバウンダリ](/concepts/boundaries#loading-boundaries)
-- [コンポーネントと JSX](/concepts/components-and-jsx)
+- [ローディングバウンダリ](/docs/concepts/boundaries.md#loading-boundaries)
+- [コンポーネントと JSX](/docs/concepts/components-and-jsx.md)

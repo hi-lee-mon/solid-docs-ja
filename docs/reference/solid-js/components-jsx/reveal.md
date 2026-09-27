@@ -100,9 +100,9 @@ function Reveal(props: RevealProps): JSX.Element;
 
 ## 関連項目
 
-- [Reveal の順序](/concepts/boundaries#reveal-order)
-- [コンポーネントと JSX](/concepts/components-and-jsx)
-- [バウンダリ](/concepts/boundaries)
+- [Reveal の順序](/docs/concepts/boundaries.md#reveal-order)
+- [コンポーネントと JSX](/docs/concepts/components-and-jsx.md)
+- [バウンダリ](/docs/concepts/boundaries.md)
 
 ## 関連する型
 

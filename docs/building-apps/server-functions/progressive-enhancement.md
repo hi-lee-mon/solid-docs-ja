@@ -70,10 +70,10 @@ JavaScript ありでは、ルーターが submit をインターセプトし、�
 ハイドレーション前の `Avoid` 版にはハンドラーがアタッチされていないため、クリックしても何も起きません。`Prefer` 版は POST されます。
 
 ハイドレーション後のページがサブミッションに対して行うことはすべて、その POST の上のレイヤーです。
-ルーターが起動すると submit をインターセプトし、同じ関数をサーバー関数トランスポート越しに呼び出し、呼び出し中はフォームに `aria-busy` を設定し、結果を `useSubmissions` に記録し、呼び出しが送信される前に `.onSubmit` フックを実行します。[楽観的な書き込み](/routing/solid-router/data#before-the-server-confirms)はここに置きます。
+ルーターが起動すると submit をインターセプトし、同じ関数をサーバー関数トランスポート越しに呼び出し、呼び出し中はフォームに `aria-busy` を設定し、結果を `useSubmissions` に記録し、呼び出しが送信される前に `.onSubmit` フックを実行します。[楽観的な書き込み](/docs/routing/solid-router/data.md#before-the-server-confirms)はここに置きます。
 これらは HTML やサーバー関数を一切変えません。バンドルがまだ届いていない買い物客には POST と新しいページが、バンドルが届いた買い物客にはサーバーの応答前に描画される同じ結果が得られます。
 
-[フォームガイド](/guides/forms)はこの形の上にチェックアウトの住所フォームを構築し、バリデーションメッセージ、保留中の状態、サーバーが確認する前に更新される住所リストを実装しています。
+[フォームガイド](/docs/guides/forms.md)はこの形の上にチェックアウトの住所フォームを構築し、バリデーションメッセージ、保留中の状態、サーバーが確認する前に更新される住所リストを実装しています。
 
 ## GET フォームを送信する
 
@@ -158,8 +158,8 @@ JavaScript なしのサブミッションは、スクリプト経由のものと
 次のサーバーレンダーでフラッシュ Cookie を読み取ってクリアし、デコードされた結果をサブミッション状態に変換し、再検証メタデータをクエリキャッシュに接続します。
 
 コアのデフォルトは、カスタムホストが `handleServerFunctionRequest()` を介してディスパッチするときに適用されます。
-ホストは `createNoJSHandler()` にベースパスを設定したり、別の `handleNoJS` を供給したりできます。[サーバー関数のプログレッシブエンハンスメント API](/reference/solid-web/server-functions/progressive-enhancement)にこれらのフックが列挙されています。
-[サーバーレンダリングとハイドレーション](/routing/solid-router/server-rendering)でルーターのセットアップを説明しています。
+ホストは `createNoJSHandler()` にベースパスを設定したり、別の `handleNoJS` を供給したりできます。[サーバー関数のプログレッシブエンハンスメント API](/docs/reference/solid-web/server-functions/progressive-enhancement.md)にこれらのフックが列挙されています。
+[サーバーレンダリングとハイドレーション](/docs/routing/solid-router/server-rendering.md)でルーターのセットアップを説明しています。
 :::
 
 ## よくある問題
@@ -183,7 +183,7 @@ JavaScript なしのサブミッションは、スクリプト経由のものと
 
 結果はフラッシュ Cookie で戻ってきており、誰かがそれを読む必要があります。
 Solid Router は次のサーバーレンダーで Cookie を読み取り、サブミッションを記録します。ルーターがない場合、カスタムホストは自身の `handleNoJS` を通じてそれを読み取ります。
-[フォームガイドのパス3](/guides/forms#pass-3-inline-errors-and-pending-state)でルーターがそれを読む様子を示しています。
+[フォームガイドのパス3](/docs/guides/forms.md#pass-3-inline-errors-and-pending-state)でルーターがそれを読む様子を示しています。
 
 ## まとめ
 
@@ -198,6 +198,6 @@ Solid Router は次のサーバーレンダーで Cookie を読み取り、サ�
 
 ## 次のステップ
 
-- [フォーム](/guides/forms): チェックアウトの住所フォーム。ハイドレーション前から動作し、ハイドレーション後はインラインメッセージと楽観的な住所リストを追加します。
-- [データロードとミューテーション](/routing/solid-router/data): `.with()`、サブミッション、再検証を含め、`action()` がこのトランスポートの上に追加するもの。
-- [セッションと認証](/building-apps/sessions-and-auth): サインインフォーム。ストアフロントで最も一般的な JavaScript なしのサブミッションです。
+- [フォーム](/docs/guides/forms.md): チェックアウトの住所フォーム。ハイドレーション前から動作し、ハイドレーション後はインラインメッセージと楽観的な住所リストを追加します。
+- [データロードとミューテーション](/docs/routing/solid-router/data.md): `.with()`、サブミッション、再検証を含め、`action()` がこのトランスポートの上に追加するもの。
+- [セッションと認証](/docs/building-apps/sessions-and-auth.md): サインインフォーム。ストアフロントで最も一般的な JavaScript なしのサブミッションです。

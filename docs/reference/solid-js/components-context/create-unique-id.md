@@ -61,4 +61,4 @@ function Field(props: { label: string }) {
 
 ## 関連項目
 
-- [コンポーネントと JSX](/concepts/components-and-jsx)
+- [コンポーネントと JSX](/docs/concepts/components-and-jsx.md)

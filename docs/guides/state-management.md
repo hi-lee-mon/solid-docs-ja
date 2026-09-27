@@ -4,7 +4,7 @@ version: "2.0"
 description: "ストアフロントの各状態がどこに置かれるべきか（コンポーネント、コンテキストプロバイダー、URL、サーバーのいずれか）を決め、サーバーでも実行されるコードではモジュールスコープに置かないようにします。"
 ---
 
-[Thinking in Solid](/guides/thinking-in-solid) の検索ページは、`Search` コンポーネント内で作成されたカート件数で終わりました。
+[Thinking in Solid](/docs/guides/thinking-in-solid.md) の検索ページは、`Search` コンポーネント内で作成されたカート件数で終わりました。
 ヘッダーはすべてのページでその件数を表示するため、別の場所へ移す必要があります。
 同じ問題は、サインイン中の顧客名、リロード後も残るべき検索フィルター、商品カタログ、そして **Remove item?** ダイアログの開閉フラグにも当てはまります。
 
@@ -66,11 +66,11 @@ function RemoveButton(props: { onConfirm: () => void }) {
 
 `open` を必要とするものは他にないので、他の何にも見えないようにすべきです。
 コンポーネント内で作成された状態はそのコンポーネントに所有されます。コンポーネントがページから離れるとき Solid が破棄し、新しいインスタンスには新しい値が入ります。
-破棄の対象範囲は [オーナーシップ](/concepts/reactivity#ownership) で説明しています。
+破棄の対象範囲は [オーナーシップ](/docs/concepts/reactivity.md#ownership) で説明しています。
 
 値を持ち上げるのは、2つ目のコンポーネントがそれを必要とするときだけです。
 カートページでも、1つのダイアログが開いている間は他のすべての **Remove** ボタンを無効にしたい場合、`open` はリストコンポーネントに移され、prop として各行に渡されます。
-props はそれ自体がリアクティブなので、持ち上げた値のコストは渡すための2行だけです。理由は [props](/concepts/components-and-jsx#props) を参照してください。
+props はそれ自体がリアクティブなので、持ち上げた値のコストは渡すための2行だけです。理由は [props](/docs/concepts/components-and-jsx.md#props) を参照してください。
 
 ## コンテキストで共有する
 
@@ -142,9 +142,9 @@ function Header() {
 検索ページからチェックアウトページへ遷移しても、バッジは数値を保持します。
 `createCart()` は `App` のレンダー時に `CartProvider` 内で一度だけ実行されました。その配下のページは遷移のたびに入れ替わりますが、プロバイダーは残り続けます。
 
-[`createContext`](/reference/solid-js/components-context/create-context) が返すコンテキストオブジェクトはプロバイダーコンポーネントでもあり、children 用のスコープ付きオーナーを作成します。
+[`createContext`](/docs/reference/solid-js/components-context/create-context.md) が返すコンテキストオブジェクトはプロバイダーコンポーネントでもあり、children 用のスコープ付きオーナーを作成します。
 `useCart()` は、間にあるどのコンポーネントにも prop を付けずに、プロバイダー配下のどこからでも同じオブジェクトを返します。
-この形は [コンポーネント間での状態の共有](/concepts/reactivity#share-state-between-components) で紹介しています。この節の残りでは `value` に何を入れるかを扱います。
+この形は [コンポーネント間での状態の共有](/docs/concepts/reactivity.md#share-state-between-components) で紹介しています。この節の残りでは `value` に何を入れるかを扱います。
 
 ### スナップショットではなくストアかアクセサーを渡す
 
@@ -208,7 +208,7 @@ function createCart() {
 export const [cart] = createStore(() => getCart(), { items: [] as CartItem[] });
 ```
 
-サーバー上ではストアが作成されるとすぐ、モジュールがまだ評価中の段階で派生が実行され、プロセス内の `getCart()` 呼び出しはリクエストイベントがまだ存在しないため `Cannot call server function outside of a request` をスローします。これが現れる他の場面は [サーバー関数](/building-apps/server-functions#cannot-call-server-function-outside-of-a-request-on-the-server) に一覧があります。
+サーバー上ではストアが作成されるとすぐ、モジュールがまだ評価中の段階で派生が実行され、プロセス内の `getCart()` 呼び出しはリクエストイベントがまだ存在しないため `Cannot call server function outside of a request` をスローします。これが現れる他の場面は [サーバー関数](/docs/building-apps/server-functions/index.md#cannot-call-server-function-outside-of-a-request-on-the-server) に一覧があります。
 `createCart()` 内では同じ行がリクエスト中、ミドルウェアが装飾したリクエストイベントの下で実行されるため、`getCart()` 内の `getRequestEvent()?.locals.userId` は正しい顧客を指します。
 
 :::note[サーバーレンダリングを使わないプロジェクト]
@@ -267,13 +267,13 @@ export default function Search() {
 
 `setSearch` は渡されたキーを現在のクエリ文字列にマージしてスクロールなしで遷移するため、`q` と `category` を2つのハンドラーから互いに消し合うことなく設定できます。
 `search.q` はストアのプロパティと同様のリアクティブな読み取りなので、**戻る** を含め URL が変わるとメモが再実行されます。
-2つのコントロールが `latest` 経由で読み取るのは、`results` がフェッチしている間 URL への書き込みが保留されるためで、ユーザーが触れたコントロールは古いリストが待っている間に新しい値を表示すべきだからです。この組み合わせは [入力を今すぐ表示する](/concepts/async-reactivity#show-the-input-now-latest) で説明しています。
-スキーマがなければすべての値は文字列または文字列の配列です。ルートの `search` スキーマが `"2"` を `2` に変えてデフォルト値を与える方法は [検索パラメータの型付け](/routing/solid-router/navigation#type-search-parameters) を参照してください。
+2つのコントロールが `latest` 経由で読み取るのは、`results` がフェッチしている間 URL への書き込みが保留されるためで、ユーザーが触れたコントロールは古いリストが待っている間に新しい値を表示すべきだからです。この組み合わせは [入力を今すぐ表示する](/docs/concepts/async-reactivity.md#show-the-input-now-latest) で説明しています。
+スキーマがなければすべての値は文字列または文字列の配列です。ルートの `search` スキーマが `"2"` を `2` に変えてデフォルト値を与える方法は [検索パラメータの型付け](/docs/routing/solid-router/navigation.md#type-search-parameters) を参照してください。
 
 :::caution[検索パラメータはユーザー入力です]
 クエリ文字列の値はユーザー入力です。
 `String(search.category ?? "all")` は `?category=<script>` を受け入れてしまうため、サーバー関数は他の引数と同じ方法でそれを検証しなければなりません。
-`searchProducts` に入れるべきチェックは [引数とセキュリティ](/building-apps/server-functions/arguments-and-security) で説明しています。
+`searchProducts` に入れるべきチェックは [引数とセキュリティ](/docs/building-apps/server-functions/arguments-and-security.md) で説明しています。
 :::
 
 ページ上のすべてが URL に属するわけではありません。
@@ -321,7 +321,7 @@ export function Header() {
 
 `user` はユーザーのコピーではなく、Promise のメモです。
 サーバー側で `getCurrentUser()` の返す内容が変わっても、再読み取りされるまでビューは古いままです。名前変更アクションの後の `refresh(user)`、またはサインアウト後の完全な遷移が必要です。
-クッキー、ミドルウェア、サインイン・サインアウト関数は [セッションと認証](/building-apps/sessions-and-auth) が扱います。このようなビューの上に、第2の情報源にならずに楽観的レイヤーを重ねる方法は [ミューテーション](/concepts/mutations) を参照してください。
+クッキー、ミドルウェア、サインイン・サインアウト関数は [セッションと認証](/docs/building-apps/sessions-and-auth.md) が扱います。このようなビューの上に、第2の情報源にならずに楽観的レイヤーを重ねる方法は [ミューテーション](/docs/concepts/mutations.md) を参照してください。
 
 メモはそれを読む側がある場所に置いてください。
 `App` はヘッダーを一度だけレンダーするため、`Header` 内のメモはアプリごとに1回作成されます。ユーザーを必要とする商品ページは、サーバー関数を二度目に呼ぶのではなく、カートの隣のプロバイダー経由で読み取るべきです。
@@ -384,7 +384,7 @@ export function Header() {
 
 ## 次のステップ
 
-- [ミューテーション](/concepts/mutations): `action`、`createOptimisticStore`、`refresh` によるサーバー所有の状態への書き込み。データの第2のコピーなしに重ねられます。
-- [セッションと認証](/building-apps/sessions-and-auth): `event.locals.userId` がどう設定され、各サーバー関数がどうそれを確認するか。
-- [ナビゲーションと型付きパス](/routing/solid-router/navigation): スキーマによる型付き検索パラメータと、状態としての URL の残りの部分。
-- [レンダリングと SSR](/concepts/rendering-and-ssr): サーバーとクライアントの両方で実行されるコードに関する他のルール。
+- [ミューテーション](/docs/concepts/mutations.md): `action`、`createOptimisticStore`、`refresh` によるサーバー所有の状態への書き込み。データの第2のコピーなしに重ねられます。
+- [セッションと認証](/docs/building-apps/sessions-and-auth.md): `event.locals.userId` がどう設定され、各サーバー関数がどうそれを確認するか。
+- [ナビゲーションと型付きパス](/docs/routing/solid-router/navigation.md): スキーマによる型付き検索パラメータと、状態としての URL の残りの部分。
+- [レンダリングと SSR](/docs/concepts/rendering-and-ssr.md): サーバーとクライアントの両方で実行されるコードに関する他のルール。

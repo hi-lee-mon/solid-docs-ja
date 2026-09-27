@@ -17,7 +17,7 @@ Promise を返す計算も依然として計算であり、それを読み取る
 Solid 1 から来た場合や、各パネルが独自のスケジュールで fetch して独自のスピナーを表示するパターンから来た場合、ここが意外に感じる部分です。[処理中の処理](#settled-view-and-in-flight-work)のセクションで、その挙動とそこにある選択肢を示します。
 
 このページでは、非同期の計算がもたらすものと、自分で決める必要があるものを説明します。
-例は[リアクティビティ](/concepts/reactivity)ページのショッピングカートの続きです。
+例は[リアクティビティ](/docs/concepts/reactivity.md)ページのショッピングカートの続きです。
 
 ## Promise を返すメモ
 
@@ -50,7 +50,7 @@ function ProductDetail(props: { id: string }) {
 チェックするローディングフラグも、オプショナルチェイニングもありません。
 式が実行されていれば、値はそこにあります。
 
-最初の結果が届くまで、`product()` の読み取りは値がまだ準備できていないことを報告し、最も近い [`Loading`](/reference/solid-js/components-jsx/loading) バウンダリがコンテンツの代わりにフォールバックをレンダリングします。
+最初の結果が届くまで、`product()` の読み取りは値がまだ準備できていないことを報告し、最も近い [`Loading`](/docs/reference/solid-js/components-jsx/loading.md) バウンダリがコンテンツの代わりにフォールバックをレンダリングします。
 Promise が解決すると、コンテンツがレンダリングされます。
 
 その後 `props.id` が変わっても、フォールバックは戻ってきません。
@@ -183,14 +183,14 @@ const brand = createMemo(() => fetchBrand(product().brandId));
 
 `brand` は `product` が解決するまで始められません。id がレスポンスから来るからです。
 これはデータが逐次的だから逐次的であり、その依存関係はコードに見えています。
-開発ビルドでは、アトリビューションを有効にしていれば、このような長いチェーンを `ASYNC_WATERFALL` 診断で指摘できます。[リアクティビティのデバッグ](/guides/debugging-reactivity)を参照してください。
+開発ビルドでは、アトリビューションを有効にしていれば、このような長いチェーンを `ASYNC_WATERFALL` 診断で指摘できます。[リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md)を参照してください。
 
 ## 確定済みビューと処理中の処理
 
 値が確定した後は、入力を変えても画面は真っ白になりません。
 Solid は、ユーザーに見えている答えと、次の答えを生み出す処理を分離します:
 
-![最初のリクエスト中に Loading フォールバックが表示され、保持された更新の間も回答 A が表示され続け、次のリクエストが確定すると回答 B が現れるタイムライン](/images/diagrams/async-update-timeline.svg)
+![最初のリクエスト中に Loading フォールバックが表示され、保持された更新の間も回答 A が表示され続け、次のリクエストが確定すると回答 B が現れるタイムライン](/docs/images/diagrams/async-update-timeline.svg)
 
 最初の答えの前には表示するものがなく、`Loading` バウンダリが何をレンダリングするかを決めます。
 答えの後は、次のものが準備される間、Solid はコミット済みのビューを保持します。
@@ -261,7 +261,7 @@ Solid では `period` への書き込みが保持されます。
 ## 次の答えが来る途中: `isPending`
 
 古い答えが表示されたままなので、UI には新しいものが途中であることを伝える手段が必要です。
-[`isPending(fn)`](/reference/solid-js/reactivity/is-pending)は、1つの式についてそれに答えます:
+[`isPending(fn)`](/docs/reference/solid-js/reactivity/is-pending.md)は、1つの式についてそれに答えます:
 
 ```tsx
 import { For, createMemo, createSignal, isPending } from "solid-js";
@@ -309,7 +309,7 @@ function App() {
 デザイン上ハイライトをすぐに動かしたい場合は、次に説明する [`latest`](#show-the-input-now-latest) で入力を読み取ります。
 
 何も反応しない保持された更新は、リクエストにかかる時間の間、死んだクリックに見えます。
-アトリビューションを有効にした開発ビルドは、そのケースを `SILENT_HOLD` として報告し、インタラクション、書き込み、待っていたソースを特定します。[リアクティビティのデバッグ](/guides/debugging-reactivity#the-screen-looks-dead-after-a-click)で、そのレポートと修正方法（このページのプリミティブです）を説明しています。
+アトリビューションを有効にした開発ビルドは、そのケースを `SILENT_HOLD` として報告し、インタラクション、書き込み、待っていたソースを特定します。[リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md#the-screen-looks-dead-after-a-click)で、そのレポートと修正方法（このページのプリミティブです）を説明しています。
 
 式にまだ確定済みの答えがなければ、`isPending` の中の読み取りも周囲の `Loading` の流れに従います。`isPending` が報告するのは存在する値への更新であり、初回読み込みではありません。
 
@@ -319,7 +319,7 @@ function App() {
 コンテンツについては、それが正しい選択です。
 ユーザーが触れたコントロールについては、通常そうではありません。クリックしてもハイライトされないタブは、下のコンテンツが正しく待っていても、壊れて見えます。
 
-[`latest(fn)`](/reference/solid-js/reactivity/latest)は、更新がコミットした値ではなく、更新が向かっている値を読み取ります:
+[`latest(fn)`](/docs/reference/solid-js/reactivity/latest.md)は、更新がコミットした値ではなく、更新が向かっている値を読み取ります:
 
 ```tsx
 <ProductList selectedId={latest(selectedId)} onSelect={setSelectedId} />
@@ -400,7 +400,7 @@ function App() {
 上のダッシュボードも同じ選択で決まります。
 各パネルに `on={period()}` 付きの独自のバウンダリを与えると、期間への書き込みはすぐにコミットされます。セレクターは切り替わり、すべてのパネルがスケルトンを表示し、各パネルのコンテンツは自分のリクエストが届き次第現れます。
 `on` を1つのパネルだけに与えると、共有入力を通常どおり読み取っている他の2つは依然として書き込みを保持します。ページは最も遅いリクエストを待ち、`on` 付きのパネルもスケルトンを表示しません。
-[バウンダリ](/concepts/boundaries)で、配置と `Reveal` が複数のバウンダリをどう順序付けるかを説明しています。
+[バウンダリ](/docs/concepts/boundaries.md)で、配置と `Reveal` が複数のバウンダリをどう順序付けるかを説明しています。
 
 :::deep-dive[再取得のたびにスケルトンを表示: on={data()}]
 `on` が指定するのは対象なので、同じ対象の再取得はコンテンツをそのままにします。
@@ -430,13 +430,13 @@ const results = createMemo(() => searchProducts(query()), {
 `loadingValue` を持つソースは最初の処理中に `Loading` に届くことはなく、最初の計算値が届くまで `isPending` は `false` のままです。
 後の更新は通常の保持の振る舞いに従います。
 ストア版は `createStore(async () => ..., seed)` の `seedLoadingValue: true` で、シード値がプレースホルダーになります。
-[`createMemo`](/reference/solid-js/reactivity/create-memo)と [`createStore`](/reference/solid-js/stores/create-store) のリファレンスにオプションの仕様があります。
+[`createMemo`](/docs/reference/solid-js/reactivity/create-memo.md)と [`createStore`](/docs/reference/solid-js/stores/create-store.md) のリファレンスにオプションの仕様があります。
 :::
 
 ## 処理が reject する: `Errored`
 
 非同期の処理が reject すると、エラーは値と同じようにリアクティブグラフを伝わります。
-[`Errored` バウンダリ](/reference/solid-js/components-jsx/errored)は、処理されなかったエラーをフォールバック UI に変えます:
+[`Errored` バウンダリ](/docs/reference/solid-js/components-jsx/errored.md)は、処理されなかったエラーをフォールバック UI に変えます:
 
 ```tsx
 import { Errored, Loading } from "solid-js";
@@ -461,7 +461,7 @@ import { Errored, Loading } from "solid-js";
 エラーはグラフのその部分のステータスであり、終了状態ではありません。
 入力シグナルが変わったり `refresh` が届いたりして元のデータが変わると、バウンダリは再試行し、コンテンツが戻ります。
 `reset` は同じエラーを再び表示するのではなく、失敗したソースを再試行します。
-[バウンダリ](/concepts/boundaries)で配置と復帰を詳しく説明しています。
+[バウンダリ](/docs/concepts/boundaries.md)で配置と復帰を詳しく説明しています。
 
 ## 最初の `await` の前にすべての入力を読み取る
 
@@ -506,8 +506,8 @@ const profile = createMemo(async () => {
 
 ## 次のステップ
 
-- [ミューテーション](/concepts/mutations): 往復をまたぐ書き込み。`action`、`createOptimisticStore`、`refresh` を使い、クライアントのみのカートから組み立てます。
-- [バウンダリ](/concepts/boundaries): `Loading` と `Errored` をどこに置くか、`Reveal` が兄弟領域をどう順序付けるか、エラーになった領域がどう復帰するか。
-- [データ取得パターン](/guides/data-fetching-patterns): 入力中の検索、1ページの複数リクエスト、ページネーション、リクエストの共有、ポーリング、失敗。それぞれ動作するコードで示します。
-- [Solid 1 からのデータ取得の移行](/migration/data-fetching-from-solid-1): `createResource` やエフェクト＋フラグのパターンが非同期メモになると何が変わるか、必要な場所で旧来の感覚をどう維持するか。
-- [サーバー関数](/building-apps/server-functions): `"use server"` 関数は Promise を返すため、このページのすべてがそのまま適用されます。あちらのページではトランスポート、`GET` の読み取り、`live` ストリームを扱います。
+- [ミューテーション](/docs/concepts/mutations.md): 往復をまたぐ書き込み。`action`、`createOptimisticStore`、`refresh` を使い、クライアントのみのカートから組み立てます。
+- [バウンダリ](/docs/concepts/boundaries.md): `Loading` と `Errored` をどこに置くか、`Reveal` が兄弟領域をどう順序付けるか、エラーになった領域がどう復帰するか。
+- [データ取得パターン](/docs/guides/data-fetching-patterns.md): 入力中の検索、1ページの複数リクエスト、ページネーション、リクエストの共有、ポーリング、失敗。それぞれ動作するコードで示します。
+- [Solid 1 からのデータ取得の移行](/docs/migration/data-fetching-from-solid-1.md): `createResource` やエフェクト＋フラグのパターンが非同期メモになると何が変わるか、必要な場所で旧来の感覚をどう維持するか。
+- [サーバー関数](/docs/building-apps/server-functions/index.md): `"use server"` 関数は Promise を返すため、このページのすべてがそのまま適用されます。あちらのページではトランスポート、`GET` の読み取り、`live` ストリームを扱います。

@@ -26,7 +26,7 @@ Solid の[ルーター](https://github.com/solidjs/solid-router)は常にかな�
 
 なので私たちがやるべきだったのは、始めやすくするためにファイルシステムルーティングの規約を追加することだけでした。ネストにはフォルダーシャドウイングのパターンを採用し（[Nuxt](https://nuxtjs.org/docs/features/file-system-routing/#nested-routes) から）、`[]` のパラメータ化ルートと `()` のグルーピングを組み合わせました。また、`()` は `index.tsx` ルートにもぴったりだと気づきました。おかげで、プロジェクト内のファイルに同名を付ける必要が一切なくなります。
 
-![ルート一覧の例](/img/blog/introducing-solidstart/routes.jpeg)
+![ルート一覧の例](/blog/images/introducing-solidstart/routes.jpeg)
 
 ファイルシステムルーティングは驚くほど便利ですが、時には制約にもなります。そこで `<FileRoutes />` コンポーネントとしてエクスポートしており、ルート定義に自分で挿入しても、しなくても構いません。（[Hydrogen](https://shopify.dev/api/hydrogen/components/framework/fileroutes) に感謝）。
 

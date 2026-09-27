@@ -50,5 +50,5 @@ function trackIfTracked(source: () => unknown) {
 
 ## 関連項目
 
-- [オーナーシップ](/concepts/reactivity#ownership)
-- [カスタムプリミティブ](/guides/custom-primitives)
+- [オーナーシップ](/docs/concepts/reactivity.md#ownership)
+- [カスタムプリミティブ](/docs/guides/custom-primitives.md)

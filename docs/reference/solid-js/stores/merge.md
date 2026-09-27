@@ -77,13 +77,13 @@ function Button(_props: { label: string; type?: string; disabled?: boolean }) {
 
 ## よくある問題
 
-- [親のシグナルが変わっても子が更新されない](/concepts/components-and-jsx#a-child-does-not-update-when-the-parents-signal-changes)
+- [親のシグナルが変わっても子が更新されない](/docs/concepts/components-and-jsx.md#a-child-does-not-update-when-the-parents-signal-changes)
 
 ## さらに学ぶ
 
-- [Props](/concepts/components-and-jsx#props)
-- [ストア](/concepts/stores)
-- [リスト](/guides/lists)
+- [Props](/docs/concepts/components-and-jsx.md#props)
+- [ストア](/docs/concepts/stores.md)
+- [リスト](/docs/guides/lists.md)
 
 ## 関連する型
 

@@ -11,7 +11,7 @@ HTML は届くのに `/assets/*.js` と `.css` のリクエストがすべて 40
 
 `bare` や `basic` のプロジェクトは `dist/client` だけにビルドされ、任意の静的ホストが配信できます。
 このページは `ssr: true` またはサーバー関数を持つプロジェクトについてのもので、静的アセットとサーバーハンドラーにビルドされます。
-[プロジェクト構成](/getting-started/project-shapes)ではどの構成がどの出力を生成するかを、[アプリの構造](/building-apps/app-structure)ではハンドラーが実行するエントリーを説明しています。
+[プロジェクト構成](/docs/getting-started/project-shapes.md)ではどの構成がどの出力を生成するかを、[アプリの構造](/docs/building-apps/app-structure.md)ではハンドラーが実行するエントリーを説明しています。
 
 ほとんどのアプリで必要なのはリクエストハンドラーのセクションと、その後にあるホストのセクションのうち1つです。出力された `dist/server/node.js` を使う Node か、プロバイダープラグインのどれかです。
 残りは細部を確認したり、リストにないホストを配線したりするためのものです。
@@ -384,7 +384,7 @@ Cloudflare プラグインは環境の Fetchable `index` エントリーを解�
 ### サーバーが起動時に `server env validation failed at boot` で終了する
 
 `env.ts` で `server` として宣言された変数が、プロセス環境で欠けているか無効です。
-サーバーの値はビルド時ではなく起動時に読まれるため、ホストの環境やシークレット設定で設定してください。ルールは [環境](/building-apps/environment) にあります。
+サーバーの値はビルド時ではなく起動時に読まれるため、ホストの環境やシークレット設定で設定してください。ルールは [環境](/docs/building-apps/environment.md) にあります。
 クライアントの `VITE_` の値は逆です。`vite build` を実行するマシンで設定します。
 
 ### ローカルではサインインできるのに本番でセッションが失われる
@@ -404,6 +404,6 @@ Cloudflare プラグインは環境の Fetchable `index` エントリーを解�
 
 ## 次のステップ
 
-- [環境](/building-apps/environment): ホストが起動時に供給しなければならない変数と、ビルド時に確定する変数。
-- [レンダリングモードを選ぶ](/guides/choose-a-rendering-mode): プロジェクトにサーバーハンドラーが本当に必要か、プリレンダーしたサイトで十分か。
-- [ミドルウェアと API ルート](/building-apps/middleware-and-api-routes): ページがレンダーされる前にハンドラー内で実行されるコード。
+- [環境](/docs/building-apps/environment.md): ホストが起動時に供給しなければならない変数と、ビルド時に確定する変数。
+- [レンダリングモードを選ぶ](/docs/guides/choose-a-rendering-mode.md): プロジェクトにサーバーハンドラーが本当に必要か、プリレンダーしたサイトで十分か。
+- [ミドルウェアと API ルート](/docs/building-apps/middleware-and-api-routes.md): ページがレンダーされる前にハンドラー内で実行されるコード。

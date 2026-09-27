@@ -81,11 +81,11 @@ setRows(reconcile(nextRows, (row) => row.region + row.year));
 
 ## よくある問題
 
-- [リストが変わると行がフォーカスやアニメーションを失う](/guides/lists#rows-lose-focus-or-animation-when-the-list-changes)
-- [1つの要素を編集するとリスト全体が再構築される](/guides/lists#editing-one-item-rebuilds-the-whole-list)
+- [リストが変わると行がフォーカスやアニメーションを失う](/docs/guides/lists.md#rows-lose-focus-or-animation-when-the-list-changes)
+- [1つの要素を編集するとリスト全体が再構築される](/docs/guides/lists.md#editing-one-item-rebuilds-the-whole-list)
 
 ## さらに学ぶ
 
-- [更新をまたいで行の同一性を保つ](/guides/lists#keep-row-identity-across-updates)
-- [ストア](/concepts/stores)
-- [リスト](/guides/lists)
+- [更新をまたいで行の同一性を保つ](/docs/guides/lists.md#keep-row-identity-across-updates)
+- [ストア](/docs/concepts/stores.md)
+- [リスト](/docs/guides/lists.md)

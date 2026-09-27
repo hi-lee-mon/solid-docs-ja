@@ -74,10 +74,10 @@ function Portal(props: { mount?: Element; children: JSX.Element }): JSX.Element;
 
 ## よくある問題
 
-- [`ref` コールバック内のエフェクトや `onCleanup` が一度も実行されない](/concepts/components-and-jsx#an-effect-or-oncleanup-inside-a-ref-callback-never-runs)
+- [`ref` コールバック内のエフェクトや `onCleanup` が一度も実行されない](/docs/concepts/components-and-jsx.md#an-effect-or-oncleanup-inside-a-ref-callback-never-runs)
 
 ## 関連項目
 
-- [サーバーとクライアントのバウンダリ](/concepts/rendering-and-ssr#server-and-client-boundaries)
-- [Solid を外部コンテナにレンダーする](/guides/integrate-non-solid-code#render-solid-into-a-foreign-container)
-- [コンポーネントと JSX](/concepts/components-and-jsx)
+- [サーバーとクライアントのバウンダリ](/docs/concepts/rendering-and-ssr.md#server-and-client-boundaries)
+- [Solid を外部コンテナにレンダーする](/docs/guides/integrate-non-solid-code.md#render-solid-into-a-foreign-container)
+- [コンポーネントと JSX](/docs/concepts/components-and-jsx.md)

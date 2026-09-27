@@ -39,7 +39,7 @@ console.table(feedback().flights);
 
 属性付けが有効な間、Solid は次の場合に自分でも警告を出します: スコープが1秒間に120回以上再実行されたとき（`HOT_SCOPE_RERUNS`）、1秒間に8ms以上の計算を費やしたとき（`HOT_SCOPE_TIME`）、30個以上のソースを追跡したとき（`WIDE_SCOPE_DEPS`）、1回の書き込みが250個以上の購読者に届いたとき（`WIDE_WRITE`）。
 常時有効な警告が開発時に2つあります: `HUGE_FAN_OUT` と `HUGE_FAN_IN` で、2,000個の購読者またはソースから発火します。
-各レポートの読み方は[リアクティビティのデバッグ](/guides/debugging-reactivity#something-updates-too-often)で説明しています。
+各レポートの読み方は[リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md#something-updates-too-often)で説明しています。
 
 :::note[開発ビルドのみ]
 属性付けとこのページの診断は開発ビルドに存在します。
@@ -58,7 +58,7 @@ console.table(feedback().flights);
 | ------------------------------------------------------- | ----------------------------------------------------- | -------------------------------------------------------------- |
 | 1つの導出がキーストロークごとに、すべての読み手で実行される | `HOT_SCOPE_RERUNS`, `HOT_SCOPE_TIME`                  | [高価な導出](#expensive-derivations)                |
 | 1回の書き込みが数千の小さなスコープを再実行する             | `HUGE_FAN_OUT`, `WIDE_WRITE`                          | [大規模なストア](#stores-at-scale)                            |
-| 読み手が変更ごとに1フラッシュずれて2回更新される        | `EFFECT_RELAY_TEAR`                                   | [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects) |
+| 読み手が変更ごとに1フラッシュずれて2回更新される        | `EFFECT_RELAY_TEAR`                                   | [不要なエフェクトを避ける](/docs/guides/avoid-unnecessary-effects.md) |
 | 同じレコードに対して行が破棄・再作成される    | `UNSTABLE_LIST_IDENTITY`, `IMMUTABLE_UPDATE_IN_STORE` | [リスト](#lists)                                                |
 | 何も変わっていないのにメモが読み手に通知する        | `UNSTABLE_MEMO_OUTPUT`                                | [高価な導出](#expensive-derivations)                |
 | リクエストが次々に開始される                        | `ASYNC_WATERFALL`                                     | [ウォーターフォール](#waterfalls)                                      |
@@ -139,19 +139,19 @@ const visible = createMemo(
 `Avoid` 版を実行してカートに1点追加すると、2,000行すべてが破棄・再作成され、属性付けは `[UNSTABLE_LIST_IDENTITY]` を報告します。
 `Prefer` 版では `inCart` は商品 id をキーにしたストアで、[大規模なストア](#stores-at-scale)で作られるため、アイテムを追加するとキーが切り替わった1行だけが更新されます。
 
-残りは[リスト](/guides/lists)ガイドが扱います: [再取得をまたいで行の同一性を保つ](/guides/lists#keep-row-identity-across-updates)、[すべての行に触れずに選択する](/guides/lists#select-a-row)、2,000行すべてを DOM に置くべきでないときに `Repeat` で[ウィンドウをレンダリングする](/guides/lists#render-a-window-over-a-large-list)方法。
+残りは[リスト](/docs/guides/lists.md)ガイドが扱います: [再取得をまたいで行の同一性を保つ](/docs/guides/lists.md#keep-row-identity-across-updates)、[すべての行に触れずに選択する](/docs/guides/lists.md#select-a-row)、2,000行すべてを DOM に置くべきでないときに `Repeat` で[ウィンドウをレンダリングする](/docs/guides/lists.md#render-a-window-over-a-large-list)方法。
 
 ## ウォーターフォール
 
 最初のペイントが3つのリクエストを待つのは、それぞれが前のリクエストの着地を待って開始されるからです。商品は何も必要とせず、ブランドの読み取りは商品を待ち、ブランドのカタログはブランドを待ちます。
 すでに持っている入力から各リクエストを導出して、互いに依存しないものは同時に開始させ、依存するものはサーバーで結合してください。
 属性付けが有効な場合、50ms以上のシーケンシャルなフライトが3つ以上続くと `[ASYNC_WATERFALL]` がシリアル化された時間とともに表示されます。2フライトのチェーンは `info` でのみ記録されます。
-[依存するリクエスト](/guides/data-fetching-patterns#dependent-requests)に `Avoid` 版と `Prefer` 版が示されており、ルートの [`preload`](/routing/solid-router/data#start-work-before-the-component-runs) はコンポーネントが実行される前から読み取りを開始します。
+[依存するリクエスト](/docs/guides/data-fetching-patterns.md#dependent-requests)に `Avoid` 版と `Prefer` 版が示されており、ルートの [`preload`](/docs/routing/solid-router/data.md#start-work-before-the-component-runs) はコンポーネントが実行される前から読み取りを開始します。
 
 ## コード分割
 
 アカウント領域はバンドルの3分の1を占めますが、ほとんどの訪問者はそれを開きません。
-[`lazy`](/reference/solid-js/components-context/lazy)は import を、初回レンダー時にチャンクを読み込むコンポーネントに変えます:
+[`lazy`](/docs/reference/solid-js/components-context/lazy.md)は import を、初回レンダー時にチャンクを読み込むコンポーネントに変えます:
 
 ```tsx
 import { Loading, lazy } from "solid-js";
@@ -168,7 +168,7 @@ const Account = lazy(() => import("./account/Account"));
 
 Solid Router では分割は通常ルートで行います。
 `component` が `lazy` コンポーネントであるルートは、ユーザーがそのルートへのリンクにホバー・フォーカス・タッチしたときにチャンクが読み込まれ、`children: () => import("./account/routes")` という thunk はルートテーブル全体を同様に遅延させます。
-[ルートサブツリーを遅延ロードする](/routing/solid-router/route-definitions#load-a-route-subtree-lazily)と[リンクからのプリロード](/routing/solid-router/data#preloading-from-links)がその両方をカバーしています。
+[ルートサブツリーを遅延ロードする](/docs/routing/solid-router/route-definitions.md#load-a-route-subtree-lazily)と[リンクからのプリロード](/docs/routing/solid-router/data.md#preloading-from-links)がその両方をカバーしています。
 
 :::caution[チャンクは1回の往復]
 最初のページが必要とするコンポーネントを分割すると、そのページがペイントする前にリクエストが1つ増えます。
@@ -200,7 +200,7 @@ Solid Router では分割は通常ルートで行います。
 `Prefer` 版ではヘッダーとスケルトンが一度に届き、データが着地するとグリッドがスケルトンに置き換わります。
 
 クローラーやリンクプレビューのために、ある読み取りが最初の HTML に含まれなければならない場合、そのメモに `deferStream: true` を渡してください。シェルはバウンダリのフォールバックを送る代わりにその読み取りを待ちます。
-[ストリーミングレンダリング](/concepts/rendering-and-ssr#streaming-rendering)は出力形式をカバーし、[レンダリングモードを選ぶ](/guides/choose-a-rendering-mode)はストリーミングと静的シェル・プリレンダリングを比較検討します。
+[ストリーミングレンダリング](/docs/concepts/rendering-and-ssr.md#streaming-rendering)は出力形式をカバーし、[レンダリングモードを選ぶ](/docs/guides/choose-a-rendering-mode.md)はストリーミングと静的シェル・プリレンダリングを比較検討します。
 
 ## 大規模なストア
 
@@ -232,7 +232,7 @@ const inCart = createProjection<Record<string, boolean>>(
 
 代替案である、すべての行が `cart.items.some((item) => item.id === product.id)` を読む方法は、2,000のスコープを `cart.items` に購読させ、アイテム追加ですべてが再実行されます。
 開発ビルドはその書き込みを `[HUGE_FAN_OUT]` として報告し、属性付けが有効なら低いしきい値の `[WIDE_WRITE]` が250購読者からシグナル名を示します。
-[プロジェクション](/concepts/stores#derive-a-store-with-a-projection)または id をキーにしたマップとして使うストアが、両方のメッセージが示唆する修復です。
+[プロジェクション](/docs/concepts/stores.md#derive-a-store-with-a-projection)または id をキーにしたマップとして使うストアが、両方のメッセージが示唆する修復です。
 
 フィールド単位で編集されるのではなく丸ごと置き換えられる行を持つレコードマップには、`createStore(value, { shallow: true })` がルートキーを追跡し、各値を参照で保持するため、フィールドごとに読まれることのない行にフィールド単位のノードは作られません。
 
@@ -242,18 +242,18 @@ const inCart = createProjection<Record<string, boolean>>(
 
 原因は3つあり、属性付けがそれらを切り分けます。
 `costs().scopes` の上位にフィルターやソートがある場合、それはすべての読み手で実行されています。メモにして、[高価な導出](#expensive-derivations)のように正規化したクエリに等価性の境界を置いてください。
-`feedback().flights` でほとんどのリクエストが abandoned になっている場合、キーストロークごとにリクエストが開始されています。[入力しながら検索](/guides/data-fetching-patterns#search-as-you-type)が示すように、input ハンドラーでデバウンスしてください。
+`feedback().flights` でほとんどのリクエストが abandoned になっている場合、キーストロークごとにリクエストが開始されています。[入力しながら検索](/docs/guides/data-fetching-patterns.md#search-as-you-type)が示すように、input ハンドラーでデバウンスしてください。
 input 自体が前の文字を表示する場合、`query()` にバインドされており、保留中の更新が結果を待っています。代わりに `latest(query)` にバインドしてください。
 
 ### 1つの商品を選択するとすべての行が更新される
 
 各行が選択中の id を読んでいるため、選択の変更で2,000のスコープが再実行され、開発ビルドは `[HUGE_FAN_OUT]` を出力します。
-選択を id をキーにしたストアに保持し、行で `selected[product.id]` を読んでください。[行を選択する](/guides/lists#select-a-row)に2つの版が示されています。
+選択を id をキーにしたストアに保持し、行で `selected[product.id]` を読んでください。[行を選択する](/docs/guides/lists.md#select-a-row)に2つの版が示されています。
 
 ### リフレッシュのたびにリストが作り直される
 
 再取得が同じレコードに対して新しいオブジェクトを生成したため、`For` がすべての行を破棄し、属性付けは `[UNSTABLE_LIST_IDENTITY]` を報告します。
-リストを関数から作成したストアに読み込むか、`keyed={(item) => item.id}` を渡してください。[更新をまたいで行の同一性を保つ](/guides/lists#keep-row-identity-across-updates)を参照してください。
+リストを関数から作成したストアに読み込むか、`keyed={(item) => item.id}` を渡してください。[更新をまたいで行の同一性を保つ](/docs/guides/lists.md#keep-row-identity-across-updates)を参照してください。
 
 ### 最初のペイントがすべてのデータを待つ
 
@@ -278,7 +278,7 @@ input 自体が前の文字を表示する場合、`query()` にバインドさ�
 
 ## 次のステップ
 
-- [リスト](/guides/lists): カタログに対する行の同一性・選択・ウィンドウ表示と、行が作り直されたときに発火する診断。
-- [データ取得パターン](/guides/data-fetching-patterns): 並列読み取り、`preload`、コンポーネント間での1つのリクエストの共有、`[ASYNC_WATERFALL]` レポートの全体。
-- [リアクティビティのデバッグ](/guides/debugging-reactivity): このページで名前が出たすべての診断と、その背後の `why` チェーンの読み方。
-- [レンダリングと SSR](/concepts/rendering-and-ssr): `renderToStream`、ハイドレーション、このページのバウンダリが HTML のどこに来るか。
+- [リスト](/docs/guides/lists.md): カタログに対する行の同一性・選択・ウィンドウ表示と、行が作り直されたときに発火する診断。
+- [データ取得パターン](/docs/guides/data-fetching-patterns.md): 並列読み取り、`preload`、コンポーネント間での1つのリクエストの共有、`[ASYNC_WATERFALL]` レポートの全体。
+- [リアクティビティのデバッグ](/docs/guides/debugging-reactivity.md): このページで名前が出たすべての診断と、その背後の `why` チェーンの読み方。
+- [レンダリングと SSR](/docs/concepts/rendering-and-ssr.md): `renderToStream`、ハイドレーション、このページのバウンダリが HTML のどこに来るか。

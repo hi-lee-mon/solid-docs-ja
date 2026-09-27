@@ -209,5 +209,5 @@ interface BeforeLeaveEventArgs {
 
 ## 関連項目
 
-- [ルートと型付きパス](/reference/solid-router/routes-and-paths)
-- [履歴アダプター](/reference/solid-router/history)
+- [ルートと型付きパス](/docs/reference/solid-router/routes-and-paths.md)
+- [履歴アダプター](/docs/reference/solid-router/history.md)

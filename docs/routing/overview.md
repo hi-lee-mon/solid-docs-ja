@@ -4,7 +4,7 @@ version: "2.0"
 description: "Solid アプリで Solid Router と TanStack Router のどちらかを選び、App にルーターをマウントし、ルートを配列で与えるか src/routes 配下のファイルから与えるかを決めます。"
 ---
 
-[クイックスタート](/getting-started/quick-start)のストアにはページが1つしかありません。
+[クイックスタート](/docs/getting-started/quick-start.md)のストアにはページが1つしかありません。
 商品 id を URL に持つ商品ページ、`/cart` のカート、その下のページが切り替わっても画面上に残るヘッダーが必要です。そして、それらのページ間のクリックでドキュメントが再読み込みされてはいけません。
 
 Solid はルーターを同梱しません。
@@ -13,7 +13,7 @@ Solid はルーターを同梱しません。
 このページではどちらを選ぶかを決め、最小のルーティング済みアプリを示します。そこから先は各ルーターのページが引き継ぎます。
 
 :::note[この2つ以外のルーターを組み込む場合]
-別のルーターを start モードに統合する場合は、[ルーターを統合する](/routing/integrate-a-router)がリクエストパイプラインとシングルフライトの拡張ポイントを説明しています。
+別のルーターを start モードに統合する場合は、[ルーターを統合する](/docs/routing/integrate-a-router.md)がリクエストパイプラインとシングルフライトの拡張ポイントを説明しています。
 このページの内容はそのために必読ではありません。
 :::
 
@@ -25,7 +25,7 @@ CLI テンプレートが使うファイルシステムアダプターも同梱�
 `basic` と `fullstack` のプロジェクト形状がこれをインストールします。
 
 すでに TanStack Query の上に構築している場合、その型付き検索パラメータスキーマとローダーモデルが必要な場合、あるいは別フレームワークの TanStack アプリとルーティング規約を共有する場合は、TanStack Router を使います。
-その代わり、他の Solid テンプレートと共有されるファイルシステム規約は捨てることになり、サーバーとクライアント間のデータキャッシュの受け渡しは自分で管理します。これは [TanStack Router](/routing/tanstack) のページで説明しています。
+その代わり、他の Solid テンプレートと共有されるファイルシステム規約は捨てることになり、サーバーとクライアント間のデータキャッシュの受け渡しは自分で管理します。これは [TanStack Router](/docs/routing/tanstack/index.md) のページで説明しています。
 `fullstack-tanstack` のプロジェクト形状がこれをインストールします。
 
 `bare` の形状にはルーターがありません。単一ページのツールや、後からルーターを追加するプロジェクト向けです。
@@ -76,7 +76,7 @@ URL が `/users/1` に変わり、`<nav>` の下のページが切り替わり�
 `src/routes` 配下でデフォルトエクスポートを持つ各ファイルが1つのページです。
 `paths` はルートツリーから URL を構築するため、`paths.users(1)` は型チェッカーで検査され、存在しないルートへのリンクはコンパイルに失敗します。
 `props.children` を囲む `Loading` バウンダリは初回ロードにフォールバックを与えます。次のページのデータが届くまで更新が保留されるため、以降のナビゲーションではフォールバックなしに現在のページが画面に残ります。
-[Solid Router のセットアップページ](/routing/solid-router/setup)では、ファイルシステムアダプターの代わりにインメモリのルートツリーを使う同じアプリを示しています。
+[Solid Router のセットアップページ](/docs/routing/solid-router/setup.md)では、ファイルシステムアダプターの代わりにインメモリのルートツリーを使う同じアプリを示しています。
 
 ## `App` にルーターをマウントする
 
@@ -110,7 +110,7 @@ URL が `/users/1` に変わり、`<nav>` の下のページが切り替わり�
 
 :::caution[アプリにつきルーターは1つ]
 Solid Router は `<Router>` の内側に別の `<Router>` を置くことをサポートしていません。開発時には `Mounting a router inside another router is not supported.` と警告されます。
-代わりに1つのルートツリーを構成し、必要に応じてロードすべき大きなセクションは[遅延サブツリー](/routing/solid-router/route-definitions#load-a-route-subtree-lazily)に分割します。
+代わりに1つのルートツリーを構成し、必要に応じてロードすべき大きなセクションは[遅延サブツリー](/docs/routing/solid-router/route-definitions.md#load-a-route-subtree-lazily)に分割します。
 :::
 
 ## ルートの定義方法を選ぶ
@@ -121,7 +121,7 @@ Solid Router は `<Router>` の内側に別の `<Router>` を置くことをサ�
 Solid Router では、どちらの形式も同じルートオブジェクトを生成するため、判断基準はルートツリーをどこで読みたいかです:
 
 - `src/router.ts` の手書き配列はすべてのパスを1つのファイルに収め、プラグインも不要です。
-  フィールドは[ルート定義](/routing/solid-router/route-definitions)で説明しています。
+  フィールドは[ルート定義](/docs/routing/solid-router/route-definitions.md)で説明しています。
 - `filesystem-routing` Vite プラグインは `virtual:file-routes` を通じてマニフェストを公開し、`@solidjs/router/fs` の `fileRoutes` がその `pageRoutes` エクスポートをルート定義へ変換します。
   パスはファイル名に表れるため、ページの追加はファイルの追加です。
   テンプレートはこの方法を使っています。
@@ -141,7 +141,7 @@ TanStack Router は `@tanstack/router-plugin` を使って `src/routes` から�
 
 ## 次のステップ
 
-- [Solid Router](/routing/solid-router): 小さなストアをページごとに作り上げた後、ルート、レイアウト、ナビゲーション、データロードを掘り下げます。
-- [TanStack Router](/routing/tanstack): `fullstack-tanstack` テンプレートがサーバーとクライアント間で TanStack Query キャッシュを受け渡す方法。
-- [アプリ構造](/building-apps/app-structure): 生成されるエントリーが `App` と `Document` に何をするか、いつそれらを変更するか。
-- [ルーターを統合する](/routing/integrate-a-router): Solid が同梱しないルーターのための、リクエストパイプラインとシングルフライトフック。
+- [Solid Router](/docs/routing/solid-router/index.md): 小さなストアをページごとに作り上げた後、ルート、レイアウト、ナビゲーション、データロードを掘り下げます。
+- [TanStack Router](/docs/routing/tanstack/index.md): `fullstack-tanstack` テンプレートがサーバーとクライアント間で TanStack Query キャッシュを受け渡す方法。
+- [アプリ構造](/docs/building-apps/app-structure.md): 生成されるエントリーが `App` と `Document` に何をするか、いつそれらを変更するか。
+- [ルーターを統合する](/docs/routing/integrate-a-router.md): Solid が同梱しないルーターのための、リクエストパイプラインとシングルフライトフック。

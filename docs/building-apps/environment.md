@@ -4,7 +4,7 @@ version: "2.0"
 description: "環境変数を一度だけ宣言し、型付きモジュールを通してサーバーではシークレットを、ブラウザーでは公開値を読み取り、シークレットが漏れそうなときはビルドを失敗させます。"
 ---
 
-[セッションと認証](/building-apps/sessions-and-auth)のセッションクッキーは `SESSION_SECRET` で署名され、ストアのヘッダーにはステージングと本番のデプロイで変わる名前が表示されます。
+[セッションと認証](/docs/building-apps/sessions-and-auth.md)のセッションクッキーは `SESSION_SECRET` で署名され、ストアのヘッダーにはステージングと本番のデプロイで変わる名前が表示されます。
 前者は決してブラウザーに届けてはならず、後者は配布しても問題なく、型が付いていると便利です。
 Vite の `import.meta.env` は後者を扱います。
 Start モードは、1つのスキーマと2つのインポートパス、そして両者の境界を越えさせないビルドによって、両方を扱うレイヤーを追加します。
@@ -110,7 +110,7 @@ export const secrets = env.SESSION_SECRET.split(",");
 ### `virtual:env/server` をコンポーネントからインポートした
 
 ビルドが失敗し、上記のようにインポート元のファイル名が示されます。
-読み取りは[サーバー関数](/building-apps/server-functions)、ミドルウェア、あるいはそれらからのみ到達されるモジュールに移してください。
+読み取りは[サーバー関数](/docs/building-apps/server-functions/index.md)、ミドルウェア、あるいはそれらからのみ到達されるモジュールに移してください。
 
 ### シークレットが `client` マップにある
 
@@ -250,6 +250,6 @@ Vite の依存関係スキャナーは、`"use server"` 変換が実行される
 
 ## 次のステップ
 
-- [セッションと認証](/building-apps/sessions-and-auth): このレイヤーの `SESSION_SECRET` でクッキーに署名します。
-- [サーバー関数](/building-apps/server-functions): サーバーの値を読み取る一般的な場所です。
-- [デプロイ](/building-apps/deployment): 各ホストが起動時にサーバー変数を供給する方法と、クライアントの値がビルド時に固定される理由です。
+- [セッションと認証](/docs/building-apps/sessions-and-auth.md): このレイヤーの `SESSION_SECRET` でクッキーに署名します。
+- [サーバー関数](/docs/building-apps/server-functions/index.md): サーバーの値を読み取る一般的な場所です。
+- [デプロイ](/docs/building-apps/deployment.md): 各ホストが起動時にサーバー変数を供給する方法と、クライアントの値がビルド時に固定される理由です。

@@ -141,6 +141,6 @@ const route = defineRoute({
 
 ## 関連項目
 
-- [ルートと型付きパス](/reference/solid-router/routes-and-paths)
-- [履歴アダプター](/reference/solid-router/history)
-- [サーバー統合](/reference/solid-router/server)
+- [ルートと型付きパス](/docs/reference/solid-router/routes-and-paths.md)
+- [履歴アダプター](/docs/reference/solid-router/history.md)
+- [サーバー統合](/docs/reference/solid-router/server.md)

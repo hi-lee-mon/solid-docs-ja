@@ -41,7 +41,7 @@ const html = await renderToStream(() => (
 
 ## クエリは一度だけレンダリングされる
 
-[イントロダクション](/routing/solid-router#load-data-for-a-page) の商品ページはサーバーで `product().name` をレンダリングし、ブラウザーは商品を再フェッチしませんでした。
+[イントロダクション](/docs/routing/solid-router/index.md#load-data-for-a-page) の商品ページはサーバーで `product().name` をレンダリングし、ブラウザーは商品を再フェッチしませんでした。
 
 非同期サーバーレンダリング中、各 `query` の結果はそのキーと一緒にページにシリアライズされます。
 クライアントが同じ `query` を同じ名前と引数で実行すると、シリアライズされた値を見つけて、リクエストを開始する代わりにそれを採用します。
@@ -60,7 +60,7 @@ const html = await renderToStream(() => (
 サーバー側のコレクターがなければ、ブラウザーは2回リクエストを出します。ミューテーションと、ルーターが影響を受けたクエリをリロードするときの再検証フェッチです。
 コレクターがあれば、ブラウザーのリクエストは1回です。ミューテーションのレスポンスが新鮮なクエリ値を運び、ルーターはアクションの呼び出し元が戻り値を受け取る前にそこからキャッシュをシードします。
 
-![ブラウザーとサーバー間の2つのシーケンス。コレクターなし: アクションリクエスト、その結果、そして影響を受けたクエリをリロードする2回目のリクエスト。コレクターあり: レスポンスが新鮮なクエリ値を運ぶ1回のアクションリクエスト。ルーターはキャッシュをシードしてから呼び出しを解決する。](/images/diagrams/single-flight-mutation.svg)
+![ブラウザーとサーバー間の2つのシーケンス。コレクターなし: アクションリクエスト、その結果、そして影響を受けたクエリをリロードする2回目のリクエスト。コレクターあり: レスポンスが新鮮なクエリ値を運ぶ1回のアクションリクエスト。ルーターはキャッシュをシードしてから呼び出しを解決する。](/docs/images/diagrams/single-flight-mutation.svg)
 
 `fullstack` テンプレートは2つのファイルでこれを有効にします。
 1つ目はルーターをコレクターとして登録します。
@@ -92,8 +92,8 @@ solid({
 ミューテーションが終了すると、コレクターはクライアントが次に表示する URL（現在のページでも `redirect` 先でも）を割り出します。
 そのパス上の遅延サブツリーを解決し、ルートのプリロードとマッチしたルートのプリロードをデータのみのモードで実行して、それらが生成したすべての `query` 結果をレスポンスに畳み込みます。
 クライアント側では、ルーターがレスポンスの再検証とリダイレクトのメタデータを適用し、配信された値をシードして、その後初めてアクション呼び出しを解決します。
-[データ](/routing/solid-router/data#what-revalidates-after-a-mutation) ページが、ページが必要とする読み取りを `preload` に置くことを勧めるのはこのためです。コレクターはプリロードが触れるものしか更新できません。
-[ルーターを統合する](/routing/integrate-a-router#integrate-single-flight-mutations) では、コレクターが構築されているトランスポートフックを説明しています。
+[データ](/docs/routing/solid-router/data.md#what-revalidates-after-a-mutation) ページが、ページが必要とする読み取りを `preload` に置くことを勧めるのはこのためです。コレクターはプリロードが触れるものしか更新できません。
+[ルーターを統合する](/docs/routing/integrate-a-router.md#integrate-single-flight-mutations) では、コレクターが構築されているトランスポートフックを説明しています。
 :::
 
 このプロトコルをオフにするには、`createRouter` で `singleFlight: false` を設定します。
@@ -104,7 +104,7 @@ Vite プラグインでデフォルトのサーバー関数エンドポイント
 
 ## JavaScript なしのフォーム
 
-JavaScript を無効にして、[データ](/routing/solid-router/data#mutate-with-actions) ページのカートフォームを送信します。
+JavaScript を無効にして、[データ](/docs/routing/solid-router/data.md#mutate-with-actions) ページのカートフォームを送信します。
 それでも動きます。
 
 アクションの URL はサーバー関数ハンドラーを指しています。
@@ -116,7 +116,7 @@ JavaScript を無効にして、[データ](/routing/solid-router/data#mutate-wi
 
 :::note[JavaScript なしの経路を持つのはサーバーに裏付けられたアクションだけ]
 クライアントのみのアクションにはサーバーが実行できる URL がないため、フォームが送信される前にそのモジュールがロードされている必要があります。
-[プログレッシブエンハンスメント](/building-apps/server-functions/progressive-enhancement) では、このやり取りでコアランタイムが担う部分とルーターが追加する部分を説明しています。
+[プログレッシブエンハンスメント](/docs/building-apps/server-functions/progressive-enhancement.md) では、このやり取りでコアランタイムが担う部分とルーターが追加する部分を説明しています。
 :::
 
 ## よくある問題
@@ -125,13 +125,13 @@ JavaScript を無効にして、[データ](/routing/solid-router/data#mutate-wi
 
 `App` の `props.children` の周りに `Loading` バウンダリがありません。
 上にバウンダリのない非同期読み取りは、確定するまでシェルをブロックするため、サーバーは最も遅いクエリが返るまで何も送信しません。
-[セットアップ](/routing/solid-router/setup#mount-it-at-the-application-root) ページのように `props.children` を `<Loading fallback={...}>` で囲んでください。シェルはフォールバックとともにストリーミングされ、ページが後に続きます。
+[セットアップ](/docs/routing/solid-router/setup.md#mount-it-at-the-application-root) ページのように `props.children` を `<Loading fallback={...}>` で囲んでください。シェルはフォールバックとともにストリーミングされ、ページが後に続きます。
 
 ### ルーティングされたページでコンソールに `Hydration tag mismatch` または `Hydration structure mismatch`
 
 同じ URL に対してサーバーとクライアントが異なるツリーをレンダリングしました。
 よくある原因は、`isServer` や `typeof window` で分岐するコンポーネント（分岐が異なる要素のときにタグミスマッチを報告します）、レンダリング内の `Date.now()` のような値、あるいはブラウザーがロードしたものと一致しないサーバー上の `url` prop です。
-両側で同じ構造をレンダリングし、ブラウザー固有の値はハイドレーション後に埋めてください。一般的なケースは [サーバー HTML のハイドレート](/concepts/rendering-and-ssr#hydrating-server-html) で扱っています。
+両側で同じ構造をレンダリングし、ブラウザー固有の値はハイドレーション後に埋めてください。一般的なケースは [サーバー HTML のハイドレート](/docs/concepts/rendering-and-ssr.md#hydrating-server-html) で扱っています。
 
 ### ページがサーバーがすでにレンダリングしたデータをフェッチする
 
@@ -155,7 +155,7 @@ JavaScript を無効にして、[データ](/routing/solid-router/data#mutate-wi
 
 ## 次のステップ
 
-- [レンダリングモードを選ぶ](/guides/choose-a-rendering-mode): 静的シェル・ストリーミング SSR・プリレンダリング、そしてそれぞれがルートコードに求めるもの。
-- [サーバー関数](/building-apps/server-functions): `fullstack` プロジェクトにおける `query` と `action` の下にあるランタイム。
-- [デプロイ](/building-apps/deployment): サーバーハンドラーが動く場所。
-- [`@solidjs/router/server` リファレンス](/reference/solid-router/server): `createFlightDataCollector` のオプション。
+- [レンダリングモードを選ぶ](/docs/guides/choose-a-rendering-mode.md): 静的シェル・ストリーミング SSR・プリレンダリング、そしてそれぞれがルートコードに求めるもの。
+- [サーバー関数](/docs/building-apps/server-functions/index.md): `fullstack` プロジェクトにおける `query` と `action` の下にあるランタイム。
+- [デプロイ](/docs/building-apps/deployment.md): サーバーハンドラーが動く場所。
+- [`@solidjs/router/server` リファレンス](/docs/reference/solid-router/server.md): `createFlightDataCollector` のオプション。

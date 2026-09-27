@@ -81,5 +81,5 @@ export default function Theme(props: { accent: () => string }) {
 
 ## 関連項目
 
-- [`Stylesheet`](/reference/solid-meta/stylesheet)
-- [`Script`](/reference/solid-meta/script)
+- [`Stylesheet`](/docs/reference/solid-meta/stylesheet.md)
+- [`Script`](/docs/reference/solid-meta/script.md)

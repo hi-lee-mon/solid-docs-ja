@@ -100,5 +100,5 @@ history.back();
 
 ## 関連項目
 
-- [`createRouter`](/reference/solid-router/router-factory#createrouter)
-- [ナビゲーションプリミティブ](/reference/solid-router/navigation)
+- [`createRouter`](/docs/reference/solid-router/router-factory.md#createrouter)
+- [ナビゲーションプリミティブ](/docs/reference/solid-router/navigation.md)

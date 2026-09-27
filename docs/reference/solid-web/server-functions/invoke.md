@@ -20,7 +20,7 @@ source_path: "packages/web/server-functions/src/registry.ts"
 
 呼び出しスコープの `signal`、`keepalive`、`priority` オプションを付けてサーバー関数を呼び出します。
 
-> 呼び出しスコープのオプションについては[メタデータとトランスポート](/building-apps/server-functions/metadata-and-transport#configure-one-call)を参照してください。
+> 呼び出しスコープのオプションについては[メタデータとトランスポート](/docs/building-apps/server-functions/metadata-and-transport.md#configure-one-call)を参照してください。
 
 ## インポート
 
@@ -60,8 +60,8 @@ const result = invoke(loadUser, { signal }, userId);
 
 ## 関連項目
 
-- [メタデータとトランスポート](/building-apps/server-functions/metadata-and-transport)
-- [サーバー関数](/building-apps/server-functions)
+- [メタデータとトランスポート](/docs/building-apps/server-functions/metadata-and-transport.md)
+- [サーバー関数](/docs/building-apps/server-functions/index.md)
 
 ## 関連する型
 

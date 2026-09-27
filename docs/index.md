@@ -19,18 +19,18 @@ Solid 2.0 はプラットフォーム全体を束ねた協調リリースです�
 
 ## どこから始めるか
 
-Solid を書いたことがなければ、[クイックスタート](/getting-started/quick-start)から始めてください。
+Solid を書いたことがなければ、[クイックスタート](/docs/getting-started/quick-start.md)から始めてください。
 CLI でアプリを作成し、生成されるファイルを順に見ながら、最初の変更を加えるところまで案内します。
-その後、[リアクティビティ](/concepts/reactivity)と[コンポーネントと JSX](/concepts/components-and-jsx)をこの順で読んでください。クイックスタートで作ったカウンターを起点に、シグナル、派生値、エフェクト、そして一度だけ実行されるコンポーネントモデルを学びます。
+その後、[リアクティビティ](/docs/concepts/reactivity.md)と[コンポーネントと JSX](/docs/concepts/components-and-jsx.md)をこの順で読んでください。クイックスタートで作ったカウンターを起点に、シグナル、派生値、エフェクト、そして一度だけ実行されるコンポーネントモデルを学びます。
 
-プロジェクトを始める場合で Solid をすでに知っているなら、[クイックスタート](/getting-started/quick-start)が動くアプリへの最短経路であることに変わりはなく、[プロジェクトの形](/getting-started/project-shapes)でどのテンプレートを選ぶべきかを説明しています。
+プロジェクトを始める場合で Solid をすでに知っているなら、[クイックスタート](/docs/getting-started/quick-start.md)が動くアプリへの最短経路であることに変わりはなく、[プロジェクトの形](/docs/getting-started/project-shapes.md)でどのテンプレートを選ぶべきかを説明しています。
 
-React や Vue の経験があるなら、クイックスタートの後に [Thinking in Solid](/guides/thinking-in-solid)を読んでください。
+React や Vue の経験があるなら、クイックスタートの後に [Thinking in Solid](/docs/guides/thinking-in-solid.md)を読んでください。
 一つの機能を端から端まで実装しながら、どちらのフレームワークで書く場合とも Solid がどこで異なるのかを指摘します。
-[React からの移行](/migration/from-react)では React の概念を Solid の概念に一つずつ対応付け、同じコードが異なる意味を持つ箇所を説明します。
-Solid 1 や SolidStart から移行する開発者向けには、[Migration](/migration/from-solid-1)配下に専用のガイドがあります。
+[React からの移行](/docs/migration/from-react.md)では React の概念を Solid の概念に一つずつ対応付け、同じコードが異なる意味を持つ箇所を説明します。
+Solid 1 や SolidStart から移行する開発者向けには、[Migration](/docs/migration/from-solid-1.md)配下に専用のガイドがあります。
 
-必要なものが分かっていてシグネチャだけを確認したい場合は、[リファレンス](/reference)へ進んでください。
+必要なものが分かっていてシグネチャだけを確認したい場合は、[リファレンス](/docs/reference/index.md)へ進んでください。
 インポート指定子ごとに整理されているので、`solid-js`、`@solidjs/web`、`@solidjs/router` にそれぞれのセクションがあります。
 
 ## 推奨の読み順
@@ -38,18 +38,18 @@ Solid 1 や SolidStart から移行する開発者向けには、[Migration](/mi
 Learn ページは互いに積み重なっています。
 最初の通読ではこの順番で読んでください。
 
-1. [クイックスタート](/getting-started/quick-start): プロジェクトを作成し、各部分がどう組み合わさるかを見ます。
-2. [Thinking in Solid](/guides/thinking-in-solid): 一つの機能を端から端まで実装し、React や Vue との相違点を随所で指摘します。
-3. [リアクティビティ](/concepts/reactivity): シグナルとは何か、なぜ読み取りを正しい場所で行う必要があるのか、更新がいつ反映されるのか。
-4. [コンポーネントと JSX](/concepts/components-and-jsx): props、イベント、ref、リスト、条件付きコンテンツ。
-5. [ストア](/concepts/stores): プロパティが独立して更新されるオブジェクトと配列、およびドラフトを通じた更新方法。
-6. [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects): 動く Solid コードと壊れやすい Solid コードを分ける習慣。
-7. [非同期リアクティビティ](/concepts/async-reactivity)と[バウンダリ](/concepts/boundaries): データの読み込み、フォールバックの表示、新しいデータが届くまで現在の画面を維持する方法。
-8. [ミューテーション](/concepts/mutations): データをレンダーするコンポーネントを変えずに、アクションと楽観的ストアでサーバーへ書き込みます。
-9. [状態管理](/guides/state-management): モーダルの開閉フラグからログイン中のユーザーまで、各状態をどこに置くか。
-10. [レンダリングと SSR](/concepts/rendering-and-ssr): 同じコンポーネントがサーバーでも動くとき、何が変わるのか。
-11. [アプリの構造](/building-apps/app-structure)と Building apps の残りのページ: Vite プラグイン、サーバー関数、セッション、デプロイ。
-12. [ルーティング](/routing/overview): ルーターの組み込み方と、選んだルーターのガイド。
+1. [クイックスタート](/docs/getting-started/quick-start.md): プロジェクトを作成し、各部分がどう組み合わさるかを見ます。
+2. [Thinking in Solid](/docs/guides/thinking-in-solid.md): 一つの機能を端から端まで実装し、React や Vue との相違点を随所で指摘します。
+3. [リアクティビティ](/docs/concepts/reactivity.md): シグナルとは何か、なぜ読み取りを正しい場所で行う必要があるのか、更新がいつ反映されるのか。
+4. [コンポーネントと JSX](/docs/concepts/components-and-jsx.md): props、イベント、ref、リスト、条件付きコンテンツ。
+5. [ストア](/docs/concepts/stores.md): プロパティが独立して更新されるオブジェクトと配列、およびドラフトを通じた更新方法。
+6. [不要なエフェクトを避ける](/docs/guides/avoid-unnecessary-effects.md): 動く Solid コードと壊れやすい Solid コードを分ける習慣。
+7. [非同期リアクティビティ](/docs/concepts/async-reactivity.md)と[バウンダリ](/docs/concepts/boundaries.md): データの読み込み、フォールバックの表示、新しいデータが届くまで現在の画面を維持する方法。
+8. [ミューテーション](/docs/concepts/mutations.md): データをレンダーするコンポーネントを変えずに、アクションと楽観的ストアでサーバーへ書き込みます。
+9. [状態管理](/docs/guides/state-management.md): モーダルの開閉フラグからログイン中のユーザーまで、各状態をどこに置くか。
+10. [レンダリングと SSR](/docs/concepts/rendering-and-ssr.md): 同じコンポーネントがサーバーでも動くとき、何が変わるのか。
+11. [アプリの構造](/docs/building-apps/app-structure.md)と Building apps の残りのページ: Vite プラグイン、サーバー関数、セッション、デプロイ。
+12. [ルーティング](/docs/routing/overview.md): ルーターの組み込み方と、選んだルーターのガイド。
 
 各ページの末尾には次に読むべき場所が書かれているので、このリストではなくリンクをたどって進むこともできます。
 
@@ -57,7 +57,7 @@ Learn ページは互いに積み重なっています。
 
 **Learn** タブには上記のページ群があります。入門、概念、アプリの構築、ルーティング、ガイド、マイグレーションです。
 Solid の仕組みとタスクの実現方法を、コピーできる例とともに説明しています。
-タブの末尾にある[用語集](/glossary)では、held update、オーナー、プロジェクションといった Solid 固有の用語を定義し、それぞれを学べるページへリンクしています。
+タブの末尾にある[用語集](/docs/glossary.md)では、held update、オーナー、プロジェクションといった Solid 固有の用語を定義し、それぞれを学べるページへリンクしています。
 
 **Reference** タブにはエクスポートされている各 API のドキュメントがあります。インポート、シグネチャ、パラメータ、戻り値です。
 リファレンスページは意図的に短く保たれ、概念を説明する Learn ページへリンクしています。

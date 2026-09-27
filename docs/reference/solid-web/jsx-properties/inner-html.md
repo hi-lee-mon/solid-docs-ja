@@ -54,7 +54,7 @@ Solid は `innerHTML` の値をエスケープもサニタイズもしません�
 ```
 
 信頼できないコンテンツを `innerHTML` に渡す前に、アプリケーションのマークアップおよび URL ポリシーに合ったサニタイザーを使用してください。
-値をプレーンテキストとしてレンダーすべき場合は [`textContent`](/reference/solid-web/jsx-properties/text-content) を使います。
+値をプレーンテキストとしてレンダーすべき場合は [`textContent`](/docs/reference/solid-web/jsx-properties/text-content.md) を使います。
 
 ## 子要素
 

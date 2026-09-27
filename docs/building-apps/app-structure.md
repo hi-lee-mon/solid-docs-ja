@@ -4,7 +4,7 @@ version: "2.0"
 description: "start モードのプロジェクトで編集する2つのファイル、その周辺をプラグインが生成するもの、生成されたエントリーを置き換えるべきとき、サーバーレンダーにルーターをフックすべきときを理解します。"
 ---
 
-[クイックスタート](/getting-started/quick-start)で作成したプロジェクトを開くと、すべての Vite テンプレートにある2つのものが見つかりません。`index.html` がなく、`render()` や `hydrate()` を呼び出すファイルもありません。
+[クイックスタート](/docs/getting-started/quick-start.md)で作成したプロジェクトを開くと、すべての Vite テンプレートにある2つのものが見つかりません。`index.html` がなく、`render()` や `hydrate()` を呼び出すファイルもありません。
 代わりにあるのは `src/App.tsx`、`src/Document.tsx`、そして `start: true` が設定された `vite.config.ts` です。
 
 この2つのコンポーネントがアプリケーションの表面全体です。
@@ -28,7 +28,7 @@ export default defineConfig({
 });
 ```
 
-[レンダリングモードを選ぶ](/guides/choose-a-rendering-mode)ガイドで比較している3つのモードは、すべて同じ `App` と `Document` ファイルを使います:
+[レンダリングモードを選ぶ](/docs/guides/choose-a-rendering-mode.md)ガイドで比較している3つのモードは、すべて同じ `App` と `Document` ファイルを使います:
 
 - `ssr` なしの場合のデフォルトである、ブラウザーでレンダーされる静的シェル。
   ビルドはアプリを含まない `Document` を `dist/client/index.html` に書き出し、生成されたクライアントエントリーが `render()` を呼んで `App` を `document.body` にマウントします。
@@ -41,11 +41,11 @@ export default defineConfig({
   これは start モードの設定ではなくプラグインで、同じ2つのファイルをレンダーします。
 
 `ssr` を切り替えると、ビルドが生成するものとホストが実行するものが変わります。
-`App.tsx`、`Document.tsx`、ルートは変わりません。これが、[プロジェクト構成](/getting-started/project-shapes)が同じレイアウトに異なるオプションを持つ形になっている理由です。
+`App.tsx`、`Document.tsx`、ルートは変わりません。これが、[プロジェクト構成](/docs/getting-started/project-shapes.md)が同じレイアウトに異なるオプションを持つ形になっている理由です。
 
 :::note[サーバー関数はサーバーハンドラーを維持する]
 `serverFunctions` が有効で `ssr` が無効の場合、ページは静的ファイルのままですが、サーバー関数の呼び出しに応答する `/_server` エンドポイントは `dist/server` に存在するため、ビルドはそのディレクトリを保持し、ホストはそれを実行する必要があります。
-[レンダリングモードを選ぶ](/guides/choose-a-rendering-mode#what-the-host-runs)では、これとプリレンダーとを比較検討しています。
+[レンダリングモードを選ぶ](/docs/guides/choose-a-rendering-mode.md#what-the-host-runs)では、これとプリレンダーとを比較検討しています。
 :::
 
 ## アプリコンポーネント
@@ -124,7 +124,7 @@ export default function Document(props: ParentProps) {
 </head>
 ```
 
-`Avoid` 版では、HTML が到着してからクライアントバンドルがハイドレートするまでの間に起きたクリックや入力が失われます。[レンダリングと SSR](/concepts/rendering-and-ssr#the-page-renders-but-the-first-clicks-do-nothing) でその症状を説明しています。
+`Avoid` 版では、HTML が到着してからクライアントバンドルがハイドレートするまでの間に起きたクリックや入力が失われます。[レンダリングと SSR](/docs/concepts/rendering-and-ssr.md#the-page-renders-but-the-first-clicks-do-nothing) でその症状を説明しています。
 静的シェルのプロジェクトでも `<HydrationScript />` をドキュメントに残してください。ハンドラーはプリレンダーされたシェルからその出力を取り除くため、`ssr` を有効にするまでコストはかかりません。
 
 もう1つのルールは `{props.children}` です。
@@ -132,7 +132,7 @@ export default function Document(props: ParentProps) {
 
 プラグインは `src/Document.tsx` を探し、次に `src/Document.jsx` を探します。`start.document` は別のモジュールを指定し、優先されます。
 ファイルを削除すると、生成されたエントリーは charset、viewport タグ、ハイドレーションスクリプトを持つ組み込みのシェルを使います。
-静的な `<title>Solid App</title>` は、どのページも `<Title>` をマウントしていない場合のフォールバックです。ページごとのタグによる置き換えは [head とメタデータ](/building-apps/head-and-metadata) で説明しています。
+静的な `<title>Solid App</title>` は、どのページも `<Title>` をマウントしていない場合のフォールバックです。ページごとのタグによる置き換えは [head とメタデータ](/docs/building-apps/head-and-metadata.md) で説明しています。
 
 ## 生成エントリーと自作エントリー
 
@@ -179,7 +179,7 @@ solid({
 `start.setup` は、`ssr: true` の下で生成されたサーバーエントリーが行うページレンダーに対してのみ実行されます。
 `ssr` なしでは無視され、自作のサーバーエントリーとの組み合わせはエラーです。
 
-[ルーターを統合する](/routing/integrate-a-router)では、サポートされている2つのルーターがこのフックをどう使うか、そしてどんなプロジェクトでそれが必要になるかを示しています。
+[ルーターを統合する](/docs/routing/integrate-a-router.md)では、サポートされている2つのルーターがこのフックをどう使うか、そしてどんなプロジェクトでそれが必要になるかを示しています。
 
 ## よくある問題
 
@@ -202,7 +202,7 @@ solid({
 
 本番ビルドは生成されたエントリーをデフォルトのエラーバウンダリで包み、サーバーで `console.error` によりエラーをログ出力し、500 ステータスで `500 | Internal Server Error` をレンダーします。開発ビルドにはそのようなバウンダリはありません。
 実際のエラーはサーバーログを読んでください。
-ミドルウェアがエラー処理を担う場合は `start.errorBoundary: false` を設定します。そのミドルウェアは [ミドルウェアと API ルート](/building-apps/middleware-and-api-routes#catching-errors) にあります。
+ミドルウェアがエラー処理を担う場合は `start.errorBoundary: false` を設定します。そのミドルウェアは [ミドルウェアと API ルート](/docs/building-apps/middleware-and-api-routes.md#catching-errors) にあります。
 
 ### `start.setup only applies to generated entries`
 
@@ -250,8 +250,8 @@ monitor.init({ dsn: process.env.MONITOR_DSN });
 
 ## 次のステップ
 
-- [スタイリングとアセット](/building-apps/styling-and-assets): リンク元の `index.html` がなくなった今、CSS と画像を置く場所。
-- [head とメタデータ](/building-apps/head-and-metadata): `Document` シェルの上に載せるページごとのタイトルとメタタグ。
-- [レンダリングモードを選ぶ](/guides/choose-a-rendering-mode): ユーザーが見るものとホストが実行するものから、3つのモードのどれがプロジェクトに合うか。
-- [デプロイ](/building-apps/deployment): 初回デプロイで `dist/client` と `dist/server` をどうするか。
-- [オブザーバビリティ](/guides/observability): instrument モジュールが何にフックするか、そして本番でレコードとトレースを運ぶ `observe` ビルド。
+- [スタイリングとアセット](/docs/building-apps/styling-and-assets.md): リンク元の `index.html` がなくなった今、CSS と画像を置く場所。
+- [head とメタデータ](/docs/building-apps/head-and-metadata.md): `Document` シェルの上に載せるページごとのタイトルとメタタグ。
+- [レンダリングモードを選ぶ](/docs/guides/choose-a-rendering-mode.md): ユーザーが見るものとホストが実行するものから、3つのモードのどれがプロジェクトに合うか。
+- [デプロイ](/docs/building-apps/deployment.md): 初回デプロイで `dist/client` と `dist/server` をどうするか。
+- [オブザーバビリティ](/docs/guides/observability.md): instrument モジュールが何にフックするか、そして本番でレコードとトレースを運ぶ `observe` ビルド。

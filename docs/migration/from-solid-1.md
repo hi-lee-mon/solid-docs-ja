@@ -70,7 +70,7 @@ API が DOM の JSX に依存しない場合は、`solid-js` から `Component` 
 
 ## シグナルと段階的書き込みを変換する
 
-[`createSignal`](/reference/solid-js/reactivity/create-signal) が返すゲッターとセッターのペアは変わりません。
+[`createSignal`](/docs/reference/solid-js/reactivity/create-signal.md) が返すゲッターとセッターのペアは変わりません。
 変わったのはセッターの書き込みが見えるタイミングです。
 Solid 2 では通常の書き込みはいったんステージされ、リアクティブキューは次のマイクロタスクでコミットされます。
 セッターの直後に読み取ると、最後にコミットされた値が返ります。
@@ -86,7 +86,7 @@ count(); // 1
 ```
 
 ほとんどのイベントハンドラーでは明示的なフラッシュは不要です。
-[`flush()`](/reference/solid-js/reactivity/flush) を追加するのは、次のマイクロタスクより前に更新後のリアクティブな状態や DOM を監視しなければならない命令的な境界だけにしてください。
+[`flush()`](/docs/reference/solid-js/reactivity/flush.md) を追加するのは、次のマイクロタスクより前に更新後のリアクティブな状態や DOM を監視しなければならない命令的な境界だけにしてください。
 テストは代表的な例です。
 `flush(fn)` は同期フラッシュスコープ内で書き込みを実行し、戻る前にキューを空にします。
 
@@ -95,12 +95,12 @@ count(); // 1
 各 `batch` 呼び出しを `flush` に置き換えると、遅延処理が同期処理に変わってしまいます。
 
 開発モードでは、コンポーネント本体やメモ計算のような通常のオーナー付きスコープ内での書き込みも拒否されます。
-書き戻し型の派生は [`createMemo`](/reference/solid-js/reactivity/create-memo) に置き換え、セッターはイベントハンドラー、アクション、エフェクトのエフェクト関数から呼び出してください。
+書き戻し型の派生は [`createMemo`](/docs/reference/solid-js/reactivity/create-memo.md) に置き換え、セッターはイベントハンドラー、アクション、エフェクトのエフェクト関数から呼び出してください。
 `ownedWrite: true` は、スコープ内での書き込みを意図的に受け付ける内部シグナルに限定してください。
 
 コンポーネント本体がトップレベルでリアクティブな値を読み取ると、その読み取りが追跡スコープの外にあるため Solid 2 は警告します。
 リアクティブな props やストアのプロパティは、JSX 式または計算の中に保持してください。
-[`untrack`](/reference/solid-js/reactivity/untrack) は意図的な一回限りの読み取りにのみ使います。
+[`untrack`](/docs/reference/solid-js/reactivity/untrack.md) は意図的な一回限りの読み取りにのみ使います。
 
 ```tsx
 // Solid 1 code that loses reactivity in Solid 2
@@ -119,7 +119,7 @@ function Heading(props: { title: string }) {
 
 ## エフェクトを計算フェーズとエフェクトフェーズに分割する
 
-[`createEffect`](/reference/solid-js/reactivity/create-effect) は、依存関係の追跡と副作用を分離するようになりました:
+[`createEffect`](/docs/reference/solid-js/reactivity/create-effect.md) は、依存関係の追跡と副作用を分離するようになりました:
 
 ```ts
 // Solid 1
@@ -167,15 +167,15 @@ Solid 1 の `initialValue` 引数は `createEffect` と `createMemo` から削�
 よく使うライフサイクルとエフェクトのヘルパーは、次のように置き換えます:
 
 - `on(...)` は計算関数に置き換え、必要に応じてエフェクトの `defer` オプションを使います。
-- `onMount` は [`onSettled`](/reference/solid-js/lifecycle-actions/on-settled) に置き換え、そのコールバックからクリーンアップを返します。
+- `onMount` は [`onSettled`](/docs/reference/solid-js/lifecycle-actions/on-settled.md) に置き換え、そのコールバックからクリーンアップを返します。
 - エフェクト内の `onCleanup` 呼び出しは、エフェクト関数から返すクリーンアップに置き換えます。
 - `createTrackedEffect` は、追跡されるコールバックが 1 つだけ必要な場合にのみ使います。
   これと `onSettled` はネストされたプリミティブを作成できません。
-- `catchError` や `onError` は、[`Errored`](/reference/solid-js/components-jsx/errored) バウンダリまたはエフェクトバンドルの `error` コールバックに置き換えます。
+- `catchError` や `onError` は、[`Errored`](/docs/reference/solid-js/components-jsx/errored.md) バウンダリまたはエフェクトバンドルの `error` コールバックに置き換えます。
 
 ## ストアをドラフトセッターに変換する
 
-[`createStore`](/reference/solid-js/stores/create-store) は引き続き、読み取り専用のストアとそのセッターを返します。
+[`createStore`](/docs/reference/solid-js/stores/create-store.md) は引き続き、読み取り専用のストアとそのセッターを返します。
 セッターはミュータブルなドラフトを受け取るようになりました。
 これにより、Solid 1 のプロパティ単位のモデルを維持しつつ、ドラフトへの変更がデフォルトの更新形式になります。
 
@@ -193,7 +193,7 @@ setState((draft) => {
 `createMutable` と `modifyMutable` は、`createStore` と明示的なドラフトセッターに置き換えます。
 ストアへの書き込みは、シグナルと同じ段階的書き込みのタイミングに従います。
 
-[`storePath`](/reference/solid-js/advanced/store-advanced/store-path) は、一括で変換できないパスセッター向けの移行ヘルパーです:
+[`storePath`](/docs/reference/solid-js/advanced/store-advanced/store-path.md) は、一括で変換できないパスセッター向けの移行ヘルパーです:
 
 ```ts
 setState(storePath("user", "address", "city", "Paris"));
@@ -216,13 +216,13 @@ setState((draft) => {
 
 以下のユーティリティの変更も確認してください:
 
-- シリアライズや外部コードがプレーンな非リアクティブな値を必要とする場合は、`unwrap(store)` を [`snapshot(store)`](/reference/solid-js/advanced/store-advanced/snapshot) に置き換えます。
-- `mergeProps` は [`merge`](/reference/solid-js/stores/merge) に置き換えます。
+- シリアライズや外部コードがプレーンな非リアクティブな値を必要とする場合は、`unwrap(store)` を [`snapshot(store)`](/docs/reference/solid-js/advanced/store-advanced/snapshot.md) に置き換えます。
+- `mergeProps` は [`merge`](/docs/reference/solid-js/stores/merge.md) に置き換えます。
   `merge` では `undefined` が明示的な上書き値として扱われます。
-- `splitProps(props, ["a", "b"])` は [`omit(props, "a", "b")`](/reference/solid-js/stores/omit) に置き換えます。
-- セレクター型の状態は、[`createProjection`](/reference/solid-js/stores/create-projection) または関数形式の `createStore` に置き換えます。
+- `splitProps(props, ["a", "b"])` は [`omit(props, "a", "b")`](/docs/reference/solid-js/stores/omit.md) に置き換えます。
+- セレクター型の状態は、[`createProjection`](/docs/reference/solid-js/stores/create-projection.md) または関数形式の `createStore` に置き換えます。
 
-エフェクトがネストされたすべてのプロパティを購読する必要がある場合は、エフェクトの計算フェーズで [`deep(store)`](/reference/solid-js/advanced/store-advanced/deep) を使います。
+エフェクトがネストされたすべてのプロパティを購読する必要がある場合は、エフェクトの計算フェーズで [`deep(store)`](/docs/reference/solid-js/advanced/store-advanced/deep.md) を使います。
 ストアを購読せずに現在のプレーンな値が必要な場合は `snapshot(store)` を使います。
 
 ## リソースを非同期計算に置き換える
@@ -238,7 +238,7 @@ const [user] = createResource(userId, fetchUser);
 const user = createMemo(() => fetchUser(userId()));
 ```
 
-初期状態で未解決になり得る読み取りは、[`Loading`](/reference/solid-js/components-jsx/loading) の下に配置します:
+初期状態で未解決になり得る読み取りは、[`Loading`](/docs/reference/solid-js/components-jsx/loading.md) の下に配置します:
 
 ```tsx
 <Loading fallback={<UserSkeleton />}>
@@ -254,19 +254,19 @@ const user = createMemo(() => fetchUser(userId()));
 非同期計算の入力への書き込みは、その計算が次の答えを得るまで保留され、同じ更新に含まれる他のすべても一緒に待機します。
 Solid 1 のリソースやエフェクトベースのフェッチではこのようなことはなく、各コンシューマーがそれぞれのスケジュールで更新されていました。
 すべてのフェッチを一度に変換したアプリケーションはどこでも新しい動作を引き継ぎ、期間セレクターのような共有入力は、それを読み取る最も遅いフェッチを待つことになります。
-[Solid 1 からのデータフェッチ](/migration/data-fetching-from-solid-1)では、まず各パターンを変えずに動かし続ける方法を示し、その後で一度に 1 つのフェッチずつ変換し、フェッチごとにリフェッチの挙動を選択します。
+[Solid 1 からのデータフェッチ](/docs/migration/data-fetching-from-solid-1.md)では、まず各パターンを変えずに動かし続ける方法を示し、その後で一度に 1 つのフェッチずつ変換し、フェッチごとにリフェッチの挙動を選択します。
 :::
 
 Solid 1 のリソースが持っていたプロパティとアクションは、個別の操作になります:
 
-- `resource.loading` は、初期の準備状態には `Loading` バウンダリ、処理中の変更された答えには [`isPending(() => resource())`](/reference/solid-js/reactivity/is-pending) に置き換えます。
+- `resource.loading` は、初期の準備状態には `Loading` バウンダリ、処理中の変更された答えには [`isPending(() => resource())`](/docs/reference/solid-js/reactivity/is-pending.md) に置き換えます。
 - `resource.error` は `Errored` バウンダリまたはエフェクトの `error` コールバックに置き換えます。
-- `refetch()` は [`refresh(resource)`](/reference/solid-js/lifecycle-actions/refresh) に置き換えます。
-- `mutate()` は、アクションと [`createOptimistic`](/reference/solid-js/reactivity/create-optimistic) または [`createOptimisticStore`](/reference/solid-js/stores/create-optimistic-store) に置き換えます。
-- 命令的なコードが処理中の値を調べる必要がある場合は、`resource.latest` を [`latest(resource)`](/reference/solid-js/reactivity/latest) に置き換えます。
+- `refetch()` は [`refresh(resource)`](/docs/reference/solid-js/lifecycle-actions/refresh.md) に置き換えます。
+- `mutate()` は、アクションと [`createOptimistic`](/docs/reference/solid-js/reactivity/create-optimistic.md) または [`createOptimisticStore`](/docs/reference/solid-js/stores/create-optimistic-store.md) に置き換えます。
+- 命令的なコードが処理中の値を調べる必要がある場合は、`resource.latest` を [`latest(resource)`](/docs/reference/solid-js/reactivity/latest.md) に置き換えます。
 
 素の `refresh()` は、`isPending` を true にせずに同じ問いを再度発行します。
-リフレッシュを保留中として表示する必要がある場合は、周囲のアクション内で `refresh(target)` の前に [`affects(target)`](/reference/solid-js/lifecycle-actions/affects) を呼び出します。
+リフレッシュを保留中として表示する必要がある場合は、周囲のアクション内で `refresh(target)` の前に [`affects(target)`](/docs/reference/solid-js/lifecycle-actions/affects.md) を呼び出します。
 UI がミューテーション自体の進行を表示する必要がある場合は、ミューテーション専用の楽観的フラグを使います。
 
 `loadingValue` とストアオプションの `seedLoadingValue` は、最初の結果が来る前にソースの代わりに答えるプレースホルダーを宣言します。
@@ -280,7 +280,7 @@ UI がミューテーション自体の進行を表示する必要がある場�
 Solid 2 はグラフを通じて非同期計算を調整します。
 未解決の分岐には `Loading`、公開されていない変更後の答えには `isPending`、暫定的なミューテーション状態には楽観的プリミティブを使います。
 
-[`action`](/reference/solid-js/lifecycle-actions/action) は、書き込みが非同期の境界をまたぐ命令的なワークフロー向けです。
+[`action`](/docs/reference/solid-js/lifecycle-actions/action.md) は、書き込みが非同期の境界をまたぐ命令的なワークフロー向けです。
 アクションはジェネレーターまたは非同期ジェネレーターであり、Promise を返します。
 通常のシグナルやストアへの書き込みはトランザクションに保持されたままになりますが、楽観的な書き込みは表示され、トランザクションが確定すると派生値またはベース値に戻ります。
 
@@ -301,7 +301,7 @@ const addTodo = action(function* (todo: Todo) {
 アクション内で `flush()` を呼び出さないでください。トランザクションのステップを空にしてしまいます。
 アクションはイベントハンドラーや他の命令的スコープから呼び出し、コンポーネントや計算の本体からは呼び出さないでください。
 
-統合されたモデルの詳細は[非同期リアクティビティ](/concepts/async-reactivity)を参照してください。
+統合されたモデルの詳細は[非同期リアクティビティ](/docs/concepts/async-reactivity.md)を参照してください。
 
 ## バウンダリ、制御フロー、JSX を更新する
 
@@ -310,11 +310,11 @@ const addTodo = action(function* (todo: Todo) {
 - `Suspense` は `Loading` に置き換えます。
 - `ErrorBoundary` は `Errored` に置き換えます。
   その関数フォールバックはエラーのアクセサーを受け取るため、`error()` でエラーを読み取ります。
-- `SuspenseList` は [`Reveal`](/reference/solid-js/components-jsx/reveal) に置き換えます。
-- `Index` は [`For keyed={false}`](/reference/solid-js/components-jsx/for) に置き換えます。
+- `SuspenseList` は [`Reveal`](/docs/reference/solid-js/components-jsx/reveal.md) に置き換えます。
+- `Index` は [`For keyed={false}`](/docs/reference/solid-js/components-jsx/for.md) に置き換えます。
   このモードではアイテムはアクセサー、インデックスは安定した数値になります。
 - `Context.Provider` はコンテキストコンポーネント `<Theme value={value}>` に置き換えます。
-- `<Dynamic component={source} {...props} />` は [`dynamic()`](/reference/solid-web/components/dynamic) が返すコンポーネントに置き換えます。`const Comp = dynamic(() => source)` とし、その後 `<Comp {...props} />` とします。
+- `<Dynamic component={source} {...props} />` は [`dynamic()`](/docs/reference/solid-web/components/dynamic.md) が返すコンポーネントに置き換えます。`const Comp = dynamic(() => source)` とし、その後 `<Comp {...props} />` とします。
   `Dynamic` は非推奨です。
   コンポーネントは JSX の外で一度だけ作成し、必要な場所でレンダーしてください。falsy なソースは以前と同様に何もレンダーしません。
 - `createDynamic(source, props)` の直接呼び出しは `dynamic(source)` に置き換えます。
@@ -335,13 +335,13 @@ Solid 2 はデリゲートされたイベントを各レンダールートにス
 
 ## クライアントレンダリングと SSR を更新する
 
-[`render`](/reference/solid-web/rendering-ssr/render)、[`hydrate`](/reference/solid-web/rendering-ssr/hydrate)、およびすべてのサーバーレンダー関数は `@solidjs/web` からインポートします。
+[`render`](/docs/reference/solid-web/rendering-ssr/render.md)、[`hydrate`](/docs/reference/solid-web/rendering-ssr/hydrate.md)、およびすべてのサーバーレンダー関数は `@solidjs/web` からインポートします。
 `render` が返す破棄関数は、引き続き保持して呼び出してください。
 
 必要な結果に応じて SSR のエントリーポイントを選択します:
 
-- [`renderToString`](/reference/solid-web/rendering-ssr/render-to-string) は同期で、未解決の読み取りには `Loading` のフォールバックをレンダーします。
-- [`renderToStream`](/reference/solid-web/rendering-ssr/render-to-stream) はシェルを出力し、その後で解決済みの非同期フラグメントを出力します。
+- [`renderToString`](/docs/reference/solid-web/rendering-ssr/render-to-string.md) は同期で、未解決の読み取りには `Loading` のフォールバックをレンダーします。
+- [`renderToStream`](/docs/reference/solid-web/rendering-ssr/render-to-stream.md) はシェルを出力し、その後で解決済みの非同期フラグメントを出力します。
 - 完全に確定した HTML 文字列が必要な場合は、`renderToStringAsync` を `await renderToStream(() => <App />)` に置き換えます。
 - ストリームのコンシューマーは `pipe`、`pipeTo`、`readable` のいずれか 1 つだけを使います。
   `readable` ストリームは `Uint8Array` チャンクを含み、Web の `Response` に渡せます。
@@ -398,7 +398,7 @@ expect(count()).toBe(2);
 リアクティブな値、エフェクト、DOM をアサートする前に、セッターの後にフラッシュしてください。
 ユーザーレベルのテストでは `await user.click(...)` を優先してください。イベントツールもイベントシーケンスを空にします。
 
-テストがリアクティブな式の確定を待つ必要がある場合は、[`resolve(() => value())`](/reference/solid-js/advanced/interop-async/resolve) を使います。
+テストがリアクティブな式の確定を待つ必要がある場合は、[`resolve(() => value())`](/docs/reference/solid-js/advanced/interop-async/resolve.md) を使います。
 最終的にコミットまたは復元された状態をアサートする前に、アクション呼び出しを await してください。
 初期の `Loading` フォールバック、確定したコンテンツ、保留中の更新状態、エラーバウンダリを個別の状態としてテストします。
 
@@ -406,7 +406,7 @@ expect(count()).toBe(2);
 トップレベルのリアクティブ読み取りの警告、オーナー付きスコープからの書き込み、計算から呼び出されるアクション、`Loading` バウンダリ外の非同期読み取りは、診断を抑制するのではなく修正してください。
 その後、同じクライアント、SSR、ストリーミング、ハイドレーションのパスを本番モードで実行します。
 
-現在のテスト環境の分け方については[テストガイド](/guides/testing)を参照してください。
+現在のテスト環境の分け方については[テストガイド](/docs/guides/testing.md)を参照してください。
 
 ## 最終確認
 
@@ -421,6 +421,6 @@ expect(count()).toBe(2);
 
 ## 次のステップ
 
-- [Solid 1 からのデータフェッチ](/migration/data-fetching-from-solid-1): リソースとエフェクトベースのフェッチを一度に 1 つずつ変換し、それぞれにリフェッチの挙動を選択します。
-- [SolidStart から](/migration/from-solid-start)、[Solid Router から](/migration/from-solid-router)、[Solid Meta から](/migration/from-solid-meta): このガイドを土台にするフレームワークレベルの移行です。
-- [非同期リアクティビティ](/concepts/async-reactivity): 保留される更新、`Loading`、`isPending`、アクションの背後にあるモデルです。
+- [Solid 1 からのデータフェッチ](/docs/migration/data-fetching-from-solid-1.md): リソースとエフェクトベースのフェッチを一度に 1 つずつ変換し、それぞれにリフェッチの挙動を選択します。
+- [SolidStart から](/docs/migration/from-solid-start.md)、[Solid Router から](/docs/migration/from-solid-router.md)、[Solid Meta から](/docs/migration/from-solid-meta.md): このガイドを土台にするフレームワークレベルの移行です。
+- [非同期リアクティビティ](/docs/concepts/async-reactivity.md): 保留される更新、`Loading`、`isPending`、アクションの背後にあるモデルです。

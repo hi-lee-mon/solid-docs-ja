@@ -56,7 +56,7 @@ if (!isServer) {
 
 ## 関連項目
 
-- [サーバーとクライアントのバウンダリ](/concepts/rendering-and-ssr#server-and-client-boundaries)
-- [SSR セーフなコード](/guides/ssr-safe-code)
-- [レンダリングと SSR](/concepts/rendering-and-ssr)
-- [レンダリングモードを選ぶ](/guides/choose-a-rendering-mode)
+- [サーバーとクライアントのバウンダリ](/docs/concepts/rendering-and-ssr.md#server-and-client-boundaries)
+- [SSR セーフなコード](/docs/guides/ssr-safe-code.md)
+- [レンダリングと SSR](/docs/concepts/rendering-and-ssr.md)
+- [レンダリングモードを選ぶ](/docs/guides/choose-a-rendering-mode.md)

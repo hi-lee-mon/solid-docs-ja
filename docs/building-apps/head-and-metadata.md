@@ -64,7 +64,7 @@ export default function Product(props: RouteProps<"/products/:id">) {
 テキストの子要素や属性値はシグナルを読め、更新はオーバーライド順でのタグの位置を変えずにその場で適用されます。
 パラメーターの変更は、新しいタイトルをマウントするのではなく、既存のタイトルを更新します。
 
-各コンポーネントのリファレンスページに同一性のルールが記載されています。[`Title`](/reference/solid-meta/title) が最も単純です。
+各コンポーネントのリファレンスページに同一性のルールが記載されています。[`Title`](/docs/reference/solid-meta/title.md) が最も単純です。
 
 :::caution[レジストリが管理するタグは Document に置かない]
 `Document.tsx` の静的な `<title>Solid App</title>` は、`<Title>` が1つもマウントされないレンダーのためのフォールバックであり、1つでもマウントされればレジストリが置き換えます。
@@ -134,7 +134,7 @@ import { Link, Meta } from "@solidjs/meta";
 
 ## 関連タグをグループ化する
 
-複数のタグが1つの置き換えセットを構成する場合は [`<Head>`](/reference/solid-meta/head) を使います。
+複数のタグが1つの置き換えセットを構成する場合は [`<Head>`](/docs/reference/solid-meta/head.md) を使います。
 同じ同一性を持つタグは、グループ内では共存できます。
 後のグループは前のセットを1つの単位として置き換え、後のグループがアンマウントされると前のセットが復元されます。
 グループの構成は、子タグのマウント・アンマウントに応じてリアクティブであり続けます。
@@ -194,7 +194,7 @@ function ProductDescription(props: { description: string }) {
 
 配列を渡すと1つの置き換えグループとして登録され、関数を渡すとグループの構成がリアクティブになります。`<Head>` は、コンテキストから集めたグループでこの呼び出しを行うものです。
 ディスクリプターは現在のオーナーの下に登録されるため、`useHead` を呼んだコンポーネントとともに破棄されます。
-アプリケーションのメタデータには、JSX 内のコンポーネントの方が読みやすいでしょう。[`useHead`](/reference/solid-web/head/use-head) と [`HeadTag`](/reference/solid-web/head/head-tag) にディスクリプターの契約が記載されています。
+アプリケーションのメタデータには、JSX 内のコンポーネントの方が読みやすいでしょう。[`useHead`](/docs/reference/solid-web/head/use-head.md) と [`HeadTag`](/docs/reference/solid-web/head/head-tag.md) にディスクリプターの契約が記載されています。
 :::
 
 ## サーバーレンダリング
@@ -213,7 +213,7 @@ Start モードのプロジェクトでは配線作業は不要です。生成�
 ### 新しいページの読み込み中もタイトルが前のページのまま
 
 新しいページの `<Title>` が保留中のデータを読んでいるため、更新はページの他の部分とともに保留され、前の勝者が残ります。
-これはコンテンツが受けるのと同じ[保留された更新](/concepts/async-reactivity#settled-view-and-in-flight-work)です。
+これはコンテンツが受けるのと同じ[保留された更新](/docs/concepts/async-reactivity.md#settled-view-and-in-flight-work)です。
 タイトルがそのデータを必要としないなら、それを読まないページの部分から `<Title>` をレンダーしてください。
 
 ### 1つのはずの `og:image` タグが2つ現れる
@@ -249,6 +249,6 @@ Open Graph には `property` を使うか、両方に同じ `key` を与えて�
 
 ## 次のステップ
 
-- [サーバー関数](/building-apps/server-functions): タイトルが読む商品をサーバーから読み込み、読み取りをブラウザーバンドルから外します。
-- [レンダリングと SSR](/concepts/rendering-and-ssr#who-owns-the-document): 別のホストがドキュメントを所有する場合の `onHead` の用途です。
-- [Solid Meta 0.x からの移行](/migration/from-solid-meta): プロバイダーベースのバージョンからの変更点です。
+- [サーバー関数](/docs/building-apps/server-functions/index.md): タイトルが読む商品をサーバーから読み込み、読み取りをブラウザーバンドルから外します。
+- [レンダリングと SSR](/docs/concepts/rendering-and-ssr.md#who-owns-the-document): 別のホストがドキュメントを所有する場合の `onHead` の用途です。
+- [Solid Meta 0.x からの移行](/docs/migration/from-solid-meta.md): プロバイダーベースのバージョンからの変更点です。

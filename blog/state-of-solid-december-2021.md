@@ -67,7 +67,7 @@ Solid Start は、コアにおける SSR の多くの改善（前述）や、開
 
 ## SolidHack 2022 がやってきます
 
-![Linux のマスコット、Tux](/img/blog/state-of-solid-december-2021/solidhack.png)
+![Linux のマスコット、Tux](/blog/images/state-of-solid-december-2021/solidhack.png)
 
 新しいスポンサーの支援を受けて、Solid コアチームが 1 月 7 日に初の公開オープンソースハッカソンを開催することを発表できることを嬉しく思います。
 

@@ -80,9 +80,9 @@ function serializeCookie(name: string, value: string, options: CookieOptions = {
 
 ## 関連項目
 
-- [セッションと認証](/building-apps/sessions-and-auth)
-- [ミューテーションとレスポンス](/building-apps/server-functions/mutations-and-responses)
-- [ミドルウェアと API ルート](/building-apps/middleware-and-api-routes)
+- [セッションと認証](/docs/building-apps/sessions-and-auth.md)
+- [ミューテーションとレスポンス](/docs/building-apps/server-functions/mutations-and-responses.md)
+- [ミドルウェアと API ルート](/docs/building-apps/middleware-and-api-routes.md)
 
 ## 関連型
 
