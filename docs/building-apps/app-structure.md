@@ -1,22 +1,22 @@
 ---
-title: "App structure"
+title: "アプリの構造"
 version: "2.0"
-description: "Know which two files in a start-mode project you edit, what the plugin generates around them, and when to replace a generated entry or hook a router into the server render."
+description: "start モードのプロジェクトで編集する2つのファイル、その周辺をプラグインが生成するもの、生成されたエントリーを置き換えるべきとき、サーバーレンダーにルーターをフックすべきときを理解します。"
 ---
 
-Open the project the [Quick start](/getting-started/quick-start) created and two things are missing that every Vite template has: there is no `index.html`, and no file calls `render()` or `hydrate()`.
-What is there is `src/App.tsx`, `src/Document.tsx`, and a `vite.config.ts` with `start: true`.
+[クイックスタート](/getting-started/quick-start)で作成したプロジェクトを開くと、すべての Vite テンプレートにある2つのものが見つかりません。`index.html` がなく、`render()` や `hydrate()` を呼び出すファイルもありません。
+代わりにあるのは `src/App.tsx`、`src/Document.tsx`、そして `start: true` が設定された `vite.config.ts` です。
 
-Those two components are the whole application surface.
-`App` is the component every page renders inside; `Document` is the HTML shell around it.
-The plugin's start mode generates the rest: the server entry that renders `<Document><App /></Document>`, the client entry that mounts or hydrates it, and the request handler that serves both.
+この2つのコンポーネントがアプリケーションの表面全体です。
+`App` はすべてのページがその内部でレンダーされるコンポーネントで、`Document` はそれを包む HTML のシェルです。
+残りはプラグインの start モードが生成します。`<Document><App /></Document>` をレンダーするサーバーエントリー、それをマウントまたはハイドレートするクライアントエントリー、そして両方を配信するリクエストハンドラーです。
 
-Most apps need only `App.tsx` and `Document.tsx`, and the first two sections below are about those files.
-The sections on generated entries and `start.setup` are for projects that need to change the defaults, such as an authored server entry or a router that must load before the render starts.
+ほとんどのアプリで必要なのは `App.tsx` と `Document.tsx` だけで、以下の最初の2つのセクションはこれらのファイルについてのものです。
+生成エントリーと `start.setup` のセクションは、独自のサーバーエントリーやレンダー開始前にロードする必要のあるルーターなど、デフォルトを変更する必要があるプロジェクト向けです。
 
-## Three rendering modes, one layout
+## 3つのレンダリングモード、1つのレイアウト
 
-Start mode is turned on by `start: true` (or `start: {}` to pass options), and `ssr` decides how the generated entries behave:
+Start モードは `start: true`（オプションを渡す場合は `start: {}`）で有効になり、`ssr` が生成されたエントリーの動作を決めます:
 
 ```ts
 // vite.config.ts
@@ -28,30 +28,30 @@ export default defineConfig({
 });
 ```
 
-The three modes the [Choose a rendering mode](/guides/choose-a-rendering-mode) guide compares all use the same `App` and `Document` files:
+[レンダリングモードを選ぶ](/guides/choose-a-rendering-mode)ガイドで比較している3つのモードは、すべて同じ `App` と `Document` ファイルを使います:
 
-- A static shell rendered in the browser, the default without `ssr`.
-  The build writes `Document` without the app into `dist/client/index.html`, and the generated client entry calls `render()` to mount `App` into `document.body`.
-  Without server functions the build removes `dist/server`, so `dist/client` deploys to any static host.
-- Streaming server rendering, with `ssr: true`.
-  Each request renders `<Document><App /></Document>` on the server and streams it; the generated client entry calls `hydrate()` on the same tree.
-  The build emits `dist/client` and a request handler in `dist/server`.
-- Prerendered at build time.
-  The `prerender-crawler` plugin, added next to `solid()`, runs the server build once per reachable page and writes HTML into `dist/client`.
-  It is a plugin, not a start-mode setting, and it renders the same two files.
+- `ssr` なしの場合のデフォルトである、ブラウザーでレンダーされる静的シェル。
+  ビルドはアプリを含まない `Document` を `dist/client/index.html` に書き出し、生成されたクライアントエントリーが `render()` を呼んで `App` を `document.body` にマウントします。
+  サーバー関数がなければビルドは `dist/server` を削除するため、`dist/client` は任意の静的ホストにデプロイできます。
+- `ssr: true` でのストリーミングサーバーレンダリング。
+  各リクエストでサーバー上で `<Document><App /></Document>` をレンダーしてストリーミングし、生成されたクライアントエントリーが同じツリーに対して `hydrate()` を呼びます。
+  ビルドは `dist/client` と `dist/server` 内のリクエストハンドラーを出力します。
+- ビルド時にプリレンダー。
+  `solid()` の隣に追加する `prerender-crawler` プラグインが、到達可能なページごとにサーバービルドを1回実行し、HTML を `dist/client` に書き出します。
+  これは start モードの設定ではなくプラグインで、同じ2つのファイルをレンダーします。
 
-Flipping `ssr` changes what the build produces and what the host runs.
-It does not change `App.tsx`, `Document.tsx`, or the routes, which is why the [project shapes](/getting-started/project-shapes) are the same layout with different options.
+`ssr` を切り替えると、ビルドが生成するものとホストが実行するものが変わります。
+`App.tsx`、`Document.tsx`、ルートは変わりません。これが、[プロジェクト構成](/getting-started/project-shapes)が同じレイアウトに異なるオプションを持つ形になっている理由です。
 
-:::note[Server functions keep the server handler]
-With `serverFunctions` on and `ssr` off, pages are still static files, but the `/_server` endpoint that answers server-function calls lives in `dist/server`, so the build keeps that directory and the host has to run it.
-[Choose a rendering mode](/guides/choose-a-rendering-mode#what-the-host-runs) weighs that against prerendering.
+:::note[サーバー関数はサーバーハンドラーを維持する]
+`serverFunctions` が有効で `ssr` が無効の場合、ページは静的ファイルのままですが、サーバー関数の呼び出しに応答する `/_server` エンドポイントは `dist/server` に存在するため、ビルドはそのディレクトリを保持し、ホストはそれを実行する必要があります。
+[レンダリングモードを選ぶ](/guides/choose-a-rendering-mode#what-the-host-runs)では、これとプリレンダーとを比較検討しています。
 :::
 
-## The app component
+## アプリコンポーネント
 
-`src/App.tsx` default-exports the root component.
-In the `bare` template that is the whole app; in `basic` and `fullstack` it mounts the router and holds the site-wide layout:
+`src/App.tsx` はルートコンポーネントをデフォルトエクスポートします。
+`bare` テンプレートではそれがアプリのすべてで、`basic` と `fullstack` ではルーターをマウントし、サイト全体のレイアウトを保持します:
 
 ```tsx
 // src/App.tsx
@@ -71,19 +71,19 @@ export default function App() {
 }
 ```
 
-Start the dev server, and the page shows the header with the counter.
-Nothing in this file knows which mode it runs in: with `ssr: true` the same component renders once on the server and once in the browser.
+開発サーバーを起動すると、カウンター付きのヘッダーがページに表示されます。
+このファイルのどこにも、どのモードで動作しているかを知る部分はありません。`ssr: true` では、同じコンポーネントがサーバーで1回、ブラウザーで1回レンダーされます。
 
-Anything that should appear on every page belongs here: the router, navigation, a default `<Title>`, a `Loading` boundary around the routed content.
-Anything that belongs to one page belongs in that page's route module.
+すべてのページに表示すべきものはここに置きます。ルーター、ナビゲーション、デフォルトの `<Title>`、ルーティングされたコンテンツを囲む `Loading` バウンダリです。
+特定のページに属するものは、そのページのルートモジュールに置きます。
 
-The plugin looks for `src/App` with `.tsx`, `.jsx`, `.ts`, then `.js`, and falls back to lowercase `src/app` with the same extensions when no uppercase stem matches.
-Set `start.app` to point at a different module inside the Vite root.
+プラグインは `src/App` を `.tsx`、`.jsx`、`.ts`、`.js` の順に探し、大文字のステムが見つからない場合は同じ拡張子で小文字の `src/app` にフォールバックします。
+`start.app` を設定すると、Vite ルート内の別のモジュールを指せます。
 
-## The document component
+## ドキュメントコンポーネント
 
-`src/Document.tsx` default-exports the full HTML document.
-It receives the app as `props.children`, and it is where site-wide head tags such as the charset, viewport, and favicon go:
+`src/Document.tsx` は HTML ドキュメント全体をデフォルトエクスポートします。
+アプリを `props.children` として受け取り、charset、viewport、favicon などのサイト全体の head タグを置く場所です:
 
 ```tsx
 // src/Document.tsx
@@ -106,10 +106,10 @@ export default function Document(props: ParentProps) {
 }
 ```
 
-View the page source and this is the markup around the app.
-The plugin injects the client entry `<script>` into the head; you do not write that tag.
+ページのソースを表示すると、これがアプリを囲むマークアップです。
+プラグインはクライアントエントリーの `<script>` を head に注入するため、そのタグを自分で書く必要はありません。
 
-Two lines in this file carry rules:
+このファイルにはルールのある行が2つあります:
 
 ```tsx
 // Avoid: a document with no hydration script under ssr: true
@@ -124,42 +124,42 @@ Two lines in this file carry rules:
 </head>
 ```
 
-With the `Avoid` version, clicks and input that happen between the HTML arriving and the client bundle hydrating are lost; [Rendering and SSR](/concepts/rendering-and-ssr#the-page-renders-but-the-first-clicks-do-nothing) describes the symptom.
-Keep `<HydrationScript />` in the document even in a static-shell project: the handler strips its output from the prerendered shell, so it costs nothing until you turn `ssr` on.
+`Avoid` 版では、HTML が到着してからクライアントバンドルがハイドレートするまでの間に起きたクリックや入力が失われます。[レンダリングと SSR](/concepts/rendering-and-ssr#the-page-renders-but-the-first-clicks-do-nothing) でその症状を説明しています。
+静的シェルのプロジェクトでも `<HydrationScript />` をドキュメントに残してください。ハンドラーはプリレンダーされたシェルからその出力を取り除くため、`ssr` を有効にするまでコストはかかりません。
 
-The other rule is `{props.children}`.
-The generated server entry renders `<Document><App /></Document>`, so a body that does not render its children never renders the app.
+もう1つのルールは `{props.children}` です。
+生成されたサーバーエントリーは `<Document><App /></Document>` をレンダーするため、children をレンダーしない body はアプリを決してレンダーしません。
 
-The plugin looks for `src/Document.tsx`, then `src/Document.jsx`; `start.document` names another module and takes precedence.
-Delete the file and the generated entries use a built-in shell with a charset, a viewport tag, and the hydration script.
-The static `<title>Solid App</title>` is the fallback when no page has mounted a `<Title>`; [Head and metadata](/building-apps/head-and-metadata) explains how per-page tags replace it.
+プラグインは `src/Document.tsx` を探し、次に `src/Document.jsx` を探します。`start.document` は別のモジュールを指定し、優先されます。
+ファイルを削除すると、生成されたエントリーは charset、viewport タグ、ハイドレーションスクリプトを持つ組み込みのシェルを使います。
+静的な `<title>Solid App</title>` は、どのページも `<Title>` をマウントしていない場合のフォールバックです。ページごとのタグによる置き換えは [head とメタデータ](/building-apps/head-and-metadata) で説明しています。
 
-## Generated and authored entries
+## 生成エントリーと自作エントリー
 
-:::advanced[When to read this section]
-The generated entries cover every project shape, including the routers in the official templates.
-Author your own entries when the server render must return something the generated one cannot, such as a custom `Response` per request or a document assembled by another host.
+:::advanced[このセクションを読むべきとき]
+生成されたエントリーは、公式テンプレートのルーターを含むすべてのプロジェクト構成をカバーします。
+サーバーレンダーが生成されたものでは返せないもの（リクエストごとのカスタム `Response` や別のホストが組み立てるドキュメントなど）を返す必要がある場合に、独自のエントリーを作成します。
 :::
 
-An entry pair is selected in this order: explicit `start.entryServer` and `start.entryClient` paths, then the conventional `src/entry-server.*` and `src/entry-client.*` files (probed as `.tsx`, `.jsx`, `.ts`, `.js`, then `.mjs`), then the generated pair built from `App` and `Document`.
+エントリーのペアは次の順序で選択されます。明示的な `start.entryServer` と `start.entryClient` のパス、次に慣例の `src/entry-server.*` と `src/entry-client.*` ファイル（`.tsx`、`.jsx`、`.ts`、`.js`、`.mjs` の順に探索）、そして `App` と `Document` から構築される生成ペアです。
 
-Under `ssr: true`, authored entries come in pairs, because both sides must render the same document tree for hydration to match.
-The server entry exports `render(request, context)`, which may return a `renderToStream` result, an HTML string, or a `Response`.
-The client entry owns hydration, and the server document owns its own client `<script>` element: `context.clientEntry` carries the resolved client entry URL, and the production handler also rewrites a literal root-relative reference to the authored client entry.
-Authored entries bypass the `App` and `Document` conventions; those two modules belong to the generated entries.
+`ssr: true` の下では、ハイドレーションが一致するには両側が同じドキュメントツリーをレンダーしなければならないため、自作エントリーはペアで必要です。
+サーバーエントリーは `render(request, context)` をエクスポートし、`renderToStream` の結果、HTML 文字列、または `Response` を返せます。
+クライアントエントリーはハイドレーションを担当し、サーバードキュメントは自分のクライアント `<script>` 要素を持ちます。`context.clientEntry` が解決済みのクライアントエントリー URL を保持し、本番ハンドラーはルート相対のリテラル参照も自作クライアントエントリーに書き換えます。
+自作エントリーは `App` と `Document` の慣例をバイパスします。これら2つのモジュールは生成エントリーに属するものです。
 
-Without `ssr`, the server entry is always generated, because it renders the shell for dev serving and the build-time prerender.
-An authored client entry can stand alone in that mode and owns the browser mount; `start.entryServer` and any `src/entry-server.*` file are ignored, and the selected `Document` still supplies the shell.
+`ssr` なしでは、サーバーエントリーは常に生成されます。開発サーブとビルド時プリレンダーのためにシェルをレンダーするからです。
+このモードでは自作のクライアントエントリーは単独で成立し、ブラウザーへのマウントを担当します。`start.entryServer` と `src/entry-server.*` ファイルは無視され、選択された `Document` が引き続きシェルを提供します。
 
-Providing one authored entry without the other under `ssr: true` is a configuration error, and the message names the missing file.
+`ssr: true` の下で片方だけの自作エントリーを提供するのは設定エラーで、メッセージが不足しているファイル名を示します。
 
-## Mounting a router
+## ルーターのマウント
 
-Start mode does not select a router.
-Mount the router or its provider inside `App`, the way both router variants of the templates do, and route modules and route-table generation stay with the router you chose.
+Start モードはルーターを選択しません。
+テンプレートの両方のルーターバリアントがそうしているように、`App` の内部でルーターまたはそのプロバイダーをマウントします。ルートモジュールとルートテーブルの生成は、選択したルーターに委ねられます。
 
-Some routers need an instance bound to the current request so they can load the matched routes before the server render begins.
-`start.setup` names a server-only module for that:
+ルーターの中には、サーバーレンダーが始まる前にマッチしたルートをロードできるよう、現在のリクエストにバインドされたインスタンスを必要とするものがあります。
+`start.setup` はそのためのサーバー専用モジュールを指定します:
 
 ```ts
 // vite.config.ts
@@ -171,49 +171,49 @@ solid({
 });
 ```
 
-The module default-exports a function that receives the request event and the `App` component.
-The generated server entry calls it after the middleware chain has dispatched to the page render and before `renderToStream()` starts.
-It may return a component, nothing, or a promise of either: a returned component renders in `App`'s place inside `Document`, and no return keeps `<App />`.
-The browser-side `App` must produce the same router tree, or hydration will not match.
+このモジュールは、リクエストイベントと `App` コンポーネントを受け取る関数をデフォルトエクスポートします。
+生成されたサーバーエントリーは、ミドルウェアチェーンがページレンダーにディスパッチした後、`renderToStream()` が始まる前にそれを呼び出します。
+戻り値はコンポーネント、何も返さない、またはそのいずれかの Promise のいずれでも構いません。返されたコンポーネントは `Document` 内で `App` の代わりにレンダーされ、戻り値がなければ `<App />` が使われます。
+ブラウザー側の `App` は同じルーターツリーを生成しなければなりません。さもないとハイドレーションが一致しません。
 
-`start.setup` runs only for page renders made by a generated server entry under `ssr: true`.
-It is ignored without `ssr`, and combining it with an authored server entry is an error.
+`start.setup` は、`ssr: true` の下で生成されたサーバーエントリーが行うページレンダーに対してのみ実行されます。
+`ssr` なしでは無視され、自作のサーバーエントリーとの組み合わせはエラーです。
 
-[Integrate a router](/routing/integrate-a-router) shows how the two supported routers use this hook and when a project needs it at all.
+[ルーターを統合する](/routing/integrate-a-router)では、サポートされている2つのルーターがこのフックをどう使うか、そしてどんなプロジェクトでそれが必要になるかを示しています。
 
-## Common problems
+## よくある問題
 
 ### `the start option needs an app root`
 
-There is no `src/App.tsx` (or `.jsx`, `.ts`, `.js`, or a lowercase `app` variant) and `start.app` is not set.
-Add the file or set `start.app`; under `ssr: true`, an authored `src/entry-server.*` and `src/entry-client.*` pair is the other way to satisfy it.
+`src/App.tsx`（または `.jsx`、`.ts`、`.js`、小文字の `app` バリアント）がなく、`start.app` も設定されていません。
+ファイルを追加するか `start.app` を設定してください。`ssr: true` の下では、自作の `src/entry-server.*` と `src/entry-client.*` のペアがもう1つの満たし方です。
 
 ### `found entry-server but no entry-client; entry files come in pairs`
 
-One authored entry exists under `ssr: true`.
-Add the matching entry, or remove the one you have to go back to the generated pair.
+`ssr: true` の下で片方の自作エントリーが存在します。
+対になるエントリーを追加するか、既存のものを削除して生成ペアに戻してください。
 
-### The body is empty on a server-rendered page
+### サーバーレンダーされたページで body が空になる
 
-`Document` does not render `props.children`.
-The app is passed in as children; a body that hardcodes its content never renders it.
+`Document` が `props.children` をレンダーしていません。
+アプリは children として渡されるため、内容をハードコードした body はそれを決してレンダーしません。
 
-### Production shows a 500 page where development showed the error
+### 開発時にエラーが表示された場所で本番が 500 ページを表示する
 
-Production builds wrap the generated entries in a default error boundary that logs the error with `console.error` on the server and renders `500 | Internal Server Error` with a 500 status; development builds have no such boundary.
-Read the server log for the real error.
-Set `start.errorBoundary: false` when middleware owns error handling; [Middleware and API routes](/building-apps/middleware-and-api-routes#catching-errors) shows that middleware.
+本番ビルドは生成されたエントリーをデフォルトのエラーバウンダリで包み、サーバーで `console.error` によりエラーをログ出力し、500 ステータスで `500 | Internal Server Error` をレンダーします。開発ビルドにはそのようなバウンダリはありません。
+実際のエラーはサーバーログを読んでください。
+ミドルウェアがエラー処理を担う場合は `start.errorBoundary: false` を設定します。そのミドルウェアは [ミドルウェアと API ルート](/building-apps/middleware-and-api-routes#catching-errors) にあります。
 
 ### `start.setup only applies to generated entries`
 
-The project has an authored `src/entry-server.*` (or `start.entryServer`) and `start.setup` at the same time.
-Call the setup step from your own `render()` and remove `start.setup`, or remove the authored entry.
+プロジェクトに自作の `src/entry-server.*`（または `start.entryServer`）と `start.setup` が同時に存在します。
+自分の `render()` からセットアップ処理を呼び出して `start.setup` を削除するか、自作エントリーを削除してください。
 
-## Loading instrumentation first
+## 計測コードを最初にロードする
 
-An error monitor or a tracing SDK on the server patches `node:http` and the other modules it observes, so it has to run before those modules are imported.
-Writing `import "./instrument"` at the top of an entry does not achieve that in ESM: static imports are hoisted and evaluated in dependency order, so the entry's own dependencies load first.
-`start.instrument` names a server-only module the plugin awaits before anything else in the server graph:
+サーバー上のエラーモニターやトレーシング SDK は `node:http` や観測対象の他のモジュールにパッチを当てるため、それらのモジュールがインポートされる前に実行する必要があります。
+エントリーの先頭に `import "./instrument"` と書いても ESM ではそれは実現できません。静的インポートは巻き上げられて依存関係の順序で評価されるため、エントリー自身の依存関係が先にロードされます。
+`start.instrument` は、プラグインがサーバーグラフの他のすべての前に await するサーバー専用モジュールを指定します:
 
 ```ts
 // vite.config.ts
@@ -232,26 +232,26 @@ import * as monitor from "my-monitor/server";
 monitor.init({ dsn: process.env.MONITOR_DSN });
 ```
 
-The generated handler entry becomes `await import(instrument); await import(handler)`, so the module runs to completion — top-level `await` included — before the app, the middleware, `@solidjs/web`, or any dependency evaluates.
-The plugin honors it on every surface: `vite dev`, `vite build`, `vite preview`, and a host importing the handler entry directly, which replaces a `node --import` flag per host.
-The module needs no exports.
-Keep code splitting on in the server build (the default); inlining dynamic imports would hoist the handler graph back above the instrument.
+生成されたハンドラーエントリーは `await import(instrument); await import(handler)` になるため、そのモジュールはアプリ、ミドルウェア、`@solidjs/web`、その他の依存関係が評価される前に、トップレベルの `await` を含めて完了まで実行されます。
+プラグインはすべての局面でこれを尊重します。`vite dev`、`vite build`、`vite preview`、そしてハンドラーエントリーを直接インポートするホスト（ホストごとの `node --import` フラグを置き換えます）です。
+このモジュールにエクスポートは不要です。
+サーバービルドでコード分割を有効のままにしてください（デフォルト）。動的インポートをインライン化すると、ハンドラーグラフが instrument の上に巻き上げられてしまいます。
 
-## Recap
+## まとめ
 
-- Edit `src/App.tsx` for what every page shares and `src/Document.tsx` for the HTML shell; the plugin generates the entries around them.
-- The static shell, streaming SSR, and prerendering all use the same two files; `ssr` and the crawler plugin change the build and the host, not the code.
-- Keep `<HydrationScript />` in `Document`; without it, input before hydration is lost, and the static shell strips it for free.
-- Render `{props.children}` in the document body, or the app never appears on the server.
-- The static `<title>` in `Document` is the fallback; per-page titles come from head metadata.
-- Author `entry-server` and `entry-client` together, and only when the generated pair cannot produce the response you need.
-- Use `start.setup` when a router must load against the request before the server render; it applies only to generated entries under `ssr: true`.
-- Use `start.instrument` for a module that must run before the server graph loads, such as a monitoring SDK's `init()`; a static import at the top of an entry does not run first.
+- すべてのページで共有するものは `src/App.tsx`、HTML シェルは `src/Document.tsx` を編集します。プラグインがそれらを取り囲むエントリーを生成します。
+- 静的シェル、ストリーミング SSR、プリレンダーはすべて同じ2つのファイルを使います。`ssr` とクローラープラグインが変えるのはビルドとホストであり、コードではありません。
+- `<HydrationScript />` を `Document` に残してください。これがないとハイドレーション前の入力が失われます。静的シェルは無料でそれを取り除きます。
+- ドキュメントの body で `{props.children}` をレンダーしてください。さもないとアプリはサーバーに現れません。
+- `Document` の静的な `<title>` はフォールバックです。ページごとのタイトルは head メタデータから来ます。
+- `entry-server` と `entry-client` はセットで自作し、生成ペアが必要なレスポンスを生成できない場合に限ってください。
+- ルーターがサーバーレンダーの前にリクエストに対してロードする必要がある場合は `start.setup` を使います。これは `ssr: true` の生成エントリーにのみ適用されます。
+- サーバーグラフがロードされる前に実行が必要なモジュール（監視 SDK の `init()` など）には `start.instrument` を使います。エントリー先頭の静的インポートは最初には実行されません。
 
-## Next steps
+## 次のステップ
 
-- [Styling and assets](/building-apps/styling-and-assets): where CSS and images go now that there is no `index.html` to link them from.
-- [Head and metadata](/building-apps/head-and-metadata): per-page titles and meta tags on top of the `Document` shell.
-- [Choose a rendering mode](/guides/choose-a-rendering-mode): which of the three modes fits the project, by what the user sees and what the host runs.
-- [Deployment](/building-apps/deployment): what to do with `dist/client` and `dist/server` on the first deploy.
-- [Observability](/guides/observability): what the instrument module hooks into, and the `observe` build that carries records and traces in production.
+- [スタイリングとアセット](/building-apps/styling-and-assets): リンク元の `index.html` がなくなった今、CSS と画像を置く場所。
+- [head とメタデータ](/building-apps/head-and-metadata): `Document` シェルの上に載せるページごとのタイトルとメタタグ。
+- [レンダリングモードを選ぶ](/guides/choose-a-rendering-mode): ユーザーが見るものとホストが実行するものから、3つのモードのどれがプロジェクトに合うか。
+- [デプロイ](/building-apps/deployment): 初回デプロイで `dist/client` と `dist/server` をどうするか。
+- [オブザーバビリティ](/guides/observability): instrument モジュールが何にフックするか、そして本番でレコードとトレースを運ぶ `observe` ビルド。

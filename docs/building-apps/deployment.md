@@ -1,44 +1,44 @@
 ---
-title: "Deployment"
+title: "デプロイ"
 version: "2.0"
-description: "Put a start-mode build on a host: serve dist/client as static files, route everything else to the built request handler, supply the server environment at boot, and pick a Node server or a provider adapter."
+description: "start モードのビルドをホストに載せます。dist/client を静的ファイルとして配信し、それ以外のすべてをビルド済みのリクエストハンドラーに回し、起動時にサーバー環境を供給し、Node サーバーまたはプロバイダーアダプターを選びます。"
 ---
 
-The first deploy of a `fullstack` project usually fails in one of two ways.
-The HTML arrives but every `/assets/*.js` and `.css` request returns 404, so the page is unstyled and never hydrates.
-Or the home page works and refreshing `/account/orders` returns the host's 404 page.
-Both mean the host is serving one half of the build: `dist/client` is a directory of static files, `dist/server/server.js` is a request handler, and the host has to put the first in front of the second.
+`fullstack` プロジェクトの初回デプロイは、たいてい2つのうちどちらかの形で失敗します。
+HTML は届くのに `/assets/*.js` と `.css` のリクエストがすべて 404 を返し、ページがスタイルなしでハイドレートもされないか。
+あるいはホームページは動くのに `/account/orders` をリロードするとホストの 404 ページが返ってくるかです。
+どちらも、ホストがビルドの半分しか配信していないことを意味します。`dist/client` は静的ファイルのディレクトリ、`dist/server/server.js` はリクエストハンドラーであり、ホストは前者を後者の前に置く必要があります。
 
-A `bare` or `basic` project builds to `dist/client` alone, and any static host serves it.
-This page is about a project with `ssr: true` or server functions, which builds to static assets plus a server handler.
-[Project shapes](/getting-started/project-shapes) says which shape produces which output; [App structure](/building-apps/app-structure) explains the entries the handler runs.
+`bare` や `basic` のプロジェクトは `dist/client` だけにビルドされ、任意の静的ホストが配信できます。
+このページは `ssr: true` またはサーバー関数を持つプロジェクトについてのもので、静的アセットとサーバーハンドラーにビルドされます。
+[プロジェクト構成](/getting-started/project-shapes)ではどの構成がどの出力を生成するかを、[アプリの構造](/building-apps/app-structure)ではハンドラーが実行するエントリーを説明しています。
 
-Most apps need the request handler section and one of the host sections after it: Node with the emitted `dist/server/node.js`, or one provider plugin.
-The rest is for checking a detail or wiring a host that is not listed.
+ほとんどのアプリで必要なのはリクエストハンドラーのセクションと、その後にあるホストのセクションのうち1つです。出力された `dist/server/node.js` を使う Node か、プロバイダープラグインのどれかです。
+残りは細部を確認したり、リストにないホストを配線したりするためのものです。
 
-## What the build produces
+## ビルドが生成するもの
 
-Run the configured Vite build:
+設定された Vite ビルドを実行します:
 
 ```bash
 pnpm build
 ```
 
-With `start` and `ssr: true`, one build produces:
+`start` と `ssr: true` で、1回のビルドが生成するもの:
 
-- `dist/client`, containing browser JavaScript, CSS, images, and other static assets, with hashed file names.
-- `dist/server/server.js`, containing the server entry and its exported request handler.
+- `dist/client`。ブラウザーの JavaScript、CSS、画像、その他の静的アセットを含み、ファイル名はハッシュ付きです。
+- `dist/server/server.js`。サーバーエントリーと、エクスポートされたリクエストハンドラーを含みます。
 
-When server functions are enabled, the server bundle also dispatches their endpoint, `/_server` by default.
-Pages and server functions are one deployment: a render calls a server function directly, in the same process, with the request event and its `locals` in hand, so the server bundle cannot be split with pages on one host and functions on another.
+サーバー関数が有効な場合、サーバーバンドルはそのエンドポイント（デフォルトは `/_server`）もディスパッチします。
+ページとサーバー関数は1つのデプロイです。レンダーはサーバー関数を同じプロセス内で直接呼び出し、リクエストイベントとその `locals` を手元に持つため、サーバーバンドルを「ページはこのホスト、関数は別のホスト」に分割することはできません。
 
-Without `ssr: true`, start mode writes the empty document shell to `dist/client/index.html` and removes `dist/server` when the application has no server functions.
-If server functions are enabled, deploy `dist/client` for pages and keep `dist/server` running for the function endpoint.
-The two can live on different hosts as long as the browser sees one origin: the server-function client calls are same-origin by contract, so route `/_server/*` to the function host from the CDN or proxy that serves the pages rather than pointing the client at another origin.
+`ssr: true` なしでは、start モードは空のドキュメントシェルを `dist/client/index.html` に書き出し、アプリケーションにサーバー関数がなければ `dist/server` を削除します。
+サーバー関数が有効な場合は、`dist/client` をページ用にデプロイし、`dist/server` を関数エンドポイント用に実行し続けます。
+ブラウザーから1つのオリジンに見える限り、両者は別のホストに置けます。サーバー関数のクライアント呼び出しは契約上同一オリジンなので、クライアントを別のオリジンに向けるのではなく、ページを配信する CDN やプロキシーから `/_server/*` を関数ホストにルーティングしてください。
 
-## The request handler
+## リクエストハンドラー
 
-The built server entry exports the handler in two forms:
+ビルドされたサーバーエントリーは、ハンドラーを2つの形でエクスポートします:
 
 ```ts
 import app, { handleRequest } from "./dist/server/server.js";
@@ -47,8 +47,8 @@ const response = await handleRequest(request);
 const sameResponse = await app.fetch(request);
 ```
 
-`handleRequest(Request)` is the direct Solid API.
-The default export follows the Fetchable module convention used by Workers, Nitro, Netlify Functions, Bun, and `deno serve`:
+`handleRequest(Request)` は直接的な Solid API です。
+デフォルトエクスポートは Workers、Nitro、Netlify Functions、Bun、`deno serve` で使われる Fetchable モジュールの慣例に従います:
 
 ```ts
 export default {
@@ -58,13 +58,13 @@ export default {
 };
 ```
 
-The wrapper accepts only the request on purpose.
-Some hosts call `fetch` with additional environment or execution-context arguments, which are not Solid handler options.
+このラッパーは意図的にリクエストだけを受け取ります。
+ホストによっては追加の環境や実行コンテキストの引数を付けて `fetch` を呼びますが、それらは Solid ハンドラーのオプションではありません。
 
-The handler creates the request event, runs the configured middleware, dispatches the server-function endpoint when enabled, renders pages, and commits response metadata.
-It also resolves the built client entry and stylesheet URLs through the client build manifest.
+ハンドラーはリクエストイベントを作成し、設定されたミドルウェアを実行し、有効な場合はサーバー関数のエンドポイントをディスパッチし、ページをレンダーし、レスポンスのメタデータを確定します。
+また、クライアントビルドマニフェストを通してビルド済みのクライアントエントリーとスタイルシートの URL を解決します。
 
-Static files go first:
+静的ファイルが先です:
 
 ```ts
 // Avoid: every request goes to the handler, assets included
@@ -81,21 +81,21 @@ const server = createServer(async (req, res) => {
 });
 ```
 
-With the `Avoid` version, a request for `/assets/app-BpJ2g.js` renders the HTML page, because in production every request that reaches the end of the middleware chain renders; the browser receives a document where it expected a script.
-With `start.node`, the emitted Node entry is the `Prefer` version; the rest of this section is for a bridge you write.
+`Avoid` 版では、`/assets/app-BpJ2g.js` へのリクエストが HTML ページをレンダーします。本番ではミドルウェアチェーンの最後まで到達したリクエストはすべてレンダーされるためで、ブラウザーはスクリプトを期待した場所でドキュメントを受け取ります。
+`start.node` では、出力される Node エントリーは `Prefer` 版です。このセクションの残りは、自分で書くブリッジ向けです。
 
-When adapting a host request, preserve the URL, method, headers, and the body of any request that is not `GET` or `HEAD`.
-When adapting the result, preserve the status, the headers, each `Set-Cookie` value separately, and the streamed body.
+ホストのリクエストを適合させるときは、URL、メソッド、ヘッダー、そして `GET` と `HEAD` 以外のリクエストのボディを保持してください。
+結果を適合させるときは、ステータス、ヘッダー、各 `Set-Cookie` の値を個別に、そしてストリーミングされたボディを保持してください。
 
-:::caution[Set-Cookie must not be comma-joined]
-A response can carry several `Set-Cookie` headers, and joining them into one comma-separated value corrupts every cookie in it.
-The emitted Node entry reads them with `headers.getSetCookie()` and passes the array to Node; a bridge for another server needs the same care.
+:::caution[Set-Cookie をカンマで連結してはならない]
+レスポンスは複数の `Set-Cookie` ヘッダーを持てるため、それらを1つのカンマ区切りの値に連結すると、中のすべての Cookie が壊れます。
+出力される Node エントリーは `headers.getSetCookie()` でそれらを読み取り、配列を Node に渡します。他のサーバー向けのブリッジにも同じ配慮が必要です。
 :::
 
 ## Node
 
-Node has no server API that accepts a Fetchable module, so the plugin emits the Node server.
-Set `start.node` and the build writes `dist/server/node.js` next to `dist/server/server.js`:
+Node には Fetchable モジュールを受け取るサーバー API がないため、プラグインが Node サーバーを出力します。
+`start.node` を設定すると、ビルドは `dist/server/server.js` の隣に `dist/server/node.js` を書き出します:
 
 ```ts title="vite.config.ts"
 import { defineConfig } from "vite";
@@ -111,18 +111,18 @@ export default defineConfig({
 });
 ```
 
-`server.js` does not change: `handleRequest` and the default `{ fetch }` export are the same as without the option, so a provider integration or a Fetch runtime keeps working from that file.
+`server.js` は変わりません。`handleRequest` とデフォルトの `{ fetch }` エクスポートはオプションなしの場合と同じなので、プロバイダー統合や Fetch ランタイムはそのファイルから動作し続けます。
 
-Build, then run the emitted file:
+ビルドしてから、出力されたファイルを実行します:
 
 ```bash
 pnpm build
 node dist/server/node.js
 ```
 
-The server listens on `PORT`, defaulting to `3000`, and binds to `HOST` when it is set.
-Those two variables are the only runtime configuration.
-The fullstack templates point their start script at the file:
+サーバーは `PORT` で待ち受け（デフォルトは `3000`）、`HOST` が設定されていればそれにバインドします。
+この2つの変数が唯一のランタイム設定です。
+fullstack テンプレートは start スクリプトをこのファイルに向けています:
 
 ```json
 {
@@ -132,30 +132,30 @@ The fullstack templates point their start script at the file:
 }
 ```
 
-Any Node host that runs that command with `PORT` and the server environment set is done.
+そのコマンドを `PORT` とサーバー環境を設定して実行できる Node ホストなら、それで完了です。
 
-The emitted entry is the `Prefer` version from [the request handler section](#the-request-handler), with the details a production bridge needs:
+出力されるエントリーは [リクエストハンドラーのセクション](#the-request-handler) の `Prefer` 版に、本番ブリッジが必要とする詳細を加えたものです:
 
-- It serves `dist/client` first.
-  Hashed files under `assets/` get `Cache-Control: public, max-age=31536000, immutable`; other files get `public, max-age=0, must-revalidate` and a `Last-Modified` header.
-  A path containing `..` cannot leave the directory, and a path with a dot segment such as `.vite/manifest.json` is never served.
-- It passes every request that matched no file to `handleRequest(request, { event: { nativeEvent: req } })` through the same Node-to-web bridge that `vite dev` and `vite preview` use.
-  The bridge streams the request body for methods other than `GET` and `HEAD`, forwards each `Set-Cookie` header separately, answers `HEAD` without a body, aborts the render when the client disconnects, and waits for the socket to drain before writing more.
-- In client start mode with server functions, it serves `dist/client/index.html` for HTML-accepting `GET` requests that match no file, and routes the server-function endpoint to the handler.
-- It speaks plain HTTP.
-  Terminate TLS and compress at a reverse proxy or CDN in front of it, or mount it in Express behind `compression()` as shown below.
+- まず `dist/client` を配信します。
+  `assets/` 以下のハッシュ付きファイルには `Cache-Control: public, max-age=31536000, immutable` が付き、他のファイルには `public, max-age=0, must-revalidate` と `Last-Modified` ヘッダーが付きます。
+  `..` を含むパスはディレクトリの外に出られず、`.vite/manifest.json` のようなドットセグメントを含むパスは決して配信されません。
+- どのファイルにもマッチしなかったすべてのリクエストを、`vite dev` と `vite preview` が使うのと同じ Node から Web へのブリッジを通して `handleRequest(request, { event: { nativeEvent: req } })` に渡します。
+  ブリッジは `GET` と `HEAD` 以外のメソッドのリクエストボディをストリーミングし、各 `Set-Cookie` ヘッダーを個別に転送し、`HEAD` にはボディなしで応答し、クライアントが切断したらレンダーを中断し、さらに書き込む前にソケットがドレインするのを待ちます。
+- クライアント start モードでサーバー関数がある場合、ファイルにマッチしない HTML を受け入れる `GET` リクエストには `dist/client/index.html` を配信し、サーバー関数のエンドポイントをハンドラーにルーティングします。
+- プレーンな HTTP を話します。
+  TLS の終端と圧縮は、前面のリバースプロキシーや CDN で行うか、以下に示すように Express の `compression()` の後ろにマウントしてください。
 
-:::tip[The raw request is one option away]
-The emitted entry passes the Node request into the event with `handleRequest(request, { event: { nativeEvent: req } })`, so `getRequestEvent().nativeEvent` is the Node `IncomingMessage`.
-Middleware and server functions read it for platform details such as the socket's remote address.
-Behind a proxy, read the forwarding headers off `getRequestEvent().request` instead, and only when the proxy is trusted.
+:::tip[生のリクエストは1オプションで取れる]
+出力されるエントリーは `handleRequest(request, { event: { nativeEvent: req } })` で Node のリクエストをイベントに渡すため、`getRequestEvent().nativeEvent` が Node の `IncomingMessage` です。
+ミドルウェアとサーバー関数は、ソケットのリモートアドレスのようなプラットフォームの詳細をこれから読み取ります。
+プロキシーの背後では、代わりに `getRequestEvent().request` の転送ヘッダーを読んでください。ただしプロキシーが信頼できる場合に限ります。
 :::
 
-### Your own Node server
+### 独自の Node サーバー
 
-Keep a hand-written entry when the app needs compression, a custom `http` server, or a place inside an existing Express or Fastify app.
-`dist/server/node.js` exports three things for that: `listener`, the `(req, res)` function the emitted server runs; `createListener(options)`, which builds a listener with options; and `serve(options)`, which creates and starts an `http.Server` on `PORT` and `HOST` and returns it.
-Importing the file does not start a server; only running it directly does.
+アプリに圧縮、カスタム `http` サーバー、または既存の Express や Fastify アプリ内での配置が必要な場合は、手書きのエントリーを維持してください。
+そのために `dist/server/node.js` は3つをエクスポートします。出力されるサーバーが実行する `(req, res)` 関数である `listener`、オプション付きでリスナーを構築する `createListener(options)`、そして `PORT` と `HOST` で `http.Server` を作成・起動してそれを返す `serve(options)` です。
+このファイルをインポートするだけではサーバーは起動せず、直接実行した場合のみ起動します。
 
 ```js
 // server.js
@@ -165,7 +165,7 @@ import { listener } from "./dist/server/node.js";
 createServer(listener).listen(process.env.PORT || 3000);
 ```
 
-With Express, either put compression in front and let the listener serve everything:
+Express では、圧縮を前に置いてリスナーにすべてを配信させるか:
 
 ```js
 // server.js
@@ -179,7 +179,7 @@ app.use(listener); // static files, pages, server functions
 app.listen(process.env.PORT || 3000);
 ```
 
-Or let Express own the static files and keep only the bridge:
+あるいは Express に静的ファイルを持たせ、ブリッジだけを残します:
 
 ```js
 // server.js
@@ -192,42 +192,42 @@ app.use(createListener({ static: false }));
 app.listen(process.env.PORT || 3000);
 ```
 
-`static: false` skips the file lookup and, in client start mode, the `index.html` history fallback; Express owns both.
-`createListener({ event: (req) => ({ ...fields }) })` merges extra fields next to `nativeEvent` in the request event, and `serve()` accepts `static` and `event` alongside `port` and `host`.
+`static: false` はファイル検索と、クライアント start モードでは `index.html` の履歴フォールバックをスキップします。Express がその両方を担当します。
+`createListener({ event: (req) => ({ ...fields }) })` はリクエストイベントの `nativeEvent` の隣に追加フィールドをマージし、`serve()` は `port` と `host` に加えて `static` と `event` を受け取ります。
 
-A bridge written against `handleRequest` from `dist/server/server.js` is the last resort, for a server that cannot mount a Node request listener.
-It must meet the requirements in [the request handler section](#the-request-handler): stream the request body for methods other than `GET` and `HEAD`, forward multiple `Set-Cookie` headers as separate values, and pass the Node request as `event.nativeEvent`.
+`dist/server/server.js` の `handleRequest` に対して書くブリッジは最後の手段で、Node のリクエストリスナーをマウントできないサーバー向けです。
+それは [リクエストハンドラーのセクション](#the-request-handler) の要件を満たす必要があります。`GET` と `HEAD` 以外のメソッドではリクエストボディをストリーミングし、複数の `Set-Cookie` ヘッダーを個別の値として転送し、Node のリクエストを `event.nativeEvent` として渡します。
 
-## Preview the production artifact
+## 本番アーティファクトのプレビュー
 
-The start-mode integration configures `vite preview` to serve `dist/client` and dispatch the remaining requests through the built handler:
+start モードの統合は、`vite preview` が `dist/client` を配信し、残りのリクエストをビルド済みハンドラーでディスパッチするように設定します:
 
 ```bash
 pnpm build
 pnpm exec vite preview
 ```
 
-The official fullstack templates name the Vite preview script `serve` and reserve `start` for the emitted Node server.
-Preview verifies the built handler and static assets together; it does not replace a test on the target host.
+公式の fullstack テンプレートは Vite のプレビュースクリプトに `serve` という名前を付け、`start` は出力される Node サーバー用に予約しています。
+プレビューはビルド済みハンドラーと静的アセットを一緒に検証しますが、対象ホストでのテストを代替するものではありません。
 
-## Provider integrations
+## プロバイダー統合
 
-Provider Vite plugins can add platform development features and prepare deployment output.
-The normal `ssr` environment exposes the default Fetchable handler as its `index` service entry in development and production, so a provider plugin can adopt that environment, supply its runtime and build orchestration, and use the Solid entry without a custom source file or explicit Rollup input.
+プロバイダーの Vite プラグインは、プラットフォームの開発機能を追加し、デプロイ出力を準備できます。
+通常の `ssr` 環境は、開発と本番の両方で、デフォルトの Fetchable ハンドラーを `index` サービスエントリーとして公開します。そのためプロバイダープラグインはその環境を採用し、自分のランタイムとビルドオーケストレーションを供給して、カスタムのソースファイルや明示的な Rollup 入力なしで Solid のエントリーを使えます。
 
-The integrations below adopt the normal `ssr` environment.
-Use `start.external` instead when a custom host controls a differently named or independently configured server environment.
-External mode leaves the server build and development HTTP serving to that host while Solid continues to provide its generated entries, manifest, and virtual request handler.
+以下の統合は通常の `ssr` 環境を採用します。
+カスタムホストが異なる名前や独自に設定されたサーバー環境を制御する場合は、代わりに `start.external` を使ってください。
+external モードでは、サーバービルドと開発時の HTTP 配信はそのホストに委ねられ、Solid は生成されたエントリー、マニフェスト、仮想リクエストハンドラーを提供し続けます。
 
 ### Netlify
 
-The Netlify Vite plugin consumes Solid's normal `ssr` build and turns its Fetchable server entry into a streaming Netlify Function.
+Netlify の Vite プラグインは Solid の通常の `ssr` ビルドを消費し、その Fetchable サーバーエントリーをストリーミングする Netlify Function に変換します。
 
 ```package-install-dev
 @netlify/vite-plugin
 ```
 
-Add the Netlify plugin after `solid()` and enable its build support:
+`solid()` の後に Netlify プラグインを追加し、ビルドサポートを有効にします:
 
 ```ts title="vite.config.ts"
 import netlify from "@netlify/vite-plugin";
@@ -249,9 +249,9 @@ export default defineConfig({
 });
 ```
 
-Keep the normal Solid server build enabled so Netlify can consume its `ssr` environment.
+Netlify が `ssr` 環境を消費できるよう、通常の Solid サーバービルドは有効のままにしてください。
 
-Set the direct-plugin build defaults explicitly:
+プラグイン直接利用時のビルドのデフォルトを明示的に設定します:
 
 ```toml title="netlify.toml"
 [build]
@@ -259,19 +259,19 @@ command = "pnpm build"
 publish = "dist/client"
 ```
 
-The Netlify plugin generates the catch-all function, gives static files precedence, and preserves streaming responses.
-It also emulates Netlify platform features during `vite dev`.
-No handwritten Netlify Function is required.
+Netlify プラグインはキャッチオールの関数を生成し、静的ファイルを優先し、ストリーミングレスポンスを保持します。
+`vite dev` の間は Netlify プラットフォームの機能もエミュレートします。
+手書きの Netlify Function は不要です。
 
 ### Nitro
 
-[Nitro v3](https://nitro.build/) adopts Solid's `ssr` environment so its presets, route rules, tasks, and runtime features apply to the Solid handler.
+[Nitro v3](https://nitro.build/) は Solid の `ssr` 環境を採用し、そのプリセット、ルートルール、タスク、ランタイム機能を Solid ハンドラーに適用します。
 
 ```package-install
 nitro
 ```
 
-Add `nitro()` after `solid()`:
+`solid()` の後に `nitro()` を追加します:
 
 ```tsx title="vite.config.ts"
 import { nitro } from "nitro/vite";
@@ -289,20 +289,20 @@ export default defineConfig({
 });
 ```
 
-Nitro discovers the Fetchable handler through the environment's `index` service entry.
-No custom server entry or Rollup input is required.
+Nitro は環境の `index` サービスエントリーを通して Fetchable ハンドラーを見つけます。
+カスタムのサーバーエントリーや Rollup 入力は不要です。
 
-Use the top-level `nitro` property for deployment presets, prerendering, tasks, WebSockets, and other Nitro options; see the [Nitro configuration reference](https://nitro.build/config).
+デプロイプリセット、プリレンダー、タスク、WebSocket、その他の Nitro オプションにはトップレベルの `nitro` プロパティを使います。[Nitro 設定リファレンス](https://nitro.build/config)を参照してください。
 
 ### Cloudflare Workers
 
-The [Cloudflare Vite plugin](https://developers.cloudflare.com/workers/vite-plugin/) runs the server build in the Workers runtime during development and prepares it for deployment to Cloudflare.
+[Cloudflare Vite プラグイン](https://developers.cloudflare.com/workers/vite-plugin/)は、開発中にサーバービルドを Workers ランタイムで実行し、Cloudflare へのデプロイ用に準備します。
 
 ```package-install-dev
 @cloudflare/vite-plugin wrangler
 ```
 
-Map the Worker to Solid's `ssr` environment:
+Worker を Solid の `ssr` 環境にマッピングします:
 
 ```tsx title="vite.config.ts"
 import { cloudflare } from "@cloudflare/vite-plugin";
@@ -317,10 +317,10 @@ export default defineConfig({
 });
 ```
 
-Cloudflare comes before `solid()` in the plugin list, matching Cloudflare's framework-integration order.
-It associates the Worker with the `ssr` environment before Solid supplies the application entry.
+Cloudflare はプラグインリストで `solid()` の前に来ます。これは Cloudflare のフレームワーク統合の順序に合わせたものです。
+Solid がアプリケーションエントリーを供給する前に、Worker を `ssr` 環境に関連付けます。
 
-Point the Worker at Solid's generated virtual handler in `wrangler.jsonc`:
+`wrangler.jsonc` で Worker を Solid が生成する仮想ハンドラーに向けます:
 
 ```jsonc
 {
@@ -339,71 +339,71 @@ Point the Worker at Solid's generated virtual handler in `wrangler.jsonc`:
 }
 ```
 
-The `viteEnvironment` option merges the Workers runtime configuration with Solid's server environment.
-The Cloudflare plugin resolves the environment's Fetchable `index` entry and runs it in workerd.
-No custom Worker source entry is required.
-Follow the Cloudflare guide to add any platform bindings.
+`viteEnvironment` オプションは Workers ランタイムの設定を Solid のサーバー環境にマージします。
+Cloudflare プラグインは環境の Fetchable `index` エントリーを解決し、workerd で実行します。
+カスタムの Worker ソースエントリーは不要です。
+プラットフォームのバインディングを追加するには Cloudflare のガイドに従ってください。
 
-## Other Fetch runtimes
+## その他の Fetch ランタイム
 
-When a runtime accepts a default Fetchable module, point it at `dist/server/server.js` and configure its static asset service for `dist/client`.
-Bun and `deno serve`, for example, start modules that default-export an object with a `fetch` method.
-The runtime still needs the server bundle's production dependencies and environment variables.
+ランタイムがデフォルトの Fetchable モジュールを受け付ける場合、`dist/server/server.js` を指し、`dist/client` 用の静的アセット配信を設定してください。
+例えば Bun と `deno serve` は、`fetch` メソッドを持つオブジェクトをデフォルトエクスポートするモジュールを起動します。
+ランタイムには依然として、サーバーバンドルの本番依存関係と環境変数が必要です。
 
-## Common problems
+## よくある問題
 
-### A `public/` file 404s in production
+### `public/` のファイルが本番で 404 になる
 
-The host is not serving `dist/client` for that path.
-The build copies `public/` into `dist/client`, so whatever serves the hashed assets serves this file too; check that the static directory is `dist/client`, not `dist` or `public`.
+そのパスでホストが `dist/client` を配信していません。
+ビルドは `public/` を `dist/client` にコピーするため、ハッシュ付きアセットを配信しているものがこのファイルも配信します。静的ディレクトリが `dist` や `public` ではなく `dist/client` になっているか確認してください。
 
-### Every `/assets/*` request 404s or returns HTML
+### `/assets/*` のすべてのリクエストが 404 になるか HTML を返す
 
-The host is not serving `dist/client` in front of the handler.
-A 404 means nothing serves the directory; HTML means every request reaches `handleRequest`, which renders a page at any URL that gets that far.
-Serve `dist/client` first and pass only unmatched requests to the handler.
+ホストがハンドラーの前で `dist/client` を配信していません。
+404 はそのディレクトリを配信するものが何もないことを意味し、HTML はすべてのリクエストが `handleRequest` に到達していることを意味します。これはそこまで到達した任意の URL でページをレンダーします。
+まず `dist/client` を配信し、マッチしなかったリクエストだけをハンドラーに渡してください。
 
-### Refreshing a client route returns the host's 404 page
+### クライアントルートをリロードするとホストの 404 ページが返る
 
-Under `ssr: true`, requests for pages are not reaching `handleRequest`; the host is serving only the static directory.
-Route every request that is not a file to the handler.
-For a static-shell project, there is no handler: configure the host to serve `dist/client/index.html` for paths that are not files, as any single-page app needs.
+`ssr: true` の下では、ページへのリクエストが `handleRequest` に到達していません。ホストは静的ディレクトリだけを配信しています。
+ファイルではないすべてのリクエストをハンドラーにルーティングしてください。
+静的シェルのプロジェクトにはハンドラーがありません。あらゆるシングルページアプリが必要とするように、ファイルではないパスに対して `dist/client/index.html` を配信するようホストを設定してください。
 
 ### `Cannot find module 'dist/server/node.js'`
 
-The build writes `dist/server/node.js` only when `start.node` is `true`.
-Set `start: { node: true }` in `vite.config.ts` and run the build again; `server.js` alone is the handler, not a server.
-If `dist/server` is missing altogether, see the next problem.
+ビルドは `start.node` が `true` の場合にのみ `dist/server/node.js` を書き出します。
+`vite.config.ts` に `start: { node: true }` を設定してビルドを再実行してください。`server.js` だけではハンドラーであり、サーバーではありません。
+`dist/server` がまるごと存在しない場合は、次の問題を参照してください。
 
 ### `Cannot find module './dist/server/server.js'`
 
-The build did not produce a server directory.
-Without `ssr: true` and without server functions, start mode removes `dist/server` after writing the shell; there is nothing to run, so deploy `dist/client` as static files.
-With `start.external`, the provider owns the server build and its output lands where that provider puts it.
+ビルドがサーバーディレクトリを生成していません。
+`ssr: true` なしでサーバー関数もない場合、start モードはシェルを書き出した後に `dist/server` を削除します。実行するものがないため、`dist/client` を静的ファイルとしてデプロイしてください。
+`start.external` の場合、プロバイダーがサーバービルドを所有し、その出力はそのプロバイダーが置く場所に入ります。
 
-### The server exits at boot with `server env validation failed at boot`
+### サーバーが起動時に `server env validation failed at boot` で終了する
 
-A `server` variable declared in `env.ts` is missing or invalid in the process environment.
-Server values are read at boot, not at build, so set them in the host's environment or secret settings; [Environment](/building-apps/environment) has the rules.
-Client `VITE_` values are the opposite: set them on the machine that runs `vite build`.
+`env.ts` で `server` として宣言された変数が、プロセス環境で欠けているか無効です。
+サーバーの値はビルド時ではなく起動時に読まれるため、ホストの環境やシークレット設定で設定してください。ルールは [環境](/building-apps/environment) にあります。
+クライアントの `VITE_` の値は逆です。`vite build` を実行するマシンで設定します。
 
-### Sign-in works locally but the session is missing in production
+### ローカルではサインインできるのに本番でセッションが失われる
 
-The bridge joined several `Set-Cookie` headers into one comma-separated value, which corrupts them.
-Forward them as separate headers, the way the emitted Node entry does with `getSetCookie()`.
+ブリッジが複数の `Set-Cookie` ヘッダーを1つのカンマ区切りの値に連結しており、それらが壊れています。
+出力される Node エントリーが `getSetCookie()` で行うように、個別のヘッダーとして転送してください。
 
-## Recap
+## まとめ
 
-- Serve `dist/client` as static files first and pass every other request to `handleRequest`.
-- `handleRequest(request)` and the default `{ fetch }` export are the same handler; the default export ignores host arguments after the request.
-- Preserve the method, headers, and streamed body on the way in, and the status, headers, separate `Set-Cookie` values, and streamed body on the way out.
-- Set `start.node` and run `node dist/server/node.js` on any Node host; `PORT` and `HOST` are its only configuration.
-- Set `server` environment variables on the host, because they are read at boot; `VITE_` values are fixed at build time.
-- A provider plugin adopts the `ssr` environment; reach for `start.external` only when the host names or configures its server environment differently.
-- `vite preview` runs the built handler and assets together, and does not replace a test on the target host.
+- まず `dist/client` を静的ファイルとして配信し、それ以外のすべてのリクエストを `handleRequest` に渡します。
+- `handleRequest(request)` とデフォルトの `{ fetch }` エクスポートは同じハンドラーです。デフォルトエクスポートはリクエスト以降のホスト引数を無視します。
+- 入りではメソッド、ヘッダー、ストリーミングされたボディを保持し、出ではステータス、ヘッダー、個別の `Set-Cookie` の値、ストリーミングされたボディを保持します。
+- `start.node` を設定して任意の Node ホストで `node dist/server/node.js` を実行します。`PORT` と `HOST` が唯一の設定です。
+- `server` の環境変数は起動時に読まれるためホストで設定します。`VITE_` の値はビルド時に確定します。
+- プロバイダープラグインは `ssr` 環境を採用します。`start.external` が必要なのは、ホストがサーバー環境の名前や設定を独自に行う場合だけです。
+- `vite preview` はビルド済みのハンドラーとアセットを一緒に実行しますが、対象ホストでのテストを代替するものではありません。
 
-## Next steps
+## 次のステップ
 
-- [Environment](/building-apps/environment): which variables the host must supply at boot and which are fixed at build time.
-- [Choose a rendering mode](/guides/choose-a-rendering-mode): whether the project needs a server handler at all, or a prerendered site would do.
-- [Middleware and API routes](/building-apps/middleware-and-api-routes): the code that runs inside the handler before a page renders.
+- [環境](/building-apps/environment): ホストが起動時に供給しなければならない変数と、ビルド時に確定する変数。
+- [レンダリングモードを選ぶ](/guides/choose-a-rendering-mode): プロジェクトにサーバーハンドラーが本当に必要か、プリレンダーしたサイトで十分か。
+- [ミドルウェアと API ルート](/building-apps/middleware-and-api-routes): ページがレンダーされる前にハンドラー内で実行されるコード。
