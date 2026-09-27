@@ -2,15 +2,15 @@
 title: "@solidjs/meta"
 titleTemplate: ":title"
 version: "1.0"
-description: "Reference for @solidjs/meta: components that set the document title, meta tags, links, scripts, and styles from anywhere in the tree."
+description: "@solidjs/meta のリファレンス: ツリー内のどこからでもドキュメントのタイトル・メタタグ・リンク・スクリプト・スタイルを設定するコンポーネント。"
 source_repo: "solidjs/solid-meta"
 source_ref: "next"
 source_path: "src/index.ts"
 ---
 
-`@solidjs/meta` provides components for the document `<head>`.
-Each one registers a tag with the head registry in `@solidjs/web`, so a component deep in the tree can set the title or a meta tag without a provider.
-On the server the tags render into the HTML head; in the browser they update the live document.
+`@solidjs/meta` はドキュメントの `<head>` のためのコンポーネントを提供します。
+それぞれのコンポーネントは `@solidjs/web` の head レジストリにタグを登録するため、プロバイダーなしでツリーの深い場所にあるコンポーネントからタイトルやメタタグを設定できます。
+サーバーではタグは HTML の head にレンダーされ、ブラウザではライブのドキュメントを更新します。
 
 ```tsx
 import { Title, Meta } from "@solidjs/meta";
@@ -26,17 +26,17 @@ function ProductPage(props: { name: string }) {
 }
 ```
 
-[Head and metadata](/building-apps/head-and-metadata) shows the default-and-override pattern and what happens under server rendering.
+[Head とメタデータ](/building-apps/head-and-metadata)では、デフォルトと上書きのパターンと、サーバーレンダリング時に何が起きるかを示しています。
 
-## Components
+## コンポーネント
 
-- [`Title`](/reference/solid-meta/title) sets the document title. The last-registered `Title` wins, and unmounting it restores the previous one.
-- [`Meta`](/reference/solid-meta/meta) adds a `<meta>` element; tags with the same identity (`name`, `property`, and similar attributes) replace each other.
-- [`Link`](/reference/solid-meta/link) adds a `<link>` element.
-- [`Stylesheet`](/reference/solid-meta/stylesheet) adds a stylesheet link.
-- [`Style`](/reference/solid-meta/style) adds an inline `<style>` element.
-- [`Script`](/reference/solid-meta/script) adds a `<script>` element.
-- [`Base`](/reference/solid-meta/base) sets the document base URL.
-- [`Head`](/reference/solid-meta/head) groups several tags into one set that replaces together.
+- [`Title`](/reference/solid-meta/title) はドキュメントのタイトルを設定します。最後に登録された `Title` が優先され、アンマウントすると前のものに復元されます。
+- [`Meta`](/reference/solid-meta/meta) は `<meta>` 要素を追加します。同じ identity（`name`、`property` などの属性）を持つタグは互いに置き換わります。
+- [`Link`](/reference/solid-meta/link) は `<link>` 要素を追加します。
+- [`Stylesheet`](/reference/solid-meta/stylesheet) はスタイルシートのリンクを追加します。
+- [`Style`](/reference/solid-meta/style) はインラインの `<style>` 要素を追加します。
+- [`Script`](/reference/solid-meta/script) は `<script>` 要素を追加します。
+- [`Base`](/reference/solid-meta/base) はドキュメントのベース URL を設定します。
+- [`Head`](/reference/solid-meta/head) は複数のタグをまとめて置き換わる 1 つのセットにグループ化します。
 
-Each page documents the component's identity rule: which earlier tag a new one replaces, and which coexist.
+各ページにはそのコンポーネントの identity ルールが記載されています。新しいタグがどの既存のタグを置き換え、どれと共存するかを説明しています。
