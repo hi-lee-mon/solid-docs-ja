@@ -1,16 +1,18 @@
 <script setup lang="ts">
-const sha = import.meta.env.VITE_BUILD_SHA
-const date = import.meta.env.VITE_BUILD_DATE
-const repo = 'https://github.com/hi-lee-mon/solid-docs-ja'
+// Commit of solidjs/solid-docs (v2-rebuild branch) that this translation covers.
+const srcSha = '3884838e'
+const srcDate = '2026-09-18'
+const srcUrl = `https://github.com/solidjs/solid-docs/commit/3884838e91f084fc497ebbb18b79c24fbd10e857`
+const buildDate = import.meta.env.VITE_BUILD_DATE
 </script>
 
 <template>
   <div class="version-note">
     <span>非公式翻訳 · 原著 &copy; Solid（<a href="https://github.com/solidjs/solid-docs">MIT License</a>）</span>
     <span class="sep">·</span>
-    <a :href="`${repo}/commit/${sha}`" target="_blank" rel="noopener">{{ sha }}</a>
+    <span>翻訳対象: <a :href="srcUrl" target="_blank" rel="noopener">solid-docs@{{ srcSha }}</a>（{{ srcDate }}）</span>
     <span class="sep">·</span>
-    <span>最終更新 {{ date }}</span>
+    <span>翻訳最終更新 {{ buildDate }}</span>
   </div>
 </template>
 
