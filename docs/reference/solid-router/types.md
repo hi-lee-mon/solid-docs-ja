@@ -1,13 +1,13 @@
 ---
-title: "Types"
+title: "型"
 version: "2.0"
-description: "Inventory of application-facing types exported by Solid Router 2."
+description: "Solid Router 2 がエクスポートするアプリケーション向け型の一覧。"
 source_repo: "solidjs/solid-router"
 source_ref: "next"
 source_path: "src/index.tsx"
 ---
 
-Import these types from `@solidjs/router` unless another entry is shown.
+特に別のエントリーが示されていない限り、これらの型は `@solidjs/router` からインポートします。
 
 ```ts
 import type {
@@ -19,28 +19,28 @@ import type {
 } from "@solidjs/router";
 ```
 
-## Router factory
+## ルーターファクトリー
 
-- `RouterConfig<R>` is the `createRouter` options object.
-- `RouterInstance<R>` is the provider component with `paths`, `routes`, `config`, and `match`.
-- `RouterProps` contains the server-only `url` and root render-prop `children`.
-- `DefinedRoute<S, T, F, C, Sch>` is the preserved return type of `defineRoute`.
+- `RouterConfig<R>` は `createRouter` のオプションオブジェクトです。
+- `RouterInstance<R>` は `paths`、`routes`、`config`、`match` を持つプロバイダーコンポーネントです。
+- `RouterProps` はサーバー専用の `url` とルートのレンダープロップ `children` を含みます。
+- `DefinedRoute<S, T, F, C, Sch>` は `defineRoute` の保持される戻り値の型です。
 
-See [Router factory](/reference/solid-router/router-factory) for signatures.
+シグネチャは[ルーターファクトリー](/reference/solid-router/router-factory)を参照してください。
 
-## Route definitions
+## ルート定義
 
-- `RouteDefinition<S, T>` describes a route config object.
-- `RoutePreloadFunc<T, P>` is a route preload function.
-- `RoutePreloadFuncArgs<P>` contains `params`, `location`, and `intent`.
-- `RouteSectionProps<T, P>` contains route component props.
-- `RouteProps<Path, T>` derives route props from a path witness.
-- `RouteComponent<Path, T>` is a component typed from a path witness.
-- `RouteParams<S>` derives runtime parameter strings from a path pattern.
-- `RouteInfo` is the augmentable route metadata interface.
-- `RouteDescription` is a compiled route description exposed through `RouteMatch`.
-- `RouteMatch` combines a compiled route description with matched path and params.
-- `OutputMatch` is one result from `Router.match(url)`.
+- `RouteDefinition<S, T>` はルート設定オブジェクトを表します。
+- `RoutePreloadFunc<T, P>` はルートプリロード関数です。
+- `RoutePreloadFuncArgs<P>` は `params`、`location`、`intent` を含みます。
+- `RouteSectionProps<T, P>` はルートコンポーネントの props を含みます。
+- `RouteProps<Path, T>` はパスウィットネスからルートの props を導出します。
+- `RouteComponent<Path, T>` はパスウィットネスから型付けされたコンポーネントです。
+- `RouteParams<S>` はパスパターンから実行時パラメータ文字列を導出します。
+- `RouteInfo` は拡張可能なルートメタデータインターフェースです。
+- `RouteDescription` は `RouteMatch` を通じて公開されるコンパイル済みルート記述です。
+- `RouteMatch` はコンパイル済みルート記述とマッチしたパス・パラメータを組み合わせます。
+- `OutputMatch` は `Router.match(url)` の 1 件の結果です。
 
 ```ts
 interface PathMatch<P extends Params = Params> {
@@ -61,17 +61,17 @@ interface OutputMatch {
 }
 ```
 
-## Paths and filters
+## パスとフィルター
 
-- `Params` is `Record<string, string | undefined>`.
-- `SetParams` accepts string, number, boolean, null, or undefined values by key.
-- `MatchFilter` is a string array, regular expression, or predicate.
-- `MatchFilters<P>` maps route parameter names to match filters.
-- `TypedMatchFilter<T>` carries a path-builder input type on a runtime filter.
-- `TypedPath<P>` is the serializable path-node interface.
-- `RoutePaths<R>` derives the router path proxy from a literal route tuple.
-- `PathEnd<Sch, P>` is a terminating typed path node.
-- `PathParamsOf<N>` extracts the runtime parameter record from a path node.
+- `Params` は `Record<string, string | undefined>` です。
+- `SetParams` はキーごとに string、number、boolean、null、undefined の値を受け取ります。
+- `MatchFilter` は文字列配列、正規表現、または述語です。
+- `MatchFilters<P>` はルートパラメータ名をマッチフィルターにマッピングします。
+- `TypedMatchFilter<T>` は実行時フィルターにパスビルダーの入力型を載せます。
+- `TypedPath<P>` はシリアライズ可能なパスノードのインターフェースです。
+- `RoutePaths<R>` はリテラルなルートタプルからルーターのパスプロキシを導出します。
+- `PathEnd<Sch, P>` は終端の型付きパスノードです。
+- `PathParamsOf<N>` はパスノードから実行時パラメータレコードを抽出します。
 
 ```ts
 type Params = Record<string, string | undefined>;
@@ -79,13 +79,13 @@ type Params = Record<string, string | undefined>;
 type MatchFilter = readonly string[] | RegExp | ((value: string) => boolean);
 ```
 
-## Search parameters
+## 検索パラメータ
 
-- `SearchParams` contains raw string, string-array, or undefined values by key.
-- `SetSearchParams` accepts string, number, boolean, arrays of those values, null, or undefined by key.
-- `TypedSearchPath<In, Out>` carries a route's search input and output types.
-- `DefaultSearchTypes` uses `SetSearchParams` for input and `SearchParams` for output.
-- `StandardSchemaV1<Input, Output>` is the validator contract accepted by route `search`.
+- `SearchParams` はキーごとに生の文字列、文字列配列、または undefined の値を含みます。
+- `SetSearchParams` はキーごとに string、number、boolean、それらの配列、null、undefined を受け取ります。
+- `TypedSearchPath<In, Out>` はルートの検索入力型と出力型を保持します。
+- `DefaultSearchTypes` は入力に `SetSearchParams`、出力に `SearchParams` を使用します。
+- `StandardSchemaV1<Input, Output>` はルートの `search` が受け入れるバリデーター契約です。
 
 ```ts
 interface StandardSchemaV1<Input = unknown, Output = Input> {
@@ -103,40 +103,40 @@ interface StandardSchemaV1<Input = unknown, Output = Input> {
 }
 ```
 
-Solid Router accepts a Standard Schema promise in the shared type, but `useSearchParams(path)` rejects an asynchronous validation result at runtime.
+Solid Router は共有型では Standard Schema の Promise を受け入れますが、`useSearchParams(path)` は実行時に非同期の検証結果を拒否します。
 
-## Location and navigation
+## ロケーションとナビゲーション
 
-- `Location<S>` is the reactive location read by `useLocation`.
-- `LocationChange<S>` is a history adapter write.
-- `NavigateOptions<S>` configures resolution, replacement, scrolling, and state.
-- `Navigator` is returned by `useNavigate`.
-- `PathMatch<P>` is returned by `useMatch`.
-- `LinkState` is returned by `useLinkState`.
-- `BeforeLeaveEventArgs` is passed to `useBeforeLeave`.
+- `Location<S>` は `useLocation` が読み取るリアクティブなロケーションです。
+- `LocationChange<S>` は履歴アダプターへの書き込みです。
+- `NavigateOptions<S>` は解決・置換・スクロール・状態を設定します。
+- `Navigator` は `useNavigate` が返します。
+- `PathMatch<P>` は `useMatch` が返します。
+- `LinkState` は `useLinkState` が返します。
+- `BeforeLeaveEventArgs` は `useBeforeLeave` に渡されます。
 
-See [Navigation primitives](/reference/solid-router/navigation) for signatures.
+シグネチャは[ナビゲーションプリミティブ](/reference/solid-router/navigation)を参照してください。
 
-## History integration
+## 履歴統合
 
-- `RouterHistory` is the history adapter contract.
-- `MemoryHistoryAdapter` extends `RouterHistory` with `go`, `back`, `forward`, and `listen`.
-- `RouterIntegration` is the signal-and-utilities contract used by the router core.
-- `RouterUtils` contains optional history rendering, parsing, traversal, leave-guard, params, and query adapters.
+- `RouterHistory` は履歴アダプターの契約です。
+- `MemoryHistoryAdapter` は `RouterHistory` を `go`、`back`、`forward`、`listen` で拡張します。
+- `RouterIntegration` はルーターコアが使用するシグナルとユーティリティの契約です。
+- `RouterUtils` はオプションの履歴レンダリング・パース・走査・離脱ガード・パラメータ・クエリアダプターを含みます。
 
-See [History adapters](/reference/solid-router/history) for the supported built-in adapters.
+サポートされている組み込みアダプターは[履歴アダプター](/reference/solid-router/history)を参照してください。
 
-## Data
+## データ
 
-- `CachedFunction<T>` is returned by `query`.
-- `Action<T, U, V>` is returned by `action`.
-- `Submission<T, U>` is a settled action record.
+- `CachedFunction<T>` は `query` が返します。
+- `Action<T, U, V>` は `action` が返します。
+- `Submission<T, U>` は確定したアクションのレコードです。
 
-See [Data APIs](/reference/solid-router/data) for signatures.
+シグネチャは[データ API](/reference/solid-router/data)を参照してください。
 
-## Other package entries
+## その他のパッケージエントリー
 
-`@solidjs/router/fs` exports:
+`@solidjs/router/fs` のエクスポート:
 
 - `FileRouteConfig`
 - `FileRouteEntry`
@@ -145,10 +145,10 @@ See [Data APIs](/reference/solid-router/data) for signatures.
 - `FileRouteFrom`
 - `FileRoutesFrom`
 
-`@solidjs/router/server` exports:
+`@solidjs/router/server` のエクスポート:
 
 - `FlightDataCollectorOptions`
 - `CollectFlightDataHook`
 - `ServerFunctionOutcome`
 
-See the [file-system adapter](/reference/solid-router/filesystem) and [server integration](/reference/solid-router/server) pages.
+[ファイルシステムアダプター](/reference/solid-router/filesystem)と[サーバー統合](/reference/solid-router/server)のページを参照してください。

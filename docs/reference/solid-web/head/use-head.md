@@ -1,7 +1,7 @@
 ---
 title: "useHead"
 category: "Head"
-use_cases: "register document head tags, reactive metadata groups, library head integration"
+use_cases: "ドキュメント head タグの登録、リアクティブなメタデータグループ、ライブラリの head 統合"
 tags:
   - "head"
   - "metadata"
@@ -10,35 +10,35 @@ tags:
   - "reference"
   - "v2"
 version: "2.0"
-description: "Registers one or more head tag descriptors with Solid's ambient head registry."
+description: "1 つ以上の head タグ記述子を Solid のアンビエント head レジストリに登録します。"
 source_repo: "ryansolid/dom-expressions"
 source_ref: "0.50.0-next.40"
 source_path: "packages/runtime/src/client.d.ts"
 ---
 
-`useHead` registers head tags with the ambient registry under the current reactive owner.
-Disposing that owner removes its registration and restores the previous winning tags.
+`useHead` は、現在のリアクティブオーナーのもとで head タグをアンビエントレジストリに登録します。
+そのオーナーが破棄されると登録は解除され、以前の勝者タグが復元されます。
 
-Solid Meta uses `useHead` internally.
-Prefer Solid Meta components for common application metadata.
-Use `useHead` for libraries, reactive descriptor groups, or tags that need lower-level control.
+Solid Meta は内部で `useHead` を使用しています。
+一般的なアプリケーションのメタデータには Solid Meta コンポーネントを優先してください。
+`useHead` はライブラリ、リアクティブな記述子グループ、より低レベルの制御が必要なタグに使います。
 
-## Import
+## インポート
 
 ```ts
 import { useHead } from "@solidjs/web";
 ```
 
-## Type signature
+## 型シグネチャ
 
 ```ts
 function useHead(tag: HeadTag | HeadTag[] | (() => HeadTag | HeadTag[])): void;
 ```
 
-## Register one tag
+## 1 つのタグを登録する
 
-Descriptor prop values can be getters.
-Solid tracks those reads and updates the winning tag in place.
+記述子の prop 値にはゲッターを使えます。
+Solid はそれらの読み取りを追跡し、勝者タグをその場で更新します。
 
 ```tsx
 import { useHead } from "@solidjs/web";
@@ -56,11 +56,11 @@ function PageDescription(props: { description: string }) {
 }
 ```
 
-## Register a group
+## グループを登録する
 
-Pass an array when several tags form one replacement set.
-Same-identity tags inside the array coexist.
-A later group replaces the earlier set as one unit, and disposal restores the earlier set.
+複数のタグが 1 つの置き換えセットを構成する場合は配列を渡します。
+配列内で同一性が同じタグは共存します。
+後のグループは前のセットを 1 つの単位として置き換え、破棄すると前のセットが復元されます。
 
 ```tsx
 useHead([
@@ -75,7 +75,7 @@ useHead([
 ]);
 ```
 
-Pass a function when group membership changes reactively:
+グループの構成要素がリアクティブに変化する場合は関数を渡します:
 
 ```tsx
 useHead(() =>
@@ -86,21 +86,21 @@ useHead(() =>
 );
 ```
 
-Reactive updates keep the registration's original position in the override order.
-Creating a new reactive owner inside a descriptor getter can consume different hydration IDs on the server and client.
-Create helpers such as memos before calling `useHead`, then read them from the getter.
+リアクティブな更新は、登録の元のオーバーライド順序内の位置を維持します。
+記述子ゲッター内で新しいリアクティブオーナーを作成すると、サーバーとクライアントで異なるハイドレーション ID を消費する可能性があります。
+メモなどのヘルパーは `useHead` を呼ぶ前に作成し、ゲッターからそれらを読み取ってください。
 
-## Server rendering
+## サーバーレンダリング
 
-During server rendering, winning tags are written into the document head.
-Registrations discovered after the streaming shell can arrive as head patches with their boundary.
-When a host owns the document, use the renderer's `onHead` option to receive the generated head markup.
+サーバーレンダリング中、勝者タグはドキュメントの head に書き込まれます。
+ストリーミングシェルの後に検出された登録は、そのバウンダリとともに head パッチとして届くことがあります。
+ホストがドキュメントを所有する場合は、レンダラーの `onHead` オプションで生成された head マークアップを受け取ります。
 
-During hydration, the server-flushed head state remains authoritative until hydration completes.
-The client then applies reactive updates without replacing adopted tags unnecessarily.
+ハイドレーション中は、ハイドレーションが完了するまでサーバーがフラッシュした head の状態が権威であり続けます。
+その後クライアントは、採用済みタグを不必要に置き換えることなくリアクティブな更新を適用します。
 
-## Related
+## 関連項目
 
 - [`HeadTag`](/reference/solid-web/head/head-tag)
-- [Head and metadata](/building-apps/head-and-metadata)
+- [Head とメタデータ](/building-apps/head-and-metadata)
 - [`Head`](/reference/solid-meta/head)

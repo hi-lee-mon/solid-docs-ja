@@ -1,7 +1,7 @@
 ---
-title: "Routes and typed paths"
+title: "ルートと型付きパス"
 version: "2.0"
-description: "Reference for route definitions, path patterns, typed path nodes, match filters, and router matching."
+description: "ルート定義・パスパターン・型付きパスノード・マッチフィルター・ルーターマッチングのリファレンス。"
 source_repo: "solidjs/solid-router"
 source_ref: "next"
 source_path: "src/types.ts"
@@ -21,21 +21,21 @@ type RouteDefinition<S extends string | string[] = any, T = any> = {
 };
 ```
 
-### Path syntax
+### パス構文
 
-- `/users` is a static path.
-- `/:id` is a required parameter.
-- `/:id?` is an optional parameter.
-- `/*rest` captures the remaining path.
-- A path array assigns several patterns to one route definition.
-- An omitted path creates a pathless route.
+- `/users` は静的パスです。
+- `/:id` は必須パラメータです。
+- `/:id?` はオプションパラメータです。
+- `/*rest` は残りのパスを捕捉します。
+- パスの配列は、1 つのルート定義に複数のパターンを割り当てます。
+- パスを省略すると、パスレスルートになります。
 
-A wildcard must be the final segment.
+ワイルドカードは最後のセグメントでなければなりません。
 
 ### `children`
 
-Inline children accept one route or a readonly route array.
-Lazy children accept a deterministic thunk:
+インラインの children は、1 つのルートまたは読み取り専用のルート配列を受け取ります。
+遅延 children は、決定的なサンクを受け取ります:
 
 ```ts
 type LazyRouteChildren = () =>
@@ -58,8 +58,8 @@ interface RouteSectionProps<T = unknown, P extends Params = Params> {
 }
 ```
 
-`data` is the route preload's return value.
-`children` is the next matched route section.
+`data` はルートプリロードの戻り値です。
+`children` は次にマッチしたルートセクションです。
 
 ### `preload`
 
@@ -75,7 +75,7 @@ interface RoutePreloadFuncArgs<P extends Params = Params> {
 }
 ```
 
-## Match filters
+## マッチフィルター
 
 ```ts
 type MatchFilter = readonly string[] | RegExp | ((value: string) => boolean);
@@ -87,7 +87,7 @@ type MatchFilters<P extends string | readonly string[] = any> = {
 
 ### `int`
 
-Matches integer URL segments and types the corresponding path-builder argument as `number`.
+整数の URL セグメントにマッチし、対応するパスビルダー引数を `number` 型にします。
 
 ```ts
 import { int } from "@solidjs/router";
@@ -98,12 +98,12 @@ const route = defineRoute({
 });
 ```
 
-Runtime route parameters remain strings.
+実行時のルートパラメータは文字列のままです。
 
 ## `Router.paths`
 
-`Router.paths` has type `RoutePaths<typeof routes>`.
-Static properties append segments, calls bind parameters, and a zero-argument or search-object call returns a string.
+`Router.paths` の型は `RoutePaths<typeof routes>` です。
+静的プロパティはセグメントを追加し、呼び出しはパラメータをバインドします。引数なし、または search オブジェクトを渡す呼び出しは文字列を返します。
 
 ```ts
 Router.paths.users(42).settings();
@@ -111,7 +111,7 @@ Router.paths.search({ q: "solid" }, "results");
 String(Router.paths.about);
 ```
 
-All path nodes implement:
+すべてのパスノードは次を実装しています:
 
 ```ts
 interface TypedPath<P extends Params = Params>
@@ -120,7 +120,7 @@ interface TypedPath<P extends Params = Params>
 }
 ```
 
-Route ends additionally accept search and hash arguments:
+パスの終端はさらに search 引数と hash 引数を受け取ります:
 
 ```ts
 type PathEnd<
@@ -138,7 +138,7 @@ type PathEnd<
 
 ## `Router.match`
 
-Matches an arbitrary URL against the instance without rendering.
+レンダリングせずに、任意の URL をインスタンスに対してマッチさせます。
 
 ```ts
 match(url: string): OutputMatch[];
@@ -154,13 +154,13 @@ interface OutputMatch {
 }
 ```
 
-Returns matches from root to leaf.
-Returns `[]` when no route matches.
-The router's `transformUrl`, `base`, and resolved lazy subtrees apply.
+ルートから葉までのマッチを返します。
+どのルートにもマッチしない場合は `[]` を返します。
+ルーターの `transformUrl`、`base`、および解決済みの遅延サブツリーが適用されます。
 
-## Route component types
+## ルートコンポーネントの型
 
-Simplified public shape:
+簡略化された公開形状:
 
 ```ts
 type RouteProps<
@@ -171,7 +171,7 @@ type RouteProps<
 type RouteComponent<Path, T = unknown> = Component<RouteProps<Path, T>>;
 ```
 
-`Path` can be a typed path node, a literal pattern string, or a `defineFileRoute` result.
+`Path` には型付きパスノード、リテラルのパターン文字列、`defineFileRoute` の結果を指定できます。
 
 ```ts
 const User: RouteComponent<typeof Router.paths.users> = props => (
@@ -181,7 +181,7 @@ const User: RouteComponent<typeof Router.paths.users> = props => (
 
 ## `RouteInfo`
 
-An augmentable metadata interface used by route `info`, `Router.match`, and `useRouteMatches`.
+ルートの `info`、`Router.match`、`useRouteMatches` が使用する、拡張可能なメタデータインターフェースです。
 
 ```ts
 interface RouteInfo {
@@ -197,8 +197,8 @@ declare module "@solidjs/router" {
 }
 ```
 
-## Related
+## 関連項目
 
-- [`defineRoute` and `defineRoutes`](/reference/solid-router/router-factory)
-- [Navigation primitives](/reference/solid-router/navigation)
-- [File-system adapter](/reference/solid-router/filesystem)
+- [`defineRoute` と `defineRoutes`](/reference/solid-router/router-factory)
+- [ナビゲーションプリミティブ](/reference/solid-router/navigation)
+- [ファイルシステムアダプター](/reference/solid-router/filesystem)

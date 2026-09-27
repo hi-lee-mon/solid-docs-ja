@@ -1,7 +1,7 @@
 ---
 title: "HeadTag"
 category: "Head"
-use_cases: "head tag descriptor type, useHead descriptors, metadata identity"
+use_cases: "head タグ記述子型、useHead 記述子、メタデータの同一性"
 tags:
   - "head"
   - "metadata"
@@ -9,21 +9,21 @@ tags:
   - "reference"
   - "v2"
 version: "2.0"
-description: "Describes a tag registered with Solid's ambient head registry."
+description: "Solid のアンビエント head レジストリに登録されるタグを記述します。"
 source_repo: "ryansolid/dom-expressions"
 source_ref: "0.50.0-next.40"
 source_path: "packages/runtime/src/client.d.ts"
 ---
 
-`HeadTag` describes one tag for [`useHead`](/reference/solid-web/head/use-head).
+`HeadTag` は [`useHead`](/reference/solid-web/head/use-head) の 1 つのタグを記述します。
 
-## Import
+## インポート
 
 ```ts
 import type { HeadTag } from "@solidjs/web";
 ```
 
-## Type signature
+## 型シグネチャ
 
 ```ts
 type HeadTag = {
@@ -33,31 +33,31 @@ type HeadTag = {
 };
 ```
 
-## Properties
+## プロパティ
 
 ### `tag`
 
-The head element to register.
-`noscript` is not part of the descriptor union; author it statically in the document shell.
+登録する head 要素です。
+`noscript` はこの記述子のユニオンに含まれません。ドキュメントシェルに静的に記述してください。
 
 ### `props`
 
-Attributes and text content for the tag.
-Values can be reactive getters.
-Use `children` for the text body of `title`, `style`, or inline `script` descriptors.
+タグの属性とテキストコンテンツです。
+値にはリアクティブなゲッターを使えます。
+`title`、`style`、インライン `script` の記述子のテキスト本文には `children` を使います。
 
-Descriptors are data rather than managed DOM elements.
-Do not attach refs or event handlers.
+記述子は管理対象の DOM 要素ではなくデータです。
+ref やイベントハンドラーはアタッチしないでください。
 
 ### `key`
 
-Overrides the built-in replacement identity.
-The value can be a string or a reactive getter.
+組み込みの置き換え同一性を上書きします。
+値には文字列またはリアクティブなゲッターを使えます。
 
-`title` remains a document-wide singleton and cannot be forked with a key.
-For other replaceable tags, use a key to make otherwise different tags replace each other or to keep otherwise matching tags independent.
+`title` はドキュメント全体で単一のままであり、キーで分岐させることはできません。
+その他の置き換え可能なタグでは、本来は異なるタグ同士を互いに置き換えさせたり、本来は一致するタグ同士を独立させたりするためにキーを使います。
 
-## Example
+## 例
 
 ```tsx
 const description: HeadTag = {
@@ -72,7 +72,7 @@ const description: HeadTag = {
 useHead(description);
 ```
 
-## Related
+## 関連項目
 
 - [`useHead`](/reference/solid-web/head/use-head)
-- [Head and metadata](/building-apps/head-and-metadata)
+- [Head とメタデータ](/building-apps/head-and-metadata)

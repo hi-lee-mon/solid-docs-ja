@@ -2,50 +2,50 @@
 title: "@solidjs/web"
 titleTemplate: ":title"
 version: "2.0"
-description: "Reference for @solidjs/web: DOM and HTML rendering, hydration, the head registry, DOM components, JSX properties, server functions, and the request event."
+description: "@solidjs/web のリファレンス: DOM・HTML レンダリング、ハイドレーション、head レジストリ、DOM コンポーネント、JSX プロパティ、サーバー関数、リクエストイベント。"
 ---
 
-`@solidjs/web` is the renderer.
-It turns the component tree that `solid-js` describes into DOM in the browser and into HTML on the server, and it hosts the server-side runtime for server functions and request handling.
+`@solidjs/web` はレンダラーです。
+`solid-js` が記述するコンポーネントツリーをブラウザでは DOM に、サーバーでは HTML に変換し、サーバー関数とリクエスト処理のためのサーバーサイドランタイムをホストします。
 
-The package has a browser build and a server build.
-Bundlers pick the right one from the export map, so the same import works in both places:
+このパッケージにはブラウザビルドとサーバービルドがあります。
+バンドラーはエクスポートマップから適切な方を選ぶため、同じインポートがどちらの場所でも機能します:
 
 ```ts
 import { render, hydrate, isServer } from "@solidjs/web";
 ```
 
-## Rendering and SSR
+## レンダリングと SSR
 
-[Rendering and SSR](/concepts/rendering-and-ssr) explains the three rendering paths and hydration.
+[レンダリングと SSR](/concepts/rendering-and-ssr) では、3 つのレンダリングパスとハイドレーションを説明しています。
 
-- [`render`](/reference/solid-web/rendering-ssr/render) mounts a tree into a DOM element and returns a dispose function.
-- [`hydrate`](/reference/solid-web/rendering-ssr/hydrate) attaches a tree to server-rendered HTML.
-- [`renderToString`](/reference/solid-web/rendering-ssr/render-to-string) renders synchronously to a string; [`renderToStream`](/reference/solid-web/rendering-ssr/render-to-stream) streams the shell and then each boundary as it settles.
-- [`httpStatus`](/reference/solid-web/rendering-ssr/http-status) and [`httpHeader`](/reference/solid-web/rendering-ssr/http-header) declare response metadata from inside the tree.
-- [`clientOnly`](/reference/solid-web/rendering-ssr/client-only) defers a component to the browser.
-- [`isServer`](/reference/solid-web/rendering-ssr/is-server) and [`isDev`](/reference/solid-web/rendering-ssr/is-dev) are build-time constants.
+- [`render`](/reference/solid-web/rendering-ssr/render) はツリーを DOM 要素にマウントし、破棄関数を返します。
+- [`hydrate`](/reference/solid-web/rendering-ssr/hydrate) はサーバーレンダリングされた HTML にツリーをアタッチします。
+- [`renderToString`](/reference/solid-web/rendering-ssr/render-to-string) は同期的に文字列へレンダーします。[`renderToStream`](/reference/solid-web/rendering-ssr/render-to-stream) はシェルをストリーミングし、その後各バウンダリを確定次第ストリーミングします。
+- [`httpStatus`](/reference/solid-web/rendering-ssr/http-status) と [`httpHeader`](/reference/solid-web/rendering-ssr/http-header) はツリー内からレスポンスメタデータを宣言します。
+- [`clientOnly`](/reference/solid-web/rendering-ssr/client-only) はコンポーネントをブラウザへ延期します。
+- [`isServer`](/reference/solid-web/rendering-ssr/is-server) と [`isDev`](/reference/solid-web/rendering-ssr/is-dev) はビルド時定数です。
 
 ## Head
 
-- [`useHead`](/reference/solid-web/head/use-head) registers tags with the ambient head registry; [`HeadTag`](/reference/solid-web/head/head-tag) describes them.
-- [`@solidjs/meta`](/reference/solid-meta) wraps the registry in components; [Head and metadata](/building-apps/head-and-metadata) shows both.
+- [`useHead`](/reference/solid-web/head/use-head) はアンビエント head レジストリにタグを登録します。[`HeadTag`](/reference/solid-web/head/head-tag) がそれらを記述します。
+- [`@solidjs/meta`](/reference/solid-meta) はレジストリをコンポーネントでラップします。[Head とメタデータ](/building-apps/head-and-metadata) で両方を紹介しています。
 
-## Components
+## コンポーネント
 
-- [`Portal`](/reference/solid-web/components/portal) renders children elsewhere in the document.
-- [`dynamic`](/reference/solid-web/components/dynamic) creates a component from a reactive source.
+- [`Portal`](/reference/solid-web/components/portal) は children をドキュメント内の別の場所にレンダーします。
+- [`dynamic`](/reference/solid-web/components/dynamic) はリアクティブなソースからコンポーネントを作成します。
 
-## JSX properties
+## JSX プロパティ
 
-Attributes with renderer-specific behavior: [`ref`](/reference/solid-web/jsx-properties/ref), [`class`](/reference/solid-web/jsx-properties/class), [`style`](/reference/solid-web/jsx-properties/style), [`textContent`](/reference/solid-web/jsx-properties/text-content), and [`innerHTML`](/reference/solid-web/jsx-properties/inner-html).
+レンダラー固有の動作を持つ属性: [`ref`](/reference/solid-web/jsx-properties/ref)、[`class`](/reference/solid-web/jsx-properties/class)、[`style`](/reference/solid-web/jsx-properties/style)、[`textContent`](/reference/solid-web/jsx-properties/text-content)、[`innerHTML`](/reference/solid-web/jsx-properties/inner-html)。
 
-## Server functions
+## サーバー関数
 
-The runtime behind `"use server"`: declarations such as [`GET`](/reference/solid-web/server-functions/get) and [`live`](/reference/solid-web/server-functions/live), per-call [`invoke`](/reference/solid-web/server-functions/invoke) options, and the host integration hooks.
-The [Server functions index](/reference/solid-web/server-functions) groups them; the [Server functions guide](/building-apps/server-functions) covers application patterns.
+`"use server"` の背後にあるランタイム: [`GET`](/reference/solid-web/server-functions/get) や [`live`](/reference/solid-web/server-functions/live) などの宣言、呼び出しごとの [`invoke`](/reference/solid-web/server-functions/invoke) オプション、ホスト統合フック。
+[サーバー関数インデックス](/reference/solid-web/server-functions) でそれらをグループ化しています。[サーバー関数ガイド](/building-apps/server-functions) でアプリケーションパターンを説明しています。
 
-## Request and response
+## リクエストとレスポンス
 
-Working with the request on the server: [`getRequestEvent`](/reference/solid-web/request-response/get-request-event), the response helpers [`respond`](/reference/solid-web/request-response/respond), [`redirect`](/reference/solid-web/request-response/redirect), and [`reload`](/reference/solid-web/request-response/reload), [cookies](/reference/solid-web/request-response/cookies), [safe errors](/reference/solid-web/request-response/safe-errors), and [`getTraceContext`](/reference/solid-web/request-response/get-trace-context) for the request's W3C trace.
-The [Request and response index](/reference/solid-web/request-response) lists them all.
+サーバー上のリクエストを扱う機能: [`getRequestEvent`](/reference/solid-web/request-response/get-request-event)、レスポンスヘルパーの [`respond`](/reference/solid-web/request-response/respond)・[`redirect`](/reference/solid-web/request-response/redirect)・[`reload`](/reference/solid-web/request-response/reload)、[cookie](/reference/solid-web/request-response/cookies)、[安全なエラー](/reference/solid-web/request-response/safe-errors)、リクエストの W3C トレースのための [`getTraceContext`](/reference/solid-web/request-response/get-trace-context)。
+[リクエストとレスポンスのインデックス](/reference/solid-web/request-response) にすべて一覧されています。
