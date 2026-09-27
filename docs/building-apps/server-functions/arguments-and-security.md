@@ -1,32 +1,32 @@
 ---
-title: "Arguments and security"
+title: "引数とセキュリティ"
 version: "2.0"
-description: "Send arguments a server function can decode, and validate and authorize every call as if it came from a terminal, because it can."
+description: "サーバー関数がデコードできる引数を送り、ターミナルから送られてきた可能性があるものとして、すべての呼び出しをバリデーション・認可します。"
 ---
 
-The account page lets a shopper change the name on their account.
-The component calls `updateAccountName(name)`, TypeScript checks that `name` is a string, and the function writes it to the database.
+アカウントページでは、買い物客が自分のアカウントの名前を変更できます。
+コンポーネントは `updateAccountName(name)` を呼び、TypeScript は `name` が文字列であることをチェックし、関数はそれをデータベースに書き込みます。
 
-Every server function is an HTTP endpoint, and the component is one caller among many:
+すべてのサーバー関数は HTTP エンドポイントであり、コンポーネントは多くの呼び出し元の 1 つにすぎません:
 
 ```bash
 curl -X POST 'https://shop.example/_server/<id>?args=%5B%7B%22admin%22%3Atrue%7D%5D' \
 	-H 'Origin: https://shop.example'
 ```
 
-That request runs the same function with `{ admin: true }` where a string was expected.
-TypeScript types do not exist at runtime, the browser's `required` attribute was never involved, and the same-origin check passed because the request said it came from the shop.
-The function body is the only place that sees every request, so it is where validation and authorization live.
+このリクエストは、文字列が期待される場所に `{ admin: true }` を渡して同じ関数を実行します。
+TypeScript の型はランタイムには存在せず、ブラウザーの `required` 属性も関与していません。リクエストがショップから来たと名乗ったため、同一オリジンチェックも通過してしまいます。
+関数本体はすべてのリクエストを見る唯一の場所です。だからこそ、バリデーションと認可はそこに置きます。
 
-Most applications need the [validation](#validate-caller-controlled-values) and [request context](#read-trusted-request-context) sections.
-The encoding sections matter when an argument is not a string, number, plain object, or `FormData`.
+ほとんどのアプリケーションに必要なのは[バリデーション](#validate-caller-controlled-values)と[リクエストコンテキスト](#read-trusted-request-context)の節です。
+引数が文字列、数値、プレーンオブジェクト、`FormData` のいずれでもない場合は、エンコーディングの節が関係します。
 
-## Default argument encoding
+## デフォルトの引数エンコーディング
 
-The client sends an ordinary argument list as JSON.
-Strings, numbers, booleans, arrays, plain objects, and `null` need no setup.
+クライアントは通常の引数リストを JSON として送ります。
+文字列、数値、真偽値、配列、プレーンオブジェクト、`null` は設定不要です。
 
-A single argument of one of these types is sent as itself, in its natural HTTP encoding, instead of being wrapped in JSON:
+次のいずれかの型の単一引数は、JSON に包まれるのではなく、その型の自然な HTTP エンコーディングでそのまま送られます:
 
 - `string`
 - `URLSearchParams`
@@ -36,7 +36,7 @@ A single argument of one of these types is sent as itself, in its natural HTTP e
 - `ArrayBuffer`
 - `Uint8Array`
 
-That is what makes a server function a form target and an upload target with no extra code:
+この仕組みがあるおかげで、サーバー関数は追加コードなしでフォームの送信先にもアップロードの宛先にもなれます:
 
 ```ts
 // src/data/account.ts
@@ -52,12 +52,12 @@ export async function uploadAvatar(form: FormData) {
 }
 ```
 
-Submit a form with `<input type="file" name="avatar">` and the function receives the `FormData` the browser assembled, file included.
+`<input type="file" name="avatar">` を持つフォームを送信すると、関数はブラウザーが組み立てた `FormData` をファイルごと受け取ります。
 
-## Enable rich arguments
+## リッチな引数を有効にする
 
-JSON cannot carry a `Date`, `Map`, `Set`, typed array, or an object that refers to itself.
-Pass one of those in an argument list and the client throws before any request is made:
+JSON は `Date`、`Map`、`Set`、型付き配列、自分自身を参照するオブジェクトを運べません。
+それらを引数リストに渡すと、クライアントはリクエストを送る前に例外を投げます:
 
 ```ts
 // Avoid: a Date in the argument list, with the default JSON encoding
@@ -67,9 +67,9 @@ await listOrders({ since: new Date("2026-01-01") });
 await listOrders({ since: "2026-01-01" });
 ```
 
-The `Avoid` version throws `Server function arguments are sent as JSON by default and these arguments are not JSON-serializable. Call enableRichArguments() (from "@solidjs/web/server-functions/rich-args") once at startup to send Dates, Maps, Sets, typed arrays, etc. through the codec — or pass a single Blob/FormData/File argument, which has a native HTTP encoding.`
+`Avoid` の例は `Server function arguments are sent as JSON by default and these arguments are not JSON-serializable. Call enableRichArguments() (from "@solidjs/web/server-functions/rich-args") once at startup to send Dates, Maps, Sets, typed arrays, etc. through the codec — or pass a single Blob/FormData/File argument, which has a native HTTP encoding.` を投げます。
 
-When the application does send such values, call the helper once in the client entry:
+アプリケーションがこうした値を実際に送る場合は、クライアントエントリーでヘルパーを 1 回呼び出します:
 
 ```ts
 // src/entry-client.tsx
@@ -78,18 +78,18 @@ import { enableRichArguments } from "@solidjs/web/server-functions/rich-args";
 enableRichArguments();
 ```
 
-Rich arguments use the server-function codec.
-Results already use the codec when a return value needs it, so the opt-in affects arguments only.
+リッチな引数はサーバー関数コーデックを使います。
+戻り値は必要な場合すでにコーデックを使っているため、このオプトインが影響するのは引数だけです。
 
-:::deep-dive[Custom codec plugins]
-The codec accepts plugins for types it does not know, built with `createPlugin` from `@solidjs/web/serialization`.
-The client and server must be configured with matching plugins, or one side produces frames the other cannot read.
-An application that only sends the built-in rich types does not need a plugin.
+:::deep-dive[カスタムコーデックプラグイン]
+コーデックは、知らない型のために `@solidjs/web/serialization` の `createPlugin` で作るプラグインを受け付けます。
+クライアントとサーバーは一致するプラグインで設定する必要があります。そうしないと片側が相手の読めないフレームを生成します。
+組み込みのリッチな型だけを送るアプリケーションにプラグインは不要です。
 :::
 
-## Validate caller-controlled values
+## 呼び出し元が制御する値をバリデーションする
 
-Accept `unknown` where the boundary is not already a concrete web type such as `FormData`, and parse the value before using it:
+`FormData` のような具体的な Web 型になっていない境界では `unknown` を受け取り、値を使う前にパースします:
 
 ::::tab-group[validation-library]
 
@@ -161,10 +161,10 @@ export async function updateAccountName(input: unknown) {
 
 ::::
 
-Send the `curl` request from the top of the page at this function and it answers 400 with the issues as a JSON body; the database is not touched.
-The schema and the validation library are referenced only inside the `"use server"` body, so they are removed from the client build.
+このページ冒頭の `curl` リクエストをこの関数に送ると、issues を JSON ボディに載せた 400 が返り、データベースには触れられません。
+スキーマとバリデーションライブラリは `"use server"` 本体の中だけで参照されるため、クライアントビルドから取り除かれます。
 
-Validation belongs in the body, not in a wrapper around the declaration:
+バリデーションを置くべき場所は本体であり、宣言を包むラッパーではありません:
 
 ```ts
 // Avoid: a wrapper around the reference, so HTTP dispatch skips it
@@ -183,13 +183,13 @@ export async function updateAccountName(input: unknown) {
 }
 ```
 
-In the `Avoid` version, the registered server function is the inner arrow, and HTTP dispatch calls it by id.
-`validated` runs only for code that holds the exported reference, in the browser or during a render, so a `curl` request reaches the database unchecked.
-A wrapper inside a module-level `"use server"` module is different, because there the wrapper's return value is what gets registered; the [Server functions](/building-apps/server-functions#declare-a-server-module) page shows that form.
+`Avoid` の例では、登録されるサーバー関数は内側のアロー関数であり、HTTP ディスパッチは id でそれを呼び出します。
+`validated` が実行されるのは、ブラウザー内やレンダー中など、エクスポートされた参照を持つコード経由の呼び出しだけです。そのため `curl` リクエストはチェックされないままデータベースへ届きます。
+モジュールレベルの `"use server"` モジュール内のラッパーは事情が異なります。そこではラッパーの戻り値が登録されるためです。その形は[サーバー関数](/building-apps/server-functions#declare-a-server-module)のページで説明しています。
 
-## Read trusted request context
+## 信頼できるリクエストコンテキストを読む
 
-`getRequestEvent()` from `@solidjs/web` returns the current request and the values middleware placed on `event.locals`:
+`@solidjs/web` の `getRequestEvent()` は、現在のリクエストと、ミドルウェアが `event.locals` に置いた値を返します:
 
 ```ts
 import { getRequestEvent } from "@solidjs/web";
@@ -204,9 +204,9 @@ export async function currentUserId() {
 }
 ```
 
-[Sessions and auth](/building-apps/sessions-and-auth) shows middleware that reads a signed cookie and sets `event.locals.userId` before any server function runs.
+署名付き Cookie を読み、どのサーバー関数が実行されるよりも先に `event.locals.userId` を設定するミドルウェアは、[セッションと認証](/building-apps/sessions-and-auth)で説明しています。
 
-Identity is one of those values, and never an argument:
+アイデンティティはこうした値の 1 つであり、決して引数にはしません:
 
 ```ts
 // Avoid: the caller names the account to change
@@ -224,16 +224,16 @@ export async function updateAccountName(name: string) {
 }
 ```
 
-In the `Avoid` version, any caller can put any account id in the first argument, and the function renames that account.
+`Avoid` の例では、どの呼び出し元も第 1 引数に任意のアカウント id を入れられ、関数はそのアカウントの名前を変更してしまいます。
 
-:::danger[A role or an id in an argument is a claim, not a fact]
-Anything the caller sends, including a `userId`, an `isAdmin` flag, or a price, is a claim the caller made about itself.
-Read identity and permissions from the request event, and look up prices and stock on the server.
-Authorize the requested operation against that context in every function that changes data.
+:::danger[引数のロールや id は事実ではなく申告]
+`userId`、`isAdmin` フラグ、価格など、呼び出し元が送るものはすべて、呼び出し元自身についての申告にすぎません。
+アイデンティティと権限はリクエストイベントから読み、価格と在庫はサーバーで調べてください。
+データを変更するすべての関数で、要求された操作をそのコンテキストに照らして認可してください。
 :::
 
-The request also carries its trace.
-When your host runs distributed tracing, an incoming `traceparent` header names the trace this request belongs to, and a server function that calls another service should pass it along so the tracing tool shows that call under the page or action that made it:
+リクエストはトレース情報も運んでいます。
+ホストで分散トレーシングを動かしている場合、入ってきた `traceparent` ヘッダーはこのリクエストが属するトレースを示します。別のサービスを呼ぶサーバー関数はそれを引き継ぐべきです。そうすればトレーシングツールで、その呼び出しを発生させたページやアクションの下にその呼び出しが表示されます:
 
 ```ts
 import { getTraceContext } from "@solidjs/web";
@@ -246,62 +246,62 @@ export async function fetchInventory(sku: string) {
 }
 ```
 
-[`getTraceContext()`](/reference/solid-web/request-response/get-trace-context) returns the same object for every read in the request, so call it where you build the outbound request.
-When no `traceparent` came in, the runtime starts a trace of its own, so the header is always well formed; a downstream service that is not tracing ignores it.
-On the client, and outside any request, the function returns `undefined` and the spread adds nothing.
+[`getTraceContext()`](/reference/solid-web/request-response/get-trace-context) はリクエスト内のどの読み取りでも同じオブジェクトを返すため、外向きリクエストを組み立てる場所で呼んでください。
+`traceparent` が入ってこなかった場合、ランタイムが独自のトレースを開始するため、ヘッダーは常に正しい形式になります。トレーシングしていない下流のサービスはそれを無視します。
+クライアント上やリクエストの外では、この関数は `undefined` を返し、スプレッドは何も追加しません。
 
-## Same-origin protection
+## 同一オリジン保護
 
-The server-function handler checks where a state-changing request came from before running it.
-It reads `Sec-Fetch-Site`, then `Origin`, then `Referer`, and accepts the request when those say same-origin; a request with cross-origin metadata is refused with status 403, and so is a request with none of the three headers.
+サーバー関数ハンドラーは、状態を変更するリクエストを実行する前に、その送信元をチェックします。
+`Sec-Fetch-Site`、次に `Origin`、次に `Referer` を読み、それらが同一オリジンを示せばリクエストを受け付けます。クロスオリジンのメタデータを持つリクエストはステータス 403 で拒否され、3 つのヘッダーがすべてないリクエストも同様に拒否されます。
 
-That gate stops a page on another site from submitting to your server functions with the visitor's cookies, which is the cross-site request forgery (CSRF) case.
-It does not stop a script that sets its own `Origin` header, which is why the `curl` request at the top of the page went through, and why the gate is no substitute for validation and authorization.
+このゲートは、別サイトのページが訪問者の Cookie を使ってサーバー関数に送信するのを止めます。いわゆるクロスサイトリクエストフォージェリ（CSRF）のケースです。
+自分で `Origin` ヘッダーを設定するスクリプトは止められません。ページ冒頭の `curl` リクエストが通ったのはそのためであり、このゲートがバリデーションや認可の代わりにならない理由でもあります。
 
-`GET` and `HEAD` requests to a `GET()`-declared read skip the check, because a declared read is safe to run from any origin by contract and the check's `Vary` headers would fragment the shared caches the declaration exists to enable.
-Declare `GET()` only for a read that is safe and idempotent.
+`GET()` で宣言された読み取りへの `GET`・`HEAD` リクエストはこのチェックをスキップします。宣言された読み取りは契約上どのオリジンから実行しても安全であり、チェックが付ける `Vary` ヘッダーは、宣言が実現しようとする共有キャッシュを分断してしまうためです。
+`GET()` は安全で冪等な読み取りにだけ宣言してください。
 
-:::caution[Keep the default unless the host already has a CSRF policy]
-A custom host can name the expected public origin, accept requests without origin metadata, or replace the check with one at a trusted outer layer.
-Each of those widens what reaches the function.
-Turn the default off only where an equivalent check already runs in front of the handler.
+:::caution[ホストに既存の CSRF ポリシーがない限りデフォルトを維持する]
+カスタムホストは、期待する公開オリジンを指定したり、オリジンメタデータのないリクエストを受け付けたり、チェックを信頼できる外側のレイヤーのものに置き換えたりできます。
+どれも、関数に到達するものを広げます。
+同等のチェックがハンドラーの前段ですでに動いている場所でのみ、デフォルトをオフにしてください。
 :::
 
-## Common problems
+## よくある問題
 
-### The call throws `not JSON-serializable` before any request is made
+### リクエストを送る前に呼び出しが `not JSON-serializable` を投げる
 
-An argument contains a `Date`, `Map`, `Set`, typed array, or a cyclic object, and rich arguments are not enabled.
-Convert the value to a JSON-safe shape, or call `enableRichArguments()` once in the client entry.
+引数に `Date`、`Map`、`Set`、型付き配列、循環オブジェクトが含まれており、リッチな引数が有効になっていません。
+値を JSON 安全な形に変換するか、クライアントエントリーで `enableRichArguments()` を 1 回呼んでください。
 
-### A `curl` or script request is answered 403
+### `curl` やスクリプトのリクエストが 403 を返される
 
-The request carried no `Sec-Fetch-Site`, `Origin`, or `Referer` header, or carried one naming another origin.
-A legitimate script sends an `Origin` header matching the site.
-A server-to-server integration that cannot do that runs behind a host with its own check and `allowRequestsWithoutOriginCheck` set, per [Host configuration](/reference/solid-web/server-functions/host-configuration).
+リクエストに `Sec-Fetch-Site`、`Origin`、`Referer` ヘッダーがなかったか、別のオリジンを指すものが含まれていました。
+正規のスクリプトはサイトに一致する `Origin` ヘッダーを送ります。
+それができないサーバー間連携は、独自のチェックと `allowRequestsWithoutOriginCheck` を設定したホストの後ろで動かします。[ホスト構成](/reference/solid-web/server-functions/host-configuration)を参照してください。
 
-### Validation runs in development but a raw request skipped it
+### 開発中はバリデーションが動くのに素のリクエストがすり抜ける
 
-The check lives in a wrapper around the function-level declaration rather than inside the body.
-HTTP dispatch calls the registered function directly.
-Move the check into the `"use server"` body, or put the wrapper inside a module-level `"use server"` module.
+チェックが本体ではなく、関数レベルの宣言を包むラッパーの中にあります。
+HTTP ディスパッチは登録された関数を直接呼び出します。
+チェックを `"use server"` 本体に移すか、ラッパーをモジュールレベルの `"use server"` モジュール内に置いてください。
 
-### `getRequestEvent()` returns `undefined`
+### `getRequestEvent()` が `undefined` を返す
 
-The function ran with no request in scope: at module load, from a timer, or in a test that did not provide an event.
-A server function called from a render, a middleware, or an HTTP request always has one; provide one in tests with [`provideRequestEvent`](/reference/solid-web/request-response/provide-request-event).
+スコープにリクエストがない状態で関数が実行されました。モジュール読み込み時、タイマーから、イベントを提供しなかったテスト内などです。
+レンダー、ミドルウェア、HTTP リクエストから呼ばれたサーバー関数には必ずイベントがあります。テストでは [`provideRequestEvent`](/reference/solid-web/request-response/provide-request-event) で提供してください。
 
-## Recap
+## まとめ
 
-- Strings, numbers, booleans, arrays, plain objects, and `null` travel as JSON; a single `FormData`, `File`, `Blob`, `URLSearchParams`, or binary argument travels as itself.
-- A `Date`, `Map`, `Set`, or typed array in the arguments throws until `enableRichArguments()` runs once in the client entry.
-- Type an argument as `unknown` and parse it with a schema inside the `"use server"` body; a wrapper around the declaration is skipped by HTTP dispatch.
-- Read identity and permissions from `getRequestEvent().locals`, never from an argument.
-- The same-origin check refuses cross-site browser requests; it does not refuse a script that sets its own `Origin` header.
-- Declare `GET()` only for reads that are safe from any origin, because declared reads skip the origin check.
+- 文字列、数値、真偽値、配列、プレーンオブジェクト、`null` は JSON で送られます。`FormData`、`File`、`Blob`、`URLSearchParams`、バイナリの単一引数はそのままの姿で送られます。
+- 引数の `Date`、`Map`、`Set`、型付き配列は、クライアントエントリーで `enableRichArguments()` を 1 回実行するまで例外を投げます。
+- 引数は `unknown` 型で受け、`"use server"` 本体の中でスキーマでパースしてください。宣言を包むラッパーは HTTP ディスパッチにスキップされます。
+- アイデンティティと権限は `getRequestEvent().locals` から読み、引数からは決して読まないでください。
+- 同一オリジンチェックはクロスサイトのブラウザーリクエストを拒否しますが、自分で `Origin` ヘッダーを設定するスクリプトは拒否しません。
+- `GET()` はどのオリジンからでも安全な読み取りにだけ宣言してください。宣言された読み取りはオリジンチェックをスキップするためです。
 
-## Next steps
+## 次のステップ
 
-- [Mutations and responses](/building-apps/server-functions/mutations-and-responses): what to return after a validated write, and how the 400 above reaches the caller.
-- [Sessions and auth](/building-apps/sessions-and-auth): the middleware that puts `userId` on `event.locals` from a signed cookie.
-- [Forms](/guides/forms): the checkout address form, validated in the browser and again in the server function.
+- [ミューテーションとレスポンス](/building-apps/server-functions/mutations-and-responses): バリデーション済みの書き込みの後に何を返すか、そして上の 400 がどう呼び出し元に届くか。
+- [セッションと認証](/building-apps/sessions-and-auth): 署名付き Cookie から `userId` を `event.locals` に置くミドルウェア。
+- [フォーム](/guides/forms): チェックアウトの住所フォーム。ブラウザーとサーバー関数の両方でバリデーションします。
