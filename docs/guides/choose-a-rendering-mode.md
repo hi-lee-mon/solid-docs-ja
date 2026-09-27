@@ -1,60 +1,60 @@
 ---
-title: "Choose a rendering mode"
+title: "レンダリングモードを選ぶ"
 version: "2.0"
-description: "Decide between a static shell, streaming server rendering, and build-time prerendering for a start-mode project, and what each one costs."
+description: "start モードのプロジェクトで、静的シェル・ストリーミングサーバーレンダリング・ビルド時プリレンダリングのどれを選ぶか、そしてそれぞれのコストを判断する。"
 ---
 
-Someone shares a product page from the storefront in a chat, and the link preview shows the site name and nothing else.
-The page is there when a browser opens it, but the preview scraper read the HTML response, and the HTML response was a document shell with an empty body waiting for a bundle.
-Whether that is a problem depends on who reads the HTML, and that question is what picks a rendering mode.
+ストアフロントの商品ページがチャットで共有され、リンクプレビューにはサイト名だけが表示されました。
+ブラウザで開けばページは存在しますが、プレビューのスクレイパーが読んだのは HTML レスポンスであり、その HTML レスポンスはバンドルの到着を待つ空の body を持つドキュメントシェルでした。
+それが問題かどうかは誰が HTML を読むかに依存し、その問いこそがレンダリングモードを決めるものです。
 
-A start-mode project renders in one of three ways: a static shell that the browser fills in, a server that streams HTML for each request, or a build step that renders every page to HTML ahead of time.
-The application code is the same in all three.
-`src/App.tsx`, `src/Document.tsx`, and the routes carry over; what changes is one or two lines of `vite.config.ts`, what `vite build` produces, and what the host has to run.
+start モードのプロジェクトのレンダリング方法は 3 つあります。ブラウザが中身を埋める静的シェル、リクエストごとに HTML をストリーミングするサーバー、ビルドステップですべてのページをあらかじめ HTML にレンダリングする方法です。
+アプリケーションのコードは 3 つとも同じです。
+`src/App.tsx`、`src/Document.tsx`、ルートはそのまま引き継がれます。変わるのは `vite.config.ts` の 1〜2 行、`vite build` が生成するもの、そしてホストが実行しなければならないものです。
 
-:::tip[If you want the answer first]
-[A decision in three questions](#a-decision-in-three-questions) picks a mode without the trade-offs.
-The mechanics of each mode live in [App structure](/building-apps/app-structure) and [Rendering and SSR](/concepts/rendering-and-ssr).
+:::tip[先に答えが知りたい場合]
+[3 つの質問で決定](#a-decision-in-three-questions) では、トレードオフを読まずにモードを選べます。
+各モードの仕組みは [アプリの構造](/building-apps/app-structure) と [レンダリングと SSR](/concepts/rendering-and-ssr) で説明しています。
 :::
 
-## The three modes
+## 3 つのモード
 
-### Static shell, rendered in the browser
+### 静的シェル（ブラウザでレンダリング）
 
 ```ts
 solid({ start: true });
 ```
 
-This is the `bare` and `basic` project shape.
-The build writes the empty document shell from `Document.tsx`, without the app inside it, to `dist/client/index.html`.
-The browser downloads the JavaScript and `render()` mounts the app.
+これは `bare` と `basic` のプロジェクト構成です。
+ビルドは `Document.tsx` の空のドキュメントシェル（アプリを含まないもの）を `dist/client/index.html` に書き出します。
+ブラウザは JavaScript をダウンロードし、`render()` がアプリをマウントします。
 
-What the user sees first is the shell: whatever `Document.tsx` puts in `<body>` around the app, which in the templates is nothing.
-Content appears once the bundle has loaded and any data it fetches has arrived.
+ユーザーが最初に見るのはシェルです。`Document.tsx` がアプリの周りの `<body>` に置くもので、テンプレートでは何も置かれていません。
+コンテンツが表示されるのは、バンドルが読み込まれ、それが取得するデータが到着してからです。
 
-What you deploy is `dist/client`, a directory of files.
-Any static host serves it.
-There is no server process to run, scale, or keep patched.
+デプロイするのは `dist/client`、つまりファイルのディレクトリです。
+どんな静的ホストでも配信できます。
+実行・スケール・パッチ適用すべきサーバープロセスはありません。
 
-### Streaming server rendering
+### ストリーミングサーバーレンダリング
 
 ```ts
 solid({ start: true, ssr: true });
 ```
 
-This is the `fullstack` project shape.
-Each request runs `App` on the server.
-The response starts with the parts of the page that are ready, `Loading` fallbacks stand in for the parts that are still waiting on data, and the rest of the HTML streams in as that data settles.
-The browser shows the HTML as it arrives, then `hydrate()` attaches the reactive graph to the existing DOM without rebuilding it.
+これは `fullstack` のプロジェクト構成です。
+各リクエストでサーバー上の `App` が実行されます。
+レスポンスは準備のできた部分から始まり、データを待っている部分には `Loading` のフォールバックが入り、データが確定するにつれて残りの HTML がストリーミングされます。
+ブラウザは届いた HTML をそのまま表示し、その後 `hydrate()` が既存の DOM を再構築せずにリアクティブなグラフをそこに接続します。
 
-What the user sees first is real content, before the JavaScript has downloaded.
-Links and forms work before hydration; interactive widgets work after it.
+ユーザーが最初に見るのは実際のコンテンツで、JavaScript のダウンロード完了を待ちません。
+リンクとフォームはハイドレーション前から動き、インタラクティブなウィジェットはハイドレーション後に動きます。
 
-What you deploy is `dist/client` plus a request handler in `dist/server`.
-The host runs that handler on Node, a Fetch-based runtime, or a provider adapter.
-[Deployment](/building-apps/deployment) covers the options.
+デプロイするのは `dist/client` に加えて `dist/server` のリクエストハンドラーです。
+ホストはそのハンドラーを Node、Fetch ベースのランタイム、またはプロバイダーのアダプター上で実行します。
+選択肢については [デプロイ](/building-apps/deployment) で扱っています。
 
-### Prerendered at build time
+### ビルド時のプリレンダリング
 
 ```ts
 import { serverFunctions } from "@solidjs/prerender/integration";
@@ -64,61 +64,61 @@ solid({ start: true, ssr: true, serverFunctions: true });
 prerender({ mode: "static", integrations: [serverFunctions()] });
 ```
 
-Both go in the `plugins` array, the crawler after the Solid plugin.
+両方とも `plugins` 配列に入れます。クローラーは Solid プラグインの後です。
 
-This is the `fullstack` shape with the crawler plugin added; no shape ships it preconfigured.
-The server rendering happens once, during `vite build`.
-The `prerender-crawler` plugin starts at `/`, renders each page through the server build, writes the HTML, and follows same-origin links to find the rest.
-Server functions wrapped in `prerendered()` from `@solidjs/prerender` run during the build and their results are written as JSON files that the deployed client fetches instead of calling a server.
+これは `fullstack` 構成にクローラープラグインを追加したもので、あらかじめ設定済みで提供される構成はありません。
+サーバーレンダリングは `vite build` の間に一度だけ実行されます。
+`prerender-crawler` プラグインは `/` から始まり、サーバービルドを通して各ページをレンダリングして HTML を書き出し、同一オリジンのリンクをたどって残りのページを見つけます。
+`@solidjs/prerender` の `prerendered()` でラップされたサーバー関数はビルド中に実行され、その結果は JSON ファイルとして書き出されます。デプロイされたクライアントはサーバーを呼ぶ代わりにその JSON を取得します。
 
-What the user sees first is the complete page, as with SSR.
-What you deploy is `dist/client` only, as with the static shell.
-The trade is that content is as fresh as the last build, and a server function the crawl never called has no data on the deployed site.
+ユーザーが最初に見るのは SSR と同じく完成したページです。
+デプロイするのは静的シェルと同じく `dist/client` だけです。
+代償として、コンテンツの鮮度は最後のビルド時点までであり、クロールが一度も呼ばなかったサーバー関数のデータはデプロイされたサイトに存在しません。
 
-## What to weigh
+## 検討すべきこと
 
-### What appears first
+### 最初に表示されるもの
 
-The static shell shows nothing until the bundle runs.
-On a fast connection with a small app that is tens of milliseconds; on a slow connection with a large app it is a blank page for as long as the download takes.
-SSR and prerendering show the content in the HTML.
+静的シェルはバンドルが実行されるまで何も表示しません。
+高速な回線と小さなアプリなら数十ミリ秒ですが、低速な回線と大きなアプリではダウンロードが終わるまで真っ白なページです。
+SSR とプリレンダリングはコンテンツを HTML に含めて表示します。
 
-The gap matters for pages a user arrives at from outside the app: a shared link, a search result, a bookmark.
-It matters much less for the second and later pages in a session, because the bundle is already loaded and every mode navigates on the client from then on.
+この差は、共有リンク・検索結果・ブックマークなど、アプリの外から到達するページで重要になります。
+セッション中の 2 ページ目以降ではあまり重要ではありません。バンドルはすでに読み込まれており、どのモードでも以降はクライアント側で遷移するからです。
 
-### Who reads the HTML
+### 誰が HTML を読むか
 
-Search engines, link-preview scrapers, and screen-reader users on slow devices all read the HTML response.
-Google runs JavaScript, but with a delay and a budget; most other crawlers do not.
-If the content has to be indexed or previewed, it has to be in the HTML, which means SSR or prerendering.
-An admin dashboard behind a login has no such reader, and the static shell loses nothing.
+検索エンジン、リンクプレビューのスクレイパー、低速デバイスのスクリーンリーダーユーザーは、みな HTML レスポンスを読みます。
+Google は JavaScript を実行しますが遅延と予算の制約があり、他のクローラーのほとんどは実行しません。
+コンテンツをインデックスやプレビューの対象にするには HTML に含める必要があり、それは SSR かプリレンダリングを意味します。
+ログインの先にある管理ダッシュボードにはそのような読み手がいないため、静的シェルでも何も失いません。
 
-### What the host runs
+### ホストが実行するもの
 
-The static shell and prerendering deploy files.
-SSR deploys a process.
-That process needs a runtime with the right Node or Fetch API surface, environment variables at boot, memory and CPU that scale with traffic, and a way to be updated without downtime.
-Providers make this routine, but it is a different category of hosting from a directory of files, with a different bill.
+静的シェルとプリレンダリングはファイルをデプロイします。
+SSR はプロセスをデプロイします。
+そのプロセスには、適切な Node または Fetch API サーフェスを持つランタイム、起動時の環境変数、トラフィックに応じてスケールするメモリと CPU、ダウンタイムなしで更新する方法が必要です。
+プロバイダーがこれを定型化してくれますが、ファイルのディレクトリとは別種のホスティングであり、請求額も異なります。
 
-:::caution[Server functions need a server, even in client mode]
-With `serverFunctions: true` and the static shell, the pages stay static but the endpoint that serves the function calls is still a server handler in `dist/server`, so the host has to run something after all.
-For a static deployment with server-side data, prerendering is the mode that gives you both.
+:::caution[サーバー関数はクライアントモードでもサーバーが必要]
+`serverFunctions: true` と静的シェルを組み合わせると、ページは静的のままですが、関数呼び出しを処理するエンドポイントは依然として `dist/server` のサーバーハンドラーなので、結局ホストは何かを実行しなければなりません。
+サーバーサイドのデータを静的にデプロイしたい場合、両方を実現できるのはプリレンダリングです。
 :::
 
-### How fresh the data is
+### データの鮮度
 
-SSR reads data on every request.
-Prerendering reads it at build time, so a change on the server is invisible until the next deploy.
-That is fine for a documentation site or a blog and wrong for a cart.
-A middle ground is to prerender the shell and page structure and fetch the changing data from the client, or to move to SSR for the pages that change.
+SSR はリクエストごとにデータを読みます。
+プリレンダリングはビルド時に読むため、サーバー側の変更は次のデプロイまで見えません。
+ドキュメントサイトやブログならそれで問題ありませんが、カートでは間違いです。
+中間の選択肢として、シェルとページ構造をプリレンダリングして変化するデータはクライアントから取得する方法や、変化するページだけ SSR にする方法があります。
 
-### What the code has to tolerate
+### コードが耐えるべきこと
 
-In the static shell, application code runs only in the browser.
-`window`, `document`, and `localStorage` are always there.
+静的シェルでは、アプリケーションコードはブラウザでのみ実行されます。
+`window`、`document`、`localStorage` は常に存在します。
 
-With `ssr: true` or prerendering, `App` and every component it reaches also run on the server, once per request or once per page.
-Code that touches browser APIs at module scope or in a component body throws on the server:
+`ssr: true` やプリレンダリングでは、`App` とそれが到達するすべてのコンポーネントもサーバーで実行されます。リクエストごとに 1 回、またはページごとに 1 回です。
+モジュールスコープやコンポーネント本体でブラウザ API に触れるコードは、サーバーで例外を投げます。
 
 ```tsx
 // Avoid: runs on import, on the server too
@@ -131,79 +131,79 @@ onSettled(() => {
 });
 ```
 
-Run the `Avoid` version with `ssr: true` and the server render fails with `ReferenceError: localStorage is not defined`.
-Move browser-only code into an effect function or `onSettled`, guard it with `isServer`, or load the component with `clientOnly`.
-The initial output must also match between server and client, or hydration cannot claim the server-rendered nodes.
-[Server and client boundaries](/concepts/rendering-and-ssr#server-and-client-boundaries) lists the tools, with the full version of this pair.
+`Avoid` 側を `ssr: true` で実行すると、サーバーレンダリングは `ReferenceError: localStorage is not defined` で失敗します。
+ブラウザ専用のコードはエフェクト関数や `onSettled` に移すか、`isServer` でガードするか、`clientOnly` でコンポーネントを読み込みます。
+サーバーとクライアントで初期出力も一致しなければなりません。一致しないとハイドレーションがサーバーレンダリングされたノードを引き継げません。
+[サーバーとクライアントの境界](/concepts/rendering-and-ssr#server-and-client-boundaries) に、このペアの完全版とともにツールの一覧があります。
 
-The templates are written to pass this test in every mode, so a project that starts from `basic` and flips `ssr: true` later usually needs no changes.
-A project that has accumulated browser-only code does.
+テンプレートはどのモードでもこのテストに通るように書かれているため、`basic` から始めて後から `ssr: true` に切り替えるプロジェクトは通常変更不要です。
+ブラウザ専用コードが蓄積したプロジェクトでは変更が必要になります。
 
-### Development and production parity
+### 開発環境と本番環境の一致
 
-The dev server behaves the same way in every mode: server functions run against the dev server, pages render on request, and edits reload.
-The differences appear at build.
-Prerendering in particular can pass in development and fail at `vite build`, because the build is where the crawl runs and where a server function nothing prerendered is reported.
-Run the production build before assuming a mode works.
+開発サーバーはどのモードでも同じように振る舞います。サーバー関数は開発サーバーに対して実行され、ページはリクエストごとにレンダリングされ、編集はリロードされます。
+違いが現れるのはビルド時です。
+特にプリレンダリングは開発中には通っても `vite build` で失敗することがあります。クロールが実行されるのはビルド時であり、どこからもプリレンダリングされていないサーバー関数が報告されるのもビルド時だからです。
+モードが機能すると判断する前に、本番ビルドを実行してください。
 
-## A decision in three questions
+## 3 つの質問で決定
 
-1. Does the content have to be in the HTML, for search, previews, or first paint on slow connections?
-   No: use the static shell and stop here.
-2. Does the content change between deploys, or depend on who is asking?
-   No: prerender.
-3. Otherwise, stream with `ssr: true`.
+1. 検索・プレビュー・低速回線での初回ペイントのために、コンテンツを HTML に含める必要がありますか？
+   いいえ：静的シェルを使い、ここで終了です。
+2. コンテンツはデプロイ間で変化しますか、あるいは誰が尋ねるかに依存しますか？
+   いいえ：プリレンダリング。
+3. それ以外は、`ssr: true` でストリーミングします。
 
-The answer can differ by page.
-A marketing site with one signed-in dashboard is a prerendered site with `clientOnly` around the dashboard, or an SSR site with the marketing pages cached at the edge.
-Start with the simplest mode that satisfies the first question and change it when a measurement, not a guess, says to.
+答えはページごとに異なってかまいません。
+ログイン済みダッシュボードを 1 つ持つマーケティングサイトなら、ダッシュボードを `clientOnly` で囲んだプリレンダリングサイト、またはマーケティングページをエッジにキャッシュする SSR サイトになります。
+最初の質問を満たす最もシンプルなモードから始め、憶測ではなく計測が変えるべきだと示したときに変更してください。
 
-## Switching later
+## 後からの切り替え
 
-Moving from the static shell to SSR is `ssr: true` plus the host change.
-Moving to prerendering is the same flag plus the crawler plugin and `prerendered()` around the reads that should be baked.
-Moving back is removing them.
-None of the moves touch component code that was already server-safe.
+静的シェルから SSR への移行は、`ssr: true` にホストの変更を加えるだけです。
+プリレンダリングへの移行は、同じフラグにクローラープラグインと、焼き込むべき読み取りを囲む `prerendered()` を加えます。
+戻すときはそれらを取り除くだけです。
+どの移行も、すでにサーバーセーフなコンポーネントコードには触れません。
 
-## Common problems
+## よくある問題
 
-### `window is not defined` after turning on `ssr: true`
+### `ssr: true` を有効にした後の `window is not defined`
 
-A module or component body reads a browser API, and with `ssr: true` that code now runs on the server too.
-Move the read into an effect function or an `onSettled` callback, guard it with `isServer`, or wrap the component in `clientOnly`.
-[Server and client boundaries](/concepts/rendering-and-ssr#server-and-client-boundaries) shows each option.
+モジュールやコンポーネント本体がブラウザ API を読んでおり、`ssr: true` によりそのコードがサーバーでも実行されるようになりました。
+その読み取りをエフェクト関数や `onSettled` コールバックに移すか、`isServer` でガードするか、コンポーネントを `clientOnly` でラップしてください。
+それぞれの選択肢は [サーバーとクライアントの境界](/concepts/rendering-and-ssr#server-and-client-boundaries) で説明しています。
 
-### `Hydration tag mismatch` or `Hydration structure mismatch` in the console
+### コンソールの `Hydration tag mismatch` または `Hydration structure mismatch`
 
-The server and the browser rendered different structures for the same region, so the client could not claim the node it expected and its bindings attached to the wrong nodes.
-The usual causes are a conditional on `isServer` that picks a different element, which reports a tag mismatch, a `Show` whose condition depends on a random value, or data that differs between the request and the browser.
-Render the same structure on both sides and fill in browser-only values after hydration; [Hydrating server HTML](/concepts/rendering-and-ssr#hydrating-server-html) has the pair, and [SSR-safe code](/guides/ssr-safe-code) goes through the fixes line by line.
+サーバーとブラウザが同じ領域に異なる構造をレンダリングしたため、クライアントは期待したノードを引き継げず、バインディングが誤ったノードにアタッチされました。
+よくある原因は、別の要素を選ぶ `isServer` の条件分岐（タグの不一致として報告されます）、ランダムな値に依存する条件を持つ `Show`、リクエスト時とブラウザで異なるデータです。
+両側で同じ構造をレンダリングし、ブラウザ専用の値はハイドレーション後に埋めてください。[サーバー HTML のハイドレーション](/concepts/rendering-and-ssr#hydrating-server-html) にこのペアがあり、[SSR セーフなコード](/guides/ssr-safe-code) で修正方法を一行ずつ解説しています。
 
-### Server function calls fail on a static host
+### 静的ホストでサーバー関数の呼び出しが失敗する
 
-The project is in client mode with `serverFunctions: true`, and the host serves `dist/client` only.
-The function endpoint is a handler in `dist/server` that has to run somewhere.
-Deploy that handler as well, or switch to prerendering with `prerendered()` so the results are written to JSON at build time.
+プロジェクトが `serverFunctions: true` のクライアントモードで、ホストは `dist/client` だけを配信しています。
+関数のエンドポイントは `dist/server` のハンドラーで、どこかで実行する必要があります。
+そのハンドラーもデプロイするか、`prerendered()` を使ったプリレンダリングに切り替えて、結果がビルド時に JSON へ書き出されるようにしてください。
 
-### Prerendering passes in development and fails at `vite build`
+### プリレンダリングが開発中は通るが `vite build` で失敗する
 
-The crawl runs at build time, and that is where a server function nothing prerendered is reported.
-Wrap the reads that should be baked in `prerendered()`, check that the crawler can reach every page from `/` by following same-origin links, and run the production build before assuming a mode works.
+クロールはビルド時に実行され、どこからもプリレンダリングされていないサーバー関数が報告されるのもそこです。
+焼き込むべき読み取りを `prerendered()` でラップし、`/` から同一オリジンのリンクをたどってすべてのページに到達できることを確認し、モードが機能すると判断する前に本番ビルドを実行してください。
 
-## Recap
+## まとめ
 
-- Pick the mode by who reads the HTML: nothing but browsers, the static shell; crawlers and previews, SSR or prerendering.
-- Pick between SSR and prerendering by freshness: data that changes between deploys or per user needs SSR.
-- The static shell and prerendering deploy `dist/client` as files; SSR deploys a handler in `dist/server` that the host runs.
-- Server functions in client mode still need the `dist/server` handler; prerendering with `prerendered()` is the static alternative.
-- With `ssr: true` or prerendering, component code runs on the server; keep browser APIs in effect functions, `onSettled`, `isServer` guards, or `clientOnly`.
-- Run `vite build` before deciding a mode works; prerendering reports missing data at build time, not in development.
-- Start with the simplest mode that satisfies the first question and change it when a measurement says to.
+- HTML を読むのが誰かでモードを選びます。ブラウザだけなら静的シェル、クローラーやプレビューがあるなら SSR かプリレンダリングです。
+- SSR とプリレンダリングの間は鮮度で選びます。デプロイ間やユーザーごとに変わるデータには SSR が必要です。
+- 静的シェルとプリレンダリングは `dist/client` をファイルとしてデプロイし、SSR はホストが実行する `dist/server` のハンドラーをデプロイします。
+- クライアントモードのサーバー関数にも `dist/server` のハンドラーが必要です。`prerendered()` を使うプリレンダリングが静的な代替です。
+- `ssr: true` やプリレンダリングではコンポーネントコードがサーバーでも実行されます。ブラウザ API はエフェクト関数・`onSettled`・`isServer` ガード・`clientOnly` のいずれかに収めてください。
+- モードが機能すると判断する前に `vite build` を実行してください。プリレンダリングのデータ不足は開発中ではなくビルド時に報告されます。
+- 最初の質問を満たす最もシンプルなモードから始め、計測が示したときに変更してください。
 
-## Next steps
+## 次のステップ
 
-- [App structure](/building-apps/app-structure): what each mode generates and where the `App` and `Document` conventions come in.
-- [Deployment](/building-apps/deployment): hosts and adapters for the SSR handler.
-- [Rendering and SSR](/concepts/rendering-and-ssr): the `render`, `hydrate`, and `renderToStream` calls behind the modes.
-- [Boundaries](/concepts/boundaries): how `Loading` placement decides what streams in the shell.
-- [SSR-safe code](/guides/ssr-safe-code): the fixes for `window is not defined` and each hydration warning, in depth.
+- [アプリの構造](/building-apps/app-structure)：各モードが生成するものと、`App`・`Document` の規約がどこに関わるか。
+- [デプロイ](/building-apps/deployment)：SSR ハンドラー向けのホストとアダプター。
+- [レンダリングと SSR](/concepts/rendering-and-ssr)：各モードの背後にある `render`、`hydrate`、`renderToStream` の呼び出し。
+- [バウンダリ](/concepts/boundaries)：`Loading` の配置がシェルに何をストリーミングさせるかをどう決めるか。
+- [SSR セーフなコード](/guides/ssr-safe-code)：`window is not defined` と各ハイドレーション警告への修正を詳しく。

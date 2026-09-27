@@ -1,25 +1,25 @@
 ---
-title: "Avoid unnecessary effects"
+title: "不要なエフェクトを避ける"
 version: "2.0"
-description: "Recognize the effect that copies one reactive value into another, replace it with a direct, memoized, async, or writable derivation, and keep createEffect for the imperative boundary."
+description: "あるリアクティブな値を別の値へコピーするエフェクトを見抜き、直接・メモ化・非同期・書き込み可能な派生で置き換え、createEffect は命令的な境界のために残す。"
 ---
 
-The cart on the [Stores](/concepts/stores) page shows a subtotal under the line items.
-The first version many people write keeps the subtotal in its own signal and adds an effect that recalculates it whenever an item changes.
-It works, and it is wrong in a way that is hard to see: change a quantity and the row updates in one flush while the subtotal updates in the next, so for one frame the page shows the new quantity next to the old total.
-With attribution on, development names the pattern `[EFFECT_RELAY_TEAR]`.
+[ストア](/concepts/stores) ページのカートでは、明細行の下に小計が表示されます。
+多くの人が最初に書くのは、小計を専用のシグナルに保持し、商品が変わるたびに再計算するエフェクトを追加するバージョンです。
+これは動作しますが、気づきにくい形で誤っています。数量を変更すると、その行は 1 回のフラッシュで更新されるのに対し小計は次のフラッシュで更新されるため、1 フレームの間、ページには新しい数量と古い合計が並んで表示されてしまいます。
+attribution を有効にすると、開発ビルドはこのパターンを `[EFFECT_RELAY_TEAR]` と名付けます。
 
-Signals, stores, props, memos, and async computations already form a graph of derived values.
-An effect belongs at the end of that graph, where a settled result has to leave Solid and drive something Solid does not own:
+シグナル・ストア・props・メモ・非同期の計算は、すでに派生値のグラフを形成しています。
+エフェクトが属するのはそのグラフの終端です。確定した結果が Solid の外に出て、Solid が所有しないものを駆動しなければならない場所です。
 
-![Reactive inputs flow through derived values to declarative consumers and terminal effects. User interactions and external observations use setters to become new inputs.](/images/diagrams/derived-state-effects-sequence.svg)
+![リアクティブな入力は派生値を通って宣言的なコンシューマーと終端のエフェクトへ流れます。ユーザー操作や外部からの観測はセッターを介して新しい入力になります。](/images/diagrams/derived-state-effects-sequence.svg)
 
-This guide goes through the places an effect gets written where a derivation belongs, shows what each one does when it runs, and ends with the two cases where `createEffect` is the right tool.
-The [Reactivity](/concepts/reactivity) page explains tracking, memos, effect phases, scheduling, and ownership.
+このガイドでは、派生を使うべき場所にエフェクトが書かれがちな箇所を順に見て、それぞれが実行時に何をするかを示し、最後に `createEffect` が適切なツールとなる 2 つのケースを紹介します。
+追跡・メモ・エフェクトのフェーズ・スケジューリング・オーナーシップについては [リアクティビティ](/concepts/reactivity) ページで説明しています。
 
-## Calculate values when they are read
+## 値は読み取られるときに計算する
 
-A value that can be calculated from existing reactive state does not need a signal of its own:
+既存のリアクティブな状態から計算できる値には、専用のシグナルは不要です。
 
 ```tsx
 import { createEffect, createSignal, createStore } from "solid-js";
@@ -38,36 +38,36 @@ const subtotal = () =>
 	cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 ```
 
-Run the `Avoid` version and change a quantity.
-The quantity input updates in the flush the keystroke caused; the effect runs after that flush and writes `subtotal`, which updates in a second flush, so the frame in between shows the new quantity with the old total.
-With attribution enabled, development reports the copy on its second run:
+`Avoid` 側を実行して数量を変更してみてください。
+数量の入力はキーストロークが引き起こしたフラッシュで更新されます。エフェクトはそのフラッシュの後に実行されて `subtotal` に書き込み、それが 2 回目のフラッシュで更新されるため、その間のフレームでは新しい数量と古い合計が表示されます。
+attribution を有効にしていると、開発ビルドは 2 回目の実行時にこのコピーを報告します。
 
 ```text
 [EFFECT_RELAY_TEAR] effect "effect" writes its compute output into "subtotal" on every run, and nothing else writes "subtotal" — it is derived state kept one flush late: everything reading it paints a frame behind everything reading the source. The written value is the effect's compute output — by contract a pure function of what it tracks: make "subtotal" a memo of that computation and delete the effect.
 ```
 
-The names come from the `name` option; an unnamed signal prints as `signal`.
-[Debugging reactivity](/guides/debugging-reactivity#an-effect-writes-a-signal-that-another-scope-derives-from) covers the report and its variants.
+表示される名前は `name` オプションから来ます。名前のないシグナルは `signal` と表示されます。
+このレポートとそのバリエーションについては [リアクティビティのデバッグ](/guides/debugging-reactivity#an-effect-writes-a-signal-that-another-scope-derives-from) で扱っています。
 
-The `Prefer` version is a plain function.
-It runs in the tracking scope that reads it, so it cannot be stale independently of its inputs and it schedules no second write.
-Keep the call inside JSX or another tracking scope; a component body runs untracked, so `subtotal()` at the top level of a component is a one-time value.
+`Prefer` 側は単なる関数です。
+これは読み取った追跡スコープ内で実行されるため、入力とは独立に古くなることはなく、2 回目の書き込みもスケジュールされません。
+呼び出しは JSX や他の追跡スコープの内側に置いてください。コンポーネント本体は追跡されずに実行されるため、コンポーネントのトップレベルにある `subtotal()` は一度だけ評価される値になります。
 
-Use [`createMemo`](/reference/solid-js/reactivity/create-memo) when several readers share the result or when the derivation should stop propagation when its result is unchanged.
-A memo costs a node and a comparison; for a cheap expression with one reader, the function is smaller.
-Keep memo computations free of side effects.
+複数の読み取り側が結果を共有する場合や、結果が変わらないときに伝播を止めたい場合は [`createMemo`](/reference/solid-js/reactivity/create-memo) を使います。
+メモにはノードと比較のコストがかかります。読み取り側が 1 つだけの安価な式なら、関数のほうが小さく済みます。
+メモの計算には副作用を含めないでください。
 
-:::deep-dive[Why the copy is one flush behind]
-Solid applies writes in a batch.
-Within one batch it runs every tracked compute function that depends on the changed values, and only then runs the effect functions whose inputs changed.
-A write made inside an effect function cannot join the pass that is finishing; it starts a second pass inside the same flush.
-Readers of the copied signal therefore update one pass after readers of the source, and every effect and DOM write in the first pass saw the stale copy.
-A memo is a compute function, so it lands in the same pass as its inputs and there is no moment in which the two disagree.
+:::deep-dive[コピーが 1 フラッシュ遅れる理由]
+Solid は書き込みをバッチで適用します。
+1 つのバッチの中では、変更された値に依存するすべての追跡対象の計算関数を実行し、その後で初めて入力が変わったエフェクト関数を実行します。
+エフェクト関数内で行われた書き込みは、終了しようとしているパスに乗ることができず、同じフラッシュ内で 2 回目のパスを開始します。
+そのため、コピーされたシグナルの読み取り側はソースの読み取り側より 1 パス遅れて更新され、1 回目のパスにあるすべてのエフェクトと DOM 書き込みは古いコピーを見ることになります。
+メモは計算関数なので入力と同じパスに乗り、両者が食い違う瞬間はありません。
 :::
 
-## Put asynchronous work in a derivation
+## 非同期の処理は派生に置く
 
-A request started in an effect needs a second signal for its result and a third for its loading state, and the effect has to keep all three in step:
+エフェクト内で開始したリクエストには、結果用の 2 つ目のシグナルとローディング状態用の 3 つ目のシグナルが必要になり、エフェクトはこの 3 つすべての同期を保たなければなりません。
 
 ```tsx
 import {
@@ -107,12 +107,12 @@ const results = createMemo(async () => {
 });
 ```
 
-Run the `Avoid` version and type `mug` quickly.
-Three requests start, and nothing in the effect discards the answers to `m` and `mu`; whichever response lands last is the one the list shows, and `loading` turns off after the first one.
-Solid computations can return promises, so in the `Prefer` version the request and its result are one derived value.
-Changing `query()` asks the memo for another answer; Solid keeps the settled results visible during the new request and drops the answer to a superseded run.
+`Avoid` 側を実行して `mug` と素早く入力してみてください。
+3 つのリクエストが開始され、エフェクトには `m` と `mu` への回答を破棄する仕組みがありません。最後に到着したレスポンスがリストに表示され、`loading` は最初のレスポンスの後にオフになります。
+Solid の計算は Promise を返せるため、`Prefer` 側ではリクエストとその結果が 1 つの派生値になります。
+`query()` を変更するとメモに新しい答えが求められます。Solid は新しいリクエストの間も確定済みの結果を表示し続け、破棄された実行への回答は捨てます。
 
-Read the memo inside boundaries so the first load and a failure have somewhere to go:
+最初の読み込みと失敗時の表示先を確保するため、メモはバウンダリの内側で読み取ります。
 
 ```tsx
 return (
@@ -133,13 +133,13 @@ return (
 );
 ```
 
-[Async reactivity](/concepts/async-reactivity) covers pending indicators, `latest`, and refresh.
-Use the function form of [`createStore`](/reference/solid-js/stores/create-store) when the response is a list or a tree whose items should keep their identity across refetches.
+保留中のインジケーター、`latest`、リフレッシュについては [非同期リアクティビティ](/concepts/async-reactivity) で扱っています。
+レスポンスがリストやツリーで、再取得をまたいで各アイテムの同一性を保ちたい場合は、[`createStore`](/reference/solid-js/stores/create-store) の関数形式を使います。
 
-## Use a writable derivation for a local override
+## ローカルな上書きには書き込み可能な派生を使う
 
-An editable field often starts from a reactive source and needs a temporary local value.
-The habit is to copy the source into a signal and add an effect to reset the copy when the source changes:
+編集可能なフィールドは、多くの場合リアクティブなソースから始まり、一時的なローカルの値を必要とします。
+ソースをシグナルにコピーし、ソースが変わったときにコピーをリセットするエフェクトを追加するのが慣例になっています。
 
 ```tsx
 import { createEffect, createSignal } from "solid-js";
@@ -166,15 +166,15 @@ function NameField(props: { value: string }) {
 }
 ```
 
-Run the `Avoid` version and change `props.value` from the parent.
-The input shows the new value one flush after the rest of the page, and attribution records the same `[EFFECT_RELAY_TEAR]` finding for it.
+`Avoid` 側を実行して親から `props.value` を変更してみてください。
+入力はページの他の部分より 1 フラッシュ遅れて新しい値を表示し、attribution はこれに対して同じ `[EFFECT_RELAY_TEAR]` の検出を記録します。
 
-In the `Prefer` version the derivation supplies `props.value`.
-Calling `setDraft` places a local override over that result, and the override stays until a dependency of the derivation changes and the derivation produces a new value.
-There is no second flush and no effect to delete later.
+`Prefer` 側では派生が `props.value` を供給します。
+`setDraft` を呼ぶとその結果の上にローカルな上書きが置かれ、派生の依存関係が変わって派生が新しい値を生成するまで上書きが維持されます。
+2 回目のフラッシュはなく、後で削除すべきエフェクトもありません。
 
-The same shape works for a nested form.
-Pass a function and a seed to `createStore` to get a writable derived store:
+同じ形はネストされたフォームでも使えます。
+`createStore` に関数と初期値を渡すと、書き込み可能な派生ストアが得られます。
 
 ```tsx
 import { createMemo, createStore } from "solid-js";
@@ -222,18 +222,18 @@ function AddressForm(props: { address: Address }) {
 }
 ```
 
-Type in the postal code field and the message appears or clears on each keystroke.
-When `props.address` changes, for example after a save and a refetch, the derivation runs again and reconciles the new source into the store, replacing the local edits.
-Validation stays a derivation of the current draft.
+郵便番号フィールドに入力すると、キーストロークごとにメッセージが表示・消去されます。
+`props.address` が変わると（たとえば保存と再取得の後）、派生が再実行され、新しいソースをストアに反映してローカルの編集を置き換えます。
+バリデーションは現在のドラフトの派生のままです。
 
-Use this pattern when a new source value should replace the local edit.
-Use a plain signal or store when the local value has an independent lifetime.
-Use optimistic state when a tentative value belongs to an active mutation rather than a local editing session; [Mutations](/concepts/mutations) covers that case.
+新しいソースの値でローカルの編集を置き換えるべき場合にこのパターンを使います。
+ローカルの値が独立したライフタイムを持つ場合は、通常のシグナルやストアを使います。
+仮の値がローカルの編集セッションではなく進行中のミューテーションに属する場合は楽観的状態を使います。そのケースは [ミューテーション](/concepts/mutations) で扱っています。
 
-## Handle interactions where they happen
+## インタラクションは起きた場所で処理する
 
-An event handler knows which interaction happened and has the current values in hand.
-Routing the interaction through a signal so an effect can react to it moves the work away from its cause:
+イベントハンドラーは、どのインタラクションが起きたかを知っており、現在の値も手元にあります。
+エフェクトに反応させるためにインタラクションをシグナル経由で回すと、処理がその原因から切り離されてしまいます。
 
 ```tsx
 import { action, createEffect, createSignal, snapshot } from "solid-js";
@@ -259,18 +259,18 @@ const save = action(function* () {
 </button>;
 ```
 
-Run the `Avoid` version and click **Save** twice.
-The first click saves one flush after the click; the second does nothing, because writing `true` to a signal that already holds `true` notifies no one, and the flag has to be reset somewhere before the button works again.
-In the `Prefer` version each click runs the [`action`](/reference/solid-js/lifecycle-actions/action), which runs the request as one transaction: ordinary writes made inside it are held until it settles, while an optimistic value shows at once and is discarded when it settles.
+`Avoid` 側を実行して **Save** を 2 回クリックしてみてください。
+1 回目のクリックはクリックの 1 フラッシュ後に保存します。2 回目は何も起きません。すでに `true` を保持しているシグナルに `true` を書き込んでも誰にも通知されず、ボタンが再び機能するにはどこかでフラグをリセットする必要があります。
+`Prefer` 側では、クリックごとに [`action`](/reference/solid-js/lifecycle-actions/action) が実行され、リクエストが 1 つのトランザクションとして実行されます。内部で行われた通常の書き込みは確定まで保留され、楽観的な値はすぐに表示されて確定時に破棄されます。
 
-## Use an effect at an imperative boundary
+## 命令的な境界ではエフェクトを使う
 
-Use an effect when a settled reactive value must drive a system that Solid does not own: a third-party widget, a subscription, telemetry, or a browser API with no declarative JSX form.
-The two-phase [`createEffect`](/reference/solid-js/reactivity/create-effect) keeps that boundary explicit.
-The first function tracks and returns a value; the second receives that value, does the imperative work, and may return a cleanup.
-[Integrate non-Solid code](/guides/integrate-non-solid-code#create-the-instance-once-update-it-in-an-effect) applies this shape to a charting library.
+確定したリアクティブな値が、Solid が所有しないシステム（サードパーティのウィジェット、購読、テレメトリ、宣言的な JSX 表現を持たないブラウザ API など）を駆動しなければならないときにエフェクトを使います。
+2 フェーズの [`createEffect`](/reference/solid-js/reactivity/create-effect) は、その境界を明示的に保ちます。
+1 つ目の関数は追跡して値を返し、2 つ目の関数はその値を受け取って命令的な処理を行い、クリーンアップを返すことができます。
+[Solid 以外のコードの統合](/guides/integrate-non-solid-code#create-the-instance-once-update-it-in-an-effect) では、この形をチャートライブラリに適用しています。
 
-The rule to respect is that only the first function is tracked:
+守るべきルールは、追跡されるのは 1 つ目の関数だけだということです。
 
 ```ts
 import { createEffect } from "solid-js";
@@ -294,23 +294,23 @@ createEffect(
 );
 ```
 
-Run the `Avoid` version and switch the currency.
-Nothing happens until the subtotal also changes, because the compute phase never read `currency()`.
-In the `Prefer` version either change re-runs the compute function, the cleanup unmounts the old widget, and the effect function mounts a new one with both values.
+`Avoid` 側を実行して通貨を切り替えてみてください。
+計算フェーズが `currency()` を読んでいないため、小計も変わるまでは何も起きません。
+`Prefer` 側では、どちらかが変われば計算関数が再実行され、クリーンアップが古いウィジェットをアンマウントし、エフェクト関数が両方の値で新しいウィジェットをマウントします。
 
-Solid runs the tracked compute functions for an update before it runs any effect functions.
-If a compute function reaches pending async work, its effect function waits for that work to settle, so the widget never receives a value from a half-applied update.
+Solid は更新に対して、どのエフェクト関数よりも先に追跡対象の計算関数を実行します。
+計算関数が保留中の非同期処理に到達した場合、そのエフェクト関数は処理が確定するまで待つため、ウィジェットが適用途中の更新から値を受け取ることはありません。
 
-:::caution[An effect function is not a place to write reactive state]
-The effect function runs after the batch has landed.
-A setter called there starts a second pass, which is the copy pattern this guide opened with.
-If the write is needed, ask whether the value could be a memo instead; if it records something the browser produced, see the next section.
+:::caution[エフェクト関数はリアクティブな状態を書き込む場所ではない]
+エフェクト関数はバッチが適用された後に実行されます。
+そこでセッターを呼ぶと 2 回目のパスが始まります。これはこのガイドの冒頭で扱ったコピーのパターンです。
+書き込みが必要なら、その値をメモにできないかを検討してください。ブラウザが生成したものを記録する場合は次の節を参照してください。
 :::
 
-## Let external observations become new inputs
+## 外部からの観測を新しい入力にする
 
-Some information exists only after render work: an element's size, its scroll position, whether it is visible.
-A callback that reports it may write a signal, because the observation is a new input to the graph rather than a copy of an upstream value:
+レンダー処理の後にしか存在しない情報があります。要素のサイズ、スクロール位置、可視かどうかなどです。
+それを報告するコールバックはシグナルに書き込んでかまいません。観測は上流の値のコピーではなく、グラフへの新しい入力だからです。
 
 ```tsx
 import { createSignal, onSettled } from "solid-js";
@@ -351,63 +351,63 @@ function ProductGallery() {
 }
 ```
 
-Run the `Avoid` version and resize the window.
-The count never changes, because nothing measures again.
-In the `Prefer` version the observer fires on each size change and the write records what the browser reported; it does not copy a reactive value back into the graph.
+`Avoid` 側を実行してウィンドウをリサイズしてみてください。
+再計測するものがないため、カウントは変わりません。
+`Prefer` 側では、サイズ変更のたびにオブザーバーが発火し、その書き込みはブラウザが報告したものを記録します。リアクティブな値をグラフにコピーし直すわけではありません。
 
-`onSettled` runs its callback once, after the surrounding render has settled, and the returned cleanup runs when the owner is disposed, so the observer is disconnected with the component.
-[Refs and directives](/concepts/components-and-jsx#refs-and-directives) covers the owned DOM setup this builds on.
+`onSettled` は周囲のレンダーが確定した後にコールバックを一度だけ実行し、返されたクリーンアップはオーナーが破棄されるときに実行されるため、オブザーバーはコンポーネントとともに切断されます。
+このコードが前提とする、オーナーに紐づく DOM のセットアップについては [ref とディレクティブ](/concepts/components-and-jsx#refs-and-directives) で扱っています。
 
-## Check before adding an effect
+## エフェクトを追加する前のチェック
 
-Before calling `createEffect`, ask:
+`createEffect` を呼ぶ前に、次を確認してください。
 
-1. Can the value be calculated directly in JSX or a derived function?
-2. Does the result need a memo for reuse or an equality boundary?
-3. Is it asynchronous data that belongs in an async memo or a store created from a function?
-4. Is it a temporary local override that belongs in a writable derived signal or store?
-5. Did a user interaction cause the work?
-   Keep it in the event handler or an action.
-6. Is the work one-time owned setup?
-   Use `onSettled` or a ref directive.
-7. Does a settled reactive result need to leave Solid and drive an imperative system?
-   Use an effect.
+1. その値は JSX や派生関数の中で直接計算できますか？
+2. その結果は再利用や等価性の境界のためにメモが必要ですか？
+3. それは非同期メモや関数から作るストアに置くべき非同期データですか？
+4. それは書き込み可能な派生シグナルやストアに置くべき一時的なローカルの上書きですか？
+5. その処理はユーザーのインタラクションが引き起こしたものですか？
+   ならばイベントハンドラーかアクションに置いてください。
+6. その処理はオーナーに紐づく一度きりのセットアップですか？
+   ならば `onSettled` か ref ディレクティブを使います。
+7. 確定したリアクティブな結果を Solid の外に出して命令的なシステムを駆動する必要がありますか？
+   ならばエフェクトを使います。
 
-If the answer to the last question is no, the code belongs earlier in the reactive sequence.
+最後の質問への答えが「いいえ」なら、そのコードはリアクティブなシーケンスのもっと前の段階に置くべきです。
 
-## Common problems
+## よくある問題
 
-### The copied value is one step behind the source
+### コピーされた値がソースより 1 歩遅れる
 
-An effect writes a signal that a derivation could produce.
-Readers of the copy update one flush after readers of the source, and attribution reports `[EFFECT_RELAY_TEAR]`.
-Delete the signal and the effect, and derive the value where it is read; [Debugging reactivity](/guides/debugging-reactivity#an-effect-writes-a-signal-that-another-scope-derives-from) walks through the report.
+エフェクトが、派生で生成できるはずのシグナルに書き込んでいます。
+コピーの読み取り側はソースの読み取り側より 1 フラッシュ遅れて更新され、attribution は `[EFFECT_RELAY_TEAR]` を報告します。
+そのシグナルとエフェクトを削除し、値は読み取られる場所で派生してください。レポートの読み方は [リアクティビティのデバッグ](/guides/debugging-reactivity#an-effect-writes-a-signal-that-another-scope-derives-from) で順を追って説明しています。
 
-### An effect runs twice for every change
+### 変更ごとにエフェクトが 2 回実行される
 
-The effect writes a signal or store property that feeds back into what it reads, directly or through a memo.
-Attribution reports `[EFFECT_WRITES_OWN_SOURCE]`; the written value is a function of the effect's inputs and belongs in a memo, or the normalization belongs where the source is written.
-[Debugging reactivity](/guides/debugging-reactivity#an-effect-re-runs-because-of-its-own-write) covers it.
+エフェクトが、直接またはメモ経由で自分が読んでいるものへフィードバックされるシグナルやストアのプロパティに書き込んでいます。
+attribution は `[EFFECT_WRITES_OWN_SOURCE]` を報告します。書き込まれる値はエフェクトの入力の関数なのでメモに置くべきか、その正規化はソースが書き込まれる場所で行うべきです。
+詳しくは [リアクティビティのデバッグ](/guides/debugging-reactivity#an-effect-re-runs-because-of-its-own-write) で扱っています。
 
-### A signal changes and the effect does not re-run
+### シグナルが変わってもエフェクトが再実行されない
 
-The signal is read in the effect function, which is untracked.
-Move the read into the compute function and return the value alongside the others.
-[Debugging reactivity](/guides/debugging-reactivity#is-the-effect-reading-in-the-wrong-phase) shows the shape.
+そのシグナルが、追跡されないエフェクト関数の中で読み取られています。
+その読み取りを計算関数に移し、他の値と一緒に返してください。
+その形は [リアクティビティのデバッグ](/guides/debugging-reactivity#is-the-effect-reading-in-the-wrong-phase) で示しています。
 
-## Recap
+## まとめ
 
-- Derive a value where it is read; a signal plus an effect that fills it is derived state kept one flush late.
-- Use `createMemo` when several readers share a result or the chain needs an equality boundary, not by default.
-- Return the promise from a memo or a `createStore` function instead of starting a request in an effect and copying the result out.
-- Pass a function to `createSignal` or `createStore` for an editable copy that resets when its source changes.
-- Do the work of an interaction in the event handler or an `action`, not in an effect watching a flag.
-- Read every input in the effect's compute function; the effect function is untracked.
-- Write a signal from an effect only to record something produced outside the graph, such as a measurement.
+- 値は読み取られる場所で派生します。シグナルとそれを埋めるエフェクトの組み合わせは、1 フラッシュ遅れの派生状態です。
+- `createMemo` は複数の読み取り側が結果を共有するときやチェーンに等価性の境界が必要なときに使うもので、デフォルトではありません。
+- エフェクトでリクエストを開始して結果をコピーし出す代わりに、メモや `createStore` の関数から Promise を返します。
+- ソースが変わったときにリセットされる編集可能なコピーには、`createSignal` や `createStore` に関数を渡します。
+- インタラクションの処理は、フラグを監視するエフェクトではなく、イベントハンドラーや `action` で行います。
+- エフェクトの入力はすべて計算関数で読み取ります。エフェクト関数は追跡されません。
+- エフェクトからシグナルに書き込むのは、計測値のようなグラフ外で生成されたものを記録するときだけです。
 
-## Next steps
+## 次のステップ
 
-- [Debugging reactivity](/guides/debugging-reactivity): the diagnostics that fire when an effect relays state, `[EFFECT_RELAY_TEAR]` and `[EFFECT_WRITES_OWN_SOURCE]`, and how to read them.
-- [Async reactivity](/concepts/async-reactivity): what an async memo does while its promise is pending, which is the part an effect-and-flag pattern used to hand-roll.
-- [Data fetching patterns](/guides/data-fetching-patterns): the derivation shapes from this page applied to requests, pagination, and refresh.
-- [Thinking in Solid](/guides/thinking-in-solid): the same rule inside one feature built end to end, for a reader coming from React or Vue.
+- [リアクティビティのデバッグ](/guides/debugging-reactivity)：エフェクトが状態を中継したときに発火する診断、`[EFFECT_RELAY_TEAR]` と `[EFFECT_WRITES_OWN_SOURCE]`、およびその読み方。
+- [非同期リアクティビティ](/concepts/async-reactivity)：非同期メモが Promise の保留中に何をするか。エフェクトとフラグのパターンが手作業で実装していた部分です。
+- [データ取得パターン](/guides/data-fetching-patterns)：このページの派生の形を、リクエスト・ページネーション・リフレッシュに適用したもの。
+- [Thinking in Solid](/guides/thinking-in-solid)：React や Vue から来た読者向けに、1 つの機能を端から端まで作る中で同じルールを適用する。
