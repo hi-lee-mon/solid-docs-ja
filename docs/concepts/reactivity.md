@@ -1,24 +1,24 @@
 ---
-title: "Reactivity"
+title: "リアクティビティ"
 version: "2.0"
-description: "Signals, memos, and effects: how Solid tracks reads, why a component runs once, and how to tell when a value will update."
+description: "シグナル・メモ・エフェクト。Solid が読み取りをどう追跡するか、コンポーネントがなぜ1回だけ実行されるのか、値がいつ更新されるのかをどう見分けるか。"
 ---
 
-In the [Quick start](/getting-started/quick-start) you saw two versions of the same counter.
-One read `count()` inside the JSX and updated on every click.
-The other read `count()` in the component body, and the button froze at zero while the console warned that the read "will not update".
+[クイックスタート](/getting-started/quick-start)では、同じカウンターの2つのバージョンを見ました。
+1つは JSX の内側で `count()` を読み取り、クリックのたびに更新されました。
+もう1つはコンポーネント本体で `count()` を読み取り、ボタンはゼロのまま固まり、コンソールはその読み取りが「更新されない」と警告しました。
 
-Everything on this page follows from the difference between those two lines.
-Solid does not re-run components.
-It runs each component once, records which reactive values each expression reads, and re-runs only those expressions when the values they read change.
-The place where you read a value decides whether Solid can see the read.
+このページのすべての内容は、その2行の違いから導かれます。
+Solid はコンポーネントを再実行しません。
+各コンポーネントを1回だけ実行し、各式がどのリアクティブな値を読み取ったかを記録し、読み取られた値が変わったときにその式だけを再実行します。
+値をどこで読み取るかが、Solid がその読み取りを見られるかどうかを決めます。
 
-The examples use a small shopping cart: a line item with a price and a quantity, a subtotal, and a shipping estimate.
+例では小さなショッピングカートを使います。価格と数量を持つ明細、小計、配送料の見積もりです。
 
-## Signals
+## シグナル
 
-A signal holds one value and knows who reads it.
-`createSignal` returns a getter and a setter:
+シグナルは1つの値を保持し、誰がそれを読み取ったかを知っています。
+`createSignal` はゲッターとセッターを返します:
 
 ```tsx
 import { createSignal } from "solid-js";
@@ -42,19 +42,19 @@ export function LineItem() {
 }
 ```
 
-Click `+` and two things change on the page: the quantity and the subtotal.
-Nothing else is touched.
-`LineItem` does not run again; the two JSX expressions that read `quantity()` do.
+`+` をクリックすると、ページ上の2つのものが変わります。数量と小計です。
+他のものは一切触れられません。
+`LineItem` は再実行されません。`quantity()` を読み取っている2つの JSX 式が再実行されます。
 
-The parts of the code where Solid records reads are called tracking scopes.
-JSX expressions are tracking scopes.
-So are the compute functions of memos and effects, which come later on this page.
-A read inside a tracking scope subscribes that scope to the signal.
-A read anywhere else returns the current value and subscribes nothing.
+Solid が読み取りを記録するコードの領域は、追跡スコープと呼ばれます。
+JSX 式は追跡スコープです。
+このページの後半に出てくるメモとエフェクトの計算関数も同様です。
+追跡スコープの内側での読み取りは、そのスコープをシグナルに購読させます。
+それ以外の場所での読み取りは現在の値を返すだけで、何も購読しません。
 
-The component body is not a tracking scope.
-That is deliberate: the body runs once to set up the component, and Solid must not re-run it, because that would recreate every signal and child inside it.
-So this version reads the quantity once and never again:
+コンポーネント本体は追跡スコープではありません。
+これは意図的です。本体はコンポーネントをセットアップするために1回だけ実行され、Solid はそれを再実行してはなりません。再実行すれば、その内側のすべてのシグナルと子要素が作り直されてしまうからです。
+つまり、このバージョンは数量を一度だけ読み取り、二度と読み取りません:
 
 ```tsx
 const [quantity, setQuantity] = createSignal(1);
@@ -63,15 +63,15 @@ const subtotal = quantity() * price; // a number, computed once
 return <p>Subtotal: ${subtotal}</p>;
 ```
 
-In development Solid warns:
+開発時には Solid が警告を出します:
 
 ```text
 [STRICT_READ_UNTRACKED] Reactive value read directly in <LineItem> will not update.
 Move it into a tracking scope (JSX, a memo, or an effect's compute function).
 ```
 
-The fix is to move the read, not the value.
-Wrap the calculation in a function and call the function from the JSX:
+修正は、値ではなく読み取りを移動することです。
+計算を関数でラップし、その関数を JSX から呼び出します:
 
 ```tsx
 const subtotal = () => quantity() * price;
@@ -79,30 +79,30 @@ const subtotal = () => quantity() * price;
 return <p>Subtotal: ${subtotal()}</p>;
 ```
 
-Now the read of `quantity()` happens when the JSX calls `subtotal()`, inside a tracking scope, and the subtotal updates.
+これで `quantity()` の読み取りは、JSX が `subtotal()` を呼び出すときに、追跡スコープの内側で行われ、小計は更新されます。
 
-Occasionally you want the one-time snapshot.
-Say so with [`untrack`](/reference/solid-js/reactivity/untrack), which reads without subscribing and without the warning:
+一度きりのスナップショットが欲しいこともあります。
+その場合は [`untrack`](/reference/solid-js/reactivity/untrack) で明示します。これは購読せず、警告も出さずに読み取ります:
 
 ```tsx
 const initialQuantity = untrack(quantity);
 ```
 
-The setter accepts a value or an updater function.
-The updater receives the latest value, including one that was set earlier in the same event and has not landed yet:
+セッターは値または更新関数（updater）を受け取ります。
+更新関数は最新の値を受け取ります。同じイベント内で先に設定され、まだ反映（land）していない値も含みます:
 
 ```tsx
 setQuantity((current) => current + 1);
 ```
 
-Prefer the updater when the new value depends on the old one.
-`setQuantity(quantity() + 1)` reads the committed value, and if something else has already staged a write in the same turn, the two writes collide.
-The [update scheduling](#when-updates-land) section explains what "landed" means.
+新しい値が古い値に依存するときは、更新関数を使ってください。
+`setQuantity(quantity() + 1)` はコミット済みの値を読み取るため、同じターン内で他の何かがすでに書き込みを予約（stage）していた場合、2つの書き込みが衝突します。
+「反映（landed）」の意味は[更新のスケジューリング](#when-updates-land)の節で説明しています。
 
-See the [`createSignal` reference](/reference/solid-js/reactivity/create-signal) for the setter forms and the equality option.
+セッターの形式と等価性オプションについては、[`createSignal` リファレンス](/reference/solid-js/reactivity/create-signal)を参照してください。
 
-:::deep-dive[A signal in ten lines]
-The real implementation adds batching, equality checks, ownership, and async, but the shape that explains the tracking rule fits in a sketch:
+:::deep-dive[10行のシグナル]
+実際の実装にはバッチ・等価性チェック・オーナーシップ・非同期が加わりますが、追跡ルールを説明する形はスケッチに収まります:
 
 ```ts
 let currentScope: Scope | null = null; // set by Solid while a tracking scope runs
@@ -121,18 +121,18 @@ function createSignal<T>(value: T) {
 }
 ```
 
-`read` can only record a subscriber if a tracking scope is running at the moment it is called.
-A read in the component body runs when `currentScope` is empty, so it returns the value and records nothing; that is the whole reason the place you read matters.
+`read` は、呼ばれた瞬間に追跡スコープが実行中でなければ、購読者を記録できません。
+コンポーネント本体での読み取りは `currentScope` が空のときに実行されるため、値を返すだけで何も記録しません。どこで読み取るかが重要な理由は、これがすべてです。
 :::
 
-## Derived values
+## 派生値
 
-`subtotal` above is a plain function.
-It has no state of its own; it reads `quantity()` when called, in whatever tracking scope calls it.
-That is the right default for a derived value, and most derived values in a Solid app are functions like this.
+上の `subtotal` は素の関数です。
+自身の状態は持たず、呼び出されたときに、それを呼び出した追跡スコープの中で `quantity()` を読み取ります。
+これが派生値の正しいデフォルトであり、Solid アプリの派生値のほとんどはこのような関数です。
 
-A function recomputes every time a reader calls it.
-When the same derivation feeds several readers, or when it is expensive, or when you want downstream readers to update only when the result changes, use a memo:
+関数は、読み取り側が呼び出すたびに再計算されます。
+同じ導出が複数の読み取り側を賄うとき、計算が高価なとき、あるいは結果が変わったときだけ下流の読み取り側を更新したいときは、メモを使います:
 
 ```tsx
 import { createMemo, createSignal } from "solid-js";
@@ -146,27 +146,27 @@ const discount = createMemo(() => (discountCode() === "SAVE10" ? 0.1 : 0));
 const total = createMemo(() => subtotal() * (1 - discount()));
 ```
 
-`createMemo` runs its function in a tracking scope, caches the result, and hands the cached value to readers.
-When `quantity` changes, `subtotal` recomputes.
-`total` recomputes because it read `subtotal()`.
-When the user types `SAVE1` on the way to `SAVE10`, `discount` recomputes and produces `0` again; because the result is equal to the last one, `total` is not notified.
-That equality check is what makes a memo a useful boundary in a chain of derivations.
+`createMemo` はその関数を追跡スコープ内で実行し、結果をキャッシュして、キャッシュされた値を読み取り側に渡します。
+`quantity` が変わると、`subtotal` は再計算されます。
+`total` は `subtotal()` を読み取っているため再計算されます。
+ユーザーが `SAVE10` と入力する途中で `SAVE1` と打ったとき、`discount` は再計算され、再び `0` を生成します。結果が前回と等しいため、`total` には通知されません。
+この等価性チェックが、メモを派生の連鎖における有用な境界にしています。
 
-A memo's function must not write to signals or stores.
-It runs during an update, and a write inside it throws `[REACTIVE_WRITE_IN_OWNED_SCOPE]` in development.
-If you find yourself wanting to write from a memo, the value you were going to write is itself a derived value; return it instead.
+メモの関数はシグナルやストアに書き込んではいけません。
+メモは更新の途中に実行されるため、その内側での書き込みは開発時に `[REACTIVE_WRITE_IN_OWNED_SCOPE]` を throw します。
+メモから書き込みたくなったときは、書こうとしていた値自体が派生値です。代わりにそれを返してください。
 
-A memo's function may be async.
-When it returns a promise, readers of the memo wait for the result, and the nearest [`Loading`](/concepts/boundaries) boundary shows its fallback in the meantime.
-The [Async reactivity](/concepts/async-reactivity) page covers that in depth.
+メモの関数は非同期でも構いません。
+Promise を返すと、メモの読み取り側は結果を待ち、その間に最も近い [`Loading`](/concepts/boundaries) バウンダリがフォールバックを表示します。
+[非同期リアクティビティ](/concepts/async-reactivity)のページで詳しく扱っています。
 
-## When updates land
+## 更新が反映されるタイミング
 
-Setting a signal does not update readers immediately.
-The write is staged, and Solid applies all staged writes together in a microtask, after the current code finishes.
-Within one event handler you can set several signals and every reader sees the final state once, not each intermediate state.
+シグナルを設定しても、読み取り側はすぐには更新されません。
+書き込みは予約（stage）され、Solid は現在のコードが終わったあと、マイクロタスクですべての予約済み書き込みをまとめて適用します。
+1つのイベントハンドラーの中で複数のシグナルを設定でき、すべての読み取り側は個々の中間状態ではなく最終状態を一度だけ目にします。
 
-This also means a read right after a write returns the old value:
+これはまた、書き込みの直後の読み取りが古い値を返すことも意味します:
 
 ```ts
 const [quantity, setQuantity] = createSignal(1);
@@ -178,10 +178,10 @@ await Promise.resolve();
 console.log(quantity()); // 3
 ```
 
-Application code rarely notices.
-Event handlers set values and return; JSX and memos read values in tracking scopes and update when the batch lands.
-The two places where the delay shows up are tests, which assert right after an event, and imperative code that reads a signal immediately after writing it.
-[`flush()`](/reference/solid-js/reactivity/flush) applies the staged writes synchronously:
+アプリケーションコードがこれに気づくことはめったにありません。
+イベントハンドラーは値を設定して戻り、JSX とメモは追跡スコープ内で値を読み取り、バッチが反映されたときに更新されます。
+この遅延が姿を見せるのは2箇所です。イベント直後に検証するテストと、書き込み直後にシグナルを読み取る命令的なコードです。
+[`flush()`](/reference/solid-js/reactivity/flush) は予約済みの書き込みを同期的に適用します:
 
 ```ts
 setQuantity(3);
@@ -189,17 +189,17 @@ flush();
 console.log(quantity()); // 3
 ```
 
-The test in the `basic` template calls `flush()` after `fireEvent.click` for this reason.
+`basic` テンプレートのテストが `fireEvent.click` のあとに `flush()` を呼ぶのはこのためです。
 
-## Effects
+## エフェクト
 
-Signals, functions, and memos move data toward the JSX.
-An effect moves data out of Solid, into something Solid does not own: the browser's storage, the document title, a chart library, a WebSocket.
+シグナル・関数・メモはデータを JSX へ向かって運びます。
+エフェクトはデータを Solid の外へ、Solid が所有しないものへ運びます。ブラウザのストレージ、ドキュメントのタイトル、チャートライブラリ、WebSocket などです。
 
-[`createEffect`](/reference/solid-js/reactivity/create-effect) takes two functions.
-The first is the compute function; it runs in a tracking scope and returns a value.
-The second is the effect function; it receives that value and does the imperative work.
-It runs untracked, after the update has landed and the DOM reflects it:
+[`createEffect`](/reference/solid-js/reactivity/create-effect) は2つの関数を受け取ります。
+1つ目は計算関数（compute function）で、追跡スコープ内で実行され、値を返します。
+2つ目はエフェクト関数（effect function）で、その値を受け取り、命令的な処理を行います。
+これは追跡されず、更新が反映されて DOM がそれを表したあとに実行されます:
 
 ```tsx
 import { createEffect, createSignal } from "solid-js";
@@ -215,12 +215,12 @@ createEffect(
 );
 ```
 
-Put every read that should re-run the effect in the compute function.
-A signal read in the effect function is not tracked, so changing it does not re-run the effect.
-Splitting the two phases keeps the dependency list visible: the compute function is the list.
+エフェクトを再実行させたい読み取りは、すべて計算関数に入れてください。
+エフェクト関数内で読み取られたシグナルは追跡されないため、それを変更してもエフェクトは再実行されません。
+2つのフェーズを分けることで依存関係のリストが可視化されます。計算関数がそのリストです。
 
-The effect function can return a cleanup.
-Solid runs the cleanup before the next effect run and when the owning component is disposed:
+エフェクト関数はクリーンアップを返せます。
+Solid は次のエフェクト実行の前と、所有するコンポーネントが破棄されるときにクリーンアップを実行します:
 
 ```tsx
 createEffect(
@@ -233,24 +233,24 @@ createEffect(
 );
 ```
 
-A cleanup function and `undefined` are the only return values the effect function accepts.
-A setter returns the value it set, so write `(value) => { setDraft(value); }` with braces, not `(value) => setDraft(value)`; the development build throws on any other return value.
+エフェクト関数が受け付ける戻り値は、クリーンアップ関数と `undefined` だけです。
+セッターは設定した値を返すため、`(value) => setDraft(value)` ではなく `(value) => { setDraft(value); }` とブレース付きで書いてください。開発用ビルドはそれ以外の戻り値に対して throw します。
 
-Before you write an effect, check whether the value could be a derived function or memo instead.
-An effect that copies one signal into another creates a second copy of the same state, and the two copies are briefly out of step on every update.
-The guide [Avoid unnecessary effects](/guides/avoid-unnecessary-effects) works through the common cases: derived values, async data, editable copies of props, and event-driven work.
+エフェクトを書く前に、その値が代わりに派生関数やメモにできないか確認してください。
+あるシグナルを別のシグナルへコピーするエフェクトは、同じ状態の2つ目のコピーを作ることになり、更新のたびに2つのコピーが一瞬ずれます。
+ガイドの[不要なエフェクトを避ける](/guides/avoid-unnecessary-effects)では、よくあるケースを順に扱っています。派生値、非同期データ、props の編集可能なコピー、イベント駆動の処理です。
 
-## Ownership
+## オーナーシップ
 
-Every memo, effect, and cleanup belongs to an owner.
-A component is an owner.
-When Solid removes a component from the page, it disposes everything the component created: subscriptions are dropped, cleanups run, and the memos and effects stop.
-This is why a component can create an effect and never think about tearing it down.
+すべてのメモ・エフェクト・クリーンアップはオーナーに属します。
+コンポーネントはオーナーです。
+Solid がコンポーネントをページから取り除くとき、そのコンポーネントが作ったすべてのものを破棄します。購読は解除され、クリーンアップが実行され、メモとエフェクトは停止します。
+だからこそ、コンポーネントはエフェクトを作成して、それを片付けることを考えずにいられます。
 
-The owner is whatever is running when the primitive is created.
+オーナーとは、プリミティブが作成されたときに実行中だったものです。
 
-:::pitfall[An effect created in an event handler is never disposed]
-An event handler runs later, with no owner, so nothing will ever clean up what it creates.
+:::pitfall[イベントハンドラー内で作られたエフェクトは破棄されない]
+イベントハンドラーはオーナーなしで後から実行されるため、そこで作られたものを片付ける存在がいません。
 
 ```tsx
 // Avoid: a new, unowned effect on every click
@@ -263,18 +263,18 @@ createEffect(
 );
 ```
 
-Each click of the `Avoid` version adds another effect that runs for the life of the page, and development warns:
+`Avoid` 版ではクリックのたびに、ページの存続期間中ずっと動く新しいエフェクトが追加され、開発時には警告が出ます:
 
 ```text
 [NO_OWNER_EFFECT] Effects created outside a reactive context will never be disposed
 ```
 
-If the effect should start on an event, create it in the body and gate it on a signal the handler sets.
+イベントをきっかけにエフェクトを始めたい場合は、本体で作成し、ハンドラーが設定するシグナルでゲートしてください。
 :::
 
-### Share state between components
+### コンポーネント間で状態を共有する
 
-When several components need the same state, create it once in a component high enough in the tree to cover all of them, and pass it down through [context](/concepts/components-and-jsx#context):
+複数のコンポーネントが同じ状態を必要とするときは、ツリー内でそれらすべてを覆うのに十分高い位置のコンポーネントで一度だけ作成し、[コンテキスト](/concepts/components-and-jsx#context)を通じて下へ渡します:
 
 ```tsx
 import {
@@ -304,19 +304,19 @@ export function useCart() {
 }
 ```
 
-`createCart()` runs inside `CartProvider`, so the provider owns the state and disposes it when the provider leaves the page.
-Any descendant calls `useCart()`; no props are threaded through the components in between.
-The context has no default value, so a call to `useCart()` outside `CartProvider` throws `ContextNotFoundError`; there is no null check to write.
+`createCart()` は `CartProvider` の内側で実行されるため、プロバイダーがその状態を所有し、プロバイダーがページを離れるときに破棄します。
+任意の子孫が `useCart()` を呼び出せます。途中のコンポーネントに props を通す必要はありません。
+コンテキストにデフォルト値はないため、`CartProvider` の外で `useCart()` を呼ぶと `ContextNotFoundError` を throw します。null チェックを書く必要はありません。
 
-This is preferred over creating the signal at module scope.
-Module-scope state has no owner, so nothing disposes it, and during server rendering one module instance is shared by every request, which leaks one user's state into another's response.
-A context value is created per app, or per request on the server.
-[State management](/guides/state-management#module-level-state-and-the-server) shows what the server does with a module-scope store and where to create it instead.
+これはモジュールスコープでシグナルを作るよりも好ましい方法です。
+モジュールスコープの状態にはオーナーがないため破棄するものがなく、サーバーレンダリング中は1つのモジュールインスタンスがすべてのリクエストで共有され、あるユーザーの状態が別のユーザーのレスポンスへ漏れます。
+コンテキスト値はアプリごとに、サーバーではリクエストごとに作られます。
+[状態管理](/guides/state-management#module-level-state-and-the-server)では、サーバーがモジュールスコープのストアに何をするのか、代わりにどこへ作るべきかを説明しています。
 
-### Roots
+### ルート
 
-[`createRoot`](/reference/solid-js/advanced/owner-introspection/create-root) creates an owner by hand and gives you its disposer.
-It is an advanced primitive for code that runs outside any component: tests, and integrations that embed Solid reactivity in another framework or a non-UI process.
+[`createRoot`](/reference/solid-js/advanced/owner-introspection/create-root) は手動でオーナーを作成し、その disposer（破棄関数）を渡します。
+これは、どのコンポーネントの外側でも実行されるコード向けの高度なプリミティブです。テストや、Solid のリアクティビティを別のフレームワークや非 UI プロセスに埋め込むインテグレーションなどです。
 
 ```ts
 import { createEffect, createRoot, createSignal } from "solid-js";
@@ -334,17 +334,17 @@ const dispose = createRoot((dispose) => {
 dispose();
 ```
 
-Application code should not need it; if you are reaching for `createRoot` to share state, use context instead.
+アプリケーションコードでこれが必要になることはないはずです。状態共有のために `createRoot` に手を伸ばしたくなったら、代わりにコンテキストを使ってください。
 
-## Try it: a shipping estimate
+## 試してみよう: 配送料の見積もり
 
-Extend the `LineItem` component from the top of this page.
-Shipping is free when the subtotal is 50 or more and costs 5 otherwise.
-Show the shipping cost, the total, and a line that reads either "Free shipping" or "Add $N more for free shipping", where N is the amount still needed.
+このページの冒頭の `LineItem` コンポーネントを拡張してください。
+小計が 50 以上なら配送料は無料、それ以外は 5 かかります。
+配送料、合計、そして「Free shipping」または「Add $N more for free shipping」と読める行を表示してください。N は無料までまだ足りない金額です。
 
-Before you look at the solution, decide for each value whether it should be a plain function or a memo, and where each read has to happen.
+解答を見る前に、各値が素の関数であるべきかメモであるべきか、そして各読み取りがどこで起きる必要があるかを決めてください。
 
-:::solution[A shipping estimate]
+:::solution[配送料の見積もり]
 
 ```tsx
 import { createMemo, createSignal } from "solid-js";
@@ -383,35 +383,35 @@ export function LineItem() {
 }
 ```
 
-`subtotal` is a memo because four readers share it.
-`shipping` is a memo for its equality check: going from quantity 2 to 3 recomputes it, produces 5 again, and notifies nobody, so only the readers of `subtotal` update.
-`total` and `toFreeShipping` are plain functions with one reader each; a memo would add a node for no benefit.
-Every read happens inside JSX or inside a memo's function, so every line updates on click.
+`subtotal` がメモなのは、4つの読み取り側がそれを共有しているからです。
+`shipping` がメモなのは等価性チェックのためです。数量が 2 から 3 になっても再計算され、再び 5 が生成され、誰にも通知されません。つまり `subtotal` の読み取り側だけが更新されます。
+`total` と `toFreeShipping` はそれぞれ読み取り側が1つの素の関数です。メモにしてもノードが増えるだけで利益がありません。
+すべての読み取りは JSX の内側かメモの関数の内側で起きるため、すべての行がクリックで更新されます。
 :::
 
-## Common problems
+## よくある問題
 
-### The page shows the words `function` or `() =>` instead of the value
+### ページに値ではなく `function` や `() =>` と表示される
 
-The signal was turned into a string before Solid saw it:
+Solid が見る前にシグナルが文字列化されました:
 
 ```tsx
 <p>{"Quantity: " + quantity}</p>
 <p>{`Quantity: ${quantity}`}</p>
 ```
 
-`quantity` is a function.
-Call it: `quantity()`.
-Always call the accessor in JSX: `{quantity()}`, not `{quantity}`.
-A function is not a valid child of a DOM element, and TypeScript reports the uncalled form as a type error.
+`quantity` は関数です。
+呼び出してください: `quantity()`。
+JSX では常にアクセサーを呼び出します。`{quantity}` ではなく `{quantity()}` です。
+関数は DOM 要素の有効な子ではなく、TypeScript は呼び出していない形を型エラーとして報告します。
 
-### A value renders once and never updates
+### 値が一度だけレンダーされて更新されない
 
-The read happened outside a tracking scope, usually in the component body.
-Development prints `[STRICT_READ_UNTRACKED]` with the component name.
-Move the read into the JSX or wrap it in a function that the JSX calls.
+読み取りが追跡スコープの外、たいていはコンポーネント本体で起きました。
+開発時はコンポーネント名とともに `[STRICT_READ_UNTRACKED]` が出力されます。
+読み取りを JSX の中へ移すか、JSX が呼び出す関数でラップしてください。
 
-Destructuring props is the same problem in a different shape:
+props の分割代入は、形を変えた同じ問題です:
 
 ```tsx
 function LineItem({ price, quantity }: LineItemProps) {
@@ -420,17 +420,17 @@ function LineItem({ price, quantity }: LineItemProps) {
 }
 ```
 
-Keep the props object and read `props.price` inside the JSX.
-See [Props](/concepts/components-and-jsx#props).
+props オブジェクトのまま保持し、JSX の内側で `props.price` を読み取ってください。
+[Props](/concepts/components-and-jsx#props) を参照してください。
 
-### Reading a signal right after setting it gives the old value
+### シグナルを設定した直後に読み取ると古い値が返る
 
-Writes land in a batch after the current code finishes.
-If the next line depends on the new value, use the updater form so the calculation runs against the staged value, or move the dependent code into a tracking scope so it runs when the update lands.
-In a test, call `flush()` after the event.
-See [When updates land](#when-updates-land).
+書き込みは、現在のコードが終わったあとのバッチで反映されます。
+次の行が新しい値に依存するなら、計算が予約済みの値に対して実行されるように更新関数の形式を使うか、依存するコードを追跡スコープへ移して更新の反映時に実行されるようにしてください。
+テストでは、イベントのあとに `flush()` を呼んでください。
+[更新が反映されるタイミング](#when-updates-land)を参照してください。
 
-### An effect copies one value into another and the copy lags
+### エフェクトがある値を別の値へコピーし、コピーが遅れる
 
 ```tsx
 const [subtotal, setSubtotal] = createSignal(0);
@@ -440,31 +440,31 @@ createEffect(
 );
 ```
 
-`subtotal` is a derived value.
-Make it a function or a memo and delete the effect and the second signal.
-[Avoid unnecessary effects](/guides/avoid-unnecessary-effects) covers the variants, including the case where the copy is meant to be edited locally.
+`subtotal` は派生値です。
+関数またはメモにして、エフェクトと2つ目のシグナルを削除してください。
+[不要なエフェクトを避ける](/guides/avoid-unnecessary-effects)では、コピーをローカルで編集したい場合を含め、バリエーションを扱っています。
 
-### `createEffect` throws `[MISSING_EFFECT_FN]`
+### `createEffect` が `[MISSING_EFFECT_FN]` を throw する
 
-`createEffect` takes two functions: a compute function that reads, and an effect function that acts on the result.
-A single function that reads and acts needs to be split in two.
-If the single function only computed a value, you wanted `createMemo`.
-Code written for an earlier Solid hits this first; the [migration guide](/migration/from-solid-1) lists the other patterns that changed.
+`createEffect` は2つの関数を受け取ります。読み取りを行う計算関数と、結果に作用するエフェクト関数です。
+読み取りと作用を両方する1つの関数は、2つに分割する必要があります。
+その1つの関数が値を計算するだけだったなら、必要だったのは `createMemo` です。
+以前の Solid 向けに書かれたコードはまずここにぶつかります。他に変わったパターンは[マイグレーションガイド](/migration/from-solid-1)に一覧があります。
 
-## Recap
+## まとめ
 
-- Read reactive values inside a tracking scope: JSX, a memo's function, or an effect's compute function. A read in the component body is a one-time snapshot.
-- Call the accessor: `quantity()`, not `quantity`.
-- Derive with a plain function by default; use `createMemo` when several readers share the result, when it is expensive, or when its equality check should stop a chain.
-- Use the updater form, `setQuantity((q) => q + 1)`, when the new value depends on the old one.
-- Writes land in a batch after the current code finishes; a read on the next line sees the old value, and tests call `flush()`.
-- Use an effect only to move data out of Solid; a memo's function never writes.
-- Create memos and effects in the component body so the component owns and disposes them, and share state through context rather than module scope.
+- リアクティブな値は追跡スコープの内側で読み取ります。JSX、メモの関数、エフェクトの計算関数のいずれかです。コンポーネント本体での読み取りは一度きりのスナップショットです。
+- アクセサーを呼び出します。`quantity` ではなく `quantity()` です。
+- デフォルトでは素の関数で導出します。複数の読み取り側が結果を共有するとき、計算が高価なとき、その等価性チェックで連鎖を止めたいときは `createMemo` を使います。
+- 新しい値が古い値に依存するときは、更新関数の形式 `setQuantity((q) => q + 1)` を使います。
+- 書き込みは現在のコードが終わったあとのバッチで反映されます。次の行での読み取りは古い値を見ます。テストでは `flush()` を呼びます。
+- エフェクトはデータを Solid の外へ運ぶためだけに使います。メモの関数は書き込みを行いません。
+- メモとエフェクトはコンポーネント本体で作成し、コンポーネントが所有・破棄できるようにします。状態はモジュールスコープではなくコンテキストを通じて共有します。
 
-## Next steps
+## 次のステップ
 
-- [Components and JSX](/concepts/components-and-jsx) applies these rules to props, events, refs, lists, and conditional content.
-- [Stores](/concepts/stores) extends signals to nested objects and arrays with per-property tracking.
-- [Async reactivity](/concepts/async-reactivity) explains what happens when a memo returns a promise, and how Solid keeps the current screen visible while the next one loads.
-- [Avoid unnecessary effects](/guides/avoid-unnecessary-effects) is the guide to read before you write your first `createEffect` in an app.
-- [Custom primitives](/guides/custom-primitives) packages owned setup, effects, and cleanup into a `createX` function that several components can call.
+- [コンポーネントと JSX](/concepts/components-and-jsx)では、これらのルールを props・イベント・ref・リスト・条件付きコンテンツに適用します。
+- [ストア](/concepts/stores)では、シグナルをネストしたオブジェクトと配列へ拡張し、プロパティごとの追跡を行います。
+- [非同期リアクティビティ](/concepts/async-reactivity)では、メモが Promise を返すときに何が起きるか、そして次の画面が読み込まれる間 Solid がどうやって現在の画面を表示し続けるかを説明しています。
+- [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects)は、アプリで最初の `createEffect` を書く前に読むガイドです。
+- [カスタムプリミティブ](/guides/custom-primitives)では、オーナーに属するセットアップ・エフェクト・クリーンアップを、複数のコンポーネントが呼び出せる `createX` 関数にパッケージ化します。
