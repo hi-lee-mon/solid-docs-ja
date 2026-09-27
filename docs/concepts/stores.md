@@ -1,23 +1,23 @@
 ---
-title: "Stores"
+title: "ストア"
 version: "2.0"
-description: "Hold a cart, a form, or any nested object in a store: update one property through a draft, derive filtered views with a projection, and load server data into the same proxy."
+description: "カート、フォーム、あらゆるネストされたオブジェクトをストアに保持します。ドラフトでプロパティ1つを更新し、プロジェクションでフィルター済みのビューを導出し、サーバーデータを同じプロキシに読み込みます。"
 ---
 
-The cart on the [Components and JSX](/concepts/components-and-jsx) page held its items in a signal.
-That works until the user edits a quantity.
-To change one number you must build a new array with one new object in it, and `For` sees a new object where the old row was: the row is torn down and rebuilt, and if the user was typing in that row's input, the input they were typing in is gone.
+[コンポーネントと JSX](/concepts/components-and-jsx) のページのカートは、商品をシグナルに保持していました。
+ユーザーが数量を編集するまでは、それで十分です。
+数値を1つ変えるだけで、新しいオブジェクトを1つ含む新しい配列を組み立てなければならず、`For` は古い行があった場所に新しいオブジェクトを見ます。その行は破棄されて作り直され、その行の input に入力中だったなら、入力していた input は失われます。
 
-A store fixes this by tracking each property on its own.
-Change `items[1].quantity` and the one text node that reads it updates.
-Nothing is copied, no row is rebuilt, and the input keeps focus.
+ストアは、各プロパティを個別に追跡することでこれを解決します。
+`items[1].quantity` を変えれば、それを読んでいるテキストノード1つだけが更新されます。
+何もコピーされず、どの行も作り直されず、input はフォーカスを保ちます。
 
-Use a signal when a value is read and replaced as one unit: a count, a selected id, a string.
-Use a store when readers need separate parts of an object or array, which describes most application state.
+値が1つの単位として読み取られ置き換えられる場合はシグナルを使います。カウント、選択された id、文字列などです。
+読み取り側がオブジェクトや配列の個別の部分を必要とする場合はストアを使います。アプリケーションの状態のほとんどはこちらに当てはまります。
 
-## Create nested state
+## ネストされた状態を作る
 
-[`createStore`](/reference/solid-js/stores/create-store) takes an object or array and returns a read-only proxy and a setter:
+[`createStore`](/reference/solid-js/stores/create-store) はオブジェクトまたは配列を受け取り、読み取り専用のプロキシとセッターを返します:
 
 ```tsx
 import { For, createStore } from "solid-js";
@@ -68,28 +68,28 @@ export function Cart() {
 }
 ```
 
-Change the T-shirt quantity to 3.
-The `value` of that one input updates and nothing else on the page is touched: the Mug row, the line count, and the `<li>` around the input all stay as they were.
+Tシャツの数量を3に変えてみてください。
+その input 1つの `value` が更新され、ページ上の他のものには何も触れられません。マグカップの行、行数のカウント、input を囲む `<li>` はすべてそのままです。
 
-Each property read inside a tracking scope subscribes that scope to that property, including reads through nested objects and array indexes.
-`item.quantity` subscribed the input to one number; `cart.items.length` subscribed the paragraph to the array's length.
-A write to `cart.coupon` would update neither.
+追跡スコープ内で行われた各プロパティの読み取りは、そのスコープをそのプロパティに購読させます。ネストされたオブジェクトや配列インデックス経由の読み取りも含みます。
+`item.quantity` は input を1つの数値に購読させ、`cart.items.length` は段落を配列の length に購読させました。
+`cart.coupon` への書き込みはどちらも更新しません。
 
-Store properties are values, not accessors.
-Read `cart.coupon`, not `cart.coupon()`.
-The same rule as for signals applies to where you read: inside JSX, a memo, or an effect's compute function when the reader should update, and a read in the component body is a one-time snapshot.
+ストアのプロパティは値であり、アクセサーではありません。
+`cart.coupon()` ではなく `cart.coupon` と読みます。
+どこで読むかのルールはシグナルと同じです。読み取り側が更新すべきなら JSX・メモ・エフェクトの計算関数の内側で読み、コンポーネント本体での読み取りは1回限りのスナップショットです。
 
-:::deep-dive[How a store tracks one property at a time]
-The proxy does not create a signal for every property up front.
-It creates a tracking node the first time a tracked consumer reads a property, and only for the properties that were read.
-Nested objects and arrays are wrapped in their own proxies when they are first reached, so a store with a thousand rows costs nothing for the rows nothing has read.
-This is why reading `cart.items[0].quantity` and reading `cart.items.length` produce two independent subscriptions: they are two different nodes.
+:::deep-dive[ストアがプロパティを1つずつ追跡する仕組み]
+プロキシは事前にすべてのプロパティへシグナルを作るわけではありません。
+追跡されたコンシューマーがプロパティを最初に読んだときに追跡ノードを作り、読まれたプロパティに対してのみ作ります。
+ネストされたオブジェクトと配列は、最初に到達したときに独自のプロキシでラップされるため、1000行あるストアでも、何も読んでいない行にはコストがかかりません。
+`cart.items[0].quantity` の読み取りと `cart.items.length` の読み取りが2つの独立した購読を生むのはこのためです。2つは別のノードです。
 :::
 
-## Update with a draft
+## ドラフトで更新する
 
-The setter receives a draft.
-Mutate it with normal property assignments and array methods, and Solid applies the changes to the store when the callback returns:
+セッターはドラフトを受け取ります。
+通常のプロパティ代入や配列メソッドでそれを変更すると、コールバックが返ったときに Solid がストアへ変更を適用します:
 
 ```ts
 setCart((draft) => {
@@ -102,11 +102,11 @@ setCart((draft) => {
 });
 ```
 
-Three properties changed, and three subscriptions are notified: the coupon reader, the Mug quantity input, and the `length` reader.
-The T-shirt row is not touched.
+3つのプロパティが変わり、3つの購読に通知されます。クーポンの読み取り側、マグカップの数量 input、`length` の読み取り側です。
+Tシャツの行には触れられません。
 
-The habit from immutable state is to rebuild the collection.
-That habit undoes what the store gives you:
+イミュータブルな状態の習慣ではコレクションを組み直します。
+その習慣はストアが与えるものを台無しにします:
 
 ```ts
 // Avoid: a new object for the changed item, so For rebuilds that row
@@ -123,19 +123,19 @@ setCart((draft) => {
 });
 ```
 
-Run the `Avoid` version while the cursor is in that row's input and the input loses focus, because the row was torn down and a new one created.
-The `Prefer` version updates the one `value` binding.
+その行の input にカーソルがある状態で `Avoid` 版を実行すると、行が破棄されて新しいものが作られるため、input はフォーカスを失います。
+`Prefer` 版は `value` バインディング1つだけを更新します。
 
-:::pitfall[Writing to the store outside the setter does nothing]
-The store proxy is read-only.
-An assignment such as `cart.items[0].quantity = 2` outside a setter is ignored: it does not throw, it does not warn, and the value does not change.
-If a write seems to vanish, look for a write that skipped `setCart`.
-Every change goes through the setter's draft, including changes from event handlers and from inside actions.
+:::pitfall[セッターの外でストアに書き込んでも何も起きない]
+ストアのプロキシは読み取り専用です。
+セッターの外での `cart.items[0].quantity = 2` のような代入は無視されます。エラーも投げず、警告も出ず、値も変わりません。
+書き込みが消えたように見えるときは、`setCart` を経由していない書き込みを探してください。
+イベントハンドラーやアクション内からの変更も含め、すべての変更はセッターのドラフトを通ります。
 :::
 
-The callback may return a replacement value instead of mutating.
-For an array, Solid writes the returned entries by index and adjusts the length.
-For an object, Solid writes the keys that are present and deletes the keys that are missing:
+コールバックは変更の代わりに置き換え値を返しても構いません。
+配列の場合、Solid は返されたエントリーをインデックスで書き込み、長さを調整します。
+オブジェクトの場合、Solid は存在するキーを書き込み、欠けているキーを削除します:
 
 ```ts
 setCart((draft) => {
@@ -143,24 +143,24 @@ setCart((draft) => {
 });
 ```
 
-A returned or assigned collection replaces the array by index, and the items that survive are the same objects, so their proxies and their rows are kept.
-When the new array holds new objects, such as a fresh server response, nothing matches them to the old ones; reconcile that inside a [projection](#derive-a-store-with-a-projection) with a key, or with `reconcile`.
+返された、あるいは代入されたコレクションは配列をインデックスで置き換え、生き残ったアイテムは同じオブジェクトなので、それらのプロキシと行は維持されます。
+新しい配列が新しいオブジェクトを保持している場合（新鮮なサーバーレスポンスなど）、古いものと対応付けるものはありません。[プロジェクション](#derive-a-store-with-a-projection) の中でキーでリコンサイルするか、`reconcile` を使ってください。
 
-Store writes are staged and applied in the same batch as signal writes, so a read on the next line sees the previous value until the batch lands.
-[When updates land](/concepts/reactivity#when-updates-land) explains the batch and when to call `flush()`.
+ストアへの書き込みはステージングされ、シグナルへの書き込みと同じバッチで適用されるため、次の行での読み取りはバッチが適用されるまで前の値を見ます。
+[更新が適用されるタイミング](/concepts/reactivity#when-updates-land) で、バッチと `flush()` を呼ぶタイミングを説明しています。
 
-:::note[Path setters from Solid 1]
-[`storePath`](/reference/solid-js/advanced/store-advanced/store-path) accepts the path-and-value form Solid 1 used, `setCart(storePath("coupon", "SAVE10"))`, for code that has not moved yet.
-New code uses the draft.
+:::note[Solid 1 のパスセッター]
+[`storePath`](/reference/solid-js/advanced/store-advanced/store-path) は、Solid 1 が使っていたパスと値の形式 `setCart(storePath("coupon", "SAVE10"))` を受け付けます。まだ移行していないコード向けです。
+新しいコードはドラフトを使います。
 :::
 
-## Derive a store with a projection
+## プロジェクションでストアを導出する
 
-A projection is a store whose value is computed from other reactive values.
-Where a memo derives one value, a projection derives an object or array whose properties are tracked separately, and whose items keep their identity from one computation to the next.
+プロジェクションは、値が他のリアクティブな値から計算されるストアです。
+メモが値を1つ導出するのに対し、プロジェクションはプロパティが個別に追跡されるオブジェクトや配列を導出し、そのアイテムは計算をまたいで同一性を保ちます。
 
-[`createProjection`](/reference/solid-js/stores/create-projection) takes a function and a seed.
-The function receives a draft of the seed and may mutate it or return a replacement; a returned array is reconciled into the store by `id`:
+[`createProjection`](/reference/solid-js/stores/create-projection) は関数とシードを受け取ります。
+関数はシードのドラフトを受け取り、それを変更するか置き換え値を返せます。返された配列は `id` でストアにリコンサイルされます:
 
 ```tsx
 import { For, createProjection, createSignal, createStore } from "solid-js";
@@ -192,14 +192,14 @@ function Cart() {
 }
 ```
 
-Check the box and the saved items appear.
-The rows that were already visible are the same DOM nodes as before: the projection matched them by `id`, so `For` kept their proxies and did not rebuild them.
+チェックボックスをオンにすると、保存済みのアイテムが現れます。
+すでに表示されていた行は、以前と同じ DOM ノードです。プロジェクションがそれらを `id` で一致させたため、`For` はプロキシを維持し、作り直しませんでした。
 
-Pass a key name when the data uses a different identity field, or `null` to match by position.
-The seed is the backing object the results reconcile into, so the root proxy keeps its identity across recomputations too.
+データが別の同一性フィールドを使う場合はキー名を渡し、位置で一致させるなら `null` を渡します。
+シードは結果がリコンサイルされる先の裏側のオブジェクトなので、ルートプロキシも再計算をまたいで同一性を保ちます。
 
-Use a projection for a derived collection or object.
-For a derived number or string, such as the cart total, use a memo:
+導出されたコレクションやオブジェクトにはプロジェクションを使います。
+カート合計のような導出された数値や文字列には、メモを使います:
 
 ```ts
 const total = createMemo(() =>
@@ -207,10 +207,10 @@ const total = createMemo(() =>
 );
 ```
 
-### Fetch into a store
+### ストアへフェッチする
 
-The projection function may return a promise.
-The function form of `createStore` is a projection with a setter, and it is the normal way to load server data into a store:
+プロジェクションの関数は Promise を返しても構いません。
+`createStore` の関数形式はセッター付きのプロジェクションであり、サーバーデータをストアに読み込む通常の方法です:
 
 ```ts
 const [cart, setCart] = createStore(async () => api.cart(), {
@@ -218,14 +218,14 @@ const [cart, setCart] = createStore(async () => api.cart(), {
 });
 ```
 
-The request starts when the store is created, and again whenever a reactive value the function read changes.
-Each response reconciles into the same proxy by `id`, so items the server did not change keep their identity and their DOM.
-A [`Loading`](/concepts/boundaries) boundary shows a fallback before the first response, [`isPending(() => cart.items)`](/reference/solid-js/reactivity/is-pending) reports a refetch, and [`refresh(cart)`](/reference/solid-js/lifecycle-actions/refresh) asks the server again.
+リクエストはストアが作られたときに開始され、関数が読んだリアクティブな値が変わるたびに再度開始されます。
+各レスポンスは `id` で同じプロキシにリコンサイルされるため、サーバーが変えなかったアイテムは同一性と DOM を保ちます。
+[`Loading`](/concepts/boundaries) バウンダリは最初のレスポンスの前にフォールバックを表示し、[`isPending(() => cart.items)`](/reference/solid-js/reactivity/is-pending) は再フェッチを報告し、[`refresh(cart)`](/reference/solid-js/lifecycle-actions/refresh) はサーバーへ再度問い合わせます。
 
-With an async function, the seed is not shown as a first answer by default; readers wait for the first response the same way they wait for an async memo.
-[Async reactivity](/concepts/async-reactivity) explains that wait, and the `seedLoadingValue` option that makes the seed an acceptable first answer.
+非同期関数では、シードはデフォルトでは最初の答えとして表示されません。読み取り側は非同期メモと同じように最初のレスポンスを待ちます。
+[非同期リアクティビティ](/concepts/async-reactivity) でその待機と、シードを受け入れ可能な最初の答えにする `seedLoadingValue` オプションを説明しています。
 
-Split the request into its own memo only when a second reader shapes the same response differently:
+同じレスポンスを別の形で使う2人目の読み取り側がいる場合にのみ、リクエストを独自のメモに分けてください:
 
 ```ts
 const response = createMemo(() => api.cart());
@@ -233,12 +233,12 @@ const [cart] = createStore(() => response(), { items: [] as CartItem[] });
 const itemCount = createMemo(() => response().items.length);
 ```
 
-Without that second reader, the one-line form is the right one.
+その2人目の読み取り側がいなければ、1行の形式が正しい形です。
 
-## Optimistic stores
+## 楽観的ストア
 
-[`createOptimisticStore`](/reference/solid-js/stores/create-optimistic-store) has the same draft setter, with one difference: a write made inside an [`action`](/reference/solid-js/lifecycle-actions/action) is tentative.
-It shows immediately, and when the action settles Solid removes it and shows the value the store derives from its source:
+[`createOptimisticStore`](/reference/solid-js/stores/create-optimistic-store) は同じドラフトセッターを持ち、1つだけ違いがあります。[`action`](/reference/solid-js/lifecycle-actions/action) の内側で行われた書き込みは仮のものです。
+すぐに表示され、アクションが確定すると Solid はそれを取り除き、ストアがソースから導出する値を表示します:
 
 ```ts
 import { action, createOptimisticStore, refresh } from "solid-js";
@@ -257,49 +257,49 @@ const setQuantity = action(function* (id: string, quantity: number) {
 });
 ```
 
-Call `setQuantity("mug", 3)` and the input shows 3 at once.
-When the request completes, the refreshed cart from the server replaces the tentative value; if the server agreed, nothing visible changes, and if the request failed, the quantity returns to what the server has.
+`setQuantity("mug", 3)` を呼ぶと、input は即座に3を表示します。
+リクエストが完了すると、サーバーから再取得されたカートが仮の値を置き換えます。サーバーが同意したなら見た目は何も変わらず、リクエストが失敗したなら数量はサーバーが持つ値に戻ります。
 
-The [Mutations](/concepts/mutations) page builds this up from the client-only cart above, one change at a time.
+[ミューテーション](/concepts/mutations) のページでは、上記のクライアントのみのカートから、一度に1つの変更ずつこれを組み立てていきます。
 
-## Common problems
+## よくある問題
 
-### A store write did nothing
+### ストアへの書き込みが何もしなかった
 
-The write went to the proxy instead of the setter's draft: `cart.coupon = "SAVE10"` rather than `setCart((draft) => { draft.coupon = "SAVE10"; })`.
-Writes outside the setter are ignored without an error.
+書き込みがセッターのドラフトではなくプロキシに向かいました。`setCart((draft) => { draft.coupon = "SAVE10"; })` ではなく `cart.coupon = "SAVE10"` と書いた場合です。
+セッターの外の書き込みはエラーなく無視されます。
 
-### Every row rebuilds when one item changes
+### アイテム1つを変えるとすべての行が作り直される
 
-The setter replaced the item objects, usually with `map` and a spread.
-`For` keys rows by object identity, so a new object is a new row.
-Change the property on the draft instead, or if the data arrives as a fresh array from the server, load it through a [projection](#derive-a-store-with-a-projection) so items are matched by `id`.
+セッターがアイテムオブジェクトを置き換えました。多くの場合 `map` とスプレッドで。
+`For` は行をオブジェクトの同一性でキー付けするため、新しいオブジェクトは新しい行です。
+代わりにドラフト上のプロパティを変えてください。データがサーバーから新鮮な配列として届くなら、アイテムが `id` で一致させられるよう [プロジェクション](#derive-a-store-with-a-projection) を通して読み込んでください。
 
-### `cart.items.length` renders once and never updates
+### `cart.items.length` が一度レンダリングされて二度と更新されない
 
-The read happened in the component body, outside a tracking scope.
-Store reads follow the same rule as signal reads: put the read in the JSX, a memo, or an effect's compute function.
-Development prints `[STRICT_READ_UNTRACKED]` with the component name.
+その読み取りはコンポーネント本体で、追跡スコープの外で起きました。
+ストアの読み取りはシグナルの読み取りと同じルールに従います。読み取りは JSX・メモ・エフェクトの計算関数の中に置いてください。
+開発環境ではコンポーネント名付きで `[STRICT_READ_UNTRACKED]` が出力されます。
 
-### A `Map`, `Date`, or class instance inside the store does not track
+### ストア内の `Map`・`Date`・クラスインスタンスが追跡されない
 
-Plain objects, arrays, and class instances are wrapped in proxies; platform objects such as `Map`, `Set`, and `Date` are stored as they are.
-Reassign the property to a new instance through the setter to notify readers, or keep the data in plain objects and arrays.
+プレーンなオブジェクト・配列・クラスインスタンスはプロキシでラップされますが、`Map`・`Set`・`Date` のようなプラットフォームオブジェクトはそのまま格納されます。
+セッターを通してプロパティに新しいインスタンスを再代入して読み取り側に通知するか、データをプレーンなオブジェクトと配列で保持してください。
 
-## Recap
+## まとめ
 
-- Use a store for an object or array whose parts are read separately; use a signal for a value replaced as a unit.
-- Read store properties as values, `cart.coupon`, inside a tracking scope.
-- Change state on the setter's draft; a write to the proxy itself is ignored.
-- Assign the one property that changed rather than rebuilding the collection, so rows keep their identity.
-- Derive a collection with `createProjection`, which reconciles results by `id`; derive a scalar with `createMemo`.
-- Load server data with `createStore(async () => ..., seed)`; each response reconciles into the same proxy.
-- Make optimistic writes inside an `action` on a `createOptimisticStore`, and `refresh` the source when the request settles.
+- 部分が個別に読まれるオブジェクトや配列にはストアを、単位として置き換えられる値にはシグナルを使います。
+- ストアのプロパティは追跡スコープの内側で `cart.coupon` のように値として読みます。
+- 状態はセッターのドラフトで変更します。プロキシ自体への書き込みは無視されます。
+- コレクションを組み直すのではなく変わったプロパティ1つを代入して、行が同一性を保つようにします。
+- `createProjection` でコレクションを導出します。これは結果を `id` でリコンサイルします。スカラーは `createMemo` で導出します。
+- `createStore(async () => ..., seed)` でサーバーデータを読み込みます。各レスポンスは同じプロキシにリコンサイルされます。
+- `createOptimisticStore` の `action` 内で楽観的な書き込みを行い、リクエストが確定したらソースを `refresh` します。
 
-## Next steps
+## 次のステップ
 
-- [Async reactivity](/concepts/async-reactivity): what readers see while `createStore(async () => ...)` is waiting, and why the current cart stays on screen during a refetch.
-- [Mutations](/concepts/mutations): the cart's `add`, `remove`, and `setQuantity` as actions against a server, with the optimistic overlay and the refresh.
-- [Lists](/guides/lists): editing, filtering, selection, and keeping row identity across server refetches, with the store patterns from this page.
-- [Avoid unnecessary effects](/guides/avoid-unnecessary-effects): when a derived store should be a projection instead of an effect that copies into a second store.
-- [Performance](/guides/performance#stores-at-scale): keyed reconciliation and projections over a store with thousands of rows.
+- [非同期リアクティビティ](/concepts/async-reactivity): `createStore(async () => ...)` が待機している間に読み取り側が見るもの、そして再フェッチ中に現在のカートが画面に残る理由。
+- [ミューテーション](/concepts/mutations): サーバーに対するアクションとしてのカートの `add`・`remove`・`setQuantity`。楽観的オーバーレイと再取得付き。
+- [リスト](/guides/lists): 編集、フィルタリング、選択、そしてサーバー再フェッチをまたいだ行の同一性の維持。このページのストアパターンを使います。
+- [不要なエフェクトを避ける](/guides/avoid-unnecessary-effects): 派生ストアを、別のストアへコピーするエフェクトではなくプロジェクションにすべき場合。
+- [パフォーマンス](/guides/performance#stores-at-scale): 数千行のストアに対するキー付きリコンサイルとプロジェクション。

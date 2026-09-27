@@ -1,31 +1,31 @@
 ---
-title: Project shapes
+title: プロジェクトの形状
 version: "2.0"
-description: "Pick between the bare, basic, and fullstack templates by what your app needs on day one, knowing that moving up later changes configuration, not your code."
+description: "初日にアプリが必要とするもので bare・basic・fullstack のテンプレートを選びます。後から上位へ移っても変わるのは設定であり、コードではありません。"
 ---
 
-The CLI asks one question before it writes any files: `bare`, `basic`, or `fullstack`.
-The answer decides what is installed and what the build produces, and it looks like a commitment.
-It is not: each shape is a strict superset of the one before, and the `src/App.tsx` and `src/Document.tsx` conventions are the same in all three, so an app that starts as `bare` becomes `fullstack` by changing configuration rather than rewriting components.
+CLI がファイルを書き込む前に尋ねる質問は1つだけです: `bare`、`basic`、それとも `fullstack` か。
+その答えがインストールされるものとビルドが生成するものを決め、それは決定事項のように見えます。
+ですが実際は違います: 各形状は1つ前の形状の完全な上位集合であり、`src/App.tsx` と `src/Document.tsx` の規約は3つすべてで同じなので、`bare` で始まったアプリはコンポーネントを書き直すのではなく、設定を変えるだけで `fullstack` になります。
 
-Pick by what the app needs on its first deploy:
+アプリが最初のデプロイで必要とするもので選んでください:
 
-- A single page, a widget, or an experiment with no routing: `bare`.
-- Several pages that can be served as static files, such as a marketing site or a client-rendered dashboard that talks to an existing API: `basic`.
-- Server rendering, server functions, sessions, or API routes: `fullstack`.
+- ルーティングのない単一ページ、ウィジェット、実験: `bare`。
+- 静的ファイルとして配信できる複数のページ。マーケティングサイトや、既存の API と通信するクライアントレンダリングのダッシュボードなど: `basic`。
+- サーバーレンダリング、サーバー関数、セッション、APIルート: `fullstack`。
 
-When in doubt, choose the smaller one.
-Moving up is a configuration change; moving down means removing code you did not need.
+迷ったら小さい方を選んでください。
+上へ移るのは設定の変更ですが、下へ移るのは不要なコードの削除を意味します。
 
-| Shape       | Adds                                                  | Build output                                                 |
+| 形状       | 追加されるもの                                       | ビルド出力                                                   |
 | ----------- | ----------------------------------------------------- | ------------------------------------------------------------ |
-| `bare`      | Solid, nothing else                                   | `vite build` emits static files                              |
-| `basic`     | Router, file-system routes, per-page titles, testing  | Still static; deploy `dist/client` to any static host        |
-| `fullstack` | Streaming SSR, server functions, sessions, API routes | Static client assets plus a request handler in `dist/server` |
+| `bare`      | Solid のみ                                     | `vite build` が静的ファイルを出力                              |
+| `basic`     | ルーター、ファイルシステムルート、ページごとのタイトル、テスト | 依然として静的。`dist/client` を任意の静的ホストへデプロイ        |
+| `fullstack` | ストリーミング SSR、サーバー関数、セッション、APIルート | 静的クライアントアセットに加えて `dist/server` のリクエストハンドラー |
 
-## Enable server-side rendering
+## サーバーサイドレンダリングを有効にする
 
-Every shape can turn on server rendering with one option in `vite.config.ts`:
+どの形状でも、`vite.config.ts` の1つのオプションでサーバーレンダリングを有効にできます:
 
 ```ts
 import { defineConfig } from "vite";
@@ -41,17 +41,17 @@ export default defineConfig({
 });
 ```
 
-Without `ssr`, the build writes the empty document shell as static HTML and pages render in the browser.
-With `ssr: true`, pages stream from the server and hydrate in the browser.
-The `src/App.tsx` and `src/Document.tsx` structure does not change.
+`ssr` がなければ、ビルドは空のドキュメントシェルを静的 HTML として書き出し、ページはブラウザーでレンダリングされます。
+`ssr: true` なら、ページはサーバーからストリーミングされ、ブラウザーでハイドレートされます。
+`src/App.tsx` と `src/Document.tsx` の構造は変わりません。
 
-What does change is what your code is allowed to assume.
-Component and module code now runs in Node as well as in the browser, so a read of `window` or `localStorage` at module scope stops the server render with `ReferenceError: window is not defined`.
-[Rendering and SSR](/concepts/rendering-and-ssr#server-and-client-boundaries) shows where browser-only code goes and how to keep the server and client output identical for hydration.
+変わるのは、コードが前提にしてよいことです。
+コンポーネントとモジュールのコードはブラウザーだけでなく Node でも実行されるようになるため、モジュールスコープでの `window` や `localStorage` の読み取りは、`ReferenceError: window is not defined` でサーバーレンダリングを停止させます。
+[レンダリングと SSR](/concepts/rendering-and-ssr#server-and-client-boundaries) では、ブラウザー専用コードの置き場所と、ハイドレーションのためにサーバーとクライアントの出力を一致させる方法を示しています。
 
-## Deploy `fullstack`
+## `fullstack` をデプロイする
 
-The built server entry exports `handleRequest(request)`, a fetch-compatible `Request -> Promise<Response>` handler:
+ビルドされたサーバーエントリーは `handleRequest(request)` をエクスポートします。これは fetch 互換の `Request -> Promise<Response>` ハンドラーです:
 
 ```js
 import { handleRequest } from "./dist/server/server.js";
@@ -60,13 +60,13 @@ import { handleRequest } from "./dist/server/server.js";
 const response = await handleRequest(request);
 ```
 
-The `fullstack` template sets `start: { node: true }`, so the build also writes `dist/server/node.js`, the Node version of that: it serves `dist/client`, passes the rest to `handleRequest`, and listens on `PORT`.
-On a fetch-native platform, map `handleRequest` to the host's request entry point and point its static asset service at `dist/client`.
-Workers, Deno, and Bun each have their own module, asset, and environment configuration; [Deployment](/building-apps/deployment) covers them.
+`fullstack` テンプレートは `start: { node: true }` を設定するため、ビルドは `dist/server/node.js` も書き出します。これは同じものの Node 版で、`dist/client` を配信し、残りを `handleRequest` に渡して、`PORT` でリッスンします。
+fetch ネイティブなプラットフォームでは、`handleRequest` をホストのリクエストエントリーポイントに対応付け、その静的アセットサービスを `dist/client` に向けてください。
+Workers・Deno・Bun はそれぞれ独自のモジュール・アセット・環境の設定を持ちます。[デプロイ](/building-apps/deployment) で解説しています。
 
-## Next steps
+## 次のステップ
 
-- [Quick start](/getting-started/quick-start): create a `basic` project and make the first change, if you have not yet.
-- [App structure](/building-apps/app-structure): what `App.tsx` and `Document.tsx` do, and the entries the plugin generates for each shape.
-- [Choose a rendering mode](/guides/choose-a-rendering-mode): the trade-offs between a client-rendered shell, streaming SSR, and prerendering.
-- [Deployment](/building-apps/deployment): platform-specific setup for the `fullstack` request handler.
+- [クイックスタート](/getting-started/quick-start): まだなら、`basic` プロジェクトを作成して最初の変更を加えます。
+- [アプリの構造](/building-apps/app-structure): `App.tsx` と `Document.tsx` が何をするのか、そしてプラグインが各形状に生成するエントリー。
+- [レンダリングモードを選ぶ](/guides/choose-a-rendering-mode): クライアントレンダリングのシェル、ストリーミング SSR、プリレンダリングのトレードオフ。
+- [デプロイ](/building-apps/deployment): `fullstack` のリクエストハンドラー向けのプラットフォーム固有のセットアップ。
