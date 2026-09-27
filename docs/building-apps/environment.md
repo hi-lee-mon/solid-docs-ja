@@ -1,24 +1,24 @@
 ---
-title: "Environment"
+title: "環境"
 version: "2.0"
-description: "Declare environment variables once, read secrets on the server and public values in the browser through typed modules, and let the build fail when a secret would leak."
+description: "環境変数を一度だけ宣言し、型付きモジュールを通してサーバーではシークレットを、ブラウザーでは公開値を読み取り、シークレットが漏れそうなときはビルドを失敗させます。"
 ---
 
-The session cookie from [Sessions and auth](/building-apps/sessions-and-auth) is signed with `SESSION_SECRET`, and the store's header shows a name that changes between the staging and production deploys.
-The first value must never reach the browser; the second is fine to ship and useful to have typed.
-Vite's `import.meta.env` handles the second kind.
-Start mode adds a layer that handles both, with one schema, two import paths, and a build that refuses to cross them.
+[セッションと認証](/building-apps/sessions-and-auth)のセッションクッキーは `SESSION_SECRET` で署名され、ストアのヘッダーにはステージングと本番のデプロイで変わる名前が表示されます。
+前者は決してブラウザーに届けてはならず、後者は配布しても問題なく、型が付いていると便利です。
+Vite の `import.meta.env` は後者を扱います。
+Start モードは、1つのスキーマと2つのインポートパス、そして両者の境界を越えさせないビルドによって、両方を扱うレイヤーを追加します。
 
-This page uses the two variables the `fullstack` project shape declares.
-The layer belongs to start mode and is not enabled by `ssr: true` alone.
+このページでは、`fullstack` プロジェクト構成が宣言する2つの変数を使います。
+このレイヤーは Start モードに属するもので、`ssr: true` だけでは有効になりません。
 
-Most apps need the first section and the failure list after it.
-The table, the `.env` rules, and the schema location are for checking a detail; the module markers at the end apply the same boundary to your own files.
+ほとんどのアプリで必要なのは、最初のセクションとその次の失敗例のリストです。
+表や `.env` のルール、スキーマの配置場所は細部を確認するためのもので、最後のモジュールマーカーは同じ境界を自分のファイルにも適用するものです。
 
-## Declare, then import
+## 宣言してからインポートする
 
-Put an `env.ts` at the project root.
-It default-exports a `server` map and a `client` map of validators; any [Standard Schema](https://standardschema.dev/) library works, even mixed per key.
+プロジェクトルートに `env.ts` を置きます。
+このファイルはバリデーターの `server` マップと `client` マップをデフォルトエクスポートします。[Standard Schema](https://standardschema.dev/) ライブラリーならどれでも使え、キーごとに混在させても構いません。
 
 ::::tab-group[validation-library]
 
@@ -63,7 +63,7 @@ export default {
 
 ::::
 
-Read each side from its own module:
+それぞれの側は専用のモジュールから読み取ります:
 
 ```ts
 // src/server/session.ts
@@ -79,11 +79,11 @@ import { env } from "virtual:env/client";
 <Title>{env.VITE_APP_NAME}</Title>; // string, "Solid Store" when unset
 ```
 
-Hover `env.SESSION_SECRET` in the editor and its type is `string`, inferred from the validator's output; a key that is not in the schema is a type error.
-The plugin writes `solid-env.d.ts` next to the schema when dev or a build starts.
-Keep that file in the TypeScript project and do not edit it.
+エディターで `env.SESSION_SECRET` にホバーすると、その型はバリデーターの出力から推論された `string` です。スキーマにないキーは型エラーになります。
+プラグインは、dev やビルドの開始時にスキーマの隣に `solid-env.d.ts` を書き出します。
+このファイルは TypeScript プロジェクトに含めたままにし、編集しないでください。
 
-The place a read happens decides which module it may import:
+読み取りが行われる場所が、どのモジュールをインポートできるかを決めます:
 
 ```tsx
 // Avoid: a server value read from a component module
@@ -99,75 +99,75 @@ import { env } from "virtual:env/server";
 export const secrets = env.SESSION_SECRET.split(",");
 ```
 
-The `Avoid` version, in `src/components/Footer.tsx`, does not build.
-The error is `virtual:env/server is server-only and was imported from the client module graph (by src/components/Footer.tsx)`, because a component module is part of the browser bundle even when it also renders on the server.
-The `Prefer` version lives in `src/server/session.ts`, and a `"use server"` function in a module the browser also loads may import it, as the template's data layer does: the compiler keeps the function body and its imports out of the browser bundle.
+`src/components/Footer.tsx` に置いた `Avoid` 版はビルドに失敗します。
+エラーは `virtual:env/server is server-only and was imported from the client module graph (by src/components/Footer.tsx)` です。コンポーネントモジュールは、サーバーでもレンダーされる場合でもブラウザーバンドルの一部であるためです。
+`Prefer` 版は `src/server/session.ts` に置き、ブラウザーも読み込むモジュール内の `"use server"` 関数からインポートできます（テンプレートのデータレイヤーがそうしているように）。コンパイラーは関数本体とそのインポートをブラウザーバンドルから除外するためです。
 
-## What happens when you get it wrong
+## 間違えたときに起きること
 
-The layer is easiest to understand from its failures.
+このレイヤーは、失敗例から理解するのが最も簡単です。
 
-### `virtual:env/server` is imported from a component
+### `virtual:env/server` をコンポーネントからインポートした
 
-The build fails and names the importing file, as above.
-Move the read into a [server function](/building-apps/server-functions), middleware, or a module reached only from those.
+ビルドが失敗し、上記のようにインポート元のファイル名が示されます。
+読み取りは[サーバー関数](/building-apps/server-functions)、ミドルウェア、あるいはそれらからのみ到達されるモジュールに移してください。
 
-### A secret is in the `client` map
+### シークレットが `client` マップにある
 
-The build succeeds and the secret ships to every visitor.
-Nothing can protect a value once it is in the browser bundle; the `client` map is a statement that the value is public.
-Client keys must carry Vite's public prefix (`VITE_` by default) so the intent is visible in the name, and the plugin rejects a `client` key without it at config time.
+ビルドは成功し、シークレットはすべての訪問者に配布されます。
+ブラウザーバンドルに入った値はもはや守れません。`client` マップは、その値が公開であるという宣言です。
+クライアントのキーには Vite の公開プレフィックス（デフォルトは `VITE_`）が必要で、意図が名前から分かるようになっています。プラグインはプレフィックスのない `client` キーを設定時に拒否します。
 
-:::danger[The client map is a publication, not a setting]
-Every value in `client` is serialized as plain JSON into the JavaScript the browser downloads.
-Moving a key from `server` to `client` to make a build error go away publishes that value.
+:::danger[client マップは設定ではなく公開です]
+`client` のすべての値は、ブラウザーがダウンロードする JavaScript に平文の JSON としてシリアライズされます。
+ビルドエラーを消すために `server` から `client` へキーを移すと、その値が公開されます。
 :::
 
-### `SESSION_SECRET` is missing in production
+### 本番で `SESSION_SECRET` がない
 
-The build passes with a warning and the server fails at boot with `server env validation failed at boot`, naming the key and the validator's message.
-Server values are read from `process.env` when the server starts, not baked in at build time, so a build machine without secrets can still produce the artifact and a host can rotate the secret without a rebuild.
+ビルドは警告付きで通り、サーバーは起動時に `server env validation failed at boot` で失敗し、キー名とバリデーターのメッセージが示されます。
+サーバーの値はビルド時に焼き込まれるのではなく、サーバー起動時に `process.env` から読み取られます。そのため、シークレットのないビルドマシンでもアーティファクトを生成でき、ホストはリビルドなしでシークレットをローテーションできます。
 
-### `VITE_APP_NAME` is invalid
+### `VITE_APP_NAME` が無効
 
-The build fails.
-Client values are validated at build time because that is when they are serialized into the bundle.
-The validator library does not ship to the browser; only the validated values do.
+ビルドが失敗します。
+クライアントの値は、バンドルにシリアライズされるタイミングであるビルド時にバリデーションされます。
+バリデーターライブラリーはブラウザーには配布されず、バリデーション済みの値だけが配布されます。
 
-### A server string shows up in the client bundle
+### サーバーの文字列がクライアントバンドルに現れた
 
-The production client build scans non-vendor chunks for exact quoted copies of validated server strings of at least eight characters and fails with `server env values leaked into client chunks` if it finds one.
-This is a backstop for a copy-paste mistake, not a security boundary; the module split above is the control.
+本番のクライアントビルドは、ベンダー以外のチャンクをスキャンし、8文字以上のバリデーション済みサーバー文字列が引用符付きでそのまま含まれていないか調べ、見つかれば `server env values leaked into client chunks` で失敗します。
+これはコピー&ペーストミスに対する最後の砦であり、セキュリティ境界ではありません。実際の制御は上記のモジュール分割です。
 
-## Rules in one place
+## ルールの一覧
 
-|                        | `server` map                                             | `client` map             |
+|                        | `server` マップ                                             | `client` マップ           |
 | ---------------------- | -------------------------------------------------------- | ------------------------ |
-| Import from            | `virtual:env/server`                                     | `virtual:env/client`     |
-| Allowed in             | server-only modules                                      | anywhere                 |
-| Read from              | `process.env` at server boot                             | build-time environment   |
-| Validated              | at boot (and in dev, since the dev server is the server) | at build                 |
-| Key prefix             | any                                                      | `VITE_` (or `envPrefix`) |
-| Rotate without rebuild | yes                                                      | no                       |
+| インポート元            | `virtual:env/server`                                     | `virtual:env/client`     |
+| 使用できる場所          | サーバー専用モジュール                                      | どこでも                 |
+| 読み取り元              | サーバー起動時の `process.env`                             | ビルド時の環境            |
+| バリデーション          | 起動時（dev でも。dev サーバーがサーバーだから）              | ビルド時                 |
+| キーのプレフィックス     | 任意                                                      | `VITE_`（または `envPrefix`） |
+| リビルドなしでローテーション | 可                                                     | 不可                     |
 
-`virtual:env/server` also exposes the client values, so server code does not need two imports.
+`virtual:env/server` はクライアントの値も公開するため、サーバーコードでインポートを2つ書く必要はありません。
 
-## `.env` files
+## `.env` ファイル
 
-The layer loads `.env`, `.env.local`, `.env.[mode]`, and `.env.[mode].local` from Vite's environment directory and folds them into `process.env` for dev and builds.
-A value already in the process wins over one from a file, which is what you want on a host that injects real secrets.
-Because the values land in `process.env`, a database client or session library that reads `process.env` itself sees them too, with no `loadEnv` in `vite.config.ts`.
+このレイヤーは Vite の環境ディレクトリーから `.env`、`.env.local`、`.env.[mode]`、`.env.[mode].local` を読み込み、dev とビルドで `process.env` に取り込みます。
+プロセスにすでにある値はファイルの値より優先されます。これは、実際のシークレットを注入するホストで望ましい動作です。
+値は `process.env` に入るため、`process.env` を自分で読むデータベースクライアントやセッションライブラリーからも見えます。`vite.config.ts` で `loadEnv` する必要はありません。
 
-:::tip[Start from the example file]
-The `fullstack` shape ships a `.env.example` with every declared key and a comment on each.
-Copy it to `.env` and fill in `SESSION_SECRET`; `openssl rand -base64 32` produces one.
-`.env` is in `.gitignore`, and the template's `start` script loads it with `--env-file-if-exists`.
+:::tip[サンプルファイルから始める]
+`fullstack` 構成には、宣言済みの全キーとそれぞれのコメントを含む `.env.example` が付属しています。
+`.env` にコピーして `SESSION_SECRET` を入力してください。`openssl rand -base64 32` で生成できます。
+`.env` は `.gitignore` に含まれており、テンプレートの `start` スクリプトは `--env-file-if-exists` でそれを読み込みます。
 :::
 
-## Schema location
+## スキーマの配置場所
 
-Start mode probes `env.ts` or `env.js` at the Vite root.
-`start.env` changes that:
+Start モードは Vite ルートの `env.ts` または `env.js` を探します。
+`start.env` で変更できます:
 
 ```ts
 solid({
@@ -179,10 +179,10 @@ solid({
 });
 ```
 
-## Mark a module server-only or client-only
+## モジュールをサーバー専用・クライアント専用にマークする
 
-The env modules enforce their own boundary.
-For your own modules, the `server-only` and `client-only` markers do the same, and they work even with start mode and server functions off:
+env モジュールは自身の境界を強制します。
+自分のモジュールには、`server-only` と `client-only` マーカーが同じ役割を果たします。Start モードやサーバー関数がオフでも機能します:
 
 ```ts
 // src/server/db.ts
@@ -193,8 +193,8 @@ export function listOrders(customerId: string) {
 }
 ```
 
-If any path pulls this module into the client bundle, the build fails with `Attempt to import 'server-only' in a client module`, naming the importer.
-In a server graph the marker resolves to an empty module.
+どれかのパスがこのモジュールをクライアントバンドルに引き込むと、ビルドは `Attempt to import 'server-only' in a client module` で失敗し、インポート元が示されます。
+サーバーグラフでは、マーカーは空のモジュールに解決されます。
 
 ```ts
 import "client-only";
@@ -204,52 +204,52 @@ export function readPreference() {
 }
 ```
 
-`client-only` is the mirror: the build fails if the module enters a server graph.
+`client-only` はその対称版です。モジュールがサーバーグラフに入るとビルドが失敗します。
 
-The markers assert where a module may be bundled.
-They do not split a module in two, add a runtime check, or un-leak a value already copied into client code.
-Put the marker in the module that holds the sensitive code, not in the module that imports it.
+マーカーは、モジュールがどこにバンドルされてよいかを表明します。
+モジュールを2つに分割したり、ランタイムチェックを追加したり、すでにクライアントコードにコピーされた値の漏洩をなかったことにしたりはしません。
+マーカーは、それをインポートするモジュールではなく、機密コードを持つモジュールに置いてください。
 
-If TypeScript does not already know these module names, add the plugin's declarations:
+TypeScript がこれらのモジュール名をまだ知らない場合は、プラグインの宣言を追加します:
 
 ```ts
 /// <reference types="@solidjs/vite-plugin/boundary-modules" />
 ```
 
-## Common problems
+## よくある問題
 
-### `env.SESSION_SECRET` is typed `unknown` or the key is missing
+### `env.SESSION_SECRET` が `unknown` 型になるかキーがない
 
-`solid-env.d.ts` has not been regenerated; start dev or a build once.
-If it is regenerated and still wrong, the type is the validator's output type, so check the schema.
+`solid-env.d.ts` が再生成されていません。dev またはビルドを一度実行してください。
+再生成されてもまだ違う場合、型はバリデーターの出力型なのでスキーマを確認してください。
 
-### The dev server reports a validation error for a server variable
+### dev サーバーがサーバー変数のバリデーションエラーを報告する
 
-The dev server is the server, so boot validation runs there.
-Add the value to `.env` or the shell.
+dev サーバーがそのままサーバーなので、起動時バリデーションはそこで実行されます。
+`.env` またはシェルに値を追加してください。
 
-### A `server-only` module fails the build on a cold `dev` start
+### `server-only` モジュールがコールドな `dev` 起動でビルドを失敗させる
 
-Vite's dependency scanner can walk imports before the `"use server"` transform runs and hit the marker.
-It skips pre-bundling for that path and dev proceeds; the build-time guard is unaffected.
+Vite の依存関係スキャナーは、`"use server"` 変換が実行される前にインポートをたどり、マーカーに当たることがあります。
+そのパスのプリバンドルはスキップされ dev は続行されます。ビルド時のガードには影響しません。
 
-### The client value is stale after changing it on the host
+### ホストで変更したクライアントの値が古いまま
 
-Client values are serialized at `vite build`.
-Set them on the machine that runs the build, and rebuild; only `server` values are read at boot.
+クライアントの値は `vite build` でシリアライズされます。
+ビルドを実行するマシンで設定してリビルドしてください。起動時に読まれるのは `server` の値だけです。
 
-## Recap
+## まとめ
 
-- Declare every variable once in `env.ts`, in the `server` map or the `client` map.
-- Import `virtual:env/server` only from modules that server code alone reaches; a component import fails the build and names the file.
-- Treat the `client` map as public: its values are JSON in the browser bundle, and its keys carry the `VITE_` prefix to say so.
-- Server values are read and validated from `process.env` at boot, so secrets rotate without a rebuild; client values are fixed at build time.
-- Put local values in `.env`; a value already in the process wins over the file.
-- Mark your own sensitive modules with `import "server-only"` so a client import fails at build time rather than at runtime.
-- Keep `solid-env.d.ts` in the project and let the plugin regenerate it.
+- すべての変数は `env.ts` で一度だけ、`server` マップか `client` マップに宣言します。
+- `virtual:env/server` のインポートは、サーバーコードだけが到達するモジュールに限定します。コンポーネントからのインポートはビルドを失敗させ、ファイル名が示されます。
+- `client` マップは公開として扱います。その値はブラウザーバンドル内の JSON であり、キーにはそれを示す `VITE_` プレフィックスが付きます。
+- サーバーの値は起動時に `process.env` から読み取られバリデーションされるため、リビルドなしでシークレットをローテーションできます。クライアントの値はビルド時に固定されます。
+- ローカルの値は `.env` に置きます。プロセスにすでにある値がファイルより優先されます。
+- 機密モジュールには `import "server-only"` を付けて、クライアントからのインポートがランタイムではなくビルド時に失敗するようにします。
+- `solid-env.d.ts` はプロジェクトに含め、プラグインによる再生成に任せます。
 
-## Next steps
+## 次のステップ
 
-- [Sessions and auth](/building-apps/sessions-and-auth): signing the cookie with `SESSION_SECRET` from this layer.
-- [Server functions](/building-apps/server-functions): the usual place a server value is read.
-- [Deployment](/building-apps/deployment): how each host supplies server variables at boot and why client values are fixed at build time.
+- [セッションと認証](/building-apps/sessions-and-auth): このレイヤーの `SESSION_SECRET` でクッキーに署名します。
+- [サーバー関数](/building-apps/server-functions): サーバーの値を読み取る一般的な場所です。
+- [デプロイ](/building-apps/deployment): 各ホストが起動時にサーバー変数を供給する方法と、クライアントの値がビルド時に固定される理由です。

@@ -1,28 +1,28 @@
 ---
-title: Head and metadata
+title: head とメタデータ
 version: "2.0"
-description: "Give each page its own title and meta tags from the component that owns them, let a layout's defaults return when the page unmounts, and read a title from data that is still loading."
+description: "各ページに、そのページを所有するコンポーネントから独自のタイトルとメタタグを与え、ページのアンマウント時にはレイアウトのデフォルトを復元し、読み込み中のデータからタイトルを読み取ります。"
 ---
 
-Every product page in the store has the same browser tab title, "Solid App", because the only `<title>` is the one in `Document.tsx`.
-Paste a product link into a chat and the preview shows the same default image for every product.
-The component that knows the product name renders inside `<body>`; the tags that need it live in `<head>`, where a component cannot render.
+ストアのすべての商品ページでブラウザータブのタイトルが同じ "Solid App" になっています。`<title>` が `Document.tsx` にしかないためです。
+商品リンクをチャットに貼ると、どの商品でもプレビューには同じデフォルト画像が表示されます。
+商品名を知っているコンポーネントは `<body>` の内側でレンダーされますが、その情報を必要とするタグは `<head>` にあり、コンポーネントはそこにレンダーできません。
 
-Solid ships a head registry in `@solidjs/web` for this.
-A component declares a title or a meta tag from wherever it lives, and the registry puts the tag in the document head, replaces it when a later component declares the same tag, and restores the earlier one when that component unmounts.
-`@solidjs/meta` wraps the registry in components.
-The `basic` and `fullstack` project shapes include it; a `bare` project adds it with:
+このために、Solid は `@solidjs/web` に head レジストリを同梱しています。
+コンポーネントはどこにいてもタイトルやメタタグを宣言でき、レジストリはそのタグをドキュメントの head に配置し、後のコンポーネントが同じタグを宣言したら置き換え、そのコンポーネントがアンマウントしたら元のものを復元します。
+`@solidjs/meta` はこのレジストリをコンポーネントでラップしたものです。
+`basic` と `fullstack` のプロジェクト構成には含まれています。`bare` プロジェクトでは次で追加します:
 
 ```package-install
 @solidjs/meta
 ```
 
-There is no provider and no setup.
-Most apps need only the first two sections, a default title with a per-page override and a `<Meta>` or two per page; the rest covers grouping, the registry underneath, and what streams under server rendering.
+プロバイダーもセットアップも不要です。
+ほとんどのアプリで必要なのは最初の2セクションだけです。デフォルトタイトルとページごとの上書き、ページあたり1、2個の `<Meta>` です。残りは、グルーピング、その内部のレジストリ、サーバーレンダリングでストリーミングされる内容を扱います。
 
-## A default and a per-page override
+## デフォルトとページごとの上書き
 
-Set a default in `App`, as the templates do, and override it in the page:
+テンプレートがしているように `App` でデフォルトを設定し、ページで上書きします:
 
 ```tsx
 // src/App.tsx
@@ -46,29 +46,29 @@ export default function Product(props: RouteProps<"/products/:id">) {
 }
 ```
 
-Open `/products/mug` and the tab reads "Product mug - Solid Store".
-Navigate to a page with no `<Title>` of its own and it reads "Solid Store" again.
-Navigate from `/products/mug` to `/products/tee` and the title updates in place.
+`/products/mug` を開くと、タブには "Product mug - Solid Store" と表示されます。
+独自の `<Title>` を持たないページに移動すると、再び "Solid Store" になります。
+`/products/mug` から `/products/tee` に移動すると、タイトルはその場で更新されます。
 
-Three rules produce that behavior, and they apply to every tag.
+この動作は3つのルールから生まれ、すべてのタグに適用されます。
 
-Later wins.
-Tags have an identity: `<Title>` is always the same one, and `<Meta name="description">` is identified by its `name`.
-The most recently mounted tag for an identity is the one in the document, so the page's `<Title>`, mounted after `App`'s, wins.
+後のものが勝つ。
+タグには同一性があります。`<Title>` は常に同じ1つであり、`<Meta name="description">` はその `name` で識別されます。
+ある同一性について最も最近マウントされたタグがドキュメントに残るため、`App` の後にマウントされたページの `<Title>` が勝ちます。
 
-Disposal restores.
-When the winning tag unmounts, the previous one comes back.
-Leaving the product page restores the store title with no cleanup code.
+破棄で復元。
+勝ったタグがアンマウントすると、前のものが戻ります。
+商品ページを離れると、クリーンアップコードなしでストアのタイトルが復元されます。
 
-Updates are reactive.
-Text children and attribute values can read signals, and an update applies in place without changing the tag's position in the override order.
-The param change updates the existing title rather than mounting a new one.
+更新はリアクティブ。
+テキストの子要素や属性値はシグナルを読め、更新はオーバーライド順でのタグの位置を変えずにその場で適用されます。
+パラメーターの変更は、新しいタイトルをマウントするのではなく、既存のタイトルを更新します。
 
-Each component's reference page documents its identity rule; [`Title`](/reference/solid-meta/title) is the simplest.
+各コンポーネントのリファレンスページに同一性のルールが記載されています。[`Title`](/reference/solid-meta/title) が最も単純です。
 
-:::caution[Leave the tags the registry manages out of Document]
-The static `<title>Solid App</title>` in `Document.tsx` is the fallback for a render with no `<Title>` mounted at all, and the registry replaces it as soon as one mounts.
-Other tags do not get that treatment.
+:::caution[レジストリが管理するタグは Document に置かない]
+`Document.tsx` の静的な `<title>Solid App</title>` は、`<Title>` が1つもマウントされないレンダーのためのフォールバックであり、1つでもマウントされればレジストリが置き換えます。
+他のタグはそのような扱いを受けません。
 
 ```tsx
 // Avoid: a hardcoded description next to a rendered one
@@ -82,14 +82,14 @@ Other tags do not get that treatment.
 <Meta name="description" content={product().summary} />
 ```
 
-The `Avoid` version puts two `<meta name="description">` tags in the document, because the registry leaves head tags it did not register alone.
-The `Prefer` version has one, and the product page's wins.
+`Avoid` 版はドキュメントに `<meta name="description">` タグを2つ置いてしまいます。レジストリは自分が登録していない head タグには触れないためです。
+`Prefer` 版は1つだけで、商品ページのものが勝ちます。
 :::
 
-### A title from loaded data
+### 読み込んだデータからタイトルを取る
 
-A title often depends on data that is still loading.
-Read it the same way as any async value:
+タイトルは、まだ読み込み中のデータに依存することがよくあります。
+他の非同期の値と同じように読み取ります:
 
 ```tsx
 import { Title } from "@solidjs/meta";
@@ -107,13 +107,13 @@ export default function Product(props: RouteProps<"/products/:id">) {
 }
 ```
 
-Under streaming SSR the shell goes out with the fallback and `App`'s default title; when the product arrives, the title patch streams with the content.
-In the browser the same read updates the title when the data lands.
-Nothing about `<Title>` is special here; it is a component reading a memo.
+ストリーミング SSR では、シェルはフォールバックと `App` のデフォルトタイトルとともに送信され、商品が到着するとタイトルのパッチがコンテンツとともにストリーミングされます。
+ブラウザーでも、データが届いたときに同じ読み取りがタイトルを更新します。
+ここで `<Title>` に特別なことは何もありません。メモを読むコンポーネントにすぎません。
 
-## Other tags
+## その他のタグ
 
-`Meta`, `Link`, `Style`, `Script`, and `Base` follow the same rules:
+`Meta`、`Link`、`Style`、`Script`、`Base` も同じルールに従います:
 
 ```tsx
 import { Link, Meta } from "@solidjs/meta";
@@ -123,8 +123,8 @@ import { Link, Meta } from "@solidjs/meta";
 <Meta property="og:image" content={product().image} />
 ```
 
-Every component accepts a `key` prop that overrides the default identity.
-Use it to make otherwise-distinct tags override each other, or to fork an identity that would otherwise collide:
+すべてのコンポーネントは、デフォルトの同一性を上書きする `key` prop を受け付けます。
+これを使えば、通常は別物のタグ同士を上書きさせたり、衝突するはずの同一性を分岐させたりできます:
 
 ```tsx
 {/* These override each other despite different attributes: */}
@@ -132,14 +132,14 @@ Use it to make otherwise-distinct tags override each other, or to fork an identi
 <Meta key="social-image" property="og:image" content="/og.png" />
 ```
 
-## Group related tags
+## 関連タグをグループ化する
 
-Use [`<Head>`](/reference/solid-meta/head) when several tags form one replacement set.
-Tags with the same identity coexist inside a group.
-A later group replaces the earlier set as one unit, and unmounting the later group restores the earlier set.
-Group membership stays reactive as child tags mount and unmount.
+複数のタグが1つの置き換えセットを構成する場合は [`<Head>`](/reference/solid-meta/head) を使います。
+同じ同一性を持つタグは、グループ内では共存できます。
+後のグループは前のセットを1つの単位として置き換え、後のグループがアンマウントされると前のセットが復元されます。
+グループの構成は、子タグのマウント・アンマウントに応じてリアクティブであり続けます。
 
-This layout provides two default social images:
+このレイアウトは2つのデフォルトのソーシャル画像を提供します:
 
 ```tsx
 import { Head, Meta } from "@solidjs/meta";
@@ -154,7 +154,7 @@ function SocialDefaults() {
 }
 ```
 
-A product page can replace both defaults while it remains mounted:
+商品ページは、マウントされている間、両方のデフォルトを置き換えられます:
 
 ```tsx
 function ProductSocialTags(props: { image: string }) {
@@ -167,14 +167,14 @@ function ProductSocialTags(props: { image: string }) {
 }
 ```
 
-Open a product and both default images are gone, replaced by the product image and the card type.
-Leave the page and the two defaults are back.
+商品を開くと、2つのデフォルト画像は消え、商品画像とカードタイプに置き換わります。
+ページを離れると、2つのデフォルトが戻ります。
 
-An inner `<Head>` starts an independent group.
-Render bare `Meta` components from child components when those tags should join the surrounding group.
+内側の `<Head>` は独立したグループを開始します。
+そのタグを周囲のグループに参加させたい場合は、子コンポーネントからはラップなしの `Meta` コンポーネントをレンダーします。
 
-:::deep-dive[The registry under the components]
-Solid Meta is a thin layer over `useHead` from `@solidjs/web`, and a library or an application can call that primitive directly for descriptor-level control:
+:::deep-dive[コンポーネントの下にあるレジストリ]
+Solid Meta は `@solidjs/web` の `useHead` の薄いレイヤーであり、ライブラリーやアプリケーションは、ディスクリプターレベルの制御のためにそのプリミティブを直接呼び出せます:
 
 ```tsx
 import { useHead } from "@solidjs/web";
@@ -192,63 +192,63 @@ function ProductDescription(props: { description: string }) {
 }
 ```
 
-Pass an array to register one replacement group, or a function to make the group's membership reactive; `<Head>` is that call with the group collected from context.
-The descriptor is registered under the current owner, so it is disposed with the component that called `useHead`.
-For application metadata, the components are easier to read in JSX; [`useHead`](/reference/solid-web/head/use-head) and [`HeadTag`](/reference/solid-web/head/head-tag) document the descriptor contract.
+配列を渡すと1つの置き換えグループとして登録され、関数を渡すとグループの構成がリアクティブになります。`<Head>` は、コンテキストから集めたグループでこの呼び出しを行うものです。
+ディスクリプターは現在のオーナーの下に登録されるため、`useHead` を呼んだコンポーネントとともに破棄されます。
+アプリケーションのメタデータには、JSX 内のコンポーネントの方が読みやすいでしょう。[`useHead`](/reference/solid-web/head/use-head) と [`HeadTag`](/reference/solid-web/head/head-tag) にディスクリプターの契約が記載されています。
 :::
 
-## Server rendering
+## サーバーレンダリング
 
-In a start-mode project there is nothing to wire: the generated entries render `Document`, and the registry writes into its `<head>`.
-An authored server entry gets the same behavior from `renderToStream`, and can take the head markup itself through the `onHead` render option when it assembles the document by hand.
+Start モードのプロジェクトでは配線作業は不要です。生成されたエントリーが `Document` をレンダーし、レジストリがその `<head>` に書き込みます。
+自作のサーバーエントリーでも `renderToStream` で同じ動作が得られ、ドキュメントを手で組み立てる場合は `onHead` レンダーオプションで head マークアップを受け取れます。
 
-On the wire:
+ワイヤー上では:
 
-- Tags that are settled at the first flush are spliced into `<head>`, with `<base>` and `<meta charset>` right after `<head>` opens, resource links early, and the rest after.
-- Tags registered under a `Loading` boundary that settles later stream as patches and apply when the boundary reveals, which is how the data-driven title above works.
-- On the client, hydration adopts the server-rendered head tags in place, so there is no remove-and-reinsert flicker on load.
+- 最初のフラッシュ時点で確定しているタグは `<head>` に挿入されます。`<base>` と `<meta charset>` は `<head>` が開いた直後、リソースリンクは早め、その他はその後に続きます。
+- 後で確定する `Loading` バウンダリの下に登録されたタグは、パッチとしてストリーミングされ、バウンダリが表示されるときに適用されます。上記のデータ駆動タイトルはこうして動作しています。
+- クライアントでは、ハイドレーションがサーバーレンダーされた head タグをその場で引き継ぐため、読み込み時の削除・再挿入によるちらつきはありません。
 
-## Common problems
+## よくある問題
 
-### The title still shows the previous page while the new one loads
+### 新しいページの読み込み中もタイトルが前のページのまま
 
-The new page's `<Title>` reads pending data, so the update is held with the rest of the page and the previous winner stays.
-That is the same [held update](/concepts/async-reactivity#settled-view-and-in-flight-work) the content gets.
-If the title does not need the data, render `<Title>` from a part of the page that does not read it.
+新しいページの `<Title>` が保留中のデータを読んでいるため、更新はページの他の部分とともに保留され、前の勝者が残ります。
+これはコンテンツが受けるのと同じ[保留された更新](/concepts/async-reactivity#settled-view-and-in-flight-work)です。
+タイトルがそのデータを必要としないなら、それを読まないページの部分から `<Title>` をレンダーしてください。
 
-### Two `og:image` tags appear when only one was expected
+### 1つのはずの `og:image` タグが2つ現れる
 
-`<Meta name="og:image">` and `<Meta property="og:image">` have different identities.
-Use `property` for Open Graph, or give both the same `key`.
+`<Meta name="og:image">` と `<Meta property="og:image">` は異なる同一性を持ちます。
+Open Graph には `property` を使うか、両方に同じ `key` を与えてください。
 
-### `Multiple <title> tags in one head group; the last one wins` in the console
+### コンソールに `Multiple <title> tags in one head group; the last one wins`
 
-Two `<Title>` components rendered inside the same `<Head>` group.
-`<title>` has one identity that `key` cannot fork, so only the last one is in the document.
-Keep one `<Title>` per group.
+同じ `<Head>` グループ内に2つの `<Title>` コンポーネントがレンダーされています。
+`<title>` は `key` で分岐できない単一の同一性を持つため、ドキュメントには最後の1つだけが残ります。
+グループごとに `<Title>` は1つにしてください。
 
-### A page's meta tags stay after navigating away
+### ページから離れてもメタタグが残る
 
-They were registered with `useHead` outside a component owner, so nothing disposes them.
-Register from inside a component, or from a scope with an owner.
+コンポーネントのオーナーの外で `useHead` に登録されたため、破棄するものがありません。
+コンポーネントの内側、またはオーナーのあるスコープから登録してください。
 
-### A layout's defaults disappear when a page overrides one of them
+### ページが1つを上書きするとレイアウトのデフォルトが消える
 
-The layout rendered its tags in a `<Head>` group and the page replaced the whole group.
-Render the defaults as bare components if the page should override them one at a time.
+レイアウトが `<Head>` グループでタグをレンダーしており、ページがグループ全体を置き換えたためです。
+ページが1つずつ上書きすべき場合は、デフォルトをラップなしのコンポーネントとしてレンダーしてください。
 
-## Recap
+## まとめ
 
-- Render `<Title>` and `<Meta>` from the component that knows the value; there is no provider.
-- The most recently mounted tag with an identity wins, and unmounting it restores the previous one.
-- Read signals and async values in a tag as in any component; a pending value holds the title with the rest of the page.
-- Keep `Document.tsx` to the static `<title>` fallback, the charset, and tags the registry does not manage.
-- Use `key` to make distinct tags share an identity or to split one that would collide.
-- Wrap tags in `<Head>` when they must be replaced and restored as a set; render them bare when a page should override them one at a time.
-- Under streaming SSR, settled tags ship in the shell and late tags patch in with their boundary.
+- `<Title>` と `<Meta>` は値を知っているコンポーネントからレンダーします。プロバイダーはありません。
+- ある同一性で最も最近マウントされたタグが勝ち、それがアンマウントされると前のものが復元されます。
+- タグ内では他のコンポーネントと同じようにシグナルや非同期の値を読みます。保留中の値はページの他の部分とともにタイトルを保留します。
+- `Document.tsx` に置くのは、静的な `<title>` フォールバック、charset、レジストリが管理しないタグだけにします。
+- `key` を使って、別物のタグに同一性を共有させたり、衝突する同一性を分割したりします。
+- タグをセットとして置き換え・復元する必要があるときは `<Head>` で囲み、ページが1つずつ上書きすべきときはラップなしでレンダーします。
+- ストリーミング SSR では、確定済みのタグはシェルで配信され、遅いタグはそのバウンダリとともにパッチで適用されます。
 
-## Next steps
+## 次のステップ
 
-- [Server functions](/building-apps/server-functions): load the product the title reads from the server, and keep the read out of the browser bundle.
-- [Rendering and SSR](/concepts/rendering-and-ssr#who-owns-the-document): what `onHead` is for when another host owns the document.
-- [Migrate from Solid Meta 0.x](/migration/from-solid-meta): what changed from the provider-based versions.
+- [サーバー関数](/building-apps/server-functions): タイトルが読む商品をサーバーから読み込み、読み取りをブラウザーバンドルから外します。
+- [レンダリングと SSR](/concepts/rendering-and-ssr#who-owns-the-document): 別のホストがドキュメントを所有する場合の `onHead` の用途です。
+- [Solid Meta 0.x からの移行](/migration/from-solid-meta): プロバイダーベースのバージョンからの変更点です。
