@@ -1,87 +1,87 @@
-A lot of exciting things have been going in the Solid in the last few months since the 1.0 release.
+1.0 リリースからのここ数か月、Solid では多くのわくわくする出来事がありました。
 
-Let's start with some big news.
-
----
-
-## Netlify joins up as an Official Deployment Partner
-
-![Alt Text](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/w00wmhamyf0r5ek6b901.png)
-
-We are super excited to announce that Netlify has come on board as a Deployment partner and sponsor for the project. They will be contributing [$500 a month](https://opencollective.com/solid) towards the development and growth of Solid.
-
-We will be adding the [Deploy with Netlify](https://www.netlify.com/blog/2016/11/29/introducing-the-deploy-to-netlify-button/) to our official [starter templates](https://github.com/solidjs/templates) to make it easier than ever to deploy Solid applications.
+まずは大きなニュースから始めましょう。
 
 ---
 
-## 1.0 Release and Response
+## Netlify が公式デプロイパートナーに参加
 
-We've had an incredible response to the 1.0 release. It is great to see years of work come to fruition. See what some of the voices in the industry have been saying about Solid:
+![Netlify](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/w00wmhamyf0r5ek6b901.png)
 
+Netlify がデプロイパートナー兼スポンサーとして本プロジェクトに参加することを、大変嬉しく発表します。Solid の開発と成長に向けて、[月額 500 ドル](https://opencollective.com/solid)の支援をいただきます。
 
-<Tweet tweetLink="markdalgleish/status/1409811453696118786" />
-
-<Tweet tweetLink="DavidKPiano/status/1409592349370560513" />
-
-<Tweet tweetLink="mweststrate/status/1409599364838920200" />
-
-<Tweet tweetLink="trueadm/status/1413972672342528017" />
-
-<Tweet tweetLink="fredkschott/status/1424876545823318020" />
+公式の[スターターテンプレート](https://github.com/solidjs/templates)に [Deploy with Netlify](https://www.netlify.com/blog/2016/11/29/introducing-the-deploy-to-netlify-button/) を追加し、Solid アプリケーションをこれまで以上に簡単にデプロイできるようにする予定です。
 
 ---
 
-## Expanding the Team
+## 1.0 リリースと反響
 
-I started this project and ran it on my own for many years but it had definitely grown beyond me. We've been expanding the team. Since I've never formally introduced the rest of the team I will take the opportunity now:
+1.0 リリースには信じられないほどの反響をいただきました。長年の取り組みが実を結ぶのを見るのは素晴らしいことです。業界の声が Solid について何と言っているかご覧ください:
 
-David Di Biase - Web Site/Community Manager
 
-Alexandre Mouton Brady - Templates/Integrations
+[ツイートを見る](https://twitter.com/markdalgleish/status/1409811453696118786)
 
-Milo M. - Tooling
+[ツイートを見る](https://twitter.com/DavidKPiano/status/1409592349370560513)
 
-Ryan Turnquist - Router/Libraries
+[ツイートを見る](https://twitter.com/mweststrate/status/1409599364838920200)
 
-Dan Jutan - Documentation/Training
+[ツイートを見る](https://twitter.com/trueadm/status/1413972672342528017)
 
-There are also a small group of contributors making some great adds to Solid's ecosystem. You can see [bios here](https://www.solidjs.com/contributors).
+[ツイートを見る](https://twitter.com/fredkschott/status/1424876545823318020)
 
 ---
 
-## Growing Ecosystem
+## チームの拡大
 
-Every day it seems like new libraries are coming out that showcase what you can do with Solid. So I thought I'd highlight a few of them.
+このプロジェクトは私が始め、長年一人で運営してきましたが、間違いなく私一人の手に余る規模にまで成長しました。私たちはチームを拡大してきました。これまで他のメンバーを正式に紹介する機会がなかったので、ここで紹介します:
 
-[Solid Primitives](https://github.com/davedbase/solid-primitives) - Our "React Use". A set of high-quality reusable primitives.
+David Di Biase - ウェブサイト/コミュニティマネージャー
 
-[Solid Flip](https://github.com/otonashixav/solid-flip) - A new animation library that makes it easier than ever to do flip animations.
+Alexandre Mouton Brady - テンプレート/インテグレーション
 
-[Solid DND](https://github.com/thisbeyond/solid-dnd) - Drag and drop port of dnd-kit made to leverage Solid's fine-grained reactivity.
+Milo M. - ツーリング
 
-[@felte/solid](https://github.com/pablo-abc/felte/blob/main/packages/solid/README.md) - A port of the Felte form library for Svelte available in Solid.
+Ryan Turnquist - ルーター/ライブラリ
 
-[Solid URQL](https://github.com/Acidic9/solid-urql) - A URQL wrapper to make using GraphQL in Solid easier than ever.
+Dan Jutan - ドキュメント/トレーニング
 
-While not complete, there are several Component libraries currently being worked on:
+また、Solid のエコシステムに素晴らしい追加をもたらしてくれている少人数のコントリビューターグループもいます。[紹介はこちら](https://www.solidjs.com/contributors)でご覧いただけます。
+
+---
+
+## 成長するエコシステム
+
+Solid で何ができるかを示す新しいライブラリが、毎日のように登場しているようです。そこで、いくつかを紹介したいと思います。
+
+[Solid Primitives](https://github.com/davedbase/solid-primitives) - 私たち版の「React Use」。高品質で再利用可能なプリミティブのセットです。
+
+[Solid Flip](https://github.com/otonashixav/solid-flip) - FLIP アニメーションをこれまで以上に簡単に実現する新しいアニメーションライブラリです。
+
+[Solid DND](https://github.com/thisbeyond/solid-dnd) - Solid の細粒度リアクティビティを活かすために作られた dnd-kit のドラッグ&ドロップ移植版です。
+
+[@felte/solid](https://github.com/pablo-abc/felte/blob/main/packages/solid/README.md) - Svelte 向けフォームライブラリ Felte の Solid 移植版です。
+
+[Solid URQL](https://github.com/Acidic9/solid-urql) - Solid で GraphQL をこれまで以上に簡単に使えるようにする URQL ラッパーです。
+
+まだ完成はしていませんが、現在いくつかのコンポーネントライブラリが開発中です:
 [Solid Headless](https://github.com/LXSMNSYC/solid-headless)
 [Solid Blocks](https://github.com/atk/solid-blocks)
 
-And recently with the question of DSL a few projects have been attempting to bring Svelte-like syntax into Solid:
+また最近は DSL の議論に関連して、Svelte 風の構文を Solid に取り込もうとするプロジェクトもいくつか登場しています:
 [Babel Plugin Solid Labels](https://github.com/LXSMNSYC/babel-plugin-solid-labels)
 [Babel Plugin Undestructure](https://github.com/orenelbaum/babel-plugin-solid-undestructure)
 
-Interested in seeing more. Check out the [Resources section](https://www.solidjs.com/resources) of the website or the community-driven [Awesome Solid](https://github.com/one-aalam/awesome-solid-js).
+さらに見たい方は、ウェブサイトの [Resources セクション](https://www.solidjs.com/resources)や、コミュニティ主導の [Awesome Solid](https://github.com/one-aalam/awesome-solid-js)をチェックしてください。
 
 ---
 
-## Translations
+## 翻訳
 
-We could have never anticipated the interest in translations right out the gate but so much great work being done by contributors. We now have documentation on [solidjs.com](https://solidjs.com) available in 10 languages.
+リリース直後からこれほど翻訳への関心が集まるとは予想もしていませんでしたが、コントリビューターの皆さんによる素晴らしい作業がたくさん行われています。現在、[solidjs.com](https://solidjs.com) のドキュメントは 10 言語で利用できます。
 
-The full tutorials are being translated as well and are currently available in English, Japanese, and Chinese.
+全チュートリアルの翻訳も進行中で、現在は英語、日本語、中国語で利用できます。
 
-Thanks so much to:
+以下の皆さんに心から感謝します:
 - Gaving Cong 🇨🇳
 - Jun Shindo 🇯🇵
 - David Di Biase 🇮🇹
@@ -94,58 +94,59 @@ Thanks so much to:
 
 ---
 
-## Content Explosion
+## コンテンツの爆発的な増加
 
-In a similar vein, the amount of new Solid content that has been pouring in has been amazing. Honestly, there is so much between featured on [Fireship](https://www.youtube.com/watch?v=cuHDQhDhvPE), to the many independent streams and interviews/podcasts I participated in. But here's a couple that really stood out:
+同様に、Solid に関する新しいコンテンツの殺到ぶりは驚くべきものです。正直なところ、[Fireship](https://www.youtube.com/watch?v=cuHDQhDhvPE) での特集から、私が参加した多くの個人配信やインタビュー/ポッドキャストまで、本当にたくさんあります。その中でも特に印象に残ったものをいくつか紹介します:
 
-### Articles
+### 記事
 
 [Introduction to the Solid JavaScript Library by Charlie Gerard](https://css-tricks.com/introduction-to-the-solid-javascript-library/) - CSS-Tricks
-One of the best introductions we've seen written to date. A really good overview of all the core features.
+これまでに書かれた中でも最高の入門記事の一つです。すべてのコア機能を網羅した、本当に素晴らしい概観です。
 
 [SolidJS said stiffly: I am more react than React by Kasong](https://segmentfault.com/a/1190000040275257/en) - Segment Fault
-Despite the translation, you can get the humor of this article which provides some great examples to illustrate Solid's approach.
+翻訳越しでも、この記事のユーモアは伝わってきます。Solid のアプローチを説明する素晴らしい例がいくつも載っています。
 
-### Podcasts
+### ポッドキャスト
 
 [SolidJS with Ryan Carniato](https://podrocket.logrocket.com/solidjs) - PodRocket
-We talk about a lot more than just Solid but trends in frontend in general.
+Solid だけでなく、フロントエンド全般のトレンドについても多く語っています。
 
-<Spotify spotifyLink="episode/40RDz6zayJYk7QM8kQxaBK" />
+[Spotify で聴く](https://open.spotify.com/episode/40RDz6zayJYk7QM8kQxaBK)
 
 [React vs Svelte vs Solid & MicroFrontends | Ryan Carniato](https://show.nikoskatsikanis.com/episodes/ryan-carniato) - Nikos Show
-This podcast talks about developments in compilers and in server-side rendering in JavaScript Frameworks.
-<Spotify spotifyLink="episode/1d9XabKMHflqFLGuMT0bLh" />
+このポッドキャストでは、JavaScript フレームワークにおけるコンパイラとサーバーサイドレンダリングの進展について語っています。
 
-### Videos
+[Spotify で聴く](https://open.spotify.com/episode/1d9XabKMHflqFLGuMT0bLh)
 
-<YouTube youTubeId="OqcHoLWyyIw" />
+### 動画
 
-And if you haven't seen it yet check out my talk at React Finland which is a great introduction to SolidJS for those coming from a React background.
+[YouTube で見る](https://www.youtube.com/watch?v=OqcHoLWyyIw)
+
+まだ見ていない方は、React Finland での私の講演もチェックしてください。React 出身の方にとって素晴らしい SolidJS の入門となっています。
 
 
-<YouTube youTubeId="2iK9zzhSKo4" />
+[YouTube で見る](https://www.youtube.com/watch?v=2iK9zzhSKo4)
 
-I've also started streaming on [my Youtube channel](https://www.youtube.com/channel/UCLLVlcmcCP4CUe7xSqVEnxw). So if you are interested in the inner workings of the framework could be worth checking out.
-
----
-
-## Current Development
-
-New things are coming down the pipeline for Solid in the coming months. Mostly we want to make it easier for people to approach using Solid. For that reason, there are 3 things we are working on that we feel will aid in that process a lot.
-
-### Documentation
-
-While my tireless nights writing those over a couple months in the spring got us here, we can do better. Dan Jutan has been doing a great job focusing on the language to make the tutorials more accessible to developers with all levels of familiarity. We are also working on more beginner-focused, long-form tutorials to help onboarding people newer to web development.
-
-### Server Side Rendering
-
-Consolidating and generalizing on use cases to make it easier to use Solid in a variety of projects. This will include better documentation and rounding out a lot of the rough edges. The flagship experience for Single Page App SSR will be present through our new [Solid Start](https://github.com/solidjs/solid-start) project which is an official minimal Meta-Framework built on top of [Vite](https://vitejs.dev/) with support of deploying to various platforms. But this work will also include better support for integration with [Astro](https://astro.build/) for those interested in Multi-Page Apps. So no matter what type of web application you are building we have you covered.
-
-### Reactive Performance
-
-Finally, I'm personally doing a rework and optimization of our core reactive system. The last time I gave it a good tune was back in February 2020. We've added a lot of features since then and it's time to streamline out the edge cases and improve performance. This is especially important as we look to support custom renderers, for things like WebGL or native.
+私は[自身の YouTube チャンネル](https://www.youtube.com/channel/UCLLVlcmcCP4CUe7xSqVEnxw)での配信も始めました。フレームワークの内部動作に興味がある方は、見てみる価値があると思います。
 
 ---
 
-And that's it for now. We're going to be doing these updates more often in the future. So much incredible stuff has been going on and I can only imagine what more we will have to share next time.
+## 現在の開発
+
+今後数か月の間に、Solid に新しいものが次々と登場します。私たちが最も重視しているのは、人々が Solid を使い始めやすくすることです。そのために、このプロセスを大きく助けると考えている 3 つのことに取り組んでいます。
+
+### ドキュメント
+
+春の数か月間、寝る間も惜しんで書き続けたおかげで今の形になりましたが、まだ改善の余地があります。Dan Jutan は、あらゆる習熟度の開発者にとってチュートリアルがより分かりやすくなるよう、言葉遣いに焦点を当てた素晴らしい仕事をしています。また、Web 開発に不慣れな人たちのオンボーディングを助けるため、より初心者向けの長編チュートリアルにも取り組んでいます。
+
+### サーバーサイドレンダリング
+
+ユースケースを統合・一般化し、さまざまなプロジェクトで Solid を使いやすくします。これには、より良いドキュメントと、多くの粗い部分の改善が含まれます。Single Page App の SSR の旗艦となる体験は、新しい [Solid Start](https://github.com/solidjs/solid-start) プロジェクトを通じて提供されます。これは [Vite](https://vitejs.dev/) 上に構築された公式の最小限のメタフレームワークで、さまざまなプラットフォームへのデプロイをサポートしています。またこの取り組みには、Multi-Page App に関心のある方向けに [Astro](https://astro.build/) との統合をより良くサポートすることも含まれます。どのようなタイプの Web アプリケーションを構築する場合でも、私たちがカバーします。
+
+### リアクティブパフォーマンス
+
+最後に、私自身がコアのリアクティブシステムの作り直しと最適化に取り組んでいます。前回しっかりとチューニングしたのは 2020 年 2 月のことです。それ以来多くの機能を追加してきたので、エッジケースを整理し、パフォーマンスを改善する時期です。これは、WebGL やネイティブといったカスタムレンダラーのサポートを見据える上で特に重要です。
+
+---
+
+今回は以上です。今後はこれらのアップデートをより頻繁にお届けする予定です。実に素晴らしいことがたくさん起きており、次回どんなことを共有できるのか想像するだけで楽しみです。

@@ -1,9 +1,9 @@
-Hello and welcome to our new blog platform!
+新しいブログプラットフォームへようこそ!
 
-SolidJS is a community built on strong communication and teamwork. It's only right that we have a blog for our growing community that helps with sharing announcements, publish recent ideas and even bring valuable insights and learnings from the broader community.
+SolidJS は、強固なコミュニケーションとチームワークの上に成り立つコミュニティです。成長し続けるコミュニティのために、アナウンスの共有、最近のアイデアの発信、そしてより広いコミュニティからの貴重な洞察や学びを届けるブログを持つのは当然のことです。
 
-Ryan and other members will continue publishing articles you've come to love about SolidJS and broader research via dev.to, Medium and other outlets. We'll frequently link to them here and make you aware of the latest so you can keep coming to this blog for the absolute latest.
+Ryan や他のメンバーは、これまで愛読いただいてきた SolidJS やより広範な研究に関する記事を、引き続き dev.to、Medium などの媒体で公開していきます。それらの記事にはここでも頻繁にリンクし、最新情報をお知らせするので、常に最新の情報を求めてこのブログにお越しください。
 
-On behalf of the the entire Solid Core Team, thanks for reading. We look forward to a solid future. 😉
+Solid コアチーム一同を代表して、お読みいただきありがとうございます。確かな(solidな)未来を楽しみにしています。😉
 
 Dave
