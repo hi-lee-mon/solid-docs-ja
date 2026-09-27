@@ -1,24 +1,24 @@
 ---
-title: Quick start
+title: クイックスタート
 version: "2.0"
-description: "Go from an empty directory to a running Solid app with a change of your own in it, and meet the ideas the rest of the docs build on."
+description: "空のディレクトリーから、自分で変更を加えた状態で動作する Solid アプリを作り、残りのドキュメントがその上に積み上げる考え方に触れます。"
 ---
 
-This page takes you from an empty directory to a running app with a change of your own in it.
-It uses the `basic` project shape, which gives you a router, file-system routes, per-page titles, and a test suite while still producing a purely static build.
+このページでは、空のディレクトリーから、自分で変更を加えた状態で動作するアプリまで進みます。
+`basic` というプロジェクト形状を使います。これはルーター、ファイルシステムルート、ページごとのタイトル、テストスイートを備えながら、純粋に静的なビルドを生成します。
 
-## Create the project
+## プロジェクトを作成する
 
-Install Node.js `20.19` or later, or `22.12` or later.
-These versions satisfy the Vite 8 runtime requirement used by the maintained templates.
+Node.js `20.19` 以降、または `22.12` 以降をインストールしてください。
+これらのバージョンは、メンテナンスされているテンプレートが使う Vite 8 のランタイム要件を満たしています。
 
-Run the Solid CLI:
+Solid CLI を実行します:
 
 ```bash
 npm init solid@latest
 ```
 
-Use the equivalent command for another package manager:
+別のパッケージマネージャーでは同等のコマンドを使います:
 
 ```bash
 pnpm create solid@latest
@@ -26,18 +26,18 @@ yarn create solid@latest
 bun create solid@latest
 ```
 
-Choose `basic` when the CLI asks for a project shape.
-Pick a directory and a package manager, then run the development command the CLI prints.
-The dev server starts on port `3000`.
+CLI がプロジェクト形状を尋ねたら `basic` を選びます。
+ディレクトリーとパッケージマネージャーを選び、CLI が表示する開発用コマンドを実行します。
+開発サーバーはポート `3000` で起動します。
 
-Open `http://localhost:3000`.
-You see a Solid logo, a "Hello Solid!" heading, a button that counts clicks, and a nav with Home and Users links.
-Click Users to see a page that loads a user record and links to the next one.
+`http://localhost:3000` を開きます。
+Solid のロゴ、「Hello Solid!」という見出し、クリックを数えるボタン、そして Home と Users のリンクを持つナビが表示されます。
+Users をクリックすると、ユーザーレコードを読み込み、次のユーザーへリンクするページが見えます。
 
-## Look around
+## 中を見てみる
 
-The project has no `index.html` and no file that calls `render()`.
-The Vite plugin generates those parts in what it calls start mode, and it builds them around a few conventional files.
+プロジェクトには `index.html` も、`render()` を呼ぶファイルもありません。
+Vite プラグインは start モードと呼ぶ仕組みでそれらの部分を生成し、いくつかの決まったファイルを中心に組み立てます。
 
 ```text
 src/
@@ -55,7 +55,7 @@ src/
 vite.config.ts
 ```
 
-`vite.config.ts` turns start mode on and adds the file-system routing plugin:
+`vite.config.ts` が start モードを有効にし、ファイルシステムルーティングのプラグインを追加します:
 
 ```ts
 import { fileRoutes } from "filesystem-routing/vite";
@@ -71,8 +71,8 @@ export default defineConfig({
 });
 ```
 
-`src/App.tsx` is the component every page renders inside.
-The router is mounted here, and so is anything that should appear on every page:
+`src/App.tsx` はすべてのページがその内側でレンダリングされるコンポーネントです。
+ルーターはここにマウントされ、すべてのページに表示すべきものもここに置かれます:
 
 ```tsx
 import { Title } from "@solidjs/meta";
@@ -98,24 +98,24 @@ export default function App() {
 }
 ```
 
-Three things in this file come up again and again in Solid:
+このファイルには、Solid で繰り返し登場するものが3つあります:
 
-- `props.children` is where the matched page renders.
-  Layouts in Solid are ordinary components that render their children.
-- `<Loading>` is a boundary.
-  The first time a page inside it waits on data, the boundary shows the fallback instead of the page.
-  After that, Solid itself keeps the current page on screen while the next one loads; the boundary is not involved in that hold.
-- `paths.users(1)` builds the URL `/users/1` from the route tree, so a typo in a link is a type error instead of a broken page.
+- `props.children` はマッチしたページがレンダリングされる場所です。
+  Solid のレイアウトは、children をレンダリングする普通のコンポーネントです。
+- `<Loading>` はバウンダリです。
+  内側のページが初めてデータを待つとき、バウンダリはページの代わりにフォールバックを表示します。
+  その後は、次のページの読み込み中も Solid 自身が現在のページを画面に保持し続けます。その保持にバウンダリは関与しません。
+- `paths.users(1)` はルートツリーから URL `/users/1` を組み立てるため、リンクのタイプミスは壊れたページではなく型エラーになります。
 
-`src/Document.tsx` is the document shell, the file that replaces `index.html`.
-It renders the full `<html>` element and receives the app as `props.children`.
-It ships no JavaScript to the browser; it only exists to produce the static shell around the app.
+`src/Document.tsx` はドキュメントシェルで、`index.html` を置き換えるファイルです。
+完全な `<html>` 要素をレンダリングし、アプリを `props.children` として受け取ります。
+ブラウザーには JavaScript を一切送らず、アプリを包む静的なシェルを生成するためだけに存在します。
 
-`src/routes/index.tsx` is the home page.
-Each file under `src/routes` with a default export becomes a page at the matching URL: `index.tsx` is `/`, `users/[id].tsx` is `/users/:id`, and `[...404].tsx` catches everything else.
-Pairing `users.tsx` with a `users/` directory makes it a layout that wraps every page inside the directory.
+`src/routes/index.tsx` はホームページです。
+`src/routes` 配下でデフォルトエクスポートを持つ各ファイルが、対応する URL のページになります: `index.tsx` は `/`、`users/[id].tsx` は `/users/:id`、`[...404].tsx` はそれ以外すべてを受け止めます。
+`users.tsx` を `users/` ディレクトリーと組み合わせると、そのディレクトリー内のすべてのページを包むレイアウトになります。
 
-`src/components/Counter.tsx` is the smallest complete Solid component in the project:
+`src/components/Counter.tsx` はこのプロジェクトで最小の完全な Solid コンポーネントです:
 
 ```tsx
 import { createSignal } from "solid-js";
@@ -134,15 +134,15 @@ export default function Counter() {
 }
 ```
 
-`createSignal(0)` returns a pair: `count` is a function that reads the current value, and `setCount` writes a new one.
-The JSX reads `count()` inside curly braces.
-Because the read happens inside JSX, Solid knows that this text node depends on `count`, and it updates that text node, and nothing else, when the button is clicked.
-`Counter` itself runs once.
+`createSignal(0)` はペアを返します: `count` は現在の値を読み取る関数で、`setCount` は新しい値を書き込みます。
+JSX は波括弧の内側で `count()` を読み取ります。
+読み取りが JSX の内側で起きるため、Solid はこのテキストノードが `count` に依存していると認識し、ボタンがクリックされたときにそのテキストノードだけを、他は何も更新せずに更新します。
+`Counter` 自体は一度だけ実行されます。
 
-## Make a change
+## 変更を加える
 
-Add a step to the counter.
-Replace the body of `Counter.tsx` with this:
+カウンターにステップを追加します。
+`Counter.tsx` の中身を次に置き換えます:
 
 ```tsx
 import { createSignal } from "solid-js";
@@ -175,16 +175,16 @@ export default function Counter() {
 }
 ```
 
-Save the file.
-The page updates without a reload.
-Change the step to `5` and click the button: the count goes up by five, and the sentence under the button already said so before you clicked.
+ファイルを保存します。
+ページはリロードなしで更新されます。
+ステップを `5` に変えてボタンをクリックします: カウントは5ずつ増え、ボタンの下の文はクリックする前からそのことを示しています。
 
-The click handler now passes a function to `setCount` instead of a value.
-When the new value depends on the old one, this form is the safe one: it receives the latest value even if another write is already queued.
-[Reactivity](/concepts/reactivity#signals) explains the difference.
+クリックハンドラーは今、値ではなく関数を `setCount` に渡しています。
+新しい値が古い値に依存するときはこの形が安全です: 別の書き込みがすでにキューに入っていても、最新の値を受け取ります。
+違いは[リアクティビティ](/concepts/reactivity#signals)で説明しています。
 
-Now try something that does not work, on purpose.
-Move the read out of the JSX:
+次に、意図的に動かないものを試します。
+読み取りを JSX の外に移します:
 
 ```tsx
 const [count, setCount] = createSignal(0);
@@ -193,25 +193,25 @@ const current = count(); // read once, in the component body
 return <button onClick={() => setCount(count() + 1)}>Clicks: {current}</button>;
 ```
 
-The button no longer updates, and the browser console shows a warning:
+ボタンは更新されなくなり、ブラウザーのコンソールに警告が表示されます:
 
 ```text
 [STRICT_READ_UNTRACKED] Reactive value read directly in <Counter> will not update.
 Move it into a tracking scope (JSX, a memo, or an effect's compute function).
 ```
 
-This is the one rule that makes the rest of Solid make sense.
-A component body runs once, so a value read there is a snapshot.
-A read inside JSX, a memo, or an effect's compute function is tracked, and tracked reads update.
-The [Reactivity](/concepts/reactivity) page explains why, and what to do when you need a value in the component body anyway.
-Put the read back inside the JSX before you continue.
+これが、Solid の残りすべてを理解可能にする唯一のルールです。
+コンポーネント本体は一度だけ実行されるため、そこで読み取った値はスナップショットです。
+JSX、メモ、またはエフェクトの計算関数の内側での読み取りは追跡され、追跡された読み取りは更新されます。
+その理由と、それでもコンポーネント本体で値が必要な場合の対処法は[リアクティビティ](/concepts/reactivity)のページで説明しています。
+続ける前に、読み取りを JSX の内側に戻してください。
 
-### Try it: a reset button
+### 試してみる: リセットボタン
 
-Add a **Reset** button that sets the count back to zero, and disable it while the count is already zero.
-Think about where the `disabled` value has to be read for the button to enable itself after the first click.
+カウントをゼロに戻す **Reset** ボタンを追加し、カウントがすでにゼロの間は無効にします。
+最初のクリック後にボタンが自分で有効になるには、`disabled` の値をどこで読み取る必要があるか考えてください。
 
-:::solution[A reset button]
+:::solution[リセットボタン]
 
 ```tsx
 <button type="button" onClick={() => setCount(0)} disabled={count() === 0}>
@@ -219,13 +219,13 @@ Think about where the `disabled` value has to be read for the button to enable i
 </button>
 ```
 
-`disabled={count() === 0}` is a JSX expression, so it is tracked: the button is disabled on load, enables after the first click, and disables again after a reset.
-Reading `count()` into a `const` in the component body would freeze it in its first state, the same way the example above froze the label.
+`disabled={count() === 0}` は JSX 式なので追跡されます: ボタンは読み込み時に無効で、最初のクリック後に有効になり、リセット後に再び無効になります。
+コンポーネント本体で `count()` を `const` に読み込むと、上の例でラベルが固定されたのと同じように、最初の状態に固定されます。
 :::
 
-## Add a page
+## ページを追加する
 
-Create `src/routes/about.tsx`:
+`src/routes/about.tsx` を作成します:
 
 ```tsx
 import { Title } from "@solidjs/meta";
@@ -241,7 +241,7 @@ export default function About() {
 }
 ```
 
-Then add a link to the nav in `src/App.tsx`:
+次に `src/App.tsx` のナビにリンクを追加します:
 
 ```tsx
 <nav>
@@ -251,14 +251,14 @@ Then add a link to the nav in `src/App.tsx`:
 </nav>
 ```
 
-Open `http://localhost:3000/about`.
-The route table follows the file system, so there is no route registration step.
-The `fileRoutes({ types: true })` plugin also regenerates the path types, which is why `paths.about()` type-checks.
-The `<Title>` sets the browser tab for this page only; the `<Title>` in `App.tsx` is the fallback for pages that do not set one.
+`http://localhost:3000/about` を開きます。
+ルートテーブルはファイルシステムに従うため、ルート登録の手順はありません。
+`fileRoutes({ types: true })` プラグインはパス型も再生成するため、`paths.about()` が型チェックを通ります。
+`<Title>` はこのページだけのブラウザータブを設定します。`App.tsx` の `<Title>` は、タイトルを設定しないページのフォールバックです。
 
-## Run the tests and build
+## テストとビルドを実行する
 
-The template includes one test, for `Counter`:
+テンプレートには `Counter` のテストが1つ含まれています:
 
 ```tsx
 import { render, fireEvent } from "@solidjs/testing-library";
@@ -280,26 +280,26 @@ describe("<Counter />", () => {
 });
 ```
 
-Run it with `npm test`.
-If you kept the step input, `getByRole("button")` still finds the only button.
-The `flush()` call matters: Solid applies DOM updates in a batch after the event handler returns, so a test that asserts immediately after `fireEvent.click` sees the old text.
-The [Testing guide](/guides/testing) covers this and the other environments.
+`npm test` で実行します。
+ステップの入力欄を残した場合でも、`getByRole("button")` は依然として唯一のボタンを見つけます。
+`flush()` 呼び出しが重要です: Solid はイベントハンドラーが戻った後に DOM 更新をバッチで適用するため、`fireEvent.click` の直後にアサートするテストは古いテキストを見ることになります。
+[テストガイド](/guides/testing)ではこれと他の環境を扱っています。
 
-Run `npm run build`.
-The output is a set of static files in `dist/client`, with each route in its own chunk.
-You can deploy that directory to any static host.
-When you later need server rendering or server functions, add `ssr: true` next to `start: true` in `vite.config.ts`; the files you have written carry over unchanged.
-[Project shapes](/getting-started/project-shapes) compares `bare`, `basic`, and `fullstack`.
+`npm run build` を実行します。
+出力は `dist/client` の静的ファイル群で、各ルートがそれぞれのチャンクに入ります。
+そのディレクトリーは任意の静的ホストにデプロイできます。
+後でサーバーレンダリングやサーバー関数が必要になったら、`vite.config.ts` で `start: true` の隣に `ssr: true` を追加します。書いたファイルはそのまま引き継がれます。
+[プロジェクトの形状](/getting-started/project-shapes)では `bare`、`basic`、`fullstack` を比較しています。
 
-## Next steps
+## 次のステップ
 
-You now have an app with routing, a component you changed, and a passing test.
-Pick the next page by what you want to understand:
+ルーティング、自分で変更したコンポーネント、そして合格するテストを備えたアプリができました。
+理解したいことに応じて次のページを選びます:
 
-- The model, end to end: [Thinking in Solid](/guides/thinking-in-solid) builds a product search page and says at each step what a React or Vue developer would reach for instead.
-- The model, one concept at a time: [Reactivity](/concepts/reactivity) explains tracking, memos, effects, and when updates land, starting from the warning you saw above.
-- The components: [Components and JSX](/concepts/components-and-jsx) explains why a component runs once, how props stay reactive, and how `Show` and `For` replace conditionals and `map`.
-- The platform: [App structure](/building-apps/app-structure) explains what start mode generates, how `App` and `Document` fit together, and how to turn on server rendering.
-- The router: [Solid Router](/routing/solid-router) covers route definitions, layouts, navigation, and data loading.
+- モデルを最初から最後まで: [Thinking in Solid](/guides/thinking-in-solid) では商品検索ページを作りながら、各ステップで React や Vue の開発者なら代わりに何を使うかを説明します。
+- モデルを1概念ずつ: [リアクティビティ](/concepts/reactivity)では、追跡、メモ、エフェクト、そして更新がいつ反映されるかを、上で見た警告から説明します。
+- コンポーネント: [コンポーネントと JSX](/concepts/components-and-jsx)では、コンポーネントが一度だけ実行される理由、props がどうリアクティブであり続けるか、`Show` と `For` がどう条件分岐と `map` を置き換えるかを説明します。
+- プラットフォーム: [アプリの構造](/building-apps/app-structure)では、start モードが何を生成するか、`App` と `Document` がどう組み合わさるか、サーバーレンダリングをどう有効にするかを説明します。
+- ルーター: [Solid Router](/routing/solid-router) では、ルート定義、レイアウト、ナビゲーション、データ読み込みを扱います。
 
-If you get stuck, ask in the [Discord chatroom](https://discord.com/invite/solidjs).
+行き詰まったら [Discord チャットルーム](https://discord.com/invite/solidjs)で尋ねてください。
