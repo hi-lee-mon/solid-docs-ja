@@ -1,20 +1,17 @@
-SolidJS and its use of Signals have been shaking up the frontend world the past year, but it spent its first few years of existence as a relatively unknown project only worked on by a few maintainers. Its story is not one of overnight success but years of small steps until one day we woke up to a world where almost every JavaScript framework had taken inspiration in Signals or found a renewed interest in fine-grained reactivity.
+SolidJS とそのシグナルの活用は、この1年でフロントエンドの世界を大きく揺さぶりましたが、誕生から最初の数年は、少数のメンテナーだけが関わる比較的無名のプロジェクトでした。その物語は一夜の成功ではなく、小さな一歩の積み重ねです。そしてある日目覚めると、ほぼすべての JavaScript フレームワークがシグナルから影響を受け、細粒度リアクティビティへの関心を新たにしている世界になっていました。
 
-Getting to this point was not easy. Not only have we borrowed a lot from our inspirations, but relied on the generosity of our community of contributors and benefactors. Companies like Netlify, JetBrains, Builder.io, and many others have supported the development, feeding into programs like our [Fellowships](https://www.solidjs.com/blog/solid-fellowships-announcement), [SolidHack](https://hack.solidjs.com/) and now our [SolidStart Fund](https://opencollective.com/solid/projects/solidstart-fund). These programs and initiatives are carefully structured to feed value back to the community by directly supporting part-time resources and empowering our members with the opportunity to work on Solid.
+ここに至るまでの道のりは容易ではありませんでした。私たちは多くのインスピレーション元から大いに拝借しただけでなく、コントリビューターや支援者のコミュニティの善意に支えられてきました。Netlify、JetBrains、Builder.io をはじめとする多くの企業が開発を支援し、[フェローシップ](https://www.solidjs.com/blog/solid-fellowships-announcement)、[SolidHack](https://hack.solidjs.com/)、そして現在の [SolidStart Fund](https://opencollective.com/solid/projects/solidstart-fund) といったプログラムにつなげてくれました。これらのプログラムや取り組みは、パートタイムのリソースを直接支援し、メンバーが Solid に取り組む機会を得られるようにすることで、コミュニティに価値を還元するよう丁寧に設計されています。
 
-So we are very happy to announce that the Chrome team through [Aurora](http://developer.chrome.com/aurora) will be contributing $30,000 towards our continued performance research. Aurora funds improvements to Core Web Vitals in open source frameworks.
+そこで、Chrome チームが [Aurora](http://developer.chrome.com/aurora) を通じて、私たちの継続的なパフォーマンス研究に $30,000 を拠出してくれることを、とても嬉しく発表します。Aurora はオープンソースフレームワークの Core Web Vitals 改善に資金を提供しています。
 
-This started back in the fall when [Addy Osmani](https://twitter.com/addyosmani) from the Chrome team encouraged us to create a Solid version of the [Taste Movies App](https://tastejs.com/movies/). We used this as an opportunity to enlist the community to try the latest experimental technology we had been working on, and the result exceeded even our expectations. They had built a full client-navigated server-rendered app that scored top marks in Lighthouse page metrics and had 1/10th the JavaScript payload of the most popular solutions.
+きっかけは昨年秋、Chrome チームの [Addy Osmani](https://twitter.com/addyosmani) が [Taste Movies App](https://tastejs.com/movies/) の Solid 版を作るよう勧めてくれたことでした。私たちはこれを機会に、取り組んでいた最新の実験的技術をコミュニティに試してもらいました。結果は私たちの期待すら超えるものでした。クライアントナビゲーション付きの完全なサーバーレンダリングアプリが作られ、Lighthouse のページメトリクスで最高得点を記録し、JavaScript ペイロードは最も普及しているソリューションの1/10でした。
 
-<center>
-  [![Routes list
-  example](/img/blog/chrome-supports-solidjs/devto-article-image.png)](https://dev.to/this-is-learning/client-side-routing-without-the-javascript-3k1i)
-</center>
+[![ルート一覧の例](/img/blog/chrome-supports-solidjs/devto-article-image.png)](https://dev.to/this-is-learning/client-side-routing-without-the-javascript-3k1i)
 
-We accomplish this using a technique of nested routed server-rendered HTML partials combined with partial hydrated "Islands". Combining the small JavaScript delivery of Islands with the state preservation found in single page applications.
+これを実現したのは、ネストされたルーティングによるサーバーレンダリング HTML パーシャルと、部分的にハイドレーションされる「アイランド」を組み合わせる手法です。アイランドの小さな JavaScript 配信量と、シングルページアプリケーションが持つ状態保持を組み合わせています。
 
-It's one thing to prototype new exciting technology. It is a whole other to support its general adoption. There are still [performance improvements to be made, techniques to be applied, and rough edges to smooth out](https://github.com/solidjs/solid-start/issues/400). This contribution will give us the means to not only build out this technology but explore some of the less understood overheads in JavaScript frameworks like the cost of hydration and serialization.
+新しくてエキサイティングな技術のプロトタイプを作ることと、それを一般に普及させることを支えることは、まったく別のことです。[改善すべきパフォーマンス、適用すべき手法、滑らかにすべき粗い部分](https://github.com/solidjs/solid-start/issues/400)はまだ残っています。この拠出により、この技術を作り上げるだけでなく、ハイドレーションやシリアライズのコストのような、JavaScript フレームワークであまり理解されていないオーバーヘッドの探究も可能になります。
 
-We aim to approach this project the way we have approached SolidJS since the beginning; based on the numbers, with [Core Web Vitals](https://web.dev/learn-core-web-vitals/) setting the guidelines. We are particularly interested in ensuring great INP(Interaction to Next Paint) scores while maintaining low LCP(Largest Contentful Paints) and TBT (Total Blocking Time).
+このプロジェクトには、SolidJS 開始以来と同じ、数字に基づくアプローチで臨みます。指針となるのは [Core Web Vitals](https://web.dev/learn-core-web-vitals/) です。特に、低い LCP（Largest Contentful Paint）と TBT（Total Blocking Time）を維持しながら、優れた INP（Interaction to Next Paint）スコアを確保することに注力しています。
 
-This is an exciting time for open-source software and SolidJS. The SolidJS Team is honored to have been granted this incredible opportunity to continue our research and development, exploring new avenues and ideas that will unlock incredible performance and DX. We look forward to working closely with the Chrome team in building a faster web.
+オープンソースソフトウェアと SolidJS にとって、エキサイティングな時期です。SolidJS チームは、研究開発を続け、驚異的なパフォーマンスと DX を引き出す新しい道やアイデアを探究する、この素晴らしい機会を得られたことを光栄に思います。Chrome チームと緊密に協力し、より速いウェブを構築していくことを楽しみにしています。

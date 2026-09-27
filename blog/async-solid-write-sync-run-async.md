@@ -1,20 +1,20 @@
-*This is part two of a deep dive into how Solid 2.0 handles async. [Part one](/blog/async-solid-fetch-high-block-low) was about reads. Part two is about writes.*
+*これは Solid 2.0 が非同期をどう扱うかを深掘りするシリーズの第2回です。[第1回](/blog/async-solid-fetch-high-block-low)は読み取りについて、第2回は書き込みについてです。*
 
-Last time, we looked at how colorless composition when reading async meant we didn't have to choose between manageable code and performant UI.
+前回は、非同期の読み取りにおけるカラーレスな合成によって、管理しやすいコードとパフォーマントな UI のどちらかを選ばなくて済むことを見ました。
 
-I think writes reveal something even more profound. Even better, we get to use one of the all-time classic frontend demos to make our point: TodoMVC.
+書き込みは、さらに深い本質を見せてくれると思います。さらに嬉しいことに、その説明にはフロントエンドのデモとして史上最高の古典である TodoMVC を使えます。
 
-It's the first thing you write as a framework author to prove that your approach is worthwhile. I still look at it to evaluate new frameworks. Not all examples are equivalent. Many are overengineered. But at its base is a simple client list-management example.
+フレームワーク作者が自分のアプローチに価値があることを証明するために最初に書くもの、それが TodoMVC です。私も今でも新しいフレームワークを評価するときにこれを見ます。すべての例が同等というわけではなく、過度に複雑化したものも多いですが、その根幹にあるのはシンプルなクライアントのリスト管理の例です。
 
-Now, let's try to make it more real. Our Todos live in a database. Every mutation goes through the server. You want immediate affordance when interacting with the list. Maybe some optimistic updates.
+では、もう少し実際的にしてみましょう。Todo はデータベースに保存されています。すべてのミューテーションはサーバーを経由します。リストを操作するときには即座の反応が欲しい。おそらく楽観的更新も欲しいでしょう。
 
-Our simple example doesn't stay so simple. If you've ever had to hand roll this yourself, you are left snapshotting the cache, writing the prediction, firing the mutation, on error restore, on success invalidate. And this isn't just something you do with vanilla JS, I remember doing the same with GraphQL clients. And none of this is even considering managing concurrent requests, race conditions, loading states, and optimistic tearing.
+シンプルな例はシンプルのままではいられなくなります。これを自分で一から実装したことがあれば、キャッシュのスナップショットを取り、予測を書き、ミューテーションを発行し、エラー時に復元し、成功時に無効化する、という作業を残されます。しかもこれはバニラ JS だけの話ではなく、GraphQL クライアントでも同じことをやっていた記憶があります。さらに言えば、これは並行リクエストの管理、競合状態、ローディング状態、楽観的更新のティアリングをまだ考慮すらしていません。
 
-So when designing Solid 2.0, we took a step back. What we realized was that your client-only application was the Optimistic UI all along. It just wasn't aware of the server yet.
+そこで Solid 2.0 の設計では、一歩引いて考えました。気づいたのは、クライアントだけのアプリケーションは、実は最初からずっと楽観的 UI だったということです。単にサーバーの存在をまだ知らなかっただけです。
 
-## Client-Side Todos
+## クライアントサイドの Todo
 
-Let's start with the code for our simple client-side Todo app. I've removed some of the advanced features (like filter, multi-toggle) so we can focus on the main functionality. The UI looks like:
+まず、シンプルなクライアントサイドの Todo アプリのコードから始めましょう。主な機能に集中できるよう、高度な機能（フィルターや一括トグルなど）は取り除いてあります。UI は次のようになります。
 
 ```tsx
 // App.tsx
@@ -82,7 +82,7 @@ function Todo(props: {
 }
 ```
 
-And for our data we've used a Solid Store:
+そしてデータには Solid ストアを使います。
 
 ```ts
 // todos.ts
@@ -109,13 +109,13 @@ export function createTodos() {
 }
 ```
 
-Solid stores have mutation-based setters that collect fine-grained updates so that when you `todo.completed = true` only parts of the UI that listen to the completed value on the particular todo re-evaluate. Not the list. Not the whole row.
+Solid のストアはミューテーションベースのセッターを持ち、細粒度の更新を集約します。そのため `todo.completed = true` と書いたとき、再評価されるのは特定の todo の completed 値を購読している UI の部分だけです。リストではなく、行全体でもありません。
 
-Everything here follows standard patterns. We extracted our logic into a custom primitive `createTodos`. It provides our readonly store and named mutations. This keeps our UI clean and gives us a centralized way to look at our data.
+ここまでのすべては標準的なパターンです。ロジックをカスタムプリミティブ `createTodos` に切り出し、読み取り専用のストアと名前付きミューテーションを提供しています。これにより UI はクリーンに保たれ、データを一元的に見る方法が得られます。
 
-## Making it Real
+## 実際的にする
 
-So what if we want the Todos to live in a database? We could set up our API service or maybe create some server functions:
+では、Todo をデータベースに保存したい場合はどうでしょう。API サービスを用意してもいいですし、サーバー関数をいくつか作ってもいいでしょう。
 
 ```ts
 // api.ts
@@ -140,11 +140,9 @@ export async function remove(id: string) {
 }
 ```
 
-<Notice>
-That string at the top means these functions run on the server. That's the next article. Also this is demonstrative. A real backend would have error handling logic and validation.
-</Notice>
+> 先頭のあの文字列は、これらの関数がサーバーで実行されることを意味します。それは次回の記事で取り上げます。また、これはあくまで例示です。実際のバックエンドにはエラーハンドリングとバリデーションのロジックが必要です。
 
-Let's update our application to read from the server and to have optimistic updates.
+アプリケーションを更新して、サーバーから読み取り、楽観的更新を行うようにしましょう。
 
 ```ts
 // todos.ts
@@ -180,37 +178,37 @@ export function createTodos() {
 }
 ```
 
-That's it.
+これだけです。
 
-The UI of our application didn't need to change. `App.tsx` still imports and calls `createTodos`. The `<For>` doesn't know the list comes from a database now. The checkbox doesn't know its click crosses a network. In part one, we established that latency was a property a value could have without its consumers caring. It is no different here.
+アプリケーションの UI を変える必要はありませんでした。`App.tsx` は相変わらず `createTodos` をインポートして呼び出します。`<For>` はリストがデータベースから来るようになったことを知りません。チェックボックスは、自分のクリックがネットワークを越えることを知りません。第1回で、レイテンシはコンシューマーが気にすることなく値が持てる性質だと確立しました。ここでもまったく同じです。
 
-Mutations didn't change either. If you look at all the `setTodos` calls they are identical to before. We added the API call and the data refresh. Legitimate new work we needed. We didn't need to add a prediction because our sync mutation already was one.
+ミューテーションも変わりません。すべての `setTodos` 呼び出しを見れば、以前と同一です。追加したのは API 呼び出しとデータのリフレッシュだけです。必要だった正当な新規作業です。予測を追加する必要はありませんでした。同期ミューテーション自体がすでに予測だったからです。
 
-The last change here is wrapping the mutations in an `action`. These might look a bit foreign as they are generator functions. To be fair, this is us dealing with a limitation of JavaScript. There is no way for us to keep context after an `await` today. There is an [Async Context proposal](https://github.com/tc39/proposal-async-context) but it may be years before it lands in your browser. But with generators we can `yield` promises for a very similar experience and still have access to it.
+最後の変更は、ミューテーションを `action` で包むことです。ジェネレーター関数なので少し見慣れないかもしれません。公平に言えば、これは JavaScript の制約への対処です。今の JavaScript では `await` の後にコンテキストを保持する方法がありません。[Async Context 提案](https://github.com/tc39/proposal-async-context)はありますが、ブラウザに実装されるまで何年もかかるかもしれません。しかしジェネレーターを使えば Promise を `yield` して、非常によく似た体験を得ながら、コンテキストへのアクセスを保てます。
 
-This is important so that we can connect the start of async (and the optimistic prediction) with all the work that happens downstream, like the refresh, so they can ride as part of the same transaction.
+これは重要です。非同期の開始（と楽観的な予測）を、リフレッシュのような下流で起きるすべての処理と結びつけ、それらを同じトランザクションの一部として動かせるからです。
 
-## Drafts Are Always Speculative
+## ドラフトは常に投機的
 
-This all extends the new batch timing mechanism in Solid 2.0. When we write a new value we don't commit it right away. When no async is involved the commit happens quickly. But when async is involved we wait until it resolves. Our system demands this of us. We need the ability to simultaneously have the past be alive on our display while building the future. Independent state updates shouldn't suddenly be frozen because of new work in flight.
+これはすべて、Solid 2.0 の新しいバッチタイミング機構を拡張したものです。新しい値を書き込んでも、すぐにはコミットしません。非同期が絡まなければコミットはすぐに行われます。しかし非同期が絡むと、その解決を待ちます。システムがこれを私たちに要求します。未来を構築している間も、過去を画面に生かし続ける能力が必要なのです。独立した状態更新が、実行中の新しい処理のために急に凍結されるべきではありません。
 
-`createOptimisticStore` and optimistic state, in general, are a little different, but built on the same layering idea. The draft applies the mutation immediately. `yield` gives the graph the Promise to wait on. `action` holds the transaction open. `refresh` revalidates the source. The underlying store reconciles against the confirmed truth. Only the differences trigger per property fine-grained updates. If optimism matches reality there is no additional work done. No components re-ran. The optimistic layer resolves itself.
+`createOptimisticStore` や楽観的状態全般は少し異なりますが、同じレイヤリングの考え方の上に構築されています。ドラフトはミューテーションを即座に適用します。`yield` は待つべき Promise をグラフに渡します。`action` はトランザクションを開いたままにします。`refresh` はソースを再検証します。基底のストアは確定した真実と突き合わせます。差分だけがプロパティ単位の細粒度更新をトリガーします。楽観的な予測が現実と一致すれば、追加の処理は一切行われません。コンポーネントの再実行もありません。楽観的レイヤーは自ら解決します。
 
-![The optimistic overlay sits on top of the confirmed store and is discarded once the transaction settles](/img/blog/async-solid-write-sync-run-async/optimistic-overlay-diagram.png)
+![楽観的オーバーレイは確定済みストアの上に重なり、トランザクションが確定すると破棄される](/img/blog/async-solid-write-sync-run-async/optimistic-overlay-diagram.png)
 
-That's why there is no rollback. Optimistic writes aren't a second copy of your state, but a layer that sits on top. An overlay that the reactive system discards when the transaction completes, pass or fail. If `api.add` throws, the overlay is dropped and the list is back to where it started.
+これがロールバックが存在しない理由です。楽観的な書き込みは状態の2つ目のコピーではなく、上に重なるレイヤーです。成功しても失敗しても、トランザクション完了時にリアクティブシステムが破棄するオーバーレイです。`api.add` が投げれば、オーバーレイは捨てられ、リストは開始時点に戻ります。
 
-Because `actions` are part of the same hold-on-async system we discussed in part one, things remain consistent. UI never shows half a mutation, and rapid clicking doesn't interleave into a corrupted list.
+`action` は第1回で説明した非同期保持システムの一部なので、一貫性が保たれます。UI がミューテーションの半分だけを見せることはなく、速い連打が相互に入り組んで壊れたリストになることもありません。
 
-## I'm Oversimplifying (a little)
+## 少し単純化しています
 
-Yes, I admit this example works so well because we decided that the synchronous experience was the desired outcome. Things like Trello Boards and multiplayer applications really play well with this. If the network latency suddenly becomes 5 seconds per request the client never notices. We can start doing future mutations on optimistically rendered UI that hasn't fully been acknowledged. A new optimistically sourced Todo with a checkbox can still make a request when you toggle it.
+はい、この例がここまでうまくいくのは、同期体験を望ましい結果として決めたからだと認めます。Trello ボードやマルチプレイヤーアプリケーションのようなものは、この方式と本当に相性が良いです。ネットワークレイテンシが急にリクエストあたり5秒になっても、クライアントは気づきません。まだ完全に承認されていない楽観的にレンダーされた UI 上で、未来のミューテーションを開始できます。楽観的に作られた新しい Todo に付いたチェックボックスでも、トグルすればリクエストを発行できます。
 
-The downside is when things do go wrong, while we have no problem showing a consistent UI, if we let the user get too far ahead of us the result can be more jarring. They registered that their work succeeded (as they see it) and then suddenly it is gone. We can collect the failed actions and have the ability to replay them, but that is a design consideration and not part of the automation.
+欠点は、実際に問題が起きたときです。一貫した UI を見せることに問題はありませんが、ユーザーが先行しすぎると結果はより衝撃的になります。ユーザーから見れば作業は成功したと認識しているのに、それが突然消えてしまうのです。失敗したアクションを集めてリプレイすることもできますが、それは設計上の検討事項であって自動化の一部ではありません。
 
-The reality, like with the previous article, is that we do often need to add more affordances. We might want to indicate that a record is saving and hasn't been confirmed yet. It doesn't need to change the immediacy of the experience but it is legitimate work. Like with reads it is work your designer would have flagged for you to do anyway.
+前回の記事と同じく、現実には追加のアフォーダンスが必要になることが多いです。レコードが保存中でまだ確定していないことを示したい場合もあるでしょう。体験の即時性を変える必要はありませんが、それは正当な作業です。読み取りと同様、デザイナーがどのみちあなたにやるべきだと指摘する種類の作業です。
 
-A simple way to do this could be to add additional optimistic state:
+簡単な方法のひとつは、追加の楽観的状態を足すことです。
 
 ```ts
 const [isSaving, setSaving] = createOptimistic(false);
@@ -219,7 +217,7 @@ const [isSaving, setSaving] = createOptimistic(false);
 setSaving(true); // will revert at the end back to false
 ```
 
-Or my personal favorite build it into the schema:
+あるいは、私のお気に入りの、スキーマに組み込んでしまう方法です。
 
 ```ts
 export type Todo = {
@@ -239,20 +237,20 @@ const addTodo = action(function* (title: string) {
 });
 ```
 
-That way the new record has an indicator on it and when the server comes back and all async settles it will be gone — success or failure. One surgical update for the piece of UI that happened to listen to it.
+こうすれば新しいレコードにインジケーターが付き、サーバーが応答してすべての非同期が確定した時点で、成功でも失敗でも消えます。その値をたまたま購読している UI の一部に対する、ピンポイントの更新が1回行われるだけです。
 
-How your application deals with that failure we will talk more about in the next article. For now, the important part is the guarantee that rejection can't strand your UI in a lie. The overlay is dropped and only the truth remains.
+アプリケーションがその失敗にどう対処するかは、次回の記事で詳しく話します。いま重要なのは、拒否が UI を嘘の状態に取り残さないという保証です。オーバーレイは破棄され、真実だけが残ります。
 
-## The Rewrite that Never Happens
+## 起こらなかった書き直し
 
-When we first introduced the world to Fine-Grained reactivity the argument I made was that your Components don't matter. You could re-arrange your code how you saw fit. I'd seen too many projects over the years have parts of the UI expand in capability, have their boundaries move and it be a huge refactor.
+細粒度リアクティビティを初めて世に出したとき、私が主張したのは「コンポーネントは重要ではない」ということでした。コードは好きなように再配置できます。長年の間に、UI の一部が機能を拡大し、その境界が動いて大規模なリファクタリングになるプロジェクトを見すぎてきました。
 
-Fine-Grained allowed you to write the whole application as one Component and pay no performance penalty. Similarly as it grew, no matter where you broke that Component apart, it wouldn't be impacted. Because all costs were tied to the data and not a re-render, you weren't checking if your memoization rules changed. It just worked. The updates were always isolated — why would this change anything?
+細粒度では、アプリケーション全体を1つのコンポーネントとして書いても、パフォーマンスのペナルティを払わずに済みます。同様に、アプリが成長しても、コンポーネントをどこで分割しても影響を受けません。すべてのコストはデータに結び付けられ、再レンダーには結び付けられていないので、メモ化のルールが変わったかを確認する必要もありません。ただ動きます。更新は常に分離されています。これが何かを変えるというのでしょうか。
 
-This article I think is even closer to home for every development team. The prototype worked. Everyone loved it. But now you have to make it for real and that's generally a rewrite. State moves into a cache library. Mutations gain lifecycles. Components gain loading and error branches. The app you validated gets thrown away.
+今回の記事は、どの開発チームにとってもさらに身近な話だと思います。プロトタイプは動いた。皆は気に入った。でも今度は本物にしなければならず、それは普通は書き直しを意味します。状態はキャッシュライブラリに移され、ミューテーションはライフサイクルを持ち、コンポーネントはローディングとエラーの分岐を持ちます。検証済みのアプリは捨てられてしまいます。
 
-Here the prototype becomes the production app. The synchronous TodoMVC wasn't just a toy. It had the finished Component structure and mutations. Going from demo to production was additive. One store constructor, an extra wrapper per mutation, and a file of server functions. Pinpoint updates that one could easily see in a code review.
+ここではプロトタイプがそのまま本番アプリになります。同期の TodoMVC は単なるおもちゃではありませんでした。完成されたコンポーネント構造とミューテーションを持っていました。デモから本番への移行は追加的なものでした。ストアコンストラクターを1つ、ミューテーションごとにラッパーを1つ、そしてサーバー関数のファイルを1つ。コードレビューで一目で確認できるピンポイントの更新です。
 
-But we aren't quite done yet. We sort of glossed over how `api.ts` was running on a different machine. We streamed, serialized, and did full round trips to the server without writing any network specific code. That's what we cover next time.
+しかし、まだ終わっていません。`api.ts` が別のマシンで動いていることを、私たちは軽く流してきました。ネットワーク固有のコードを一切書かずに、ストリーミング、シリアライズ、サーバーへの完全な往復を行っていたのです。それが次回のテーマです。
 
-That's writes. The network is stranger. Until then.
+書き込みは以上です。ネットワークはもっと奇妙です。では次回。
