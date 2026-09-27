@@ -1,12 +1,12 @@
-The hardest problems in UI frameworks were never about rendering. We've always had a DOM we could mutate efficiently. The early challenge was synchronization — showing a consistent interface no matter what was going on, and doing it efficiently. Fine-grained reactivity solved that a decade ago. Update exactly what changed. Skip the rest.
+UI フレームワークにおける最も難しい問題は、決してレンダリングではありませんでした。効率的に変更できる DOM は最初からありました。最初の課題は同期でした――何が起きていようと一貫したインターフェースを表示し、それを効率的に行うことです。細粒度リアクティビティは 10 年前にそれを解決しました。変更されたものだけを正確に更新し、残りはスキップする。
 
-The problem that never went away was async. Every framework, including ours, treated it as a condition that happened *to* it. Something a synchronous core would have to weather.
+なくならなかった問題は非同期です。私たちのものを含め、あらゆるフレームワークが非同期を、自分に*降りかかる*条件として扱ってきました。同期的なコアが耐え忍ぶしかないものとして。
 
-Today Solid 2.0 reaches Release Candidate, and it takes the other path: async is a property of the reactive system itself. It's part of the graph. That one decision runs through everything in this release. The model does more, so the framework does less.
+そして今日、Solid 2.0 はリリース候補（Release Candidate）に到達し、もう一つの道を取ります。非同期はリアクティブシステム自体の性質であり、グラフの一部です。この一つの決定が、このリリースのすべてを貫いています。モデルがより多くを担うため、フレームワークはより少なくて済みます。
 
-## Async Lives in the Graph
+## 非同期はグラフの中に生きる
 
-A computation can return a Promise (or an async iterator), and everything downstream just understands. No special primitive to absorb it. No manual loading state. No null checks.
+計算は Promise（または非同期イテレーター）を返すことができ、下流のすべてがそれを理解します。それを吸収する特別なプリミティブも、手動のローディング状態も、null チェックも不要です。
 
 ```tsx
 import { createMemo, isPending, Loading } from "solid-js";
@@ -22,39 +22,39 @@ function Profile(props) {
 }
 ```
 
-That's the whole data-fetching story. `user` is a memo that happens to be async. `<Loading>` covers it until it's ready. When `props.id` changes, the old content stays visible while the new answer is in flight, and `isPending` tells you a change is coming — not "is anything fetching anywhere," but "is a new answer to *this* question on the way."
+これがデータフェッチの物語のすべてです。`user` はたまたま非同期なメモです。`<Loading>` は準備ができるまでそれをカバーします。`props.id` が変わると、新しい回答が届くまでの間も古いコンテンツは表示されたままになり、`isPending` が変更が来ることを教えてくれます――「どこかで何かがフェッチ中か」ではなく、「*この*質問への新しい回答が届く途中か」です。
 
-Derived state, error handling, transitions, and optimistic updates all fall out of this one idea. And because async lives in the graph, the same components work whether their data comes from a client fetch, a server render, or a server function. The server story layers onto your app instead of replacing it.
+派生状態、エラーハンドリング、トランジション、楽観的更新はすべてこの一つのアイデアから自然に導かれます。そして非同期がグラフの中にあるため、データがクライアントのフェッチ、サーバーレンダー、サーバー関数のどこから来ても同じコンポーネントが動作します。サーバーの物語はアプリを置き換えるのではなく、その上に重なります。
 
-There's more to the async story than a single section can cover — see What's Next below.
+非同期の物語は 1 つのセクションでは語り尽くせません――後述の「次は何か」をご覧ください。
 
-## Less to Learn, More to Use
+## 学ぶことは少なく、使えることは多く
 
-Everything Solid 2.0 removes is something you had to learn. Everything it adds is something you get to use. These weren't features we cut. They were workarounds you had to learn. Now they're just how Solid works:
+Solid 2.0 が取り除いたものはすべて、あなたが学ばなければならなかったものです。追加されたものはすべて、あなたが使えるものです。これらは私たちが削った機能ではありません。あなたが学ばなければならなかった回避策でした。今では、それらは Solid の動作そのものです。
 
-- **`createResource` — gone.** Async flows through ordinary memos.
-- **`batch` — gone.** Everything batches. Writes apply on a microtask; `flush()` when you need them now.
-- **`startTransition` / `useTransition` — gone.** The graph holds a consistent state on its own; `isPending` and `latest` read it.
-- **`on` and `createComputed` — gone.** Split effects — `createEffect(compute, apply)` — separate tracking from side effects.
-- **`produce` and `createMutable` — gone.** Store setters hand you a draft you mutate. That's just how stores work now.
+- **`createResource` ―― 廃止。** 非同期は普通のメモを流れます。
+- **`batch` ―― 廃止。** すべてがバッチされます。書き込みはマイクロタスクで適用され、今すぐ必要なら `flush()` します。
+- **`startTransition` / `useTransition` ―― 廃止。** グラフが自分で一貫した状態を保持し、`isPending` と `latest` がそれを読み取ります。
+- **`on` と `createComputed` ―― 廃止。** 分割エフェクト `createEffect(compute, apply)` が、追跡と副作用を分離します。
+- **`produce` と `createMutable` ―― 廃止。** ストアのセッターはミューテートするドラフトを渡します。これが今のストアの動作です。
 
-The [1.x migration guide](https://v2.solidjs.com/migration/from-solid-1) maps every removal to its replacement.
+[1.x 移行ガイド](https://v2.solidjs.com/migration/from-solid-1)は、すべての削除とその代替の対応を示しています。
 
-The new APIs are a different story. You don't need optimistic stores, projections, actions, or reveal ordering to build your first app. You might not need them for your tenth. But when you do, they're there, and they work with everything else. Learn less, do more. And the runtime is only half of it.
+新しい API は別の話です。最初のアプリを作るのに、楽観的ストア、プロジェクション、アクション、表示順序の制御は必要ありません。10 個目のアプリでも必要ないかもしれません。しかし必要になったとき、それらはそこにあり、他のすべてと連携します。学ぶことは少なく、できることは多い。そしてランタイムはその半分にすぎません。
 
-## One Plugin, Whole Platform
+## 1 つのプラグイン、プラットフォーム全体
 
-Our tooling made the same trade.
+私たちのツールチェーンも同じトレードをしました。
 
-Solid 2.0 ships a new compiler toolchain written in Rust on top of [Oxc](https://oxc.rs/), and `@solidjs/vite-plugin` **defaults to it**. Upgrade the plugin and you're compiling Solid with native tooling. Zero configuration. Nothing to migrate. The Babel preset remains available.
+Solid 2.0 は [Oxc](https://oxc.rs/) の上に構築された Rust 製の新しいコンパイラツールチェーンを同梱し、`@solidjs/vite-plugin` は**デフォルトでそれを使います**。プラグインをアップグレードすれば、ネイティブツールで Solid をコンパイルしています。設定ゼロ。移行も不要。Babel プリセットも引き続き利用できます。
 
-| Workload | babel-plugin-jsx-dom-expressions | Oxc compiler | Speedup |
+| ワークロード | babel-plugin-jsx-dom-expressions | Oxc コンパイラ | 高速化 |
 | --- | ---: | ---: | ---: |
-| Fixture corpus (88 files, 175 KB, all 10 modes) | 440 ms | 19 ms | 23x |
-| 129 KB single module | 545 ms | 9.4 ms | 58x |
-| 1 MB single module | 24,975 ms | 70 ms | 355x |
+| Fixture 一式（88 ファイル、175 KB、全 10 モード） | 440 ms | 19 ms | 23x |
+| 129 KB の単一モジュール | 545 ms | 9.4 ms | 58x |
+| 1 MB の単一モジュール | 24,975 ms | 70 ms | 355x |
 
-And the plugin now ships a **start mode** — a turnkey serving layer built directly into the plugin:
+そしてプラグインには **start モード** が追加されました――プラグインに直接組み込まれた、すぐに使えるサーブレイヤーです。
 
 ```ts
 // vite.config.ts
@@ -66,14 +66,14 @@ export default defineConfig({
 });
 ```
 
-That's a complete app setup on plain Vite. No entry files, no `index.html`, no dev server script. The plugin owns entries, dev serving, and the build. You write `src/App.tsx` and go.
+これだけで、プレーンな Vite 上の完全なアプリセットアップです。エントリーファイルも `index.html` も dev サーバースクリプトも不要。プラグインがエントリー、dev サーブ、ビルドを担います。`src/App.tsx` を書くだけです。
 
-Everything layers on from there:
+そこからすべてが積み重なります。
 
-- **An SPA by default.** `start: true` alone is client mode: dev serves your app client-rendered onto a streamed document shell, and `vite build` emits a purely static `dist/client` — deployable to any static host.
-- **File-system routing** via the router-neutral [filesystem-routing](https://github.com/solidjs/filesystem-routing) package — SolidStart-proven conventions, HMR and code splitting, `GET`/`POST` API routes as fetch middleware, typed route emission for Solid Router.
-- **SSR** with `solid({ start: true, ssr: true })`. The plugin swaps `render` for `hydrate`, turns on the hydratable transforms, and ships the server bundle. The production contract is one function — `handleRequest(request)` — which is why it composes with any host platform. Fetch-style middleware (`start.middleware`), a per-request setup seam for routers (`start.setup`), and typed environment variables validated by [Standard Schema](https://standardschema.dev) — with a build-time check that blocks compilation if a server secret leaks into a client chunk — round out the serving layer.
-- **Server functions.** `"use server"` is now a *core* feature backed by `@solidjs/web/server-functions` — typed RPC, streaming returns, progressive enhancement, and custom serialization in any Vite app. The server side of a server function is your function body — validation, auth, and logging are lines of code, not framework hooks. Anything referenced only inside the body never reaches the client; the directive boundary is itself the privacy mechanism.
+- **デフォルトで SPA。** `start: true` だけでクライアントモードです。dev はストリーム配信されるドキュメントシェルにアプリをクライアントレンダリングで提供し、`vite build` は純粋に静的な `dist/client` を出力します――任意の静的ホストにデプロイ可能です。
+- ルーター中立の [filesystem-routing](https://github.com/solidjs/filesystem-routing) パッケージによる**ファイルシステムルーティング**――SolidStart で実証済みの規約、HMR とコード分割、フェッチミドルウェアとしての `GET`/`POST` API ルート、Solid Router 向けの型付きルート出力。
+- `solid({ start: true, ssr: true })` による **SSR**。プラグインは `render` を `hydrate` に置き換え、ハイドレーション可能な変換を有効にし、サーバーバンドルを出力します。本番の契約は 1 つの関数 `handleRequest(request)` であり、だからこそ任意のホストプラットフォームと合成できます。フェッチスタイルのミドルウェア（`start.middleware`）、ルーター向けのリクエストごとのセットアップ接続点（`start.setup`）、[Standard Schema](https://standardschema.dev) で検証される型付き環境変数――サーバーのシークレットがクライアントチャンクに漏れた場合にコンパイルをブロックするビルド時チェック付き――がサーブレイヤーを完成させます。
+- **サーバー関数。** `"use server"` は `@solidjs/web/server-functions` に支えられた*コア*機能になりました――型付き RPC、ストリーミング返却、プログレッシブエンハンスメント、任意の Vite アプリでのカスタムシリアライゼーション。サーバー関数のサーバー側はあなたの関数本体です――バリデーション、認証、ロギングはフレームワークのフックではなくコード行です。本体内でのみ参照されるものはクライアントに届きません。ディレクティブの境界自体がプライバシー機構です。
 
 ```ts
 import { reload } from "@solidjs/web";
@@ -85,70 +85,70 @@ export async function addTodo(title: string) {
 }
 ```
 
-- **When it's time to ship,** one build emits `dist/client` plus a server module that default-exports a web-standard Fetchable handler — the convention Cloudflare Workers, Netlify Functions, Nitro, Bun, and `deno serve` already speak. The platform Vite plugins from [Cloudflare](https://developers.cloudflare.com/workers/vite-plugin/), [Netlify](https://www.npmjs.com/package/@netlify/vite-plugin), and [Nitro](https://nitro.build/) adopt Solid's server environment directly, so there is no Solid adapter layer for you to configure or for us to maintain. Deployment is web standards plus your platform's own tooling. [Full deployment guide.](https://v2.solidjs.com/building-apps/deployment)
+- **デプロイするときは**、1 回のビルドで `dist/client` と、Web 標準の Fetchable ハンドラーを default エクスポートするサーバーモジュールが出力されます――Cloudflare Workers、Netlify Functions、Nitro、Bun、`deno serve` がすでに対応している規約です。[Cloudflare](https://developers.cloudflare.com/workers/vite-plugin/)、[Netlify](https://www.npmjs.com/package/@netlify/vite-plugin)、[Nitro](https://nitro.build/) のプラットフォーム Vite プラグインは Solid のサーバー環境を直接採用しているため、あなたが設定する Solid アダプター層も、私たちがメンテナンスする層も存在しません。デプロイは Web 標準とあなたのプラットフォームのツールだけです。[完全なデプロイガイド。](https://v2.solidjs.com/building-apps/deployment)
 
-## SolidStart Finished Its Job
+## SolidStart は役目を終えた
 
-A metaframework exists to fill the gaps in its framework. SolidStart's job was to provide what core couldn't. Over the 2.0 cycle, each of those capabilities moved home: server functions into core, the serving layer into start mode, file-system routing into a router-neutral package. What remained at the end of that process was a wrapper around things that no longer needed wrapping.
+メタフレームワークは、フレームワークの隙間を埋めるために存在します。SolidStart の仕事は、コアが提供できないものを提供することでした。2.0 のサイクルを通じて、それらの機能は一つずつ本来の場所へ移りました。サーバー関数はコアへ、サーブレイヤーは start モードへ、ファイルシステムルーティングはルーター中立のパッケージへ。その過程の最後に残ったのは、もはやラップを必要としないものを包むラッパーでした。
 
-So instead of shipping a hollow 3.0, we're retiring it. **Start mode replaces SolidStart.**
+そこで、中身の空っぽな 3.0 を出す代わりに、私たちはそれを退役させます。**start モードが SolidStart に取って代わります。**
 
-If you run SolidStart in production today, nothing breaks. SolidStart will continue to receive maintenance releases, and the [migration guide](https://v2.solidjs.com/migration/from-solid-start) is available now. For most apps the move is mechanical, and the migration assistant below flags the rest. This isn't an ending — it's the framework finishing the job the metaframework started.
+今日 SolidStart を本番で動かしていても、何も壊れません。SolidStart は引き続きメンテナンスリリースを受け取り、[移行ガイド](https://v2.solidjs.com/migration/from-solid-start)はすでに公開されています。ほとんどのアプリでは移行は機械的な作業で、残りは後述の移行アシスタントが指摘します。これは終わりではありません――フレームワークが、メタフレームワークが始めた仕事をやり遂げることです。
 
-## The Ten-Second Tour
+## 10 秒ツアー
 
-If you followed the beta announcement, you know the foundations. For everyone else, each item links to the docs:
+ベータの発表を追っていた方なら基礎はご存知でしょう。そうでない皆さんのために、各項目にはドキュメントへのリンクが付いています。
 
-- **[`<Loading>`, `<Errored>`, `<Reveal>`.](https://v2.solidjs.com/concepts/boundaries)** Suspense, ErrorBoundary, and SuspenseList, reconsidered for the new async model — stale content stays visible on revalidation, boundaries heal, reveal order is coordinated.
-- **[Actions and optimistic state in core.](https://v2.solidjs.com/concepts/async-reactivity)** `action`, `createOptimistic`, and `createOptimisticStore` make in-flight mutations render immediately and reconcile when the server answers.
-- **[Draft-first stores.](https://v2.solidjs.com/concepts/stores)** Setters hand back a value to mutate directly; projections and derived stores (`createStore(fn)`, `createProjection`) replace the write-back patterns of 1.x.
-- **[Unified lists.](https://v2.solidjs.com/concepts/components-and-jsx)** One `<For>` with keying modes replaces `<For>`/`<Index>`; `<Repeat>` renders by count with no diffing.
-- **[A DOM model closer to HTML.](https://v2.solidjs.com/concepts/components-and-jsx)** Standard attribute semantics, boolean presence/absence, `class` objects and arrays, `ref` directive factories.
-- **A cleaner package graph.** The reactive core is `@solidjs/signals`; the web runtime is `@solidjs/web`; stores live in `solid-js` itself.
+- **[`<Loading>`・`<Errored>`・`<Reveal>`。](https://v2.solidjs.com/concepts/boundaries)** 新しい非同期モデルに合わせて再考された Suspense、ErrorBoundary、SuspenseList――再検証中も古いコンテンツは表示されたまま、バウンダリは回復し、表示順序は調整されます。
+- **[コアのアクションと楽観的状態。](https://v2.solidjs.com/concepts/async-reactivity)** `action`、`createOptimistic`、`createOptimisticStore` が、実行中のミューテーションを即座にレンダーし、サーバーの応答で整合させます。
+- **[ドラフトファーストのストア。](https://v2.solidjs.com/concepts/stores)** セッターは直接ミューテートする値を返します。プロジェクションと派生ストア（`createStore(fn)`、`createProjection`）が 1.x の書き戻しパターンに取って代わります。
+- **[統一されたリスト。](https://v2.solidjs.com/concepts/components-and-jsx)** キー指定モードを持つ 1 つの `<For>` が `<For>`/`<Index>` に取って代わり、`<Repeat>` は diffing なしで個数指定でレンダーします。
+- **[HTML に近い DOM モデル。](https://v2.solidjs.com/concepts/components-and-jsx)** 標準の属性セマンティクス、boolean の有無、`class` オブジェクトと配列、`ref` ディレクティブファクトリー。
+- **クリーンなパッケージグラフ。** リアクティブコアは `@solidjs/signals`、ウェブランタイムは `@solidjs/web`、ストアは `solid-js` 自体にあります。
 
-The design rationale for all of it lives in the [2.0 RFCs](https://github.com/solidjs/solid/blob/next/documentation/solid-2.0/README.md).
+これらすべての設計根拠は [2.0 RFC](https://github.com/solidjs/solid/blob/next/documentation/solid-2.0/README.md) にあります。
 
-## What's Next
+## 次は何か
 
-Two things are deliberately not in this post.
+この記事には意図的に入れていないことが 2 つあります。
 
-The async model deserves a real deep dive. A series starts next week: reads, writes, and the wire — how components stay latency-agnostic whether data comes from a memo, an optimistic mutation, or a streaming server.
+非同期モデルは本格的な深掘りに値します。来週からシリーズが始まります。読み取り、書き込み、そしてワイヤー上の通信――メモ、楽観的ミューテーション、ストリーミングサーバーのどこからデータが来ても、コンポーネントがどうレイテンシを意識せずにいられるかを扱います。
 
-And for those who notice `serverFunctions: { components: true }` in the config types: yes, server functions can return components. Reactive server components are in experimental preview behind that flag, and they'll get a full announcement after 2.0 stable. They're worth the wait.
+そして設定型の中の `serverFunctions: { components: true }` に気づいた方へ。はい、サーバー関数はコンポーネントを返せます。リアクティブサーバーコンポーネントはそのフラグの下で実験的プレビュー中で、2.0 安定版の後に正式な発表を予定しています。待つ価値はあります。
 
-## Try It, Migrate to It
+## 試して、移行して
 
-Preview documentation for Solid 2.0 is live at [v2.solidjs.com](https://v2.solidjs.com).
+Solid 2.0 のプレビュードキュメントは [v2.solidjs.com](https://v2.solidjs.com) で公開中です。
 
-For new projects, choose the Solid 2.0 templates from:
+新しいプロジェクトでは、以下から Solid 2.0 テンプレートを選んでください。
 
 ```sh
 npm create solid@latest
 ```
 
-For migrating existing projects, follow the guides [here](https://v2.solidjs.com/migration/from-solid-1).
+既存プロジェクトの移行は、[こちら](https://v2.solidjs.com/migration/from-solid-1)のガイドに従ってください。
 
-We are also developing a [migration assistant](https://github.com/solidjs-community/solid-migration-assistant) that scans your project and prints specific guidance for every 1.x migration site it detects — legacy imports, one-argument `createEffect`, `onMount`, `Suspense`/`Index`/`classList`, the old store helpers:
+また、プロジェクトをスキャンして、検出したすべての 1.x 移行箇所――レガシーなインポート、1 引数の `createEffect`、`onMount`、`Suspense`/`Index`/`classList`、旧ストアヘルパー――に対して具体的なガイダンスを表示する[移行アシスタント](https://github.com/solidjs-community/solid-migration-assistant)も開発中です。
 
 ```sh
 npx solid-migration-assistant
 ```
 
-The ecosystem didn't wait. [Solid Router 2.0](https://v2.solidjs.com/routing/solid-router) ships alongside the RC with fully typed routes, params, and navigation. [Solid Meta 1.0](https://v2.solidjs.com/migration/from-solid-meta) is now a thin layer over 2.0's built-in head registry. Prefer TanStack? The [fullstack-tanstack template](https://v2.solidjs.com/routing/tanstack) pairs TanStack Router and TanStack Query with start mode out of the box, and [TanStack Start](https://tanstack.com/start) already ships a Solid 2.0 beta (`@tanstack/solid-start@beta`). And the libraries you actually build apps with — [Solid Primitives](https://primitives2.solidjs.community/), [Kobalte](https://kobalte.dev/), [Solid Testing Library](https://github.com/solidjs/solid-testing-library), [Storybook](https://github.com/solidjs-community/storybook), and [AG Grid](https://github.com/dsnchz/solid-ag-grid) — have been working hard to support 2.0 through the betas and are ready to use with the RC today. Utilities, components, metaframeworks, testing, routing, head management: the stack is ready before the release is.
+エコシステムは待っていませんでした。[Solid Router 2.0](https://v2.solidjs.com/routing/solid-router) は、完全に型付けされたルート、パラメーター、ナビゲーションとともに RC と同時にリリースされます。[Solid Meta 1.0](https://v2.solidjs.com/migration/from-solid-meta) は 2.0 の組み込み head レジストリの薄いレイヤーになりました。TanStack がお好みですか？ [fullstack-tanstack テンプレート](https://v2.solidjs.com/routing/tanstack)は TanStack Router と TanStack Query を start モードと標準で組み合わせ、[TanStack Start](https://tanstack.com/start) はすでに Solid 2.0 ベータ（`@tanstack/solid-start@beta`）を出しています。そして実際にアプリを作るのに使うライブラリ――[Solid Primitives](https://primitives2.solidjs.community/)、[Kobalte](https://kobalte.dev/)、[Solid Testing Library](https://github.com/solidjs/solid-testing-library)、[Storybook](https://github.com/solidjs-community/storybook)、[AG Grid](https://github.com/dsnchz/solid-ag-grid)――はベータ期間を通じて 2.0 対応に懸命に取り組み、今日 RC とともに使えます。ユーティリティ、コンポーネント、メタフレームワーク、テスティング、ルーティング、head 管理。リリースよりも先にスタックは整っています。
 
-## Thank You
+## 謝辞
 
-It's hard to describe the Herculean effort that has gone into making this happen over the last five months. I never thought we'd accomplish so much in such a short time. It is always the quality-of-life things that you tend to skimp on, and that was the difference. Solid 2.0 Beta was pretty "Solid" before we even launched it. Years of researching the best patterns for declarative reactivity reached their culmination.
+この 5 か月間、これを実現するために費やされた努力は並大抵のものではなく、言葉では言い表せません。こんな短時間にこれほど多くを成し遂げられるとは思ってもみませんでした。手を抜きがちなのはいつも使い勝手に関わる細部ですが、そこが違いを生みました。Solid 2.0 ベータは、ローンチする前からすでにかなり「Solid（堅牢）」でした。宣言的リアクティビティの最良のパターンに関する長年の研究が、ここに結実しました。
 
-But what I didn't expect was how different this was compared to when we prepared for the Solid 1.0 release. The community was much smaller then, and it felt like it was taking forever. This time, I went on paternity leave for six weeks to bond with my son Nico, and we didn't miss a beat. The beta testers, the AI agents, just kept pushing forward. While I was determined not to let the core scope creep, everything else sort of just came along with it. Things I had penciled in for Solid 3.0 or even 4.0. I actually had a Solid 3.0 plan document sketched out six months ago — we've accomplished everything in it.
+しかし予期していなかったのは、Solid 1.0 リリースの準備と比べて、どれほど様子が違っていたかです。あのときコミュニティはずっと小さく、永遠に時間がかかるように感じられました。今回は息子の Nico との絆を深めるために 6 週間の育児休暇を取りましたが、開発は一拍も乱れませんでした。ベータテスターと AI エージェントが、ただ前へ進み続けました。コアのスコープを膨らませないと固く決めていましたが、それ以外のすべては自然とついてきました。Solid 3.0、ひいては 4.0 用に控えていたものまで。実は半年前に Solid 3.0 の計画書を書き起こしていたのですが――その内容はすべて達成しました。
 
-And that might just be how these things go in an age of AI, but it's important to acknowledge the people who make that possible. And there are too many to recognize, but I will give a quick shout-out.
+それは AI の時代における物事の進み方なのかもしれませんが、それを可能にした人々を認めることが重要です。紹介しきれないほどたくさんの方々がいますが、簡単に謝意を述べさせてください。
 
-Starting with those who directly support my work, [Sentry](https://sentry.io), my benevolent employer, and [Cursor](https://cursor.com/), whose credits made the impossible possible.
+まず私の仕事を直接支援してくださる方々から。寛大な雇用主である [Sentry](https://sentry.io)、そして不可能を可能にするクレジットを提供してくれた [Cursor](https://cursor.com/) に感謝します。
 
-And to everyone involved in testing and contributing to the beta:
+そしてベータのテストと貢献に関わったすべての皆さんへ：
 @brenelz @yumemi-thomas @mizulu @titoBouzout @GabbeV @birkskyum @dangkyokhoang @tsushanth @maciek50322 @kanashimia @SnowingFox @atk @AFatNiBBa @snatvb @better-salmon @m-canton @arpitjain099 @DominicDolan @deluksic @danon @danielalanbates @beanscg @trusktr @sonukapoor @rtritto @ngotruonghuy @mudmaster556 @jpdutoit @gameroman @echab @danielrkling @katywings @clinuxrulz @ahzvenol @tonghuaxingdsb @thomasbuilds @thep0y @subotac @spokodev @samualtnorman @rvlzzr @rrshaban @rexblade58 @mitsuhiko @mesram @mariokresic @madaxen86 @lxsmnsyc @Tommypop2 @LadyBluenotes @le0-0 @jer3m01 @iamssen @gnomical @developerdizzle @devagrawal09 @milomg @mihar-22 @tannerlinsley @crassicus @alfi-dim @aekobear @WolffM @VXsz @PierBover @Jungzl @JLouisa @DakshSinghDhami @CxRes
 
-Release Candidate means the API is frozen, not that there won't be bugs, so we really appreciate everyone updating their projects and reporting issues. If you're an ecosystem builder or you maintain projects on Solid 1.0, please consider migrating now and reporting any issues.
+リリース候補とは API が凍結されたという意味であり、バグがないという意味ではありません。プロジェクトをアップデートして Issue を報告してくださる皆さんに心から感謝します。エコシステムの構築者の方、あるいは Solid 1.0 でプロジェクトをメンテナンスしている方は、ぜひ今すぐ移行して Issue を報告してください。
 
-Let's get Solid 2.0 to an official release!
+Solid 2.0 を正式リリースへ届けましょう！
