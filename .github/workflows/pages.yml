@@ -25,6 +25,8 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      # packageManager(npm@12) を有効化して .npmrc の min-release-age を CI にも適用
+      - run: corepack enable
       - run: npm ci
       - run: npm run docs:build
         env:
